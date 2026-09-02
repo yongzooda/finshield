@@ -14,16 +14,17 @@ Evidence-Verified Multi-Agent 금융 의사결정 생애주기 검증 플랫폼
 - 기존 PreCase 저장소와 배포 사이트는 그대로 유지
 - 과거 실험 원본 `measure/` 87개는 중복 복사하지 않으며 PreCase 저장소를 정본으로 사용
 - 현재 Runtime에는 PreCase 이름과 환경변수가 일부 남아 있으며 FinShield 기능 구현 과정에서 단계적으로 분리
-- FinShield의 기획 정본은 [docs/01-product-plan.md](./docs/01-product-plan.md)
+- FinShield의 요구사항 정본은 [docs/02-integrated-requirements.md](./docs/02-integrated-requirements.md)
+- 상위 서비스 기획은 [docs/01-product-plan.md](./docs/01-product-plan.md)
 
-현재 Commit은 개발 기준선이다. FinShield의 로그인·파일 입력·Claim Engine·Multi-Agent·재검증 기능이 모두 구현됐다는 의미가 아니다.
+현재 Commit은 문서·개발 기준선이다. FinShield의 로그인·파일 입력·Claim Engine·Multi-Agent·재검증 기능이 모두 구현됐다는 의미가 아니다.
 
 ## 서비스 경계
 
 | FinShield | PreCase 기반 가입 후 보호 |
 |---|---|
 | 거래 전 진위성·거래위험·개인 적합성 검증 | 가입 후 설명 적정성·이해도·분쟁 준비 |
-| 상품·기관·공시·URL·개인 프로필 | 법령·분쟁조정·약관·판매행위 |
+| 상품·기관·공시·문서·개인 프로필 | 법령·분쟁조정·약관·판매행위 |
 | 중단·추가 확인·조건부 진행 | 정상 관리·문의·정정·분쟁 준비 |
 
 사용자는 `precase.vercel.app`으로 이동하지 않는다. PreCase의 Agent·Tool·데이터·안전장치를 FinShield 내부 모듈로 재사용한다.
@@ -33,19 +34,17 @@ Evidence-Verified Multi-Agent 금융 의사결정 생애주기 검증 플랫폼
 | 문서 | 상태 |
 |---|---|
 | `docs/01-product-plan.md` | 확정 |
-| `docs/02-integrated-requirements.md` | 다음 작성 |
-| `docs/03-database-spec.md` | 요구사항 확정 후 작성 |
-| `docs/04-feature-spec.md` | P0 기능부터 작성 |
+| `docs/02-integrated-requirements.md` | 확정·최상위 개발 기준 |
+| `docs/03-database-spec.md` | 다음 작성 |
+| `docs/04-feature-spec.md` | DB 명세와 P0 Spike 후 작성 |
 
 문서 간 충돌 시 우선순위는 다음과 같다.
 
 1. `docs/02-integrated-requirements.md`
 2. `docs/01-product-plan.md`
 3. DB·기능명세
-4. `CLAUDE.md`
-5. 코드
-
-통합 요구사항이 작성되기 전까지는 기획서가 최상위 기준이다.
+4. `CLAUDE.md`, `AGENTS.md`
+5. 코드와 테스트
 
 ## 개발 환경
 
