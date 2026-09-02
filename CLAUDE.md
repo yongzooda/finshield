@@ -2,7 +2,7 @@
 
 2026 금융 AI Challenge 출품작. 거래 전 금융정보 검증과 가입 후 PreCase 보호를 하나의 FinancialCase로 연결한다.
 
-상세 기준은 `docs/`를 따른다. 통합 요구사항이 작성되기 전에는 `docs/01-product-plan.md`가 최상위 기준이다.
+상세 기준은 `docs/`를 따른다. `docs/02-integrated-requirements.md`가 최상위 개발 기준이고, `docs/01-product-plan.md`와 DB·기능명세는 이를 보충한다.
 
 ## 절대 규칙
 
@@ -32,7 +32,8 @@
 
 - 업로드 원본은 회원 여부와 관계없이 기본 영구 보관하지 않는다.
 - MIME·Magic Byte·크기·페이지·악성 파일을 확인한 뒤 OCR·Parsing한다.
-- PII를 마스킹한 Claim·Evidence·결과만 기본 저장한다.
+- 동의한 외부 OCR 예외를 제외하면 비모델 PII Gate를 거친 마스킹 텍스트만 LLM·Embedding에 전달한다.
+- Claim 확인·사용자 중단·Case 삭제 중 먼저 도달한 시점에 원본 삭제를 시도하고 최대 24시간을 넘기지 않는다.
 - 원본 보관은 별도 동의·암호화·삭제 기능이 있을 때만 허용한다.
 - 사용자 문서와 Embedding을 공용 Knowledge Base에 섞지 않는다.
 - 로그에 원본 문서·PII·Secret을 남기지 않는다.
@@ -43,6 +44,7 @@
 - `service_role`과 외부 API Key는 서버에서만 사용한다.
 - FinancialCase 생성 시 금융 프로필 Snapshot을 남긴다.
 - 검증 결과·Evidence Passport·재검증 결과는 덮어쓰지 않고 새 버전을 생성한다.
+- 역할은 클라이언트가 수정할 수 없고 서버 전용 또는 수동 승인 경로만 사용한다.
 - 공유는 명시적 초대·최소 권한·만료·회수를 지원해야 한다.
 
 ### 6. PreCase 통합 경계
@@ -50,6 +52,7 @@
 - 사용자를 별도 PreCase 사이트로 이동시키지 않는다.
 - Sales Conduct·Regulation & Dispute Agent와 기존 Tool·데이터·안전장치를 내부에서 재사용한다.
 - FinShield가 거래 전 판단을 담당하고 PreCase는 가입 후 설명 적정성·이해도·분쟁 준비를 담당한다.
+- 가입 사실·송금/피해 의심·검증 상태를 서로 다른 상태 축으로 관리한다.
 - 기존 PreCase의 정확도를 FinShield 전체 성능으로 표시하지 않는다.
 
 ### 7. 금융·법적 표현
