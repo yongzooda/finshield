@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 개발 규칙 (축소 불가 5종)
+    url: https://github.com/yongzooda/precase/blob/main/CLAUDE.md
+    about: 코드 작업 전에 반드시 읽는다
+  - name: 요구사항 명세서
+    url: https://github.com/yongzooda/precase/tree/main/docs
+    about: 범위·기능·데이터·화면·권한·연동·예외·비기능·용어·DB
+  - name: 라벨 규칙
+    url: https://github.com/yongzooda/precase#라벨
+    about: 유형(feat·fix…) + 명세 영역(S 화면·F 기능…) 조합으로 단다

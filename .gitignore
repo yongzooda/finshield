@@ -1,0 +1,43 @@
+# 환경변수 — 자격증명이 커밋되면 안 된다 (EC-4)
+.env
+.env.local
+.env*.local
+
+# 원본 데이터 — 공공누리 범위 밖 재배포 방지
+data/raw/
+data/*.hwp
+*.hwp
+
+# Node
+node_modules/
+.next/
+out/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 측정 산출물은 커밋한다 (N-803 재현성) — 결과만 제외
+results/*.tmp
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# 기타
+.DS_Store
+.vercel
+*.log
+
+# 측정 중간 산출물 — 완료본은 measure/로 옮긴다
+results-*.jsonl
+results-*.json
+
+# 개인 권한 설정 — 공유하지 않는다
+.claude/settings.local.json
