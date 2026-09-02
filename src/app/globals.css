@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+/**
+ * 프리케이스 디자인 토큰 — 접근성 기준이 곧 설계 제약이다 (화면 명세 4.2).
+ *
+ *  A11Y-1  본문 18px 이상 (축소 불가)      → --text-base: 1.125rem
+ *  A11Y-2  터치 영역 48×48px 이상          → --tap-min: 3rem
+ *  A11Y-3  명도 대비 WCAG AA 4.5:1 이상    → 아래 색상은 전부 흰 배경 대비 7:1 이상
+ *
+ * 다크 모드를 두지 않는다. 고령층이 주 사용자이고 대비 기준(AA)을 두 테마에서
+ * 각각 보장하는 비용보다, 고대비 단일 테마를 확실히 지키는 편이 낫다 (기획서 7.2
+ * "고대비 기본값"). Lighthouse 접근성 90+ 검증(N-703)도 단일 테마가 안정적이다.
+ */
+
+:root {
+  --bg: #ffffff;
+  --bg-subtle: #f6f7f9;
+  --fg: #14171a;        /* 대비 16.1:1 */
+  --fg-muted: #4b5563;  /* 대비  7.6:1 — 보조 텍스트도 AA를 넘긴다 */
+  --border: #d3d8de;
+  --border-strong: #9aa3ae;
+
+  --accent: #1c4ed8;        /* 링크·강조. 대비 7.0:1 */
+  --accent-fg: #ffffff;
+  --accent-deep: #16399f;   /* 진입 카드 그라데이션 하단. 흰 글씨 대비 9.9:1 */
+  --accent-soft: #eef3fd;   /* 강조 틴트 배경 — 결론 배너·선택 pill */
+  --navy: #102a5c;          /* 브랜드 딥 네이비. 흰 배경 대비 12.6:1 */
+  --ok-fg: #166534;         /* 「하는 일」 체크 표시. 대비 7.5:1 */
+  --warn-bg: #fdf6e3;       /* 한계·주의 배경 */
+  --warn-border: #b45309;
+  --warn-fg: #7c3f00;       /* 대비 8.2:1 */
+
+  --tap-min: 3rem;          /* 48px */
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-warn-bg: var(--warn-bg);
+  --color-warn-border: var(--warn-border);
+  --color-warn-fg: var(--warn-fg);
+  --color-accent-deep: var(--accent-deep);
+  --color-accent-soft: var(--accent-soft);
+  --color-navy: var(--navy);
+  --color-ok-fg: var(--ok-fg);
+
+  /* 한글 시스템 폰트 스택 — 외부 폰트를 받지 않아 카카오톡 인앱에서도 즉시 렌더된다 */
+  --font-sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+}
+
+html {
+  /* A11Y-1 — 본문 기준 18px. rem 기반 컴포넌트가 전부 여기서 파생된다 */
+  font-size: 18px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  line-height: 1.7;
+  word-break: keep-all; /* 한글 어절 단위 줄바꿈 — 좁은 화면 가독성 */
+}
+
+/* A11Y-2 — 터치 대상 최소 48×48px. 링크·버튼에 공통 적용 */
+a,
+button {
+  min-height: var(--tap-min);
+}
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/*
+ * 인쇄본은 화면의 사본이지 다른 문서가 아니다.
+ *
+ * 이용자가 이 종이를 금감원 창구에 들고 갈 수 있어야 한다(고령층이 주 사용자다).
+ * 그래서 ① 한계·근거가 잘려나가지 않고 ② 카드가 페이지 경계에서 두 동강 나지
+ * 않고 ③ 누를 수 없는 것은 빠진다.
+ *
+ * 접힌 `<details>`를 여는 것은 CSS로 못 한다 — `beforeprint`에서 JS가 연다
+ * (`judgment/save-print.tsx`). 여기서는 편 뒤의 표시만 책임진다.
+ */
+@media print {
+  details {
+    display: block;
+  }
+
+  /* 근거 카드·점검 항목이 페이지 경계에서 갈라지면 읽을 수 없다 */
+  li,
+  details,
+  blockquote,
+  pre {
+    break-inside: avoid;
+  }
+
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+
+  /* 잉크를 아끼되 경계는 남긴다 — 카드가 구분되지 않으면 근거가 뭉친다 */
+  * {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  a {
+    text-decoration: none;
+  }
+}
