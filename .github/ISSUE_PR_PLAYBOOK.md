@@ -1,10 +1,23 @@
-# 이슈·PR 규칙집
+# FinShield 이슈·PR 규칙집
 
-새 저장소를 열 때 **첫날** 정해 두는 것들. 이 파일과 `.github/` 폴더를 통째로
-복사해 쓰면 된다.
+PreCase에서 검증한 운영 방식을 FinShield에 옮긴 규칙집이다. 이 파일과 `.github/`를 프로젝트 관리의 기준으로 사용한다.
 
 프리케이스에서 실제로 겪은 실패를 근거로 썼다. 각 규칙 뒤의 「왜」는 전부
 겪고 나서 적은 것이지 원칙론이 아니다.
+
+---
+
+
+## FinShield 적용값
+
+- 유형 라벨: `feat` `fix` `chore` `docs` `refactor` `test`
+- 영역 라벨: `SCP 범위` `F 기능` `S 화면` `D 데이터` `AI 에이전트` `E 연동` `N 비기능` `SEC 보안` `DB`
+- 특수 라벨: `배포 조건`
+- P0·P1·P2는 라벨이 아니라 요구사항 속성과 마일스톤으로 관리한다.
+- `main`은 배포 브랜치이며 직접 push하지 않는다.
+- 작업 브랜치 완료 후 이슈 생성 → PR에 `Closes #N` → squash merge한다.
+- 머지 후 브랜치는 삭제하지 않는다.
+- AI 공동저자·생성 도구 트레일러를 커밋에 넣지 않는다.
 
 ---
 
@@ -280,10 +293,10 @@ Closes #
 blank_issues_enabled: true
 contact_links:
   - name: 개발 규칙
-    url: https://github.com/<org>/<repo>/blob/main/CLAUDE.md
+    url: https://github.com/yongzooda/finshield/blob/main/CLAUDE.md
     about: 코드 작업 전에 반드시 읽는다
   - name: 요구사항 명세
-    url: https://github.com/<org>/<repo>/tree/main/docs
+    url: https://github.com/yongzooda/finshield/tree/main/docs
 ```
 
 ---
@@ -295,7 +308,7 @@ contact_links:
 혼자 하는 프로젝트에서 계획용 이슈를 미리 쌓으면 계획서가 두 곳(이슈 목록 +
 계획 문서)이 되고 반드시 어긋난다.
 
-프리케이스 규칙: **계획의 정본은 `HANDOFF.md` 하나**, 이슈는 끝난 작업의
+FinShield 규칙: **계획의 정본은 `HANDOFF.md` 하나**, 이슈는 끝난 작업의
 실행 기록. 브랜치 작업 완료 → 이슈 생성 → PR(`Closes #N`) → squash merge.
 
 여럿이 하는 프로젝트라면 반대로 하는 게 맞다. **어느 쪽이든 정본을 하나로
