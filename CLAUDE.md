@@ -2,7 +2,7 @@
 
 2026 금융 AI Challenge 출품작. 거래 전 금융정보 검증과 가입 후 PreCase 보호를 하나의 FinancialCase로 연결한다.
 
-상세 기준은 `docs/`를 따른다. `docs/02-integrated-requirements.md`가 최상위 개발 기준이고, `docs/01-product-plan.md`가 이를 보충한다. `docs/03-database-spec.md`는 그 아래에서 Schema·Migration·RLS·Storage 구현 기준으로 사용한다.
+상세 기준은 `docs/`를 따른다. `docs/02-integrated-requirements.md`가 최상위 개발 기준이고, `docs/01-product-plan.md`가 이를 보충한다. `docs/03-database-spec.md`는 그 아래에서 Schema·Migration·RLS·Storage 구현 기준으로 사용하고, `docs/adr/001-p0-provider-stack.md`는 Provider·공식 출처·실행 인프라 구현 기준으로 사용한다.
 
 ## 절대 규칙
 
@@ -18,7 +18,8 @@
 
 - Agent마다 별도 입력·출력 Schema, Tool Allowlist, 실행 기록을 둔다.
 - 화면에 Agent 이름만 여러 개 보여주고 하나의 Prompt에서 전부 처리하지 않는다.
-- Orchestrator가 필요한 Agent만 선택하고 가능한 Domain Agent는 병렬 실행한다.
+- P0 `햇살론15` 흐름은 명세에 고정한 Product/Institution, Fraud/Channel, PreCase 기반 Sales Conduct, Regulation & Dispute 4개 Domain Agent를 실제로 분리해 순차 실행할 수 있다.
+- 동적 Agent 선택과 독립 Agent 병렬 실행은 `AI-003`·`AI-004`의 P1 Gate를 통과한 뒤 활성화한다.
 - Evidence Judge에는 가능한 한 사용자 원문 대신 확인된 Claim·Evidence 구조를 전달한다.
 
 ### 3. 독립 검증
@@ -61,6 +62,16 @@
 - 확인된 범위와 한계를 함께 표시한다.
 - 확률처럼 보이는 임의의 0~100 사기 점수를 만들지 않는다.
 - 신고·문의·정정은 공식 채널로 연결한다.
+
+### 8. Provider Implementation·Release Gate
+
+- Architecture Decision 승인과 Live Release 허용을 구분한다.
+- 현재 Gate 값의 유일한 기준은 `docs/adr/001-p0-provider-stack.md` metadata다.
+- Implementation Gate (`N-QLT-010`)가 `NO-GO`이면 Provider Spike·격리 인프라·Fixture 검증만 진행하고, `GO`이면 기능을 구현할 수 있다.
+- Release Gate (`N-QLT-009`) 통과 전에는 출시 완료로 표시하지 않는다.
+- Provider key 존재나 Vercel Preview 성공만으로 Model·OCR·Source·RLS·삭제·Job 검증을 통과한 것으로 보지 않는다.
+- 외부 연동 실패·미구성·쿼터 초과를 Seed 또는 정적 Snapshot의 Live 성공으로 바꾸지 않는다.
+- Provider·모델·Embedding 차원·OCR 외부 전송·Job Runner·공식 Source를 바꿀 때 ADR과 평가 증거를 같은 PR에서 갱신한다.
 
 ## 기록 규칙
 

@@ -7,6 +7,9 @@
 - 요구사항 정본: `docs/02-integrated-requirements.md`
 - 상위 기획: `docs/01-product-plan.md`
 - DB 구현 기준: `docs/03-database-spec.md`
+- Provider Stack ADR: `docs/adr/001-p0-provider-stack.md`
+- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — Live Spike 증거 미확보
+- Product Release Gate (`N-QLT-009`): `NOT-EVALUATED` — P0 기능 구현 뒤 평가
 - 배포: Vercel `finshield` Production 연결 완료 (`https://finshield-gamma.vercel.app`)
 - 기존 PreCase 저장소·배포: 유지
 
@@ -23,17 +26,18 @@
 - [x] FinShield 통합 요구사항 명세서와 P0·P1·P2 기준선 확정
 - [x] FinShield 목표 데이터베이스 명세와 D-001~D-032 구현 기준선 확정
 - [x] Vercel Production 배포 연결 및 `READY` 확인
+- [x] P0 Provider·외부 연동·실행 인프라 Architecture Decision과 분리된 Implementation/Release Gate 기준선 확정
 
 ## 다음 작업 순서
 
-1. P0 Provider·외부 연동·실행 인프라 Spike Gate 확정
-2. P0 `docs/04-feature-spec.md`
+1. `N-QLT-010` Live Spike 증거 확보와 Implementation `NO-GO` 차단 해제
+2. P0 `docs/04-feature-spec.md` — Implementation Gate가 `GO`가 된 뒤 확정
 3. 인증·FinancialCase·Claim·Evidence 수직 구현
 4. Image·PDF File Gateway·OCR·PII Gate 구현
 5. FinShield Multi-Agent·Hybrid RAG·CoVe·Evidence Policy 구현
 6. PreCase 가입 후 보호 모듈 분리·통합
 7. 수동 재검증·Evidence Passport·앱 알림
-8. 대출 Text·Image·PDF P0 Demo와 평가셋
+8. `햇살론15` 사칭 권유 Text·Image·PDF P0 Demo와 평가셋
 9. 신뢰센터·보안·배포 Gate 점검
 
 정상 저축·투자/OpenDART 도메인은 P0 대출 수직 흐름을 완료한 뒤 P1로 확장한다.
@@ -47,3 +51,8 @@
 - `PRECASE_CI` 등 호환 환경변수는 코드·테스트를 함께 수정하는 PR에서 변경한다.
 - 현재 `supabase/migrations/0001~0006`은 이식된 PreCase 기준선이며 FinShield 목표 Schema가 아니다. 전용 Project 확인 뒤 새 Forward-only 기준선으로 전환한다.
 - DB 명세가 확정됐다는 사실은 Migration·RLS·Storage Policy가 구현·적용됐거나 P0 기능이 작동한다는 뜻이 아니다.
+- Provider ADR의 Architecture Decision이 승인됐다는 사실은 Implementation 또는 Product Release Gate 통과를 뜻하지 않는다.
+- Anthropic Sonnet 5, Cohere `embed-v4.0`, CLOVA OCR, 공공데이터·법제처 API의 자격증명·쿼터·지연·비용은 아직 Live 검증되지 않았다.
+- 전용 FinShield Supabase Project·RLS·authenticated TUS one-use slot·24시간 물리 삭제와 Vercel Workflow Replay·Fencing은 아직 검증되지 않았다.
+- 법제처는 등록 IP와 Vercel 동적 egress가 충돌할 수 있어 request-time Live 조회를 기본값으로 두지 않고 공식 Snapshot 수집 경로를 검증한다.
+- GitHub의 Vercel success status는 Build/Deploy 성공이며 Provider 기능 성공 증거가 아니다.

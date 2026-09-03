@@ -6,10 +6,10 @@
 |---|---|
 | 문서명 | FinShield 데이터베이스 명세서 |
 | 문서 ID | FS-DB |
-| 버전 | v1.0 |
+| 버전 | v1.0.3 |
 | 상태 | 개발 기준선(Baseline) |
 | 작성일 | 2026-09-03 |
-| 상위 문서 | `docs/02-integrated-requirements.md` v1.0, `docs/01-product-plan.md` v1.0 |
+| 상위 문서 | `docs/02-integrated-requirements.md` v1.0.3, `docs/01-product-plan.md` v1.0 |
 | 대상 | FinShield 전용 Supabase Postgres 15+, Auth, Storage, pgvector |
 | 후속 산출물 | P0 Provider·인프라 Spike, `docs/04-feature-spec.md`, Supabase Migration·RLS·Storage Policy |
 
@@ -1052,7 +1052,7 @@ Manifest는 UPDATE하지 않고 새 버전을 추가한다. 운영 활성·폐�
 | `tool_definitions` | `id`, `tool_code`, `version`, `transport`, `input_schema_version`, `output_schema_version`, `max_payload_bytes`, `max_batch_size`, `timeout_ms`, `retry_limit`, `definition_hash`, `created_at` | `UQ(tool_code, version)`, 오류·크기 계약 |
 | `agent_tool_allowlists` | `agent_definition_id`, `tool_definition_id`, `purpose_code`, `created_at` | 복합 PK; 미등록 Tool 호출 차단 |
 
-P0 대출 Manifest는 Product/Institution, Fraud/Channel, PreCase 기반 Sales/Regulation 중 확정된 3~4개 Domain Agent와 CoVe·Red Team·Judge·Guide의 실제 정의를 포함한다.
+P0 대출 Manifest는 Product/Institution, Fraud/Channel, PreCase 기반 Sales Conduct, Regulation & Dispute의 고정된 4개 Domain Agent와 CoVe·Red Team·Judge·Guide의 실제 정의를 포함한다.
 
 ### `private.execution_manifest_agents`, `private.execution_manifest_tools`, `private.execution_manifest_events`
 
@@ -1876,4 +1876,7 @@ DB 구현 완료 조건:
 
 | 버전 | 날짜 | 변경 | 상태 |
 |---|---|---|---|
+| v1.0.3 | 2026-09-03 | FS-REQ v1.0.3의 비모델 Profile Policy Validator 경계를 반영하고 DB Profile Snapshot·Policy 계약 정합성 확인 | Baseline |
+| v1.0.2 | 2026-09-03 | FS-REQ v1.0.2 우선순위 경계와 P0 고정 4개 Domain Agent Manifest를 반영 | Baseline |
+| v1.0.1 | 2026-09-03 | FS-REQ v1.0.1의 E-020 표기 경계를 반영하고 기존 Tool transport 저장 계약과 정합성 확인 | Baseline |
 | v1.0 | 2026-09-03 | FS-REQ v1.0을 기준으로 목표 Schema·ERD·상태·컬럼·제약·Index·RLS·Storage·RAG·보존·Migration·테스트 기준 확정 | Baseline |
