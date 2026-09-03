@@ -21,6 +21,7 @@ jobs:
   evidence:
     name: provider-evidence / ${{ inputs.blocker_id }}
     if: github.ref == 'refs/heads/main'
+    environment: provider-spike
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -51,8 +52,10 @@ jobs:
 
       - name: Run blocker evidence harness
         env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           BLOCKER_ID: ${{ inputs.blocker_id }}
           CODE_UNDER_TEST_SHA: ${{ github.sha }}
+          EVIDENCE_REGION: github-hosted
           GITHUB_RUN_ATTEMPT: ${{ github.run_attempt }}
           GITHUB_RUN_ID: ${{ github.run_id }}
           TRUSTED_REPOSITORY: ${{ github.workspace }}/trusted

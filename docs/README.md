@@ -7,6 +7,7 @@
 | `03-database-spec.md` | ERD·컬럼·제약·RLS·보존정책 | 확정·DB 구현 기준 |
 | `adr/001-p0-provider-stack.md` | P0 Provider·공식 출처·Storage·Job·실패 계약 | Architecture 승인·Implementation Gate `NO-GO` |
 | `ops/ci-integrity-preflight.md` | `B-CI-INTEGRITY` 외부 통제 준비 상태·강화 절차 | P0 비차단·제출 후 강화 `DEFERRED` |
+| `ops/provider-model-spike.md` | `B-MODEL-01` Sonnet 5 실행·비용·증거 채택 절차 | Harness 구현·Live 실행 전 |
 | `04-feature-spec.md` | P0 기능 흐름·예외·완료조건 | `N-QLT-010` Implementation Gate `GO` 후 작성 |
 
 문서와 코드가 충돌하면 `02-integrated-requirements.md`를 최우선 기준으로 사용하고, 그 다음 `01-product-plan.md`, DB·기능명세, 승인 ADR, 개발 규칙, 코드 순으로 판단한다. ADR은 담당 구현 선택을 고정하지만 상위 요구·DB·기능명세의 의미나 우선순위를 바꾸지 않는다.
