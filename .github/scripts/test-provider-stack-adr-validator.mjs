@@ -51,6 +51,22 @@ const fixturePaths = [
   "package-lock.json",
 ];
 
+// The mutation suite validates the validator's static contracts in an isolated
+// repository with GitHub access deliberately disabled. Partial PASS rows require
+// live provenance and are exercised separately by expectPartialEvidence(), so
+// neutralize only those rows while the overall implementation gate is NO-GO.
+const neutralizePartialImplementationPasses = (source) => {
+  if (!source.includes("- Implementation Gate (`N-QLT-010`): `NO-GO`")) return source;
+  const start = source.indexOf("### 14.2 Implementation Gate 차단 항목");
+  const end = source.indexOf("### 14.3 Implementation Gate 전환 규칙", start);
+  if (start < 0 || end < 0) return source;
+  const section = source.slice(start, end).replace(
+    /^(\| `B-[A-Z0-9-]+` \| [^|\n]+ \|) PASS (\| [^|\n]+ \|)$/gm,
+    "$1 NOT-EVALUATED $2",
+  );
+  return `${source.slice(0, start)}${section}${source.slice(end)}`;
+};
+
 const makeFixture = () => {
   const fixture = realpathSync(mkdtempSync(join(tmpdir(), "finshield-provider-validator-")));
   for (const relativePath of fixturePaths) {
@@ -58,6 +74,8 @@ const makeFixture = () => {
     mkdirSync(dirname(destination), { recursive: true });
     copyFileSync(resolve(root, relativePath), destination);
   }
+  const fixtureAdrPath = resolve(fixture, "docs/adr/001-p0-provider-stack.md");
+  writeFileSync(fixtureAdrPath, neutralizePartialImplementationPasses(readFileSync(fixtureAdrPath, "utf8")));
   symlinkSync(resolve(root, "node_modules"), resolve(fixture, "node_modules"), "dir");
   return fixture;
 };
@@ -93,6 +111,16 @@ const expectFail = (name, mutate, expected) => {
     throw new Error(`${name}: expected failure matching ${expected}\n${output}`);
   }
 };
+
+const neutralizedPartialPass = neutralizePartialImplementationPasses([
+  "- Implementation Gate (`N-QLT-010`): `NO-GO`",
+  "### 14.2 Implementation Gate 차단 항목",
+  "| `B-MODEL-01` | proof | PASS | exit |",
+  "### 14.3 Implementation Gate 전환 규칙",
+].join("\n"));
+if (!neutralizedPartialPass.includes("| `B-MODEL-01` | proof | NOT-EVALUATED | exit |")) {
+  throw new Error("isolated mutation fixture must neutralize partial PASS rows");
+}
 
 const expectPartialEvidence = async ({
   artifactAgeMs = 60_000,
