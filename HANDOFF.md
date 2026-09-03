@@ -6,6 +6,7 @@
 - 기반: PreCase 2026-09-02 `main` 제품 Snapshot
 - 요구사항 정본: `docs/02-integrated-requirements.md`
 - 상위 기획: `docs/01-product-plan.md`
+- DB 구현 기준: `docs/03-database-spec.md`
 - 배포: 아직 FinShield Production을 연결하지 않음
 - 기존 PreCase 저장소·배포: 유지
 
@@ -20,19 +21,19 @@
 - [x] GitHub 라벨 생성
 - [x] main 브랜치 보호와 GitHub Actions `check` 필수 설정
 - [x] FinShield 통합 요구사항 명세서와 P0·P1·P2 기준선 확정
+- [x] FinShield 목표 데이터베이스 명세와 D-001~D-032 구현 기준선 확정
 
 ## 다음 작업 순서
 
-1. `docs/03-database-spec.md`
-2. P0 Provider·외부 연동·실행 인프라 Spike Gate 확정
-3. P0 `docs/04-feature-spec.md`
-4. 인증·FinancialCase·Claim·Evidence 수직 구현
-5. Image·PDF File Gateway·OCR·PII Gate 구현
-6. FinShield Multi-Agent·Hybrid RAG·CoVe·Evidence Policy 구현
-7. PreCase 가입 후 보호 모듈 분리·통합
-8. 수동 재검증·Evidence Passport·앱 알림
-9. 대출 Text·Image·PDF P0 Demo와 평가셋
-10. 신뢰센터·보안·배포 Gate 점검
+1. P0 Provider·외부 연동·실행 인프라 Spike Gate 확정
+2. P0 `docs/04-feature-spec.md`
+3. 인증·FinancialCase·Claim·Evidence 수직 구현
+4. Image·PDF File Gateway·OCR·PII Gate 구현
+5. FinShield Multi-Agent·Hybrid RAG·CoVe·Evidence Policy 구현
+6. PreCase 가입 후 보호 모듈 분리·통합
+7. 수동 재검증·Evidence Passport·앱 알림
+8. 대출 Text·Image·PDF P0 Demo와 평가셋
+9. 신뢰센터·보안·배포 Gate 점검
 
 정상 저축·투자/OpenDART 도메인은 P0 대출 수직 흐름을 완료한 뒤 P1로 확장한다.
 
@@ -43,4 +44,5 @@
 - 기존 PreCase의 Stateless 저장 금지 정책은 FinShield 계정·기록 정책과 다르다.
 - 기존 `LIKELY/UNLIKELY`·자체 신뢰도 1~5는 FinShield 최종 결과로 사용할 수 없다.
 - `PRECASE_CI` 등 호환 환경변수는 코드·테스트를 함께 수정하는 PR에서 변경한다.
-- 요구사항 문서가 확정됐다는 사실은 P0 기능이 구현됐다는 뜻이 아니다.
+- 현재 `supabase/migrations/0001~0006`은 이식된 PreCase 기준선이며 FinShield 목표 Schema가 아니다. 전용 Project 확인 뒤 새 Forward-only 기준선으로 전환한다.
+- DB 명세가 확정됐다는 사실은 Migration·RLS·Storage Policy가 구현·적용됐거나 P0 기능이 작동한다는 뜻이 아니다.
