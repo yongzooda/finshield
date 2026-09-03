@@ -631,7 +631,7 @@ CI는 성공한 exact workflow/run attempt/job/step, main에서 실행한 truste
 
 ADR digest는 Markdown AST에서 실제 14.1로 확인한 strict `EVID-*` table 행만 하나의 marker로 정규화하고, 숨겨진 HTML·code의 가짜 heading을 포함한 다른 prose·heading·합격선은 보존한다. 14.1은 정확한 4열 table과 고정 disclaimer 외 임의 문장을 거부한다. blocker별 scope digest는 정책이 지정한 관련 파일의 경로와 Git Blob SHA를 결박한다. `B-MODEL-01`은 evidence workflow, model harness, 공용 ADR digest 모듈, `.env.example`, `package.json`, `package-lock.json`을 감시하며 이 중 하나가 바뀌면 기존 `PASS`를 재사용할 수 없다. 새 실제 adapter가 harness 입력이 되면 실행 전에 scope 목록에 추가한다. artifact의 `PASS` 문자열은 신뢰하지 않고 validator에 사전 등록한 blocker별 raw-metric 합격식으로 다시 계산한다.
 
-Actions artifact retention은 30일이고 `PASS` evidence TTL은 27일이다. artifact 생성 시각보다 이른 채택, 미래 시각, 27일 초과 artifact는 거부한다. main의 일일 scheduled `check`가 이미 채택된 근거의 만료·삭제를 탐지하며, 만료 전에 동일 정책으로 다시 실행·채택하거나 blocker를 `NOT-EVALUATED`로 되돌려야 한다. 문서 표가 아직 갱신되지 않았더라도 27일이 지난 `PASS`는 의미상 만료다. 근거를 상속한 열린 PR은 현재 merge SHA에서 required `check`를 다시 통과해야 하고, validator는 artifact/run 존재·다운로드·TTL과 채택 provenance를 재검사한다. 각 blocker는 실제 harness와 합격식을 검토해 등록하기 전에는 `PASS`를 거부한다. 현재 `B-MODEL-01` scaffold의 `--run`은 fail-closed이고 evidence workflow에는 Provider secret이나 environment를 주입하지 않는다. `main` 전용 deployment branch policy가 있는 protected environment를 확인한 뒤에만 environment 전용 key와 실제 harness를 함께 추가한다.
+Actions artifact retention은 30일이고 `PASS` evidence TTL은 27일이다. artifact 생성 시각보다 이른 채택, 미래 시각, 27일 초과 artifact는 거부한다. main의 일일 scheduled `check`가 이미 채택된 근거의 만료·삭제를 탐지하며, 만료 전에 동일 정책으로 다시 실행·채택하거나 blocker를 `NOT-EVALUATED`로 되돌려 재측정한다. 문서 표가 아직 갱신되지 않았더라도 27일이 지난 `PASS`는 의미상 만료다. 근거를 상속한 열린 PR은 현재 merge SHA에서 required `check`를 다시 통과해야 하고, validator는 artifact/run 존재·다운로드·TTL과 채택 provenance를 재검사한다. 각 blocker는 실제 harness와 합격식을 검토해 등록하기 전에는 `PASS`를 거부한다. `B-MODEL-01` harness는 합성·마스킹 Fixture 50건을 Sonnet 5에 실제 호출하고 Text/File-derived 각 20건의 P95·비용을 계산한다. 429·timeout·refusal·schema error는 외부 장애를 유발하지 않는 deterministic adapter fixture 20건이며 evidence에 그 모드를 명시한다. main 전용 branch policy의 `provider-spike` environment에서만 secret을 주입하고, main 실행 artifact를 별도 Adoption PR로 채택하기 전에는 상태를 `PASS`로 바꾸지 않는다.
 
 이 P0 통제는 PR 코드가 workflow·validator를 함께 바꾸는 시도를 mutation test와 검토로 탐지하지만 권한이 분리된 외부 불변 attestation은 아니다. 따라서 제출 문서에는 `repository-controlled evidence`로 표시하고 독립 감사 증거로 표현하지 않는다. 외부 불변 통제는 §14.5의 제출 후 강화 항목으로 보존한다.
 
@@ -682,13 +682,13 @@ Release blocker도 같은 네 상태를 사용한다. Implementation Gate가 `GO
 | 연결 단절·상태 복원 | Text/Image/PDF 각 단절·취소 10 + Revalidation 단절 10 | 동기 하위 Abort 전달 P95 ≤2초, terminal 상태 누락 0건, 소유자 상태 조회 일치 100%, Revalidation 오취소 0건 |
 | Component vertical spike | 합성 `햇살론15` Text·Image·PDF 각 3회 + Provider fault 각 1회 | 실제 Provider·Source·Storage·DB·Workflow 경로 skip 0개, 기대 terminal·비용·삭제 원장 100% 일치 |
 
-비용은 2026-09-03 단가 Snapshot과 실제 OCR/Embedding 청구를 포함한다. 한 합격선이라도 미달이면 해당 blocker는 해제하지 않고 최적화·범위 변경·Provider 변경 중 하나를 ADR 변경으로 결정한다.
+Model 비용은 2026-09-04 공식 Sonnet 5 표준 단가인 input USD 2/MTok, output USD 10/MTok Snapshot으로 계산한다. OCR·Embedding은 각 실행일의 실제 청구 단가를 별도로 고정한다. 한 합격선이라도 미달이면 해당 blocker는 해제하지 않고 최적화·범위 변경·Provider 변경 중 하나를 ADR 변경으로 결정한다.
 
 ### 15.2 시험 묶음
 
 | 시험 묶음 | 최소 시험 | 저장할 증거 |
 |---|---|---|
-| Model | auth, structured schema, strict tool, refusal, timeout, 429, token/cost | model ID, timestamp, latency, sanitized usage, result code |
+| Model | 합성 50건 실제 auth·structured schema·strict tool·quota header·token/cost; refusal·timeout·429·schema error adapter fixture 20건 | model ID, latency/P95, sanitized usage·비용, request ID hash, fixture/fault mode |
 | Embedding | Korean query set, hard negative, dimension, cosine, exact KNN | eval version, Recall@k, P50/P95, cost |
 | Parser/OCR | Text·digital PDF·scanned PDF·Image, 숫자·부정어·표·URL | fixture hash, page result, expected/actual diff |
 | Storage | direct upload, 4.5MB 초과, 10MiB reject, RLS, signed download | object metadata, HTTP code, deletion ledger |

@@ -28,8 +28,11 @@ const root = resolve(fileURLToPath(new URL("../../", import.meta.url)));
 const validatorPath = ".github/scripts/validate-provider-stack-adr.mjs";
 const fixturePaths = [
   validatorPath,
+  ".github/fixtures/provider-model-v1.json",
   ".github/scripts/provider-adr-digest.mjs",
   ".github/scripts/provider-evidence.mjs",
+  ".github/scripts/provider-model-policy.mjs",
+  ".github/scripts/provider-model-spike.mjs",
   ".github/scripts/run-provider-model-evidence.mjs",
   ".github/workflows/pr-check.yml",
   ".github/workflows/provider-spike-evidence.yml",
@@ -129,12 +132,15 @@ const expectPartialEvidence = async ({
     const runId = 12345;
     const workflowId = 67890;
     const artifactId = 24680;
-    const workflowBlobSha = "aeb7baa6ac9b7e9e597769b83a1f58db097a7f76";
-    const harnessBlobSha = "d296230b83e1bfc2ab5daeb2bd6c2ed1e6d55802";
+    const workflowBlobSha = "49f21b3aabe11f5c53e39f2a2e30cd857a549ca6";
+    const harnessBlobSha = "109c96b06dfc1c3eaa76d16f9c7d76d7b70ca93d";
     const trustedExecutionBlobs = new Map([
       [".github/workflows/provider-spike-evidence.yml", workflowBlobSha],
+      [".github/fixtures/provider-model-v1.json", "baec2b7b6945e527905bf2b5822fb2912d95659a"],
       [".github/scripts/run-provider-model-evidence.mjs", harnessBlobSha],
       [".github/scripts/provider-adr-digest.mjs", "a0d89bbd01fcdd4cc2659afb29d243ba2bdfc099"],
+      [".github/scripts/provider-model-policy.mjs", "50a19a237b29951021e271173fe1ee692b13ccaf"],
+      [".github/scripts/provider-model-spike.mjs", "8e6649cd8e9909f9901ebc84b14db837cbfcdc31"],
       ["package.json", "ecb26cd086f874ea4f989d50f2719a8390c282de"],
       ["package-lock.json", "678296a5f7e2256799413740041886f29f939191"],
     ]);
@@ -160,19 +166,23 @@ const expectPartialEvidence = async ({
       scope_sha256: scopeSha,
       run: { id: runId, attempt: 1 },
       observations: {
-        auth: { http_status: 200, model_id: "claude-sonnet-5" },
-        normal: { total: 50, schema_passed: 50, strict_tool_passed: 50, post_validation_passed: 50 },
-        faults: { total: 20, categories: ["429", "refusal", "schema_error", "timeout"], false_successes: 0 },
-        latency: { samples: 50, p95_ms: 9_500 },
+        auth: { http_status: 200, model_id: "claude-sonnet-5", request_id_present: true, rate_limit_headers_present: true, request_limit_observed: 1000, input_token_limit_observed: 100000, output_token_limit_observed: 100000 },
+        normal: { total: 50, schema_passed: 50, strict_tool_passed: 50, post_validation_passed: 50, live_provider_requests: 100 },
+        faults: { total: 20, categories: ["429", "refusal", "schema_error", "timeout"], false_successes: 0, fixture_mode: "deterministic_adapter_boundary" },
+        latency: { samples: 100, p95_ms: 9_500 },
         text_runs: { samples: 20, p95_ms: 100_000, p95_cost_usd: 0.49 },
         file_runs: { samples: 20, p95_ms: 150_000, p95_cost_usd: 0.79 },
       },
       environment: {
-        node_version: process.version,
+        node_version: "v24.4.1",
         region: "test",
         fixture_set_hash: "d".repeat(64),
-        pricing_snapshot_date: "2026-09-03",
+        pricing_snapshot_date: "2026-09-04",
+        pricing_input_per_million_usd: 2,
+        pricing_output_per_million_usd: 10,
+        sdk_version: "0.117.1",
         provider_request_ids_hash: "e".repeat(64),
+        fault_fixture_mode: "deterministic_adapter_boundary",
       },
       redactions_applied: true,
     };
@@ -360,7 +370,10 @@ await expectPartialEvidence({ artifactAgeMs: 28 * 24 * 60 * 60 * 1000, expectedE
 await expectPartialEvidence({ adoptedContentMismatch: true, expectedError: /채택 PR commit에 실제로 존재/ });
 await expectPartialEvidence({ adoptedLedgerDecoy: true, expectedError: /채택 PR commit에 실제로 존재/ });
 for (const trustedAPathMismatch of [
+  ".github/fixtures/provider-model-v1.json",
   ".github/scripts/provider-adr-digest.mjs",
+  ".github/scripts/provider-model-policy.mjs",
+  ".github/scripts/provider-model-spike.mjs",
   "package.json",
   "package-lock.json",
 ]) {
@@ -370,12 +383,22 @@ for (const trustedAPathMismatch of [
 {
   const metricErrors = [];
   validateModelEvidenceResult({ observations: {
-    auth: { http_status: 200, model_id: "claude-sonnet-5" },
-    normal: { total: 50, schema_passed: 50, strict_tool_passed: 50, post_validation_passed: 50 },
-    faults: { total: 20, categories: ["429", "refusal", "schema_error", "timeout"], false_successes: 0 },
-    latency: { samples: 50, p95_ms: -1 },
+    auth: { http_status: 200, model_id: "claude-sonnet-5", request_id_present: true, rate_limit_headers_present: true, request_limit_observed: 1000, input_token_limit_observed: 100000, output_token_limit_observed: 100000 },
+    normal: { total: 50, schema_passed: 50, strict_tool_passed: 50, post_validation_passed: 50, live_provider_requests: 100 },
+    faults: { total: 20, categories: ["429", "refusal", "schema_error", "timeout"], false_successes: 0, fixture_mode: "deterministic_adapter_boundary" },
+    latency: { samples: 100, p95_ms: -1 },
     text_runs: { samples: 20, p95_ms: 100_000, p95_cost_usd: 0.49 },
     file_runs: { samples: 20, p95_ms: 150_000, p95_cost_usd: 0.79 },
+  }, environment: {
+    node_version: "v24.4.1",
+    region: "test",
+    fixture_set_hash: "d".repeat(64),
+    pricing_snapshot_date: "2026-09-04",
+    pricing_input_per_million_usd: 2,
+    pricing_output_per_million_usd: 10,
+    sdk_version: "0.117.1",
+    provider_request_ids_hash: "e".repeat(64),
+    fault_fixture_mode: "deterministic_adapter_boundary",
   } }, (message) => metricErrors.push(message));
   if (!metricErrors.some((message) => message.includes("P95 10초"))) {
     throw new Error("negative latency metric must be rejected");
@@ -457,7 +480,10 @@ expectFail(
 );
 
 for (const [name, path] of [
+  ["trusted model fixture changes invalidate its policy pin", ".github/fixtures/provider-model-v1.json"],
   ["trusted ADR digest helper changes invalidate its policy pin", ".github/scripts/provider-adr-digest.mjs"],
+  ["trusted model policy changes invalidate its policy pin", ".github/scripts/provider-model-policy.mjs"],
+  ["trusted model spike changes invalidate its policy pin", ".github/scripts/provider-model-spike.mjs"],
   ["trusted package manifest changes invalidate its policy pin", "package.json"],
   ["trusted package lock changes invalidate its policy pin", "package-lock.json"],
 ]) {
@@ -493,6 +519,15 @@ expectFail(
     "run: echo validator-skipped # node .github/scripts/validate-provider-stack-adr.mjs",
   )),
   /PR CI가 Provider ADR validator를 exact safe step으로 실행하지 않습니다/,
+);
+
+expectFail(
+  "provider model contract test cannot be skipped",
+  (fixture) => update(fixture, ".github/workflows/pr-check.yml", (source) => source.replace(
+    "run: node .github/scripts/test-provider-model-spike.mjs",
+    "run: echo model-spike-contract-skipped",
+  )),
+  /PR CI가 Provider Model Spike contract test를 exact safe step으로 실행하지 않습니다/,
 );
 
 expectFail(
@@ -580,4 +615,4 @@ expectFail(
   /P0 고정 Agent 4개 결정/,
 );
 
-console.log("Provider ADR validator mutation tests passed: 4 pass cases, 30 rejection cases.");
+console.log("Provider ADR validator mutation tests passed.");

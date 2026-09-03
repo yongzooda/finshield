@@ -4,19 +4,27 @@ import { relative, resolve, sep } from "node:path";
 import { isDeepStrictEqual } from "node:util";
 import { unzipSync } from "fflate";
 import { adrDecisionDigest, maskNonRenderedMarkdown } from "./provider-adr-digest.mjs";
+import { validateModelEvidenceResult } from "./provider-model-policy.mjs";
 
 export { adrDecisionDigest } from "./provider-adr-digest.mjs";
+export { validateModelEvidenceResult } from "./provider-model-policy.mjs";
 
 const REPOSITORY = "yongzooda/finshield";
 const EVIDENCE_WORKFLOW_NAME = "Provider Spike Evidence";
 const EVIDENCE_WORKFLOW_PATH = ".github/workflows/provider-spike-evidence.yml";
+const MODEL_FIXTURE_PATH = ".github/fixtures/provider-model-v1.json";
 const MODEL_HARNESS_PATH = ".github/scripts/run-provider-model-evidence.mjs";
 const ADR_DIGEST_PATH = ".github/scripts/provider-adr-digest.mjs";
+const MODEL_POLICY_PATH = ".github/scripts/provider-model-policy.mjs";
+const MODEL_SPIKE_PATH = ".github/scripts/provider-model-spike.mjs";
 const PACKAGE_JSON_PATH = "package.json";
 const PACKAGE_LOCK_PATH = "package-lock.json";
-const TRUSTED_EVIDENCE_WORKFLOW_BLOB = "aeb7baa6ac9b7e9e597769b83a1f58db097a7f76";
-const TRUSTED_MODEL_HARNESS_BLOB = "d296230b83e1bfc2ab5daeb2bd6c2ed1e6d55802";
+const TRUSTED_EVIDENCE_WORKFLOW_BLOB = "49f21b3aabe11f5c53e39f2a2e30cd857a549ca6";
+const TRUSTED_MODEL_FIXTURE_BLOB = "baec2b7b6945e527905bf2b5822fb2912d95659a";
+const TRUSTED_MODEL_HARNESS_BLOB = "109c96b06dfc1c3eaa76d16f9c7d76d7b70ca93d";
 const TRUSTED_ADR_DIGEST_BLOB = "a0d89bbd01fcdd4cc2659afb29d243ba2bdfc099";
+const TRUSTED_MODEL_POLICY_BLOB = "50a19a237b29951021e271173fe1ee692b13ccaf";
+const TRUSTED_MODEL_SPIKE_BLOB = "8e6649cd8e9909f9901ebc84b14db837cbfcdc31";
 const TRUSTED_PACKAGE_JSON_BLOB = "ecb26cd086f874ea4f989d50f2719a8390c282de";
 const TRUSTED_PACKAGE_LOCK_BLOB = "678296a5f7e2256799413740041886f29f939191";
 const MAX_ARCHIVE_BYTES = 2 * 1024 * 1024;
@@ -82,48 +90,6 @@ const adoptedGateRowIsPass = (source, gate, blockerId) => {
   return matchingRows[0].split("|").map((field) => field.trim())[3] === "PASS";
 };
 
-export const validateModelEvidenceResult = (result, fail) => {
-    if (!exactKeys(result?.observations, ["auth", "normal", "faults", "latency", "text_runs", "file_runs"])) {
-      fail("B-MODEL-01 observations 필드가 고정 schema와 다릅니다.");
-      return;
-    }
-    const { auth, normal, faults, latency, text_runs: textRuns, file_runs: fileRuns } = result.observations;
-    if (!exactKeys(auth, ["http_status", "model_id"]) || auth.http_status !== 200 || auth.model_id !== "claude-sonnet-5") {
-      fail("B-MODEL-01 auth/model 관측값이 합격 기준과 다릅니다.");
-    }
-    if (!exactKeys(normal, ["total", "schema_passed", "strict_tool_passed", "post_validation_passed"])
-      || !Number.isInteger(normal.total) || normal.total < 50
-      || normal.schema_passed !== normal.total
-      || normal.strict_tool_passed !== normal.total
-      || normal.post_validation_passed !== normal.total) {
-      fail("B-MODEL-01 정상 schema/tool/post-validation 50건 이상 전량 합격이 아닙니다.");
-    }
-    if (!exactKeys(faults, ["total", "categories", "false_successes"])
-      || !Number.isInteger(faults.total) || faults.total < 20
-      || !Array.isArray(faults.categories)
-      || JSON.stringify([...faults.categories].sort()) !== JSON.stringify(["429", "refusal", "schema_error", "timeout"])
-      || faults.false_successes !== 0) {
-      fail("B-MODEL-01 오류 fixture 20건·4개 유형·false success 0건 기준을 충족하지 못했습니다.");
-    }
-    if (!exactKeys(latency, ["samples", "p95_ms"])
-      || !Number.isInteger(latency.samples) || latency.samples < 50
-      || !Number.isFinite(latency.p95_ms) || latency.p95_ms < 0 || latency.p95_ms > 10_000) {
-      fail("B-MODEL-01 단일 호출 P95 10초 기준을 충족하지 못했습니다.");
-    }
-    if (!exactKeys(textRuns, ["samples", "p95_ms", "p95_cost_usd"])
-      || !Number.isInteger(textRuns.samples) || textRuns.samples < 20
-      || !Number.isFinite(textRuns.p95_ms) || textRuns.p95_ms < 0 || textRuns.p95_ms > 105_000
-      || !Number.isFinite(textRuns.p95_cost_usd) || textRuns.p95_cost_usd < 0 || textRuns.p95_cost_usd > 0.5) {
-      fail("B-MODEL-01 Text 20건 P95 시간·비용 기준을 충족하지 못했습니다.");
-    }
-    if (!exactKeys(fileRuns, ["samples", "p95_ms", "p95_cost_usd"])
-      || !Number.isInteger(fileRuns.samples) || fileRuns.samples < 20
-      || !Number.isFinite(fileRuns.p95_ms) || fileRuns.p95_ms < 0 || fileRuns.p95_ms > 155_000
-      || !Number.isFinite(fileRuns.p95_cost_usd) || fileRuns.p95_cost_usd < 0 || fileRuns.p95_cost_usd > 0.8) {
-      fail("B-MODEL-01 Image/PDF 20건 P95 시간·비용 기준을 충족하지 못했습니다.");
-    }
-};
-
 const modelEvidencePolicy = {
   gate: "implementation",
   workflowName: EVIDENCE_WORKFLOW_NAME,
@@ -133,15 +99,21 @@ const modelEvidencePolicy = {
   harnessBlobSha: TRUSTED_MODEL_HARNESS_BLOB,
   trustedExecutionFiles: Object.freeze([
     Object.freeze({ path: EVIDENCE_WORKFLOW_PATH, blobSha: TRUSTED_EVIDENCE_WORKFLOW_BLOB }),
+    Object.freeze({ path: MODEL_FIXTURE_PATH, blobSha: TRUSTED_MODEL_FIXTURE_BLOB }),
     Object.freeze({ path: MODEL_HARNESS_PATH, blobSha: TRUSTED_MODEL_HARNESS_BLOB }),
     Object.freeze({ path: ADR_DIGEST_PATH, blobSha: TRUSTED_ADR_DIGEST_BLOB }),
+    Object.freeze({ path: MODEL_POLICY_PATH, blobSha: TRUSTED_MODEL_POLICY_BLOB }),
+    Object.freeze({ path: MODEL_SPIKE_PATH, blobSha: TRUSTED_MODEL_SPIKE_BLOB }),
     Object.freeze({ path: PACKAGE_JSON_PATH, blobSha: TRUSTED_PACKAGE_JSON_BLOB }),
     Object.freeze({ path: PACKAGE_LOCK_PATH, blobSha: TRUSTED_PACKAGE_LOCK_BLOB }),
   ]),
   jobName: "provider-evidence / B-MODEL-01",
   scopePaths: Object.freeze([
     ".env.example",
+    ".github/fixtures/provider-model-v1.json",
     ".github/scripts/provider-adr-digest.mjs",
+    ".github/scripts/provider-model-policy.mjs",
+    ".github/scripts/provider-model-spike.mjs",
     ".github/scripts/run-provider-model-evidence.mjs",
     ".github/workflows/provider-spike-evidence.yml",
     "package-lock.json",
@@ -405,12 +377,19 @@ export const validateEvidenceIndex = async ({
       || result.scope_sha256 !== entry.scope_sha256
       || !exactKeys(result.run, ["id", "attempt"])
       || result.run.id !== entry.run_id || result.run.attempt !== entry.run_attempt
-      || !exactKeys(result.environment, ["node_version", "region", "fixture_set_hash", "pricing_snapshot_date", "provider_request_ids_hash"])
+      || !exactKeys(result.environment, [
+        "node_version", "region", "fixture_set_hash", "pricing_snapshot_date", "pricing_input_per_million_usd",
+        "pricing_output_per_million_usd", "sdk_version", "provider_request_ids_hash", "fault_fixture_mode",
+      ])
       || !/^v24\./.test(result.environment?.node_version ?? "")
       || !/^[a-z0-9-]{2,32}$/.test(result.environment?.region ?? "")
       || !/^[0-9a-f]{64}$/.test(result.environment?.fixture_set_hash ?? "")
-      || !/^20\d{2}-\d{2}-\d{2}$/.test(result.environment?.pricing_snapshot_date ?? "")
+      || result.environment?.pricing_snapshot_date !== "2026-09-04"
+      || result.environment?.pricing_input_per_million_usd !== 2
+      || result.environment?.pricing_output_per_million_usd !== 10
+      || result.environment?.sdk_version !== "0.117.1"
       || !/^[0-9a-f]{64}$/.test(result.environment?.provider_request_ids_hash ?? "")
+      || result.environment?.fault_fixture_mode !== "deterministic_adapter_boundary"
       || result.redactions_applied !== true) {
       fail(`${gate} evidence '${id}' result snapshot의 strict metadata가 index와 다릅니다.`);
     }
