@@ -709,7 +709,7 @@ Live 시험은 Preview 격리 환경에서 먼저 수행한 뒤 Production과 �
 | 현재 DB 5432 예시와 pooler 주석 충돌 | Runtime 6543·migration direct 분리 | env와 preflight 수정 |
 | 매 health 요청마다 외부 Provider probe | 저비용 app/DB + cached status | health 계약 재구현 |
 | PreCase referer/OC | FinShield 등록과 Snapshot 수집기 | 별도 key·domain/IP 검증 |
-| 공개 `/api/mcp` | P0 disabled | flag와 404/410 test |
+| 공개 `/api/mcp`가 runtime 404로 차단됨 | P0 disabled | drift validator 유지; P1 활성화 전 보안·쿼터·conformance 재검증 |
 | 300초 route 설정 | 제품 deadline 120/180초 | AbortSignal·partial terminal write |
 | 법령 cache row 덮어쓰기 | immutable Source Snapshot | ingestion/version migration |
 | Supabase/OCR/Embedding/Workflow SDK 없음 | 본 ADR 조합 | Spike harness 통과 후 의존성 추가 |

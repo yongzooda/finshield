@@ -29,6 +29,8 @@ const paths = {
   packageLock: resolve(root, "package-lock.json"),
   envExample: resolve(root, ".env.example"),
   workflow: resolve(root, ".github/workflows/pr-check.yml"),
+  runtimeEnv: resolve(root, "src/lib/env.ts"),
+  mcpRoute: resolve(root, "src/app/api/mcp/route.ts"),
 };
 
 const read = (path) => readFileSync(path, "utf8");
@@ -44,6 +46,8 @@ const packageJsonText = read(paths.packageJson);
 const packageLockText = read(paths.packageLock);
 const envExample = read(paths.envExample);
 const workflow = read(paths.workflow);
+const runtimeEnv = read(paths.runtimeEnv);
+const mcpRoute = read(paths.mcpRoute);
 const errors = [];
 
 const fail = (message) => errors.push(message);
@@ -562,6 +566,16 @@ if (!exactKeysForWorkflow(providerEnv, ["GITHUB_TOKEN", "VALIDATION_HEAD_SHA", "
 }
 if (jobEnv.PUBLIC_MCP_ENABLED !== "false") fail("PR CI에서 공개 MCP가 비활성화되지 않았습니다.");
 requireMatch(envExample, /^PUBLIC_MCP_ENABLED="false"$/m, ".env.example에서 공개 MCP가 비활성화되지 않았습니다.");
+if (countExactLine(runtimeEnv, '  PUBLIC_MCP_ENABLED: z.literal("false"),') !== 1) {
+  fail("Runtime env schema가 P0 PUBLIC_MCP_ENABLED=false만 허용하지 않습니다.");
+}
+if (/@\/lib\/mcp\/server|@\/lib\/ops\/rate-limit/.test(mcpRoute)
+  || countExactLine(mcpRoute, "  return jsonNoStore({ ok: false, error: \"MCP_DISABLED\" }, 404);") !== 1
+  || !/export function OPTIONS\(\): Response \{\n  return mcpUnavailable\(\);\n\}/.test(mcpRoute)
+  || !/export function GET\(\): Response \{\n  return mcpUnavailable\(\);\n\}/.test(mcpRoute)
+  || !/export function POST\(request: Request\): Response \{\n  void request;\n  return mcpUnavailable\(\);\n\}/.test(mcpRoute)) {
+  fail("P0 /api/mcp route가 body·rate limit·MCP handler 실행 전에 모든 method를 404로 차단하지 않습니다.");
+}
 if (implementationGate === "GO") {
   if (jobEnv.ANTHROPIC_MODEL !== "claude-sonnet-5") fail("Implementation GO에서 CI 기본 모델이 Sonnet 5가 아닙니다.");
   requireMatch(envExample, /^ANTHROPIC_MODEL="claude-sonnet-5"$/m, "Implementation GO에서 .env.example 기본 모델이 Sonnet 5가 아닙니다.");
