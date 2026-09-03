@@ -67,6 +67,9 @@ jobs:
       - name: Provider Model Spike Contract Test
         run: node .github/scripts/test-provider-model-spike.mjs
 
+      - name: Provider Embedding Spike Contract Test
+        run: node .github/scripts/test-provider-embed-spike.mjs
+
       - name: 라우트 타입 생성
         run: npx next typegen
 

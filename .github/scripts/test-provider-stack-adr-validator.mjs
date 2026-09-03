@@ -20,6 +20,7 @@ import {
   computeEvidenceScopeDigest,
   evidencePolicies,
   gitBlobSha,
+  validateEmbedEvidenceResult,
   validateEvidenceIndex,
   validateModelEvidenceResult,
 } from "./provider-evidence.mjs";
@@ -28,13 +29,18 @@ const root = resolve(fileURLToPath(new URL("../../", import.meta.url)));
 const validatorPath = ".github/scripts/validate-provider-stack-adr.mjs";
 const fixturePaths = [
   validatorPath,
+  ".github/fixtures/provider-embed-v1.json",
   ".github/fixtures/provider-model-v1.json",
   ".github/scripts/provider-adr-digest.mjs",
+  ".github/scripts/provider-embed-policy.mjs",
+  ".github/scripts/provider-embed-spike.mjs",
   ".github/scripts/provider-evidence.mjs",
   ".github/scripts/provider-model-policy.mjs",
   ".github/scripts/provider-model-spike.mjs",
+  ".github/scripts/run-provider-embed-evidence.mjs",
   ".github/scripts/run-provider-model-evidence.mjs",
   ".github/workflows/pr-check.yml",
+  ".github/workflows/provider-embed-evidence.yml",
   ".github/workflows/provider-spike-evidence.yml",
   ".env.example",
   "src/lib/env.ts",
@@ -47,6 +53,7 @@ const fixturePaths = [
   "docs/02-integrated-requirements.md",
   "docs/03-database-spec.md",
   "docs/adr/001-p0-provider-stack.md",
+  "docs/ops/provider-embed-spike.md",
   "package.json",
   "package-lock.json",
 ];
@@ -433,6 +440,31 @@ for (const trustedAPathMismatch of [
   }
 }
 
+{
+  const metricErrors = [];
+  validateEmbedEvidenceResult({ observations: {
+    contract: { model_id: "embed-v4.0", dimension: 1024, metric: "cosine", document_input_type: "search_document", query_input_type: "search_query", embedding_type: "float", knn: "exact" },
+    dataset: { topics: 20, documents: 140, queries: 100, hard_negative_documents: 40, hard_negative_queries: 40, risk_queries: 30 },
+    quality: { top_k: 5, recall_at_5: 0.89, risk_core_recall_at_5: 1, precision_at_5: 0.8 },
+    latency: { query_samples: 100, query_p50_ms: 500, query_p95_ms: 1400, exact_knn_samples: 100, exact_knn_p95_ms: 2 },
+    usage: { provider_requests: 102, embedded_inputs: 240, billed_input_tokens: 1000, price_per_million_usd: 0.12, calculated_cost_usd: 0.00012 },
+    provider: { http_status: 200, request_ids_present: 102, unique_request_ids: 102, rate_limit_headers_observed: true },
+  }, environment: {
+    node_version: "v24.4.1",
+    region: "test",
+    fixture_set_hash: "d".repeat(64),
+    pricing_snapshot_date: "2026-09-04",
+    pricing_source: "https://cohere.com/pricing",
+    transport: "native-fetch",
+    provider_request_ids_hash: "e".repeat(64),
+    api_version: "v2",
+    official_text_input_limit_per_minute: 2000,
+  } }, (message) => metricErrors.push(message));
+  if (!metricErrors.some((message) => message.includes("Recall@5"))) {
+    throw new Error("embedding recall below 0.90 must be rejected");
+  }
+}
+
 if (adoptionFilesAreSafe([{
   status: "renamed",
   previous_filename: "src/app/api/route.ts",
@@ -508,6 +540,11 @@ expectFail(
 );
 
 for (const [name, path] of [
+  ["trusted embed workflow changes invalidate its policy pin", ".github/workflows/provider-embed-evidence.yml"],
+  ["trusted embed fixture changes invalidate its policy pin", ".github/fixtures/provider-embed-v1.json"],
+  ["trusted embed harness changes invalidate its policy pin", ".github/scripts/run-provider-embed-evidence.mjs"],
+  ["trusted embed policy changes invalidate its policy pin", ".github/scripts/provider-embed-policy.mjs"],
+  ["trusted embed spike changes invalidate its policy pin", ".github/scripts/provider-embed-spike.mjs"],
   ["trusted model fixture changes invalidate its policy pin", ".github/fixtures/provider-model-v1.json"],
   ["trusted ADR digest helper changes invalidate its policy pin", ".github/scripts/provider-adr-digest.mjs"],
   ["trusted model policy changes invalidate its policy pin", ".github/scripts/provider-model-policy.mjs"],
@@ -556,6 +593,15 @@ expectFail(
     "run: echo model-spike-contract-skipped",
   )),
   /PR CI가 Provider Model Spike contract test를 exact safe step으로 실행하지 않습니다/,
+);
+
+expectFail(
+  "provider embedding contract test cannot be skipped",
+  (fixture) => update(fixture, ".github/workflows/pr-check.yml", (source) => source.replace(
+    "run: node .github/scripts/test-provider-embed-spike.mjs",
+    "run: echo embed-spike-contract-skipped",
+  )),
+  /PR CI가 Provider Embedding Spike contract test를 exact safe step으로 실행하지 않습니다/,
 );
 
 expectFail(

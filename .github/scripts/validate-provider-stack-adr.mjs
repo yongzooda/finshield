@@ -577,12 +577,19 @@ const modelSpikeContractStep = requireExactRunStep(
   "node .github/scripts/test-provider-model-spike.mjs",
   "PR CI가 Provider Model Spike contract test를 exact safe step으로 실행하지 않습니다.",
 );
+const embedSpikeContractStep = requireExactRunStep(
+  "Provider Embedding Spike Contract Test",
+  "node .github/scripts/test-provider-embed-spike.mjs",
+  "PR CI가 Provider Embedding Spike contract test를 exact safe step으로 실행하지 않습니다.",
+);
 if (steps.indexOf(databaseStep) !== 3 || providerStepIndex !== 4 || steps.indexOf(mutationStep) !== 5
   || !exactKeysForWorkflow(databaseStep, ["name", "run"])
   || !exactKeysForWorkflow(providerStep, ["name", "env", "run"])
   || !exactKeysForWorkflow(mutationStep, ["name", "run"])
   || steps.indexOf(modelSpikeContractStep) <= steps.indexOf(mutationStep)
-  || !exactKeysForWorkflow(modelSpikeContractStep, ["name", "run"])) {
+  || !exactKeysForWorkflow(modelSpikeContractStep, ["name", "run"])
+  || steps.indexOf(embedSpikeContractStep) !== steps.indexOf(modelSpikeContractStep) + 1
+  || !exactKeysForWorkflow(embedSpikeContractStep, ["name", "run"])) {
   fail("DB/Provider/mutation 검증은 설치 직후의 exact 순서와 필드로 실행해야 합니다.");
 }
 const providerEnv = isRecord(providerStep?.env) ? providerStep.env : {};
