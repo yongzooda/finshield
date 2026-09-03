@@ -28,6 +28,7 @@
 - [x] Vercel Production 배포 연결 및 `READY` 확인
 - [x] P0 Provider·외부 연동·실행 인프라 Architecture Decision과 분리된 Implementation/Release Gate 기준선 확정
 - [x] `PUBLIC_MCP_ENABLED=false` P0 공개 `/api/mcp` runtime 404 차단과 ADR drift 검증
+- [x] main Ruleset strict required status 활성화와 `B-CI-INTEGRITY` fail-closed preflight·contract test
 
 ## 다음 작업 순서
 
@@ -58,3 +59,4 @@
 - 전용 FinShield Supabase Project·RLS·authenticated TUS one-use slot·24시간 물리 삭제와 Vercel Workflow Replay·Fencing은 아직 검증되지 않았다.
 - 법제처는 등록 IP와 Vercel 동적 egress가 충돌할 수 있어 request-time Live 조회를 기본값으로 두지 않고 공식 Snapshot 수집 경로를 검증한다.
 - GitHub의 Vercel success status는 Build/Deploy 성공이며 Provider 기능 성공 증거가 아니다.
+- main Ruleset의 required `check`는 strict·bypass 0·Actions retention 90일 기준을 충족하지만, 저장소가 개인 소유이고 외부 Required Workflow·App attestation이 없어 `B-CI-INTEGRITY`는 계속 `BLOCKED`다. `docs/ops/ci-integrity-preflight.md`의 Organization 이전 경로는 사용자 확인 전 실행하지 않는다.
