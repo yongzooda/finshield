@@ -61,6 +61,9 @@ jobs:
       - name: Provider ADR Validator Mutation Test
         run: node .github/scripts/test-provider-stack-adr-validator.mjs
 
+      - name: CI Integrity Preflight Contract Test
+        run: node .github/scripts/test-ci-integrity-preflight.mjs
+
       - name: 라우트 타입 생성
         run: npx next typegen
 

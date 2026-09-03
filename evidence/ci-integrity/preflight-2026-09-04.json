@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "repository": "yongzooda/finshield",
+  "observed_at": "2026-09-03T15:55:47.471Z",
+  "status": "BLOCKED",
+  "checks": [
+    {
+      "id": "OWNER_IS_ORGANIZATION",
+      "status": "FAIL",
+      "observed": "User"
+    },
+    {
+      "id": "ACTIVE_ORG_REQUIRED_WORKFLOW",
+      "status": "FAIL",
+      "observed": []
+    },
+    {
+      "id": "EXTERNAL_WORKFLOW_SHA_PIN",
+      "status": "FAIL",
+      "observed": "missing"
+    },
+    {
+      "id": "REQUIRED_WORKFLOW_BYPASS_ACTORS_VISIBLE",
+      "status": "FAIL",
+      "observed": "missing-or-unreadable"
+    },
+    {
+      "id": "REQUIRED_WORKFLOW_BYPASS_ACTORS_ZERO",
+      "status": "FAIL",
+      "observed": "unverified"
+    },
+    {
+      "id": "STRICT_REQUIRED_CHECK",
+      "status": "PASS",
+      "observed": "check"
+    },
+    {
+      "id": "ACTIONS_ENABLED",
+      "status": "PASS",
+      "observed": "enabled"
+    },
+    {
+      "id": "GITHUB_TOKEN_READ_ONLY",
+      "status": "PASS",
+      "observed": "read/false"
+    },
+    {
+      "id": "ARTIFACT_RETENTION_30_DAYS",
+      "status": "PASS",
+      "observed": 90
+    }
+  ],
+  "missing_requirements": [
+    "OWNER_IS_ORGANIZATION",
+    "ACTIVE_ORG_REQUIRED_WORKFLOW",
+    "EXTERNAL_WORKFLOW_SHA_PIN",
+    "REQUIRED_WORKFLOW_BYPASS_ACTORS_VISIBLE",
+    "REQUIRED_WORKFLOW_BYPASS_ACTORS_ZERO"
+  ],
+  "limitations": [
+    "이 preflight는 B-CI-INTEGRITY PASS 증거가 아니다.",
+    "외부 GitHub App attestation의 발행자·현재 merge SHA·policy pin·artifact/run·27일 TTL 검증은 별도 privileged control에서 수행해야 한다."
+  ]
+}
