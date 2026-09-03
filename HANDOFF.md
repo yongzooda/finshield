@@ -7,7 +7,7 @@
 - 요구사항 정본: `docs/02-integrated-requirements.md`
 - 상위 기획: `docs/01-product-plan.md`
 - DB 구현 기준: `docs/03-database-spec.md`
-- 배포: 아직 FinShield Production을 연결하지 않음
+- 배포: Vercel `finshield` Production 연결 완료 (`https://finshield-gamma.vercel.app`)
 - 기존 PreCase 저장소·배포: 유지
 
 ## 완료 상태
@@ -22,6 +22,7 @@
 - [x] main 브랜치 보호와 GitHub Actions `check` 필수 설정
 - [x] FinShield 통합 요구사항 명세서와 P0·P1·P2 기준선 확정
 - [x] FinShield 목표 데이터베이스 명세와 D-001~D-032 구현 기준선 확정
+- [x] Vercel Production 배포 연결 및 `READY` 확인
 
 ## 다음 작업 순서
 
