@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  statuses: read
 
 jobs:
   check:
@@ -59,3 +60,29 @@ jobs:
 
       # 현재 PreCase 기반 일부 정적 화면은 빌드 시 DB를 읽는다.
       # Vercel Preview가 실환경 build check를 담당하며 DB 의존 제거 후 CI build를 추가한다.
+      - name: Vercel Preview 확인
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          for attempt in {1..60}; do
+            state="$(gh api "repos/${REPOSITORY}/commits/${HEAD_SHA}/status" --jq '[.statuses[] | select(.context == "Vercel")][0].state // "missing"')"
+            echo "Vercel status: ${state} (attempt ${attempt}/60)"
+
+            case "${state}" in
+              success)
+                exit 0
+                ;;
+              failure|error)
+                echo "::error::Vercel Preview failed with status ${state}"
+                exit 1
+                ;;
+            esac
+
+            sleep 10
+          done
+
+          echo "::error::Timed out waiting for Vercel Preview status"
+          exit 1
