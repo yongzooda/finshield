@@ -72,6 +72,7 @@
 - Provider key 존재나 Vercel Preview 성공만으로 Model·OCR·Source·RLS·삭제·Job 검증을 통과한 것으로 보지 않는다.
 - 외부 연동 실패·미구성·쿼터 초과를 Seed 또는 정적 Snapshot의 Live 성공으로 바꾸지 않는다.
 - Provider·모델·Embedding 차원·OCR 외부 전송·Job Runner·공식 Source를 바꿀 때 ADR과 평가 증거를 같은 PR에서 갱신한다.
+- P0 Evidence는 저장소 수준 strict check·SHA pin·mutation test·main 실행·별도 Adoption PR로 채택하고 `repository-controlled evidence`로 표시한다. 외부 Required Workflow·App attestation은 제출 후 강화 항목이며 P0 Gate를 차단하지 않는다.
 
 ## 기록 규칙
 

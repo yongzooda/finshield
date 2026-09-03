@@ -114,7 +114,7 @@ export const evaluateCiIntegrityPreflight = ({
     checks,
     missing_requirements: missingRequirements,
     limitations: [
-      "이 preflight는 B-CI-INTEGRITY PASS 증거가 아니다.",
+      "이 preflight는 B-CI-INTEGRITY 외부 강화 완료 증거가 아니다.",
       "외부 GitHub App attestation의 발행자·현재 merge SHA·policy pin·artifact/run·27일 TTL 검증은 별도 privileged control에서 수행해야 한다.",
     ],
   };

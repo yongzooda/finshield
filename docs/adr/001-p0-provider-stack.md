@@ -608,7 +608,6 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `B-DEADLINE-01` | Text 120초·Image/PDF 180초 abort·status 조회·partial save | NOT-EVALUATED | §4.3 예산 합·§15.1 P95/단절 복원 합격 + terminal row |
 | `B-HEALTH-01` | 저비용 health와 cached provider status | NOT-EVALUATED | §15.1 Health 합격 + provider 호출 없는 trace |
 | `B-RUNTIME-01` | Preview/Production 실제 Node minor/patch·deployment·region | NOT-EVALUATED | §15.1 Runtime 합격 + manifest |
-| `B-CI-INTEGRITY` | PR이 validator/workflow를 바꿔 required `check`를 우회하지 못하는 외부 보호 | BLOCKED | GitHub Required Workflow 또는 base-controlled 검증과 Ruleset 조회 artifact |
 | `B-SPIKE-01` | 실제 Provider·Source·Storage·DB·Workflow component vertical | NOT-EVALUATED | §15.1 합성 Text·Image·PDF spike 합격; 제품 UI 요구 없음 |
 
 ### 14.3 Implementation Gate 전환 규칙
@@ -626,15 +625,15 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 
 각 blocker 상태는 `NOT-EVALUATED`, `PASS`, `FAIL`, `BLOCKED` 중 하나다. 부분 검증의 sanitized artifact와 이력은 독립적으로 보존하지만, `PASS`는 아래 TTL·policy pin·채택 provenance가 계속 유효한 동안만 유지한다. 만료되거나 관련 harness·합격식이 바뀌면 이력은 남기고 상태를 `NOT-EVALUATED`로 되돌려 재측정한다. 모든 blocker가 `PASS`일 때만 Implementation Gate가 `GO`다.
 
-`B-CI-INTEGRITY`를 제외한 Implementation `PASS`는 먼저 `B-CI-INTEGRITY`가 live Rulesets 조회까지 `PASS`하고, schema v3 `evidence/provider-stack-gate.json`에 해당 blocker entry가 있을 때만 허용한다. Commit A는 검토된 harness·policy가 이미 squash merge된 정확한 `main` head다. `main`에서 dispatch한 trusted Workflow Run W는 임의 target을 받지 않고 `A = W = github.sha`를 시험해 단일 `result.json` Actions artifact를 만든다. 그 뒤 별도 채택 PR은 PR 번호를 index에 기록하고 sanitized 결과 snapshot·index·상태·동기화 문서만 변경한다. 결과 안에는 A/W SHA, 요구사항 Blob SHA, Gate metadata·blocker 상태·strict 증거 행만 정규화한 ADR decision digest, blocker별 scope digest, raw 관측값, 실행 환경, redaction 여부를 넣되 artifact ID·archive digest·채택 commit SHA는 넣지 않는다. 따라서 결과가 자기 자신을 포함한 commit SHA를 미리 알아야 하는 순환은 없다.
+Implementation `PASS`는 schema v3 `evidence/provider-stack-gate.json`에 해당 blocker entry가 있고 아래 저장소 수준 P0 통제를 모두 통과할 때만 허용한다. main Ruleset은 active·bypass actor 0명·`strict_required_status_checks_policy=true`이고, required `check`는 SHA로 고정한 Action·최소 읽기 권한·validator mutation test를 사용한다. Commit A는 검토된 harness·policy가 이미 squash merge된 정확한 `main` head다. `main`에서 dispatch한 Workflow Run W는 임의 target을 받지 않고 `A = W = github.sha`를 시험해 단일 `result.json` Actions artifact를 만든다. 그 뒤 별도 채택 PR은 PR 번호를 index에 기록하고 sanitized 결과 snapshot·index·상태·동기화 문서만 변경한다. 결과 안에는 A/W SHA, 요구사항 Blob SHA, Gate metadata·blocker 상태·strict 증거 행만 정규화한 ADR decision digest, blocker별 scope digest, raw 관측값, 실행 환경, redaction 여부를 넣되 artifact ID·archive digest·채택 commit SHA는 넣지 않는다. 따라서 결과가 자기 자신을 포함한 commit SHA를 미리 알아야 하는 순환은 없다.
 
 CI는 성공한 exact workflow/run attempt/job/step, main에서 실행한 trusted workflow·harness Git Blob pin, artifact ID·이름·GitHub SHA-256과 실제 다운로드 ZIP digest, 단일 `result.json`·크기·symlink·경로, 저장한 결과 SHA-256을 모두 대조한다. 채택 PR이 열려 있을 때는 A가 현재 merge candidate의 직계 기준 main인지 확인하고, merge 뒤에는 GitHub REST `2022-11-28` PR 응답의 실제 채택 `merge_commit_sha`가 현재 main의 ancestor인지 확인한다. 이 API 계약은 지원 종료 전인 2028-03-10 이전에 GraphQL `potentialMergeCommit`·`mergeCommit`으로 이관한다. A에서 그 채택 commit까지의 변경만 `evidence/**`, 이 ADR, README, `docs/README.md`, `HANDOFF.md`로 제한하고 rename의 이전 경로도 검사한다. 지정 채택 commit에서 result, exact index entry, 해당 Gate 표의 유일한 `PASS` 행, ADR digest도 다시 읽는다. 이후 일반 코드 commit은 이미 확인한 채택 범위에 다시 섞이지 않으므로 기존 근거를 무조건 무효화하지 않는다.
 
 ADR digest는 Markdown AST에서 실제 14.1로 확인한 strict `EVID-*` table 행만 하나의 marker로 정규화하고, 숨겨진 HTML·code의 가짜 heading을 포함한 다른 prose·heading·합격선은 보존한다. 14.1은 정확한 4열 table과 고정 disclaimer 외 임의 문장을 거부한다. blocker별 scope digest는 정책이 지정한 관련 파일의 경로와 Git Blob SHA를 결박한다. `B-MODEL-01`은 evidence workflow, model harness, 공용 ADR digest 모듈, `.env.example`, `package.json`, `package-lock.json`을 감시하며 이 중 하나가 바뀌면 기존 `PASS`를 재사용할 수 없다. 새 실제 adapter가 harness 입력이 되면 실행 전에 scope 목록에 추가한다. artifact의 `PASS` 문자열은 신뢰하지 않고 validator에 사전 등록한 blocker별 raw-metric 합격식으로 다시 계산한다.
 
-Actions artifact retention은 30일이고 `PASS` evidence TTL은 27일이다. artifact 생성 시각보다 이른 채택, 미래 시각, 27일 초과 artifact는 거부한다. main의 일일 scheduled `check`가 이미 채택된 근거의 만료·삭제를 탐지하며, 만료 전에 동일 정책으로 다시 실행·채택하거나 blocker를 `NOT-EVALUATED`로 되돌려야 한다. 문서 표가 아직 갱신되지 않았더라도 27일이 지난 `PASS`는 의미상 만료다. 외부 `B-CI-INTEGRITY` control은 근거를 상속한 모든 열린 PR의 현재 merge SHA를 주기적으로 재검사하고 artifact/run 존재·다운로드·TTL을 포함한 merge 직전 최신 성공을 요구해야 한다. required status는 `strict_required_status_checks_policy=true`여야 하며, 이 보호 전에는 어떤 부분 PASS도 허용하지 않는다. 각 blocker는 실제 harness와 합격식을 검토해 등록하기 전에는 `PASS`를 거부한다. 현재 `B-MODEL-01` scaffold의 `--run`은 fail-closed이고 evidence workflow에는 Provider secret이나 environment를 주입하지 않는다. 외부 독립 CI와 `main` 전용 deployment branch policy가 있는 protected environment를 확인한 뒤에만 environment 전용 key와 실제 harness를 함께 추가한다.
+Actions artifact retention은 30일이고 `PASS` evidence TTL은 27일이다. artifact 생성 시각보다 이른 채택, 미래 시각, 27일 초과 artifact는 거부한다. main의 일일 scheduled `check`가 이미 채택된 근거의 만료·삭제를 탐지하며, 만료 전에 동일 정책으로 다시 실행·채택하거나 blocker를 `NOT-EVALUATED`로 되돌려야 한다. 문서 표가 아직 갱신되지 않았더라도 27일이 지난 `PASS`는 의미상 만료다. 근거를 상속한 열린 PR은 현재 merge SHA에서 required `check`를 다시 통과해야 하고, validator는 artifact/run 존재·다운로드·TTL과 채택 provenance를 재검사한다. 각 blocker는 실제 harness와 합격식을 검토해 등록하기 전에는 `PASS`를 거부한다. 현재 `B-MODEL-01` scaffold의 `--run`은 fail-closed이고 evidence workflow에는 Provider secret이나 environment를 주입하지 않는다. `main` 전용 deployment branch policy가 있는 protected environment를 확인한 뒤에만 environment 전용 key와 실제 harness를 함께 추가한다.
 
-`B-CI-INTEGRITY`는 일반 artifact나 저장소의 `GITHUB_TOKEN`만으로 닫지 않는다. 권한이 분리된 외부 GitHub App/control이 main에 적용되는 Required Workflow 또는 동등한 immutable control pin, strict required status, active ruleset, bypass actor 0명, 그리고 근거를 상속한 모든 열린 PR의 현재 merge SHA·artifact/run·TTL을 조회해야 한다. 외부 workflow는 trusted validator와 의존성을 control 저장소에서 불러와 target `npm ci`나 target validator보다 먼저 별도 job/runner에서 검증하고, 그 결과를 target 저장소가 위조할 수 없는 서명·불변 attestation으로 발행해야 한다. target validator는 이 attestation의 발행자·대상 SHA·정책 pin·신선도를 소비·검증해야 하며, PR 코드가 선행 validator·lockfile import·job skip·checkout ref·같은 이름의 check로 검증을 바꿔치기할 수 없어야 한다. 현재 개인 소유 저장소에는 organization-level Required Workflows 규칙을 설정할 수 없고 외부 control pin·attestation consumer도 구현되지 않았으므로 이 blocker는 `BLOCKED`다. GitHub Team 이상 조직으로 이전해 Required Workflow를 구성하거나 동등한 base-controlled 외부 검증을 별도 설계하기 전에는 다른 Implementation blocker를 `PASS`로 채택하거나 Implementation Gate를 `GO`로 바꾸지 않는다. 저장소 내부 validator는 자기 자신을 신뢰 근거로 삼지 않는다.
+이 P0 통제는 PR 코드가 workflow·validator를 함께 바꾸는 시도를 mutation test와 검토로 탐지하지만 권한이 분리된 외부 불변 attestation은 아니다. 따라서 제출 문서에는 `repository-controlled evidence`로 표시하고 독립 감사 증거로 표현하지 않는다. 외부 불변 통제는 §14.5의 제출 후 강화 항목으로 보존한다.
 
 ### 14.4 Release Gate 차단 항목
 
@@ -649,6 +648,14 @@ Implementation Gate가 `GO`가 된 뒤 기능을 구현하고 다음을 별도 �
 Release blocker도 같은 네 상태를 사용한다. Implementation Gate가 `GO`이기 전에는 평가를 시작할 수 없다. `PASS`는 release 전용 trusted harness·raw-metric policy를 먼저 추가한 뒤 schema v3 `evidence/release-gate.json`과 동일한 `A = W`·채택 PR provenance와 27일 TTL로 검증하며, policy가 등록되지 않은 blocker는 `PASS`를 거부한다. 모두 `NOT-EVALUATED`이면 Release Gate는 `NOT-EVALUATED`, 평가가 시작됐지만 하나라도 PASS가 아니면 `NO-GO`, 모두 PASS이면 `GO`다.
 
 공개 Live Seed는 회원 Case를 만들거나 사용자 데이터를 재사용하지 않는다. 실제 Pipeline 장애 때만 사용자가 정적 Fallback을 선택할 수 있고, `STATIC_FALLBACK`·기준일을 표시하며 Live 성공으로 집계하지 않는다. P0 완료 결과의 다른 기기 조회는 Release 조건이지만, 진행 중 초기 Run의 새로고침·다른 기기 복원은 `N-AVL-004` P1 경계다.
+
+### 14.5 제출 후 CI 무결성 강화
+
+| 강화 ID | 상태 | 목표 통제 | P0 Gate 영향 |
+|---|---|---|---|
+| `B-CI-INTEGRITY` | DEFERRED | GitHub Team 이상 Organization Required Workflow 또는 동등한 외부 App attestation | Implementation·Release Gate 비차단; 제출 후 별도 검증·채택 |
+
+권한이 분리된 외부 control은 trusted validator를 target 저장소 밖에서 고정하고, 열린 PR의 현재 merge SHA·policy pin·artifact/run·27일 TTL을 검증하며 target이 위조할 수 없는 attestation을 발행해야 한다. 이 강화가 완료되기 전에는 현재 P0 증거를 외부 독립 CI가 보증했다고 표현하지 않는다. 2026-09-04 현재 저장소가 개인 계정 소유이고 상위 `N-QLT-010`은 Provider·실행 인프라 Spike를 요구하지만 특정 유료 GitHub 조직 기능을 요구하지 않는 점을 검토해, 제출 일정의 선행조건에서는 제외하고 이력을 보존하기로 승인했다.
 
 ---
 

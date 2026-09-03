@@ -43,6 +43,7 @@ const canonicalizeAdrDecision = (source) => {
     }
     if (structuralLine === "### 14.3 Implementation Gate 전환 규칙") insideGateTable = false;
     if (structuralLine === "### 14.4 Release Gate 차단 항목") insideGateTable = true;
+    if (structuralLine === "### 14.5 제출 후 CI 무결성 강화") insideGateTable = false;
     if (structuralLine === "## 15. Live 시험 계획") insideGateTable = false;
 
     if (insideLedger && /^\| `EVID-[A-Z0-9-]+` \|/.test(structuralLine)) {

@@ -130,11 +130,11 @@ const expectPartialEvidence = async ({
     const workflowId = 67890;
     const artifactId = 24680;
     const workflowBlobSha = "aeb7baa6ac9b7e9e597769b83a1f58db097a7f76";
-    const harnessBlobSha = "1147517e4bc60f2ae0bf3d7235c597983f0e9057";
+    const harnessBlobSha = "d296230b83e1bfc2ab5daeb2bd6c2ed1e6d55802";
     const trustedExecutionBlobs = new Map([
       [".github/workflows/provider-spike-evidence.yml", workflowBlobSha],
       [".github/scripts/run-provider-model-evidence.mjs", harnessBlobSha],
-      [".github/scripts/provider-adr-digest.mjs", "6fffb7755197bfcbdcb89735739321e9f3d7af42"],
+      [".github/scripts/provider-adr-digest.mjs", "a0d89bbd01fcdd4cc2659afb29d243ba2bdfc099"],
       ["package.json", "ecb26cd086f874ea4f989d50f2719a8390c282de"],
       ["package-lock.json", "678296a5f7e2256799413740041886f29f939191"],
     ]);
@@ -325,7 +325,6 @@ const expectPartialEvidence = async ({
       gate: "implementation",
       rows: [
         { id: "B-MODEL-01", status: "PASS" },
-        { id: "B-CI-INTEGRITY", status: "PASS" },
       ],
       requirementsBlob,
       indexRelativePath: "evidence/provider-stack-gate.json",
@@ -334,7 +333,6 @@ const expectPartialEvidence = async ({
       currentHeadSha,
       currentPrNumber: adoptionPrNumber,
       nowMs,
-      verifyCi: async () => true,
     });
     if (expectedError) {
       if (!errors.some((error) => expectedError.test(error))) {
@@ -429,12 +427,21 @@ expectFail(
 );
 
 expectFail(
-  "partial PASS requires independent CI integrity first",
+  "deferred CI hardening cannot reenter implementation blockers",
   (fixture) => update(fixture, "docs/adr/001-p0-provider-stack.md", (source) => source.replace(
-    "| `B-MODEL-01` | Anthropic Sonnet 5 auth·quota·structured output·strict tool·P95·cost | NOT-EVALUATED |",
-    "| `B-MODEL-01` | Anthropic Sonnet 5 auth·quota·structured output·strict tool·P95·cost | PASS |",
+    "| `B-SPIKE-01` | 실제 Provider·Source·Storage·DB·Workflow component vertical | NOT-EVALUATED | §15.1 합성 Text·Image·PDF spike 합격; 제품 UI 요구 없음 |",
+    "| `B-CI-INTEGRITY` | 외부 immutable CI | BLOCKED | Required Workflow |\n| `B-SPIKE-01` | 실제 Provider·Source·Storage·DB·Workflow component vertical | NOT-EVALUATED | §15.1 합성 Text·Image·PDF spike 합격; 제품 UI 요구 없음 |",
   )),
-  /B-CI-INTEGRITY가 live 검증까지 PASS/,
+  /알 수 없는 Implementation blocker 'B-CI-INTEGRITY'/,
+);
+
+expectFail(
+  "deferred CI hardening cannot be presented as complete",
+  (fixture) => update(fixture, "docs/adr/001-p0-provider-stack.md", (source) => source.replace(
+    "| `B-CI-INTEGRITY` | DEFERRED |",
+    "| `B-CI-INTEGRITY` | PASS |",
+  )),
+  /B-CI-INTEGRITY는 제출 후 강화 상태 DEFERRED로 보존해야 합니다/,
 );
 
 expectFail(

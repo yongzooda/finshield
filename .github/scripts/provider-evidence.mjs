@@ -14,13 +14,9 @@ const MODEL_HARNESS_PATH = ".github/scripts/run-provider-model-evidence.mjs";
 const ADR_DIGEST_PATH = ".github/scripts/provider-adr-digest.mjs";
 const PACKAGE_JSON_PATH = "package.json";
 const PACKAGE_LOCK_PATH = "package-lock.json";
-// Personal repositories cannot configure organization-level Required Workflows.
-// Replace this null only together with a privileged external attestation verifier;
-// a repository GITHUB_TOKEN cannot inspect ruleset bypass actors.
-const TRUSTED_INTEGRITY_CONTROL = null;
 const TRUSTED_EVIDENCE_WORKFLOW_BLOB = "aeb7baa6ac9b7e9e597769b83a1f58db097a7f76";
-const TRUSTED_MODEL_HARNESS_BLOB = "1147517e4bc60f2ae0bf3d7235c597983f0e9057";
-const TRUSTED_ADR_DIGEST_BLOB = "6fffb7755197bfcbdcb89735739321e9f3d7af42";
+const TRUSTED_MODEL_HARNESS_BLOB = "d296230b83e1bfc2ab5daeb2bd6c2ed1e6d55802";
+const TRUSTED_ADR_DIGEST_BLOB = "a0d89bbd01fcdd4cc2659afb29d243ba2bdfc099";
 const TRUSTED_PACKAGE_JSON_BLOB = "ecb26cd086f874ea4f989d50f2719a8390c282de";
 const TRUSTED_PACKAGE_LOCK_BLOB = "678296a5f7e2256799413740041886f29f939191";
 const MAX_ARCHIVE_BYTES = 2 * 1024 * 1024;
@@ -74,7 +70,7 @@ const adoptedGateRowIsPass = (source, gate, blockerId) => {
     : "### 14.4 Release Gate 차단 항목";
   const endHeading = gate === "implementation"
     ? "### 14.3 Implementation Gate 전환 규칙"
-    : "---\n\n## 15.";
+    : "### 14.5 제출 후 CI 무결성 강화";
   const start = structuralSource.indexOf(startHeading);
   const end = start >= 0 ? structuralSource.indexOf(endHeading, start + startHeading.length) : -1;
   if (start < 0 || end < 0) return false;
@@ -300,15 +296,6 @@ export const createGitHubClient = (token, fetchImpl = globalThis.fetch) => {
   };
 };
 
-export const verifyCiIntegrity = async ({ fail }) => {
-  if (!TRUSTED_INTEGRITY_CONTROL) {
-    fail("B-CI-INTEGRITY에 privileged external required-workflow attestation verifier가 등록되지 않았습니다.");
-    return false;
-  }
-  fail("B-CI-INTEGRITY external attestation 소비·서명 검증은 아직 구현되지 않았습니다.");
-  return false;
-};
-
 export const validateEvidenceIndex = async ({
   root,
   gate,
@@ -320,26 +307,14 @@ export const validateEvidenceIndex = async ({
   currentHeadSha = process.env.VALIDATION_HEAD_SHA,
   currentPrNumber = process.env.VALIDATION_PR_NUMBER,
   nowMs = Date.now(),
-  verifyCi = verifyCiIntegrity,
 }) => {
   const fail = (message) => errors.push(message);
-  const ciRow = gate === "implementation" ? rows.find((row) => row.id === "B-CI-INTEGRITY") : null;
   const passIds = rows
-    .filter((row) => row.status === "PASS" && row.id !== "B-CI-INTEGRITY")
+    .filter((row) => row.status === "PASS")
     .map((row) => row.id)
     .sort();
 
-  let ciVerified = false;
-  if (ciRow?.status === "PASS") {
-    if (!github) fail("B-CI-INTEGRITY PASS는 GitHub Actions token으로 live Rulesets를 검증해야 합니다.");
-    else ciVerified = await verifyCi({ github, fail });
-  }
-
   if (passIds.length === 0) return;
-  if (gate === "implementation" && (ciRow?.status !== "PASS" || !ciVerified)) {
-    fail("B-CI-INTEGRITY가 live 검증까지 PASS하기 전에는 다른 Implementation blocker를 PASS로 채택할 수 없습니다.");
-    return;
-  }
   const indexPath = resolve(root, indexRelativePath);
   if (!existsSync(indexPath)) {
     fail(`${gate} PASS blocker가 있지만 '${indexRelativePath}'가 없습니다.`);
@@ -359,7 +334,7 @@ export const validateEvidenceIndex = async ({
   }
   const entries = isRecord(index.entries) ? index.entries : {};
   if (JSON.stringify(Object.keys(entries).sort()) !== JSON.stringify(passIds)) {
-    fail(`${indexRelativePath} entry는 B-CI-INTEGRITY를 제외한 현재 PASS blocker와 정확히 일치해야 합니다.`);
+    fail(`${indexRelativePath} entry는 현재 PASS blocker와 정확히 일치해야 합니다.`);
   }
   if (!github || !/^[0-9a-f]{40}$/.test(currentHeadSha ?? "")) {
     fail(`${gate} PASS evidence는 PR head SHA와 GitHub API 권한이 있는 Actions에서 검증해야 합니다.`);

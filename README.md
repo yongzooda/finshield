@@ -21,6 +21,8 @@ Evidence-Verified Multi-Agent 금융 의사결정 생애주기 검증 플랫폼
 
 현재 Commit은 문서·개발 기준선이다. Provider Architecture Decision은 승인됐지만 Live Spike 증거가 없어 `N-QLT-010` Implementation Gate는 `NO-GO`이고, `N-QLT-009` Release Gate는 기능 구현 뒤 평가한다. FinShield의 로그인·파일 입력·Claim Engine·Multi-Agent·재검증 기능이 모두 구현됐다는 의미가 아니다.
 
+P0 Evidence는 active main Ruleset·strict required `check`·SHA 고정 Action·mutation test·main 실행·별도 Adoption PR로 관리한다. GitHub Organization Required Workflow와 외부 App attestation은 제출 후 강화 항목이며, 완료 전 증거를 외부 독립 CI가 보증했다고 표현하지 않는다.
+
 ## 서비스 경계
 
 | FinShield | PreCase 기반 가입 후 보호 |
