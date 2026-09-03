@@ -2,7 +2,7 @@
 
 2026 금융 AI Challenge 출품작. 거래 전 금융정보 검증과 가입 후 PreCase 보호를 하나의 FinancialCase로 연결한다.
 
-상세 기준은 `docs/`를 따른다. `docs/02-integrated-requirements.md`가 최상위 개발 기준이고, `docs/01-product-plan.md`와 DB·기능명세는 이를 보충한다.
+상세 기준은 `docs/`를 따른다. `docs/02-integrated-requirements.md`가 최상위 개발 기준이고, `docs/01-product-plan.md`가 이를 보충한다. `docs/03-database-spec.md`는 그 아래에서 Schema·Migration·RLS·Storage 구현 기준으로 사용한다.
 
 ## 절대 규칙
 
