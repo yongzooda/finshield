@@ -24,6 +24,8 @@ const EnvSchema = z.object({
   ANTHROPIC_API_KEY: z.string().min(10),
   /** 운영 모델 — 교체 시 확신도 임계 재보정 필수 (A-2·A-6) */
   ANTHROPIC_MODEL: z.string().min(1),
+  /** P0에서는 공개 MCP를 노출하지 않는다. P1 전환은 ADR·보안 시험과 함께 수행한다. */
+  PUBLIC_MCP_ENABLED: z.literal("false"),
   /** 법제처 OPEN API 인증키 (OC 파라미터) */
   LAW_API_OC: z.string().min(1),
   LAW_API_BASE: z.url(),

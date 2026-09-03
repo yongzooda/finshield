@@ -27,6 +27,7 @@
 - [x] FinShield 목표 데이터베이스 명세와 D-001~D-032 구현 기준선 확정
 - [x] Vercel Production 배포 연결 및 `READY` 확인
 - [x] P0 Provider·외부 연동·실행 인프라 Architecture Decision과 분리된 Implementation/Release Gate 기준선 확정
+- [x] `PUBLIC_MCP_ENABLED=false` P0 공개 `/api/mcp` runtime 404 차단과 ADR drift 검증
 
 ## 다음 작업 순서
 
@@ -52,6 +53,7 @@
 - 현재 `supabase/migrations/0001~0006`은 이식된 PreCase 기준선이며 FinShield 목표 Schema가 아니다. 전용 Project 확인 뒤 새 Forward-only 기준선으로 전환한다.
 - DB 명세가 확정됐다는 사실은 Migration·RLS·Storage Policy가 구현·적용됐거나 P0 기능이 작동한다는 뜻이 아니다.
 - Provider ADR의 Architecture Decision이 승인됐다는 사실은 Implementation 또는 Product Release Gate 통과를 뜻하지 않는다.
+- 공개 `/api/mcp`는 P0에서 GET·OPTIONS·POST 모두 404 `MCP_DISABLED`로 차단하며, 기존 MCP protocol 구현은 P1 재검증 전까지 외부 route에서 사용하지 않는다.
 - Anthropic Sonnet 5, Cohere `embed-v4.0`, CLOVA OCR, 공공데이터·법제처 API의 자격증명·쿼터·지연·비용은 아직 Live 검증되지 않았다.
 - 전용 FinShield Supabase Project·RLS·authenticated TUS one-use slot·24시간 물리 삭제와 Vercel Workflow Replay·Fencing은 아직 검증되지 않았다.
 - 법제처는 등록 IP와 Vercel 동적 egress가 충돌할 수 있어 request-time Live 조회를 기본값으로 두지 않고 공식 Snapshot 수집 경로를 검증한다.

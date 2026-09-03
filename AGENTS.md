@@ -17,4 +17,5 @@ Provider ADR의 Architecture Decision이 승인됐다는 사실을 Live 연동 �
 - 기존 PreCase 저장소와 배포에는 쓰기 작업을 하지 않는다.
 - FinShield에서 PreCase는 별도 링크가 아니라 내부 `가입 후 보호` 모듈이다.
 - 작업은 이슈·브랜치·PR 단위로 관리하고 squash merge한다.
+- merge와 원격 검증까지 끝난 작업은 `git fetch origin` 후 접근 가능한 FinShield 로컬 작업 폴더를 최신 `origin/main`과 일치시키고 clean 상태를 확인한다. 사용자 로컬 변경은 덮어쓰지 않는다.
 - 커밋 메시지에 AI 공동저자·생성 도구 트레일러를 넣지 않는다.

@@ -5,6 +5,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  realpathSync,
   rmSync,
   symlinkSync,
   writeFileSync,
@@ -33,6 +34,8 @@ const fixturePaths = [
   ".github/workflows/pr-check.yml",
   ".github/workflows/provider-spike-evidence.yml",
   ".env.example",
+  "src/lib/env.ts",
+  "src/app/api/mcp/route.ts",
   "AGENTS.md",
   "CLAUDE.md",
   "HANDOFF.md",
@@ -46,7 +49,7 @@ const fixturePaths = [
 ];
 
 const makeFixture = () => {
-  const fixture = mkdtempSync(join(tmpdir(), "finshield-provider-validator-"));
+  const fixture = realpathSync(mkdtempSync(join(tmpdir(), "finshield-provider-validator-")));
   for (const relativePath of fixturePaths) {
     const destination = resolve(fixture, relativePath);
     mkdirSync(dirname(destination), { recursive: true });
@@ -522,6 +525,24 @@ expectFail(
 );
 
 expectFail(
+  "runtime MCP flag cannot be enabled during P0",
+  (fixture) => update(fixture, "src/lib/env.ts", (source) => source.replace(
+    'PUBLIC_MCP_ENABLED: z.literal("false")',
+    'PUBLIC_MCP_ENABLED: z.enum(["false", "true"])',
+  )),
+  /Runtime env schema가 P0 PUBLIC_MCP_ENABLED=false만 허용하지 않습니다/,
+);
+
+expectFail(
+  "public MCP route cannot call the protocol handler during P0",
+  (fixture) => update(fixture, "src/app/api/mcp/route.ts", (source) => source.replace(
+    'import { env } from "@/lib/env";',
+    'import { env } from "@/lib/env";\nimport { handlePayload } from "@/lib/mcp/server";',
+  )),
+  /P0 \/api\/mcp route가 body·rate limit·MCP handler 실행 전에/,
+);
+
+expectFail(
   "release evaluation cannot start before implementation GO",
   (fixture) => {
     update(fixture, "docs/adr/001-p0-provider-stack.md", (source) => source
@@ -552,4 +573,4 @@ expectFail(
   /P0 고정 Agent 4개 결정/,
 );
 
-console.log("Provider ADR validator mutation tests passed: 4 pass cases, 28 rejection cases.");
+console.log("Provider ADR validator mutation tests passed: 4 pass cases, 30 rejection cases.");

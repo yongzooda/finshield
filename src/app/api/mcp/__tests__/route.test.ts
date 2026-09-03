@@ -1,12 +1,6 @@
-/**
- * MCP 엔드포인트의 HTTP 계약.
- *
- * 프로토콜 처리는 `lib/mcp/server`에서 따로 검증한다. 여기서 보는 것은 **전송
- * 계층의 약속**이다 — 알림에는 본문 없이 202, 브라우저 클라이언트가 붙을 수
- * 있게 CORS, 스트림을 열지 않으니 GET은 405.
- */
+/** P0 공개 MCP 차단 계약 (E-017, E-021, N-QLT-010). */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { GET, OPTIONS, POST } from "../route";
 
 const post = (body: unknown) =>
@@ -18,47 +12,29 @@ const post = (body: unknown) =>
     }),
   );
 
-describe("전송 계층", () => {
-  it("tools/list를 JSON으로 돌려준다", async () => {
+describe("P0 공개 MCP 비활성", () => {
+  it("GET·OPTIONS·POST가 모두 404다", async () => {
+    expect(GET().status).toBe(404);
+    expect(OPTIONS().status).toBe(404);
     const res = await post({ jsonrpc: "2.0", id: 1, method: "tools/list" });
-    expect(res.status).toBe(200);
-    expect(res.headers.get("content-type")).toContain("application/json");
-    const body = (await res.json()) as { result: { tools: unknown[] } };
-    expect(body.result.tools).toHaveLength(5);
+    expect(res.status).toBe(404);
   });
 
-  it("응답을 캐시하지 않는다", async () => {
+  it("응답은 비활성 상태만 알리고 캐시하지 않는다", async () => {
     const res = await post({ jsonrpc: "2.0", id: 1, method: "ping" });
+    expect(await res.json()).toEqual({ ok: false, error: "MCP_DISABLED" });
     expect(res.headers.get("cache-control")).toBe("no-store");
   });
 
-  it("알림에는 본문 없이 202", async () => {
-    const res = await post({ jsonrpc: "2.0", method: "notifications/initialized" });
-    expect(res.status).toBe(202);
-    expect(await res.text()).toBe("");
-  });
-
-  it("깨진 JSON은 400과 -32700", async () => {
+  it("깨진 JSON도 parsing하지 않고 404다", async () => {
     const res = await post("{ not json");
-    expect(res.status).toBe(400);
-    expect(((await res.json()) as { error: { code: number } }).error.code).toBe(-32700);
+    expect(res.status).toBe(404);
   });
 
-  it("GET은 405이고 어디를 보면 되는지 알려준다", async () => {
-    const res = GET();
-    expect(res.status).toBe(405);
-    expect(((await res.json()) as { docs: string }).docs).toContain("/mcp");
-  });
-
-  it("CORS 프리플라이트가 열려 있다", () => {
-    const res = OPTIONS();
-    expect(res.status).toBe(204);
-    expect(res.headers.get("access-control-allow-origin")).toBe("*");
-    expect(res.headers.get("access-control-allow-headers")).toContain("mcp-protocol-version");
-  });
-
-  it("모든 응답에 CORS 헤더가 붙는다 — 붙지 않으면 브라우저가 이유를 못 읽는다", async () => {
-    const res = await post({ jsonrpc: "2.0", id: 1, method: "ping" });
-    expect(res.headers.get("access-control-allow-origin")).toBe("*");
+  it("POST request body를 읽지 않는다", () => {
+    const req = new Request("http://localhost/api/mcp", { method: "POST", body: "{}" });
+    const parse = vi.spyOn(req, "json");
+    expect(POST(req).status).toBe(404);
+    expect(parse).not.toHaveBeenCalled();
   });
 });
