@@ -38,6 +38,7 @@ const createFakeClient = ({ breakStrictTool = false, omitQuotaHeaders = false } 
             if (params.tool_choice?.type === "tool") {
               const fixtureId = params.messages[0].content.match(/^Fixture (M\d{3})/)[1];
               const lookupKey = fixtures.cases.find((item) => item.id === fixtureId).lookup_key;
+              assert.match(params.messages[0].content, new RegExp(`^Fixture ${fixtureId}\\nAuthorized lookup_key: ${lookupKey}\\n`));
               return {
                 data: {
                   model: "claude-sonnet-5",
@@ -118,7 +119,7 @@ assert.match(spike.providerRequestIdsHash, /^[0-9a-f]{64}$/);
 
 await assert.rejects(
   runModelSpike({ root, apiKey: "sk-test-not-a-real-key", client: createFakeClient({ breakStrictTool: true }), pacer: noWaitPacer }),
-  /strict tool validation/,
+  /strict tool validation \(lookup-key\)/,
 );
 await assert.rejects(
   runModelSpike({ root, apiKey: "sk-test-not-a-real-key", client: createFakeClient({ omitQuotaHeaders: true }), pacer: noWaitPacer }),

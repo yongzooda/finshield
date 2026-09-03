@@ -140,7 +140,7 @@ const expectPartialEvidence = async ({
       [".github/scripts/run-provider-model-evidence.mjs", harnessBlobSha],
       [".github/scripts/provider-adr-digest.mjs", "a0d89bbd01fcdd4cc2659afb29d243ba2bdfc099"],
       [".github/scripts/provider-model-policy.mjs", "50a19a237b29951021e271173fe1ee692b13ccaf"],
-      [".github/scripts/provider-model-spike.mjs", "8e6649cd8e9909f9901ebc84b14db837cbfcdc31"],
+      [".github/scripts/provider-model-spike.mjs", "7448338a029999476c4ec0580ca181dbe50e8135"],
       ["package.json", "ecb26cd086f874ea4f989d50f2719a8390c282de"],
       ["package-lock.json", "678296a5f7e2256799413740041886f29f939191"],
     ]);
