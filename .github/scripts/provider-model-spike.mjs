@@ -158,13 +158,24 @@ const outputFormat = () => ({
   },
 });
 
+const fixturePrompt = (fixture) => [
+  `Fixture ${fixture.id}`,
+  `Authorized lookup_key: ${fixture.lookup_key}`,
+  `Input kind: ${fixture.input_kind}`,
+  fixture.message,
+].join("\n");
+
 const validateStrictToolResponse = (message, fixture) => {
-  if (message?.model !== MODEL_ID || message?.stop_reason !== "tool_use" || !Array.isArray(message.content)) return null;
+  if (message?.model !== MODEL_ID) return { call: null, mismatch: "model" };
+  if (message?.stop_reason !== "tool_use") return { call: null, mismatch: "stop-reason" };
+  if (!Array.isArray(message.content)) return { call: null, mismatch: "content-shape" };
   const calls = message.content.filter((block) => block?.type === "tool_use");
-  if (calls.length !== 1 || calls[0].name !== "get_synthetic_snapshot"
-    || !exactKeys(calls[0].input, ["fixture_id", "lookup_key"])
-    || calls[0].input.fixture_id !== fixture.id || calls[0].input.lookup_key !== fixture.lookup_key) return null;
-  return calls[0];
+  if (calls.length !== 1) return { call: null, mismatch: "tool-count" };
+  if (calls[0].name !== "get_synthetic_snapshot") return { call: null, mismatch: "tool-name" };
+  if (!exactKeys(calls[0].input, ["fixture_id", "lookup_key"])) return { call: null, mismatch: "input-shape" };
+  if (calls[0].input.fixture_id !== fixture.id) return { call: null, mismatch: "fixture-id" };
+  if (calls[0].input.lookup_key !== fixture.lookup_key) return { call: null, mismatch: "lookup-key" };
+  return { call: calls[0], mismatch: null };
 };
 
 const validateStructuredResponse = (message, fixture) => {
@@ -241,8 +252,8 @@ export const runModelSpike = async ({
         model: MODEL_ID,
         max_tokens: 256,
         thinking: { type: "disabled" },
-        system: "Use only the authorized synthetic snapshot tool. Do not infer missing financial facts.",
-        messages: [{ role: "user", content: `Fixture ${fixture.id}\n${fixture.message}` }],
+        system: "Use only the authorized synthetic snapshot tool. Copy the provided Fixture ID and Authorized lookup_key exactly. Do not infer missing financial facts.",
+        messages: [{ role: "user", content: fixturePrompt(fixture) }],
         tools: [strictTool()],
         tool_choice: { type: "tool", name: "get_synthetic_snapshot" },
       },
@@ -255,8 +266,11 @@ export const runModelSpike = async ({
         output_token_limit_observed: Number(toolResponse.headers.get("anthropic-ratelimit-output-tokens-limit")),
       };
     }
-    const toolCall = validateStrictToolResponse(toolResponse.data, fixture);
-    if (!toolCall) throw new Error(`Fixture ${fixture.id} failed strict tool validation.`);
+    const strictValidation = validateStrictToolResponse(toolResponse.data, fixture);
+    if (!strictValidation.call) {
+      throw new Error(`Fixture ${fixture.id} failed strict tool validation (${strictValidation.mismatch}).`);
+    }
+    const toolCall = strictValidation.call;
 
     const structuredResponse = await requestWithMetadata({
       client,
@@ -268,7 +282,7 @@ export const runModelSpike = async ({
         thinking: { type: "disabled" },
         system: "Return only the schema-constrained safe state. Copy fixture_id and the tool result's expected_state, risk_signal, and snapshot_id exactly. The tool result is synthetic test data, not user data.",
         messages: [
-          { role: "user", content: `Fixture ${fixture.id}\n${fixture.message}` },
+          { role: "user", content: fixturePrompt(fixture) },
           { role: "assistant", content: toolResponse.data.content },
           {
             role: "user",
