@@ -4,9 +4,11 @@ import { relative, resolve, sep } from "node:path";
 import { isDeepStrictEqual } from "node:util";
 import { unzipSync } from "fflate";
 import { adrDecisionDigest, maskNonRenderedMarkdown } from "./provider-adr-digest.mjs";
+import { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
 import { validateModelEvidenceResult } from "./provider-model-policy.mjs";
 
 export { adrDecisionDigest } from "./provider-adr-digest.mjs";
+export { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
 export { validateModelEvidenceResult } from "./provider-model-policy.mjs";
 
 const REPOSITORY = "yongzooda/finshield";
@@ -27,6 +29,17 @@ const TRUSTED_MODEL_POLICY_BLOB = "50a19a237b29951021e271173fe1ee692b13ccaf";
 const TRUSTED_MODEL_SPIKE_BLOB = "7448338a029999476c4ec0580ca181dbe50e8135";
 const TRUSTED_PACKAGE_JSON_BLOB = "ecb26cd086f874ea4f989d50f2719a8390c282de";
 const TRUSTED_PACKAGE_LOCK_BLOB = "678296a5f7e2256799413740041886f29f939191";
+const EMBED_WORKFLOW_PATH = ".github/workflows/provider-embed-evidence.yml";
+const EMBED_FIXTURE_PATH = ".github/fixtures/provider-embed-v1.json";
+const EMBED_HARNESS_PATH = ".github/scripts/run-provider-embed-evidence.mjs";
+const EMBED_POLICY_PATH = ".github/scripts/provider-embed-policy.mjs";
+const EMBED_SPIKE_PATH = ".github/scripts/provider-embed-spike.mjs";
+const EMBED_OPS_PATH = "docs/ops/provider-embed-spike.md";
+const TRUSTED_EMBED_WORKFLOW_BLOB = "204b15d107adff1ffb59e17b58e8b9393bf4f6f9";
+const TRUSTED_EMBED_FIXTURE_BLOB = "a22c0b2f7239a4361b1f8437c61da3998c2dd5c7";
+const TRUSTED_EMBED_HARNESS_BLOB = "2088f33d827321c3c10560bc7cbbd1e0001cfdcf";
+const TRUSTED_EMBED_POLICY_BLOB = "d55faaa9ffebcc187eead6703d0497e7611892ce";
+const TRUSTED_EMBED_SPIKE_BLOB = "8031855d5bf6b08c1ef9bcc7849b7a6dcbca7459";
 const MAX_ARCHIVE_BYTES = 2 * 1024 * 1024;
 const MAX_RESULT_BYTES = 512 * 1024;
 const MAX_EVIDENCE_AGE_MS = 27 * 24 * 60 * 60 * 1000;
@@ -122,10 +135,39 @@ const modelEvidencePolicy = {
   validate: validateModelEvidenceResult,
 };
 
+const embedEvidencePolicy = {
+  gate: "implementation",
+  workflowName: "Provider Embedding Evidence",
+  workflowPath: EMBED_WORKFLOW_PATH,
+  workflowBlobSha: TRUSTED_EMBED_WORKFLOW_BLOB,
+  harnessPath: EMBED_HARNESS_PATH,
+  harnessBlobSha: TRUSTED_EMBED_HARNESS_BLOB,
+  trustedExecutionFiles: Object.freeze([
+    Object.freeze({ path: EMBED_WORKFLOW_PATH, blobSha: TRUSTED_EMBED_WORKFLOW_BLOB }),
+    Object.freeze({ path: EMBED_FIXTURE_PATH, blobSha: TRUSTED_EMBED_FIXTURE_BLOB }),
+    Object.freeze({ path: EMBED_HARNESS_PATH, blobSha: TRUSTED_EMBED_HARNESS_BLOB }),
+    Object.freeze({ path: ADR_DIGEST_PATH, blobSha: TRUSTED_ADR_DIGEST_BLOB }),
+    Object.freeze({ path: EMBED_POLICY_PATH, blobSha: TRUSTED_EMBED_POLICY_BLOB }),
+    Object.freeze({ path: EMBED_SPIKE_PATH, blobSha: TRUSTED_EMBED_SPIKE_BLOB }),
+  ]),
+  jobName: "provider-embedding-evidence / B-EMBED-01",
+  scopePaths: Object.freeze([
+    EMBED_FIXTURE_PATH,
+    ADR_DIGEST_PATH,
+    EMBED_POLICY_PATH,
+    EMBED_SPIKE_PATH,
+    EMBED_HARNESS_PATH,
+    EMBED_WORKFLOW_PATH,
+    EMBED_OPS_PATH,
+  ]),
+  validate: validateEmbedEvidenceResult,
+};
+
 // PASS is fail-closed: each remaining blocker gets a policy only with its real
 // harness. A prose criterion or a hand-authored `result: PASS` is never enough.
 export const evidencePolicies = Object.freeze({
   "B-MODEL-01": modelEvidencePolicy,
+  "B-EMBED-01": embedEvidencePolicy,
 });
 
 export const computeEvidenceScopeDigest = (root, policy, fail) => {
@@ -377,19 +419,7 @@ export const validateEvidenceIndex = async ({
       || result.scope_sha256 !== entry.scope_sha256
       || !exactKeys(result.run, ["id", "attempt"])
       || result.run.id !== entry.run_id || result.run.attempt !== entry.run_attempt
-      || !exactKeys(result.environment, [
-        "node_version", "region", "fixture_set_hash", "pricing_snapshot_date", "pricing_input_per_million_usd",
-        "pricing_output_per_million_usd", "sdk_version", "provider_request_ids_hash", "fault_fixture_mode",
-      ])
-      || !/^v24\./.test(result.environment?.node_version ?? "")
-      || !/^[a-z0-9-]{2,32}$/.test(result.environment?.region ?? "")
-      || !/^[0-9a-f]{64}$/.test(result.environment?.fixture_set_hash ?? "")
-      || result.environment?.pricing_snapshot_date !== "2026-09-04"
-      || result.environment?.pricing_input_per_million_usd !== 2
-      || result.environment?.pricing_output_per_million_usd !== 10
-      || result.environment?.sdk_version !== "0.117.1"
-      || !/^[0-9a-f]{64}$/.test(result.environment?.provider_request_ids_hash ?? "")
-      || result.environment?.fault_fixture_mode !== "deterministic_adapter_boundary"
+      || !isRecord(result.environment)
       || result.redactions_applied !== true) {
       fail(`${gate} evidence '${id}' result snapshot의 strict metadata가 index와 다릅니다.`);
     }
