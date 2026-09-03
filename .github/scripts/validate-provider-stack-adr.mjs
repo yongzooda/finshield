@@ -212,6 +212,7 @@ for (const heading of [
   "### 14.2 Implementation Gate 차단 항목",
   "### 14.3 Implementation Gate 전환 규칙",
   "### 14.4 Release Gate 차단 항목",
+  "### 14.5 제출 후 CI 무결성 강화",
   "### 15.1 사전 고정 합격선",
   "### 15.2 시험 묶음",
 ]) {
@@ -325,12 +326,11 @@ const implementationBlockers = [
   "B-DEADLINE-01",
   "B-HEALTH-01",
   "B-RUNTIME-01",
-  "B-CI-INTEGRITY",
   "B-SPIKE-01",
 ];
 const implementationRows = parseGateRows("### 14.2 Implementation Gate 차단 항목", "### 14.3 Implementation Gate 전환 규칙");
 const releaseBlockers = ["B-DEMO-01", "B-E2E-01", "B-BUILD-01"];
-const releaseRows = parseGateRows("### 14.4 Release Gate 차단 항목", "---\n\n## 15.");
+const releaseRows = parseGateRows("### 14.4 Release Gate 차단 항목", "### 14.5 제출 후 CI 무결성 강화");
 
 const blockerStatuses = new Set(["NOT-EVALUATED", "PASS", "FAIL", "BLOCKED"]);
 const validateGateRows = (label, rows, expectedIds) => {
@@ -348,6 +348,27 @@ const validateGateRows = (label, rows, expectedIds) => {
 
 validateGateRows("Implementation", implementationRows, implementationBlockers);
 validateGateRows("Release", releaseRows, releaseBlockers);
+
+const deferredCiSection = structuralAdr.slice(
+  structuralAdr.indexOf("### 14.5 제출 후 CI 무결성 강화"),
+  structuralAdr.indexOf("---\n\n## 15."),
+);
+if (countExactLine(deferredCiSection, "| `B-CI-INTEGRITY` | DEFERRED | GitHub Team 이상 Organization Required Workflow 또는 동등한 외부 App attestation | Implementation·Release Gate 비차단; 제출 후 별도 검증·채택 |") !== 1) {
+  fail("B-CI-INTEGRITY는 제출 후 강화 상태 DEFERRED로 보존해야 합니다.");
+}
+requireMatch(
+  deferredCiSection,
+  /N-QLT-010[\s\S]*특정 유료 GitHub 조직 기능을 요구하지 않는[\s\S]*제출 일정의 선행조건에서는 제외/,
+  "B-CI-INTEGRITY의 상위 요구 경계와 P0 비차단 결정 근거가 없습니다.",
+);
+requireMatch(
+  structuralAdr.slice(structuralAdr.indexOf("### 14.3 Implementation Gate 전환 규칙"), structuralAdr.indexOf("### 14.4 Release Gate 차단 항목")),
+  /repository-controlled evidence[\s\S]*독립 감사 증거로 표현하지 않는다/,
+  "P0 Evidence의 저장소 통제 한계가 명시되지 않았습니다.",
+);
+if (implementationRows.some((row) => row.id === "B-CI-INTEGRITY")) {
+  fail("B-CI-INTEGRITY는 P0 Implementation blocker 표에 들어갈 수 없습니다.");
+}
 
 const implementationAllPass = implementationRows.length === implementationBlockers.length && implementationRows.every((row) => row.status === "PASS");
 if (implementationGate === "GO" && !implementationAllPass) fail("Implementation GO는 모든 blocker가 PASS여야 합니다.");

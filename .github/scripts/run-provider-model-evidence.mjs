@@ -11,8 +11,8 @@ if (mode === "--run") {
   console.error([
     "B-MODEL-01 live harness is intentionally fail-closed in this architecture baseline.",
     "Implement the 50 normal, 20 fault, latency and cost measurements in a reviewed PR,",
-    "then add a main-only protected environment secret and update its trusted blob pin",
-    "only after B-CI-INTEGRITY is independently enforced.",
+    "then add a main-only protected environment secret, update its trusted blob pin,",
+    "and keep the repository-controlled evidence limitation explicit.",
   ].join(" "));
   process.exit(1);
 }

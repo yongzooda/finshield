@@ -52,7 +52,7 @@ const expectBlocked = (mutate, expectedId) => {
 const ready = evaluateCiIntegrityPreflight(validFixture());
 assert.equal(ready.status, "READY_FOR_EXTERNAL_ATTESTATION");
 assert.deepEqual(ready.missing_requirements, []);
-assert.match(ready.limitations.join(" "), /PASS 증거가 아니다/);
+assert.match(ready.limitations.join(" "), /외부 강화 완료 증거가 아니다/);
 
 expectBlocked((fixture) => { fixture.repository.owner.type = "User"; }, "OWNER_IS_ORGANIZATION");
 expectBlocked((fixture) => { fixture.rulesets = [repositoryRuleset]; }, "ACTIVE_ORG_REQUIRED_WORKFLOW");
