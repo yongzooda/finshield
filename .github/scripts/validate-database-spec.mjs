@@ -1,9 +1,14 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, realpathSync } from "node:fs";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = process.cwd();
+const root = realpathSync(fileURLToPath(new URL("../../", import.meta.url)));
+if (realpathSync(process.cwd()) !== root) {
+  console.error("Database spec validator는 저장소 root에서만 실행할 수 있습니다.");
+  process.exit(1);
+}
 const paths = {
-  spec: process.env.DATABASE_SPEC_PATH ?? resolve(root, "docs/03-database-spec.md"),
+  spec: resolve(root, "docs/03-database-spec.md"),
   readme: resolve(root, "README.md"),
   docsReadme: resolve(root, "docs/README.md"),
   handoff: resolve(root, "HANDOFF.md"),
@@ -112,7 +117,6 @@ for (const [pattern, label] of requiredConcepts) requireMatch(spec, pattern, `${
 requireMatch(readme, /`docs\/03-database-spec\.md` \| 확정·DB 구현 기준/, "README의 DB 명세 상태가 동기화되지 않았습니다.");
 requireMatch(docsReadme, /`03-database-spec\.md`[\s\S]*확정·DB 구현 기준/, "docs/README의 DB 명세 상태가 동기화되지 않았습니다.");
 requireMatch(handoff, /DB 구현 기준: `docs\/03-database-spec\.md`/, "HANDOFF에 DB 구현 기준이 없습니다.");
-requireMatch(handoff, /P0 Provider·외부 연동·실행 인프라 Spike Gate 확정/, "HANDOFF 다음 작업이 Spike Gate로 갱신되지 않았습니다.");
 requireMatch(agents, /`docs\/03-database-spec\.md`/, "AGENTS 읽기 순서에 DB 명세가 없습니다.");
 requireMatch(claude, /`docs\/03-database-spec\.md`[\s\S]*Schema·Migration·RLS·Storage 구현 기준/, "CLAUDE에 DB 구현 기준이 없습니다.");
 

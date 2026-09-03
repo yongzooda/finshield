@@ -5,9 +5,13 @@ on:
     branches: [main]
   push:
     branches: [main]
+  schedule:
+    - cron: "17 2 * * *"
 
 permissions:
+  actions: read
   contents: read
+  pull-requests: read
   statuses: read
 
 jobs:
@@ -19,6 +23,7 @@ jobs:
       DATABASE_URL: postgres://ci:ci@127.0.0.1:5432/ci
       ANTHROPIC_API_KEY: sk-ci-placeholder-not-a-real-key
       ANTHROPIC_MODEL: claude-opus-5
+      PUBLIC_MCP_ENABLED: "false"
       LAW_API_OC: ci-placeholder
       LAW_API_BASE: https://www.law.go.kr/DRF
       MAX_TOOL_CALLS_PER_CYCLE: "12"
@@ -34,17 +39,27 @@ jobs:
       RATE_LIMIT_JUDGMENTS_PER_DAY: "10"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
+
+      - run: npm ci --ignore-scripts
 
       - name: DB 명세 검증
         run: node .github/scripts/validate-database-spec.mjs
 
-      - run: npm ci
+      - name: Provider Stack ADR 검증
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          VALIDATION_HEAD_SHA: ${{ github.sha }}
+          VALIDATION_PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: node .github/scripts/validate-provider-stack-adr.mjs
+
+      - name: Provider ADR Validator Mutation Test
+        run: node .github/scripts/test-provider-stack-adr-validator.mjs
 
       - name: 라우트 타입 생성
         run: npx next typegen

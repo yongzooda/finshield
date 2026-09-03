@@ -6,7 +6,7 @@
 |---|---|
 | 문서명 | FinShield 통합 요구사항 명세서 |
 | 문서 ID | FS-REQ |
-| 버전 | v1.0 |
+| 버전 | v1.0.3 |
 | 상태 | 개발 기준선(Baseline) |
 | 작성일 | 2026-09-02 |
 | 상위 문서 | `docs/01-product-plan.md` |
@@ -22,8 +22,9 @@
 1. `docs/02-integrated-requirements.md`
 2. `docs/01-product-plan.md`
 3. `docs/03-database-spec.md`, `docs/04-feature-spec.md`
-4. `CLAUDE.md`, `AGENTS.md`
-5. 코드와 테스트
+4. 상위 문서와 충돌하지 않고 Architecture Decision이 `ACCEPTED`인 `docs/adr/*.md`
+5. `CLAUDE.md`, `AGENTS.md`
+6. 코드와 테스트
 
 과거 PreCase 문서와 `precase.vercel.app`은 재사용 근거와 구현 참고자료다. FinShield 요구사항과 충돌하는 PreCase의 Stateless, 로그인 금지, 파일 업로드 금지, 자체 신뢰도 1~5 정책은 승계하지 않는다.
 
@@ -383,7 +384,7 @@ stateDiagram-v2
 | Fraud & Channel Agent | 사칭·URL 문자열·계좌·선입금·원격제어·긴급성 분석 | P0 URL Host/Scheme Parser·공식 채널 Registry·Warning/Pattern; 외부 Fetch·Reputation은 P1 |
 | Sales Conduct Agent | 설명·권유 과정·오인·누락 검토 | PreCase `analyze_risk_pattern`, `check_documents` |
 | Regulation & Dispute Agent | 법령·판례·분쟁조정·약관 검색 | `lookup_statute`, `search_precedent`, `search_case` |
-| Suitability Agent | 프로필 Snapshot과 부담·유동성·위험 비교 | Profile Policy |
+| Profile Policy Validator (비모델) | 프로필 Snapshot과 부담·유동성·위험을 결정적 규칙으로 비교하고, 미입력 시 적합성 축만 보류 | Profile Policy |
 | CoVe Agent | Material Claim 독립 질문·검색·재검증 | 초기 Query와 분리된 Retrieval |
 | Red Team Agent | 초기 판단을 뒤집는 공식 반대 근거 탐색 | 반대 가설 Retrieval |
 | Evidence Judge | Evidence Policy에 따른 Claim 상태·종합 결과 결정 | Policy Validator |
@@ -726,7 +727,7 @@ Tool 이름은 기능명세에서 변경할 수 있지만 입력·출력 Schema,
 | E-017 | P0 | API가 구성되지 않았으면 기능을 `연동 예정` 또는 `현재 확인 불가`로 표시해야 한다. | API가 있다는 가정의 Demo 응답이나 성공 배지를 만들지 않는다. |
 | E-018 | P1 | URL Fetch는 HTTP/HTTPS만 허용하고 SSRF·Redirect·DNS Rebinding을 방어해야 한다. | Private/Loopback/Metadata IP와 비허용 Content-Type이 차단된다. |
 | E-019 | P0 | MCP는 운송 방식일 뿐 출처 권위로 취급해서는 안 된다. | Citation은 MCP 서버가 아니라 원 법령·공시·공식 문서를 가리킨다. |
-| E-020 | P0 | 내부 Function Registry 사용을 실제 MCP 사용으로 오표현해서는 안 된다. | 실제 MCP Client 호출이면 `transport=MCP` 실행 기록이 있고, 아니면 `MCP-compatible Tool`로 표시한다. |
+| E-020 | P0 | 내부 Function Registry 사용을 실제 MCP 사용으로 오표현해서는 안 된다. | 실제 MCP Client 호출이면 `transport=MCP` 실행 기록이 있고, 아니면 사용자 UI에는 `내부 도구`로 표시한다. 명시적 MCP conformance를 통과한 내부 Tool만 개발자 실행 기록에서 `MCP-compatible Tool`로 분류한다. |
 | E-021 | P0 | 공개 `/api/mcp`를 유지한다면 공용 Read-only KB Tool만 노출해야 한다. | 사용자 Case·파일·프로필 Tool이 없고 인증·64KiB Body·Batch 20·동시 5 이하·호출별 Quota가 적용되며, 미충족 시 Endpoint를 비활성화한다. |
 | E-022 | P0 | 입력 문서에서 추출된 URL은 외부 접속 없이 문자열 수준에서 분석해야 한다. | Scheme·정규화 Host·IDN/Punycode·공식 채널 Registry 정확 일치 여부만 확인하고, Reputation·본문·Redirect를 조회했다고 표현하지 않는다. |
 
@@ -1125,4 +1126,7 @@ P0 요구사항은 다음 조건을 모두 만족할 때 완료다.
 
 | 버전 | 날짜 | 변경 | 상태 |
 |---|---|---|---|
+| v1.0.3 | 2026-09-03 | P0 고정 4개 Domain Agent와 충돌하던 Suitability 명칭을 비모델 Profile Policy Validator로 정정 | Baseline |
+| v1.0.2 | 2026-09-03 | 승인 ADR의 우선순위 경계를 명시해 구현 결정의 권위와 상위 요구사항 비덮어쓰기 원칙 고정 | Baseline |
+| v1.0.1 | 2026-09-03 | E-020의 사용자 UI와 개발자 실행 기록 표기를 분리해 미연동 MCP 호환 주장 방지 | Baseline |
 | v1.0 | 2026-09-02 | FinShield 기획서와 PreCase 기준선을 통합해 P0/P1/P2 요구사항·수용 기준·충돌 해소·구현 Gap 확정 | Baseline |

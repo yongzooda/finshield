@@ -17,8 +17,9 @@ Evidence-Verified Multi-Agent 금융 의사결정 생애주기 검증 플랫폼
 - FinShield의 요구사항 정본은 [docs/02-integrated-requirements.md](./docs/02-integrated-requirements.md)
 - 상위 서비스 기획은 [docs/01-product-plan.md](./docs/01-product-plan.md)
 - DB 구현 기준은 [docs/03-database-spec.md](./docs/03-database-spec.md)
+- P0 Provider·외부 연동·실행 인프라 결정과 Implementation/Release Gate는 [docs/adr/001-p0-provider-stack.md](./docs/adr/001-p0-provider-stack.md)
 
-현재 Commit은 문서·개발 기준선이다. FinShield의 로그인·파일 입력·Claim Engine·Multi-Agent·재검증 기능이 모두 구현됐다는 의미가 아니다.
+현재 Commit은 문서·개발 기준선이다. Provider Architecture Decision은 승인됐지만 Live Spike 증거가 없어 `N-QLT-010` Implementation Gate는 `NO-GO`이고, `N-QLT-009` Release Gate는 기능 구현 뒤 평가한다. FinShield의 로그인·파일 입력·Claim Engine·Multi-Agent·재검증 기능이 모두 구현됐다는 의미가 아니다.
 
 ## 서비스 경계
 
@@ -37,15 +38,17 @@ Evidence-Verified Multi-Agent 금융 의사결정 생애주기 검증 플랫폼
 | `docs/01-product-plan.md` | 확정 |
 | `docs/02-integrated-requirements.md` | 확정·최상위 개발 기준 |
 | `docs/03-database-spec.md` | 확정·DB 구현 기준 |
-| `docs/04-feature-spec.md` | P0 Provider·인프라 Spike 후 작성 |
+| `docs/adr/001-p0-provider-stack.md` | Architecture 승인·Implementation Gate `NO-GO` |
+| `docs/04-feature-spec.md` | `N-QLT-010` Implementation Gate `GO` 후 작성 |
 
 문서 간 충돌 시 우선순위는 다음과 같다.
 
 1. `docs/02-integrated-requirements.md`
 2. `docs/01-product-plan.md`
 3. DB·기능명세
-4. `CLAUDE.md`, `AGENTS.md`
-5. 코드와 테스트
+4. 승인 ADR — 담당 구현 선택에만 적용하며 상위 요구·명세를 덮지 않음
+5. `CLAUDE.md`, `AGENTS.md`
+6. 코드와 테스트
 
 ## 개발 환경
 
@@ -67,7 +70,7 @@ npm run build
 ## 저장소 구조
 
 ```text
-docs/          FinShield 기획·요구사항·DB·기능 명세
+docs/          FinShield 기획·요구사항·DB·ADR·기능 명세
 src/app/       화면과 API Route
 src/lib/       Agent·Tool·Evidence·운영 모듈
 supabase/      Migration과 RLS
