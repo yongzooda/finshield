@@ -12,6 +12,8 @@
 - Product Release Gate (`N-QLT-009`): `NOT-EVALUATED` — P0 기능 구현 뒤 평가
 - 배포: Vercel `finshield` Production 연결 완료 (`https://finshield-gamma.vercel.app`)
 - 기존 PreCase 저장소·배포: 유지
+- 작업 기록: 커밋·squash·이슈·PR·직접 작성한 댓글은 한국어. 과거 SHA는 사용자 승인대로 보존하고 `docs/ops/korean-record-corrections.md`의 정정표를 따른다.
+- 로컬 설정: `docs/ops/local-environment.md`를 따른다. `.env.local` 부재는 GitHub Provider 시험의 장애 원인이 아니며 실제 전용 개발 DB 설정과 구분한다.
 
 ## 완료 상태
 

@@ -567,6 +567,15 @@ for (const [name, path] of [
 }
 
 expectFail(
+  "PR 제목·본문 편집 시 재검사 제거를 거부한다",
+  (fixture) => update(fixture, ".github/workflows/pr-check.yml", (source) => source.replace(
+    "types: [opened, synchronize, reopened, edited]",
+    "types: [opened, synchronize, reopened]",
+  )),
+  /trigger가 exact 기준과 다릅니다/,
+);
+
+expectFail(
   "unpinned checkout is rejected",
   (fixture) => update(fixture, ".github/workflows/pr-check.yml", (source) => source.replace(
     "actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4",

@@ -56,7 +56,9 @@ P0 Evidence는 active main Ruleset·strict required `check`·SHA 고정 Action·
 
 ```bash
 npm install
-cp .env.example .env.local
+# 기존 설정을 덮어쓰지 않는다. 아래 설정 안내를 읽고 실제 전용 개발 값을 입력한다.
+cp -n .env.example .env.local
+chmod 600 .env.local
 npm run dev
 ```
 
@@ -68,6 +70,8 @@ npm run build
 ```
 
 기존 PreCase 테스트 호환을 위해 일부 `PRECASE_*` 환경변수가 남아 있다. 이름만 먼저 바꾸지 않고 관련 코드·테스트·배포 설정을 한 작업 단위에서 함께 이관한다.
+
+`.env.local`의 위치·필수값·시험과 배포의 차이는 [로컬 환경변수 설정 안내](./docs/ops/local-environment.md)를 따른다. 예제 복사만으로 전용 DB·Provider 검증이 완료되지 않는다. Production 또는 PreCase 비밀값을 임의로 복사하지 않는다.
 
 ## 저장소 구조
 
@@ -85,11 +89,13 @@ CLAUDE.md      축소 불가 개발 규칙
 ## 저장소 읽는 법
 
 - `main`은 배포 브랜치다.
-- 기능 작업은 `feat/*`, 결함은 `fix/*`, 문서·설정은 `docs/*`·`chore/*`에서 수행한다.
+- 작업 브랜치는 기본적으로 `codex/` 접두사를 사용한다.
 - 작업 완료 후 이슈를 만들고 PR 첫 줄에 `Closes #N`을 적는다.
 - PR은 squash merge하며 머지 후 브랜치를 삭제하지 않는다.
 - 머지 전 타입 검사·린트·테스트와 배포 Preview를 확인한다.
 - 커밋 메시지에 AI 공동저자·생성 도구 트레일러를 넣지 않는다.
+- 커밋·squash 메시지·이슈·PR·직접 작성한 댓글의 설명은 한국어로 쓴다. 로컬 훅 활성화: `git config core.hooksPath .githooks`. 기존 커스텀 훅은 덮어쓰지 않는다.
+- 기존 SHA를 보존한 [한국어 정정 기록](./docs/ops/korean-record-corrections.md)을 함께 확인한다.
 
 자세한 규칙은 [.github/ISSUE_PR_PLAYBOOK.md](./.github/ISSUE_PR_PLAYBOOK.md)를 따른다.
 

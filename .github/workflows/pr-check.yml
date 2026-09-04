@@ -3,6 +3,7 @@ name: PR 체크
 on:
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, edited]
   push:
     branches: [main]
   schedule:
@@ -11,6 +12,7 @@ on:
 permissions:
   actions: read
   contents: read
+  issues: read
   pull-requests: read
   statuses: read
 
@@ -69,6 +71,14 @@ jobs:
 
       - name: Provider Embedding Spike Contract Test
         run: node .github/scripts/test-provider-embed-spike.mjs
+
+      - name: 한국어 기록 검사 회귀 테스트
+        run: node .github/scripts/test-korean-records.mjs
+
+      - name: 한국어 작업 기록 검사
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node .github/scripts/validate-korean-records.mjs --ci
 
       - name: 라우트 타입 생성
         run: npx next typegen
