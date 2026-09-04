@@ -8,8 +8,8 @@
 - 상위 기획: `docs/01-product-plan.md`
 - DB 구현 기준: `docs/03-database-spec.md`
 - Provider Stack ADR: `docs/adr/001-p0-provider-stack.md`
-- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `.env.example`을 FinShield 기준으로 다시 쓰면서 scope digest가 바뀌어 `B-MODEL-01` 채택이 다시 무효가 됐다. 재측정 대기이며 나머지 19개 blocker도 미해제다.
-- Product Release Gate (`N-QLT-009`): `NOT-EVALUATED` — P0 기능 구현 뒤 평가
+- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — 20개 blocker가 모두 미해제다. `B-MODEL-01`은 두 번 합격했으나 scope 변경으로 채택이 무효가 되어 재측정 대기다. `GO` 전환에는 Claim 판정 품질 평가셋 사전등록도 필요하다.
+- Product Release Gate (`N-QLT-009`): `NOT-EVALUATED` — P0 기능 구현 뒤 평가한다. Claim 판정 품질 `B-CLAIM-01`을 포함해 4개다.
 - 배포: Vercel `finshield` Production 연결 완료 (`https://finshield-gamma.vercel.app`)
 - 기존 PreCase 저장소·배포: 유지
 - 작업 기록: 커밋·squash·이슈·PR·직접 작성한 댓글은 한국어. 과거 SHA는 사용자 승인대로 보존하고 `docs/ops/korean-record-corrections.md`의 정정표를 따른다.
