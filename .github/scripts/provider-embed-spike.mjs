@@ -8,11 +8,28 @@ export const FIXTURE_PATH = ".github/fixtures/provider-embed-v1.json";
 export const PRICING_SNAPSHOT_DATE = "2026-09-04";
 export const PRICE_PER_MILLION_USD = 0.12;
 export const OFFICIAL_TEXT_INPUT_LIMIT_PER_MINUTE = 2000;
+export const REQUEST_INTERVAL_MS = 1100;
 const ENDPOINT = "https://api.cohere.com/v2/embed";
 const isRecord = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
 const exactKeys = (value, expected) => isRecord(value)
   && JSON.stringify(Object.keys(value).sort()) === JSON.stringify([...expected].sort());
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
+
+export const createEmbedPacer = ({ now = () => performance.now(), sleep = (ms) => new Promise((done) => setTimeout(done, ms)) } = {}) => {
+  let nextStart = 0;
+  return {
+    async wait() {
+      while (now() < nextStart) await sleep(nextStart - now());
+      nextStart = now() + REQUEST_INTERVAL_MS;
+    },
+  };
+};
+
+export const retryAfterSeconds = (value) => {
+  if (typeof value !== "string" || !/^\d{1,6}$/.test(value)) return null;
+  const seconds = Number(value);
+  return seconds <= 86400 ? seconds : null;
+};
 
 export const percentile = (values, fraction) => {
   if (!Array.isArray(values) || values.length === 0 || values.some((value) => !Number.isFinite(value) || value < 0)
@@ -158,7 +175,10 @@ export const buildEmbedRequest = (texts, inputType) => {
 
 const parseEmbedResponse = async (response, expectedCount) => {
   if (response.status !== 200 || !(response.headers.get("content-type") ?? "").toLowerCase().includes("application/json")) {
-    throw Object.assign(new Error("Provider embed request did not return JSON HTTP 200."), { status: response.status });
+    throw Object.assign(new Error("Provider embed request did not return JSON HTTP 200."), {
+      status: response.status,
+      retryAfterSeconds: retryAfterSeconds(response.headers.get("retry-after")),
+    });
   }
   const body = await response.json();
   const requestId = response.headers.get("x-request-id") ?? response.headers.get("request-id") ?? body?.id;
@@ -174,7 +194,9 @@ const parseEmbedResponse = async (response, expectedCount) => {
   return { vectors, billedInputTokens, requestId };
 };
 
-const requestEmbeddings = async ({ fetchImpl, apiKey, texts, inputType }) => {
+const requestEmbeddings = async ({ fetchImpl, apiKey, texts, inputType, pacer }) => {
+  // Workload pacing is not Provider response latency; never retry a failed sample.
+  await pacer.wait();
   const startedAt = performance.now();
   const response = await fetchImpl(ENDPOINT, {
     method: "POST",
@@ -191,7 +213,7 @@ const requestEmbeddings = async ({ fetchImpl, apiKey, texts, inputType }) => {
   };
 };
 
-export const runEmbedSpike = async ({ root, apiKey, fetchImpl = globalThis.fetch, progress = () => {} }) => {
+export const runEmbedSpike = async ({ root, apiKey, fetchImpl = globalThis.fetch, progress = () => {}, pacer = createEmbedPacer() }) => {
   if (typeof apiKey !== "string" || apiKey.length < 12) throw new Error("COHERE_API_KEY is not configured for the spike environment.");
   const { documents, queries, fixtureSetHash } = loadEmbedFixtures(root);
   const requestIds = [];
@@ -203,14 +225,14 @@ export const runEmbedSpike = async ({ root, apiKey, fetchImpl = globalThis.fetch
 
   for (let offset = 0; offset < documents.length; offset += 96) {
     const batch = documents.slice(offset, offset + 96);
-    const response = await requestEmbeddings({ fetchImpl, apiKey, texts: batch.map((item) => item.text), inputType: "search_document" });
+    const response = await requestEmbeddings({ fetchImpl, apiKey, texts: batch.map((item) => item.text), inputType: "search_document", pacer });
     response.vectors.forEach((vector, index) => documentVectors.push({ id: batch[index].id, vector }));
     requestIds.push(response.requestId);
     billedInputTokens += response.billedInputTokens;
     rateLimitHeadersObserved ||= response.rateLimitHeadersObserved;
   }
   for (const [index, query] of queries.entries()) {
-    const response = await requestEmbeddings({ fetchImpl, apiKey, texts: [query.text], inputType: "search_query" });
+    const response = await requestEmbeddings({ fetchImpl, apiKey, texts: [query.text], inputType: "search_query", pacer });
     queryVectors.push(response.vectors[0]);
     queryLatencies.push(response.latencyMs);
     requestIds.push(response.requestId);

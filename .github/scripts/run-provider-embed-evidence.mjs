@@ -7,6 +7,8 @@ import { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
 import {
   OFFICIAL_TEXT_INPUT_LIMIT_PER_MINUTE,
   PRICING_SNAPSHOT_DATE,
+  REQUEST_INTERVAL_MS,
+  retryAfterSeconds,
   runEmbedSpike,
 } from "./provider-embed-spike.mjs";
 
@@ -66,7 +68,10 @@ const scopeInventory = scopePaths.sort().map((path) => ({
 const scopeSha = sha256(Buffer.from(JSON.stringify(scopeInventory)));
 
 const sanitizedFailure = (error) => {
-  if (Number.isInteger(error?.status)) return `provider-http-${error.status}`;
+  if (Number.isInteger(error?.status)) {
+    const retryAfter = retryAfterSeconds(String(error?.retryAfterSeconds));
+    return `provider-http-${error.status}; retry-after-seconds=${retryAfter ?? "unavailable"}`;
+  }
   if (["TimeoutError", "AbortError"].includes(error?.name)) return "provider-timeout";
   if (error instanceof Error && /^(Provider embed|Embedding|Expanded|COHERE_API_KEY)/.test(error.message)) return error.message;
   return "provider-or-harness-error";
@@ -107,12 +112,18 @@ if (mode === "--run") {
         provider_request_ids_hash: spike.providerRequestIdsHash,
         api_version: "v2",
         official_text_input_limit_per_minute: OFFICIAL_TEXT_INPUT_LIMIT_PER_MINUTE,
+        request_interval_ms: REQUEST_INTERVAL_MS,
       },
       redactions_applied: true,
     };
     const resultErrors = [];
+    // Trusted aggregate schema only: no external response body, ID, text or vector.
+    console.log(`B-EMBED-01 aggregate metrics: ${JSON.stringify(spike.observations)}`);
     validateEmbedEvidenceResult(result, (message) => resultErrors.push(message));
-    if (resultErrors.length > 0) throw new Error(resultErrors.join("; "));
+    if (resultErrors.length > 0) {
+      for (const message of resultErrors) console.error(`B-EMBED-01 policy failure: ${message}`);
+      throw new Error("Embedding numeric policy failed.");
+    }
     mkdirSync(resolve(process.cwd(), "evidence-output"), { recursive: true });
     writeFileSync(resultPath, `${JSON.stringify(result, null, 2)}\n`, { flag: "wx", mode: 0o600 });
     console.log("B-EMBED-01 raw evidence written with request IDs hashed and texts/vectors/response bodies discarded.");

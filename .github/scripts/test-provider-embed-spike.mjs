@@ -13,14 +13,25 @@ import { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
 import {
   buildEmbedRequest,
   cosineSimilarity,
+  createEmbedPacer,
   embeddingCostUsd,
   exactKnn,
   loadEmbedFixtures,
   percentile,
+  retryAfterSeconds,
   runEmbedSpike,
 } from "./provider-embed-spike.mjs";
 
 const root = resolve(fileURLToPath(new URL("../../", import.meta.url)));
+let virtualNow = 0;
+let pacingWaits = 0;
+const pacer = createEmbedPacer({
+  now: () => virtualNow,
+  sleep: async (ms) => { assert.equal(ms, 1100); virtualNow += ms; pacingWaits += 1; },
+});
+assert.equal(retryAfterSeconds("60"), 60);
+assert.equal(retryAfterSeconds("Bearer secret-value"), null);
+assert.equal(retryAfterSeconds("999999"), null);
 const fixtures = loadEmbedFixtures(root);
 assert.equal(fixtures.documents.length, 140);
 assert.equal(fixtures.queries.length, 100);
@@ -78,7 +89,9 @@ const fakeFetch = async (_url, options) => {
   });
 };
 
-const spike = await runEmbedSpike({ root, apiKey: "sk-test-not-real-key", fetchImpl: fakeFetch });
+const spike = await runEmbedSpike({ root, apiKey: "sk-test-not-real-key", fetchImpl: fakeFetch, pacer });
+assert.equal(pacingWaits, 101);
+assert.equal(virtualNow, 101 * 1100);
 assert.equal(requestNumber, 102);
 assert.equal(spike.observations.quality.recall_at_5, 1);
 assert.equal(spike.observations.quality.risk_core_recall_at_5, 1);
@@ -98,6 +111,7 @@ const result = {
     provider_request_ids_hash: spike.providerRequestIdsHash,
     api_version: "v2",
     official_text_input_limit_per_minute: 2000,
+    request_interval_ms: 1100,
   },
 };
 const policyErrors = [];
@@ -133,6 +147,12 @@ await assert.rejects(
   /dimension/,
 );
 await assert.rejects(runEmbedSpike({ root, apiKey: "", fetchImpl: fakeFetch }), /COHERE_API_KEY/);
+let limitedCalls = 0;
+await assert.rejects(runEmbedSpike({ root, apiKey: "sk-test-not-real-key", fetchImpl: async () => {
+  limitedCalls += 1;
+  return new Response("untrusted secret body must not be read", { status: 429, headers: { "retry-after": "60" } });
+} }), (error) => error.status === 429 && error.retryAfterSeconds === 60);
+assert.equal(limitedCalls, 1, "429 must fail closed without retrying or hiding a failed sample");
 
 const revision = spawnSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).stdout.trim();
 assert.match(revision, /^[0-9a-f]{40}$/);
