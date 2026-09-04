@@ -7,6 +7,7 @@ labels: feat
 
 <!--
 제목: [FEAT] 무엇을 만드는가 (요구사항 ID)
+제목·설명·댓글은 한국어로 쓴다. 기술명·코드·원문 로그는 그대로 유지한다.
 
 이슈는 작업 브랜치가 완료된 뒤 실행 기록으로 만든다.
 계획의 정본은 HANDOFF.md, 요구사항의 정본은 docs/02-integrated-requirements.md다.

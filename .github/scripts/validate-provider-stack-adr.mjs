@@ -482,9 +482,10 @@ const pullRequestTrigger = isRecord(triggers.pull_request) ? triggers.pull_reque
 const pushTrigger = isRecord(triggers.push) ? triggers.push : {};
 const scheduleTrigger = Array.isArray(triggers.schedule) ? triggers.schedule : [];
 if (!exactKeysForWorkflow(triggers, ["pull_request", "push", "schedule"])
-  || !exactKeysForWorkflow(pullRequestTrigger, ["branches"])
+  || !exactKeysForWorkflow(pullRequestTrigger, ["branches", "types"])
   || !exactKeysForWorkflow(pushTrigger, ["branches"])
   || JSON.stringify(pullRequestTrigger.branches) !== JSON.stringify(["main"])
+  || JSON.stringify(pullRequestTrigger.types) !== JSON.stringify(["opened", "synchronize", "reopened", "edited"])
   || JSON.stringify(pushTrigger.branches) !== JSON.stringify(["main"])
   || !exactKeysForWorkflow(scheduleTrigger[0], ["cron"])
   || scheduleTrigger.length !== 1 || scheduleTrigger[0].cron !== "17 2 * * *") {
@@ -510,7 +511,7 @@ const expectedJobEnvKeys = [
 if (!exactKeysForWorkflow(jobEnv, expectedJobEnvKeys)) {
   fail("PR workflow job env에 미승인 실행 환경변수가 있거나 필수값이 없습니다.");
 }
-const expectedPermissions = { actions: "read", contents: "read", "pull-requests": "read", statuses: "read" };
+const expectedPermissions = { actions: "read", contents: "read", issues: "read", "pull-requests": "read", statuses: "read" };
 if (JSON.stringify(Object.keys(permissions).sort()) !== JSON.stringify(Object.keys(expectedPermissions).sort())
   || Object.entries(expectedPermissions).some(([key, value]) => permissions[key] !== value)
   || Object.hasOwn(checkJob, "permissions")) {

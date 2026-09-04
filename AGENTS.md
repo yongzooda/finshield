@@ -21,3 +21,5 @@ P0 Evidence는 저장소 수준 strict check·SHA pin·mutation test·main 실�
 - 작업은 이슈·브랜치·PR 단위로 관리하고 squash merge한다.
 - merge와 원격 검증까지 끝난 작업은 `git fetch origin` 후 접근 가능한 FinShield 로컬 작업 폴더를 최신 `origin/main`과 일치시키고 clean 상태를 확인한다. 사용자 로컬 변경은 덮어쓰지 않는다.
 - 커밋 메시지에 AI 공동저자·생성 도구 트레일러를 넣지 않는다.
+- 커밋·squash 메시지, 이슈·PR 제목과 본문, 직접 작성하는 댓글은 한국어로 쓴다. 기술명·식별자·명령어·원문 로그·GitHub 연결 구문만 원형을 유지한다. 커밋 훅과 PR 한국어 검사를 우회하지 않는다.
+- 사용자가 승인한 기존 SHA 보존 방침에 따라 과거 영어 커밋은 재작성하지 않고 `docs/ops/korean-record-corrections.md`의 한국어 정정 기록을 함께 읽는다.
