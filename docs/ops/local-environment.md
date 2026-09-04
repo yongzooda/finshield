@@ -48,7 +48,8 @@ open -e .env.local
 | `ANTHROPIC_API_KEY` | 로컬 외부 호출이 승인된 경우에만 별도 개발용 키. GitHub에 등록했다는 사실만으로 파일에 생기지 않는다. 키를 채팅·이슈·PR에 붙이지 않는다. |
 | `ANTHROPIC_MODEL` | 예제 기본값을 ADR 4.1이 P0 기본 모델로 고정한 `claude-sonnet-5`로 맞췄다. `claude-opus-5`는 별도 평가를 통과한 고위험 재판정에만 허용하며 기본 경로와 자동 fallback에 쓰지 않는다. 모델을 바꾸면 `CONFIDENCE_THRESHOLD`를 재보정한다. 이 파일은 `B-MODEL-01` Evidence scope이므로 변경할 때마다 재측정이 필요하다. |
 | `LAW_API_OC` | FinShield에서 사용할 본인의 승인된 법제처 OC. 예제에서 `precase`를 제거했다. Production에서 이 값이 `AUTH` 오류를 낸 것을 확인했다. |
-| `LAW_API_BASE` | 예제의 공식 API 주소를 유지한다. OC·등록 IP·egress 검증을 대신하지 않는다. |
+| `LAW_API_BASE` | 예제의 공식 API 주소를 유지한다. OC·등록 도메인 검증을 대신하지 않는다. |
+| `LAW_API_REGISTERED_ORIGIN` | 선택. 법제처 신청 시 등록한 도메인이다. Vercel 배포는 자기 도메인을 환경에서 받으므로 비워도 되고, 로컬 실행에는 필요하다. 다른 프로젝트 도메인을 넣지 않는다. 값이 없으면 호출이 실패한다. |
 | `PUBLIC_MCP_ENABLED` | 반드시 `false`를 유지한다. |
 | 상한·예산·세션 변수 | 예제의 모든 항목을 유지한다. 누락하면 환경 검증이 실패한다. |
 | `BATCH_DATABASE_URL` | 일반 로컬 앱 실행에 불필요하며 비워 두는 것이 기본이다. 배치·Migration 권한이 별도 확인되기 전에는 실제 관리자 값을 넣거나 관련 스크립트를 실행하지 않는다. Vercel 환경변수에도 넣지 않는다. |

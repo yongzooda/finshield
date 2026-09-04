@@ -14,6 +14,11 @@
  * IP 검증이 아니므로 Vercel의 동적 출구 IP는 문제되지 않는다. 다만 **배포
  * 도메인이 바뀌면 법제처 신청 정보의 도메인도 함께 바꿔야 한다.**
  *
+ * 신청 계정과 도메인은 프로젝트마다 분리한다. 등록 도메인은
+ * `LAW_API_REGISTERED_ORIGIN`으로 명시하고, 없으면 Vercel이 주는 배포
+ * 도메인을 쓴다. 둘 다 없으면 실패한다 — 다른 프로젝트 도메인을 기본값으로
+ * 두면 그 프로젝트를 사칭하는 요청이 된다.
+ *
  * 타임아웃 10초 · 멱등 조회에 한해 1회 재시도 (EC-1).
  */
 
@@ -34,12 +39,24 @@ export class LawApiError extends Error {
   }
 }
 
-/** 등록 도메인. Referer 대조 대상이라 배포 도메인과 반드시 일치해야 한다 */
+/**
+ * 등록 도메인. Referer 대조 대상이라 배포 도메인과 반드시 일치해야 한다.
+ *
+ * 다른 프로젝트의 도메인을 기본값으로 두지 않는다. 그 값이 남아 있으면 로컬
+ * 실행이 그 프로젝트를 사칭한 Referer 로 법제처를 호출하게 된다. 확인할 수
+ * 없으면 조용히 다른 값을 쓰지 말고 실패한다.
+ */
 function registeredOrigin(): string {
   // LAW_API_BASE는 법제처 주소이므로 쓸 수 없다. 배포 도메인을 별도로 구성한다.
-  // Vercel이 주는 VERCEL_PROJECT_PRODUCTION_URL을 우선하되, 없으면 등록값을 쓴다.
-  const host = process.env.VERCEL_PROJECT_PRODUCTION_URL;
-  return host ? `https://${host}/` : "https://precase.vercel.app/";
+  const explicit = process.env.LAW_API_REGISTERED_ORIGIN?.trim();
+  if (explicit) return explicit.endsWith("/") ? explicit : `${explicit}/`;
+  // Vercel Production 배포는 자기 도메인을 환경에서 받는다.
+  const host = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (host) return `https://${host}/`;
+  throw new LawApiError(
+    "법제처 등록 도메인을 확인할 수 없다. LAW_API_REGISTERED_ORIGIN 에 신청 시 등록한 도메인을 설정할 것",
+    "AUTH",
+  );
 }
 
 async function once(url: string): Promise<unknown> {
