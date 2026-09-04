@@ -344,7 +344,7 @@ P0 법령 근거는 국가법령정보 공동활용 API에서 수집한 불변 S
 - 현행 시행일 기준 `nw=3`, pagination과 `display` 최대 100
 - 변경감지 API의 D+1 반영
 - 403·429·5xx·timeout 응답과 retry/cache 계약
-- 실제 수집기 egress IP가 등록 IP와 일치하는지
+- 요청 `Referer`가 등록 도메인과 일치하는지, Preview 배포 도메인에서도 통과하는지
 - 응답 hash·조회시각·시행일·법령/조문 ID·공식 URL·출처표시 저장
 
 P0 최소 법령 Snapshot:
@@ -353,7 +353,7 @@ P0 최소 법령 Snapshot:
 2. 대부업 등의 등록 및 금융이용자 보호에 관한 법률과 시행령의 등록·광고·최고금리·중개수수료 관련 조문
 3. 이자제한법과 시행령의 최고이자율 관련 조문
 
-법제처 자료는 출처를 표시하고 왜곡하지 않는다. API 숫자 쿼터는 공식 페이지에 공개돼 있지 않으므로 실제 승인 계정으로 확인한다. Vercel Preview와 Production 각각에서 API를 probe하고 재배포·region 변경 후에도 반복한다. 고정 egress가 보장되지 않으면 고정 IP 수집기에서 Snapshot을 갱신하고 Vercel은 그 Snapshot만 제공한다. 서버 `Referer` 헤더만으로 해결됐다고 가정하지 않는다.
+법제처 자료는 출처를 표시하고 왜곡하지 않는다. API 숫자 쿼터는 공식 페이지에 공개돼 있지 않으므로 실제 승인 계정으로 확인한다. Vercel Preview와 Production 각각에서 API를 probe하고 재배포·도메인 변경 후에도 반복한다. Preview는 배포마다 도메인이 달라 등록 도메인과 어긋날 수 있으므로 Preview 실패를 Production 실패로 해석하지 않고, 어느 범위까지 `Referer`가 통과하는지를 `B-LAW-01`에서 확인한다. Production probe 한 번의 성공을 쿼터·안정성 보증으로 보지 않는다.
 
 ### 8.2 P0 정책서민금융 상품·취급기관
 
@@ -430,7 +430,7 @@ Hobby 기준 현재 공식 제한:
 - Runtime Log 보존 1시간
 - 비상업적 개인 용도만 허용
 
-Hobby가 이번 공모전 사용을 자동으로 허용한다고 단정하지 않는다. 약관·계정 용도 확인 전에는 완전한 합성 Fixture Demo만 사용하고 실제 사용자나 실제 금융 문서를 처리하지 않는다. 실제 데이터 처리 전 Vercel plan, 고객 콘텐츠 이용/학습 설정, DPA, 하위처리자, region, 보존, 지원 인력 접근을 검토해 `B-PRIVACY-VERCEL`을 닫는다. 유료 파일럿, 고객 운영, 상업적 사용 전에는 허용되는 유료 plan을 Launch 조건으로 둔다.
+2026-09-05 Hobby를 유지하기로 결정했다. Hobby에는 DPA가 없으므로 이 제출 범위에서는 실제 사용자의 개인정보와 실제 금융 문서를 처리하지 않는다. 자유 입력 화면은 제공하되 실제 개인정보를 넣지 말라는 고지를 입력 전에 표시하고(`SEC-PRI-001`), 비모델 PII Gate와 원본 삭제로 그 약속을 기술적으로 강제한다. 심사 시연도 합성 Fixture와 데모 입력만 사용한다. 따라서 `B-PRIVACY-VERCEL`은 실데이터 처리 허용 승인이 아니라 Hobby 조건 기록과 미처리 강제 장치의 시험으로 닫는다. 실제 사용자 데이터 처리, 유료 파일럿, 고객 운영, 상업적 사용 전에는 DPA가 가능한 유료 plan을 Launch 조건으로 다시 평가한다.
 
 ### 9.2 Deadline
 
@@ -616,8 +616,8 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `B-DELETE-01` | 확인·중단·Case 삭제·기발급 URL·24시간 cleanup | NOT-EVALUATED | §15.1 물리 삭제 합격 + deletion ledger |
 | `B-SUPABASE-01` | 전용 Project·최소권한 role·pooler 6543·pgvector·Migration/RLS | NOT-EVALUATED | §15.1 cross-user/worker 시험과 preflight 합격 |
 | `B-PROCESSOR-PRIVACY` | Anthropic·Cohere·CLOVA·Supabase 학습/보존/DPA/region/하위처리자·PII fail-closed | NOT-EVALUATED | §15.1 Processor privacy + 계약 inventory |
-| `B-PRIVACY-VERCEL` | Vercel plan·고객 콘텐츠 조건·DPA·region·Workflow RBAC/보존 | NOT-EVALUATED | 합성 외 실제 데이터 처리 허용 근거 승인 |
-| `B-LAW-01` | OC·registered IP·Preview/Production 403/429/5xx·D+1 | NOT-EVALUATED | sanitized response ledger와 snapshot hash |
+| `B-PRIVACY-VERCEL` | Hobby plan·고객 콘텐츠 조건·region·Log 보존·Workflow RBAC과 실개인정보 미처리 강제 | NOT-EVALUATED | plan 조건 기록 + §15.1 Processor privacy 합격; 실데이터 운영 시 DPA plan 재평가 |
+| `B-LAW-01` | OC·등록 도메인 `Referer`·Preview/Production 403/429/5xx·D+1 | NOT-EVALUATED | sanitized response ledger와 snapshot hash |
 | `B-SOURCE-02` | 공공데이터/FSS key·quota·pagination·license label | NOT-EVALUATED | API response metadata와 source registry |
 | `B-SOURCE-03` | Demo `햇살론15` 정확 product/institution record | BLOCKED | 두 API의 immutable snapshot과 official product URL |
 | `B-JOB-01` | Workflow deploy·replay·retry·orphan·fencing·cancel·ambiguous Provider | NOT-EVALUATED | §15.1 Workflow 합격 + fault run/DB state |
@@ -762,9 +762,9 @@ Live 시험은 Preview 격리 환경에서 먼저 수행한 뒤 Production과 �
 - Anthropic, Cohere, CLOVA, Supabase, FSS/Law 계정과 운영 관리가 필요하다.
 - 외부 OCR은 명시적 동의 UX와 삭제 검증 비용이 든다.
 - Exact KNN은 corpus 성장 시 느려질 수 있다.
-- 법제처 등록 IP 조건 때문에 Hobby Vercel의 request-time Live 조회가 불안정할 수 있다.
+- 법제처는 등록 도메인 `Referer`를 대조하므로 배포 도메인이 바뀌면 재등록이 필요하고 Preview 도메인은 통과하지 못할 수 있다.
 - Workflow와 Supabase를 함께 쓰되 원장을 하나로 유지하는 멱등 설계가 필요하다.
-- Hobby는 `B-PRIVACY-VERCEL` 전에는 합성 Fixture 전용이며, 약관·데이터 조건과 상업 운영 범위에 맞는 Plan 확인이 필요하다.
+- Hobby를 유지해 DPA가 없으므로 제출 범위는 합성 Fixture와 데모 입력 전용이고, 실제 개인정보 미처리를 제품이 강제해야 한다.
 
 ### 기각한 대안
 
