@@ -8,7 +8,7 @@
 - 상위 기획: `docs/01-product-plan.md`
 - DB 구현 기준: `docs/03-database-spec.md`
 - Provider Stack ADR: `docs/adr/001-p0-provider-stack.md`
-- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01` PASS, 나머지 18개 blocker 미해제
+- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — 검색 blocker 재정의로 20개 blocker 전부 `NOT-EVALUATED`. `B-MODEL-01`은 합격 이력을 보존한 채 재측정 대기다.
 - Product Release Gate (`N-QLT-009`): `NOT-EVALUATED` — P0 기능 구현 뒤 평가
 - 배포: Vercel `finshield` Production 연결 완료 (`https://finshield-gamma.vercel.app`)
 - 기존 PreCase 저장소·배포: 유지
@@ -34,6 +34,8 @@
 - [x] `B-CI-INTEGRITY`를 상위 `N-QLT-010`에 맞춰 P0 비차단·제출 후 강화 `DEFERRED`로 재분류
 - [x] `B-MODEL-01` Sonnet 5 합성 50건 Live harness·결정적 fault fixture·main-only Evidence 계약 구현
 - [x] `B-MODEL-01` main Live Evidence 50건·100 request 합격 및 repository-controlled artifact 채택
+- [x] `B-EMBED-01` v2 실패 원인 분해와 개발용 split 전체 순위 측정
+- [x] 검색 blocker를 `AI-007` 파이프라인에 맞춰 1차 후보 생성과 종단 Retrieval로 재정의
 
 ## 다음 작업 순서
 
@@ -61,7 +63,7 @@
 - DB 명세가 확정됐다는 사실은 Migration·RLS·Storage Policy가 구현·적용됐거나 P0 기능이 작동한다는 뜻이 아니다.
 - Provider ADR의 Architecture Decision이 승인됐다는 사실은 Implementation 또는 Product Release Gate 통과를 뜻하지 않는다.
 - 공개 `/api/mcp`는 P0에서 GET·OPTIONS·POST 모두 404 `MCP_DISABLED`로 차단하며, 기존 MCP protocol 구현은 P1 재검증 전까지 외부 route에서 사용하지 않는다.
-- Anthropic Sonnet 5의 auth·quota·schema·strict tool·지연·비용은 `B-MODEL-01` 범위에서 Live 검증됐다. Cohere `embed-v4.0`, CLOVA OCR, 공공데이터·법제처 API는 아직 Live 검증되지 않았다.
+- Anthropic Sonnet 5의 auth·quota·schema·strict tool·지연·비용은 `B-MODEL-01` 범위에서 한 번 Live 검증됐으나, 이 개정의 ADR decision digest 변경으로 채택이 무효가 되어 재측정 대기다. 결과 파일 `evidence/results/B-MODEL-01/33783765337.json`과 실행 이력은 보존한다. Cohere `embed-v4.0`, CLOVA OCR, 공공데이터·법제처 API는 아직 Live 검증되지 않았다.
 - 전용 FinShield Supabase Project·RLS·authenticated TUS one-use slot·24시간 물리 삭제와 Vercel Workflow Replay·Fencing은 아직 검증되지 않았다.
 - 법제처는 등록 IP와 Vercel 동적 egress가 충돌할 수 있어 request-time Live 조회를 기본값으로 두지 않고 공식 Snapshot 수집 경로를 검증한다.
 - GitHub의 Vercel success status는 Build/Deploy 성공이며 Provider 기능 성공 증거가 아니다.

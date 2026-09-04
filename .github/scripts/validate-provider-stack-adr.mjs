@@ -310,6 +310,7 @@ const parseGateRows = (startHeading, endHeading) => {
 const implementationBlockers = [
   "B-MODEL-01",
   "B-EMBED-01",
+  "B-RETRIEVAL-01",
   "B-OCR-01",
   "B-FILE-SAFETY",
   "B-CONSENT-01",

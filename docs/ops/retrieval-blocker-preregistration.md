@@ -1,6 +1,6 @@
 # 검색 blocker 재정의 수용식 사전등록 초안
 
-이 문서는 검토용 초안이다. 병합 전에는 어떤 측정도 실행하지 않는다. 병합된 뒤에만 새 평가셋을 만들고 측정한다. 배경과 순서는 [재정의 영향 분석과 순서](embed-blocker-redefinition-plan.md), 실패 근거는 [v2 실패 원인 분해](provider-embed-failure-analysis.md)에 있다.
+이 문서의 수용식은 검토를 거쳐 ADR 5.2·14.2·15.1·15.2에 반영됐다. 반영 뒤에는 이 문서가 아니라 ADR이 정본이다. 측정 결과를 본 뒤 합격선·산식·표본 구성을 바꾸지 않는다. 배경과 순서는 [재정의 영향 분석과 순서](embed-blocker-redefinition-plan.md), 실패 근거는 [v2 실패 원인 분해](provider-embed-failure-analysis.md)에 있다.
 
 ## 1. 무엇을 왜 나누는가
 
