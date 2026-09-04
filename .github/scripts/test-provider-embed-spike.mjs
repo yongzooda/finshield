@@ -204,5 +204,24 @@ try {
   let run = validate(); assert.equal(run.status, 0, run.stdout + run.stderr);
   runnerResult.observations.quality.precision_at_5 = 1; writeFileSync(output, JSON.stringify(runnerResult));
   run = validate(); assert.notEqual(run.status, 0);
+  const stdoutPrefix = `${"x".repeat(256 * 1024)}stdout-diagnostic-tail\n`;
+  const stderrPrefix = `${"y".repeat(256 * 1024)}stderr-diagnostic-tail\n`;
+  const preload = `const original=console.error;console.error=(...args)=>{console.error=original;`
+    + `process.stdout.write("x".repeat(256*1024)+"stdout-diagnostic-tail\\n");`
+    + `process.stderr.write("y".repeat(256*1024)+"stderr-diagnostic-tail\\n");original(...args)};`;
+  run = spawnSync(process.execPath, ["--import", `data:text/javascript,${encodeURIComponent(preload)}`,
+    resolve(root, ".github/scripts/run-provider-embed-evidence.mjs"), "--validate"],
+  { cwd: temporary, env, encoding: "utf8", maxBuffer: 4 * 1024 * 1024 });
+  assert.equal(run.status, 1);
+  assert.ok(run.stdout.startsWith(stdoutPrefix), "failed runner must drain stdout");
+  assert.ok(run.stderr.startsWith(stderrPrefix), "failed runner must drain stderr");
+  assert.match(run.stderr, /재계산 불일치/);
+  const mutantPath = resolve(temporary, ".github/scripts/run-provider-embed-evidence.mjs");
+  writeFileSync(mutantPath, readFileSync(mutantPath, "utf8").replaceAll("await exitWithFlushedLogs(1)", "process.exit(1)"));
+  const mutant = spawnSync(process.execPath, ["--import", `data:text/javascript,${encodeURIComponent(preload)}`,
+    mutantPath, "--validate"], { cwd: temporary, env, encoding: "utf8", maxBuffer: 4 * 1024 * 1024 });
+  assert.equal(mutant.status, 1);
+  assert.ok(!mutant.stdout.startsWith(stdoutPrefix) || !mutant.stderr.startsWith(stderrPrefix),
+    "regression must reproduce the old pipe truncation");
 } finally { rmSync(temporary, { recursive: true, force: true }); }
 console.log("Embedding v2 tests passed: 100 gate / 20 development queries; 200 metric oracle trials; qrel, rank, trace, split, billing and provenance mutations. No Live calls.");

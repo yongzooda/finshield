@@ -14,9 +14,16 @@ import {
 } from "./provider-embed-spike.mjs";
 
 const mode = process.argv[2];
+// stdout/stderr are asynchronous pipes on Actions. Drain them before explicit
+// exit so a failed quality gate retains its complete sanitized diagnostics.
+const exitWithFlushedLogs = async (code) => {
+  await Promise.all([process.stdout, process.stderr].map((stream) =>
+    new Promise((done) => stream.write("", done))));
+  process.exit(code);
+};
 if (!["--run", "--validate"].includes(mode)) {
   console.error("Usage: run-provider-embed-evidence.mjs --run|--validate");
-  process.exit(2);
+  await exitWithFlushedLogs(2);
 }
 
 const resultPath = resolve(process.cwd(), "evidence-output/result.json");
@@ -85,7 +92,7 @@ if (mode === "--run") {
   rmSync(resultPath, { force: true });
   if (errors.length > 0) {
     for (const error of errors) console.error(`- ${error}`);
-    process.exit(1);
+    await exitWithFlushedLogs(1);
   }
   try {
     const token = process.env.GITHUB_TOKEN;
@@ -155,26 +162,26 @@ if (mode === "--run") {
   } catch (error) {
     rmSync(resultPath, { force: true });
     console.error(`B-EMBED-01 live harness failed safely: ${sanitizedFailure(error)}`);
-    process.exit(1);
+    await exitWithFlushedLogs(1);
   }
-  process.exit(0);
+  await exitWithFlushedLogs(0);
 }
 
 if (!existsSync(resultPath)) {
   console.error("Evidence result does not exist; a failed --run must never create PASS evidence.");
-  process.exit(1);
+  await exitWithFlushedLogs(1);
 }
 const resultBytes = readFileSync(resultPath);
 if (resultBytes.byteLength === 0 || resultBytes.byteLength > 512 * 1024) {
   console.error("Evidence result size is outside the 1..512 KiB boundary.");
-  process.exit(1);
+  await exitWithFlushedLogs(1);
 }
 let result;
 try {
   result = JSON.parse(resultBytes.toString("utf8"));
 } catch {
   console.error("Evidence result is not valid JSON.");
-  process.exit(1);
+  await exitWithFlushedLogs(1);
 }
 if (!exactKeys(result, [
   "schema_version", "blocker_id", "requirements_blob_sha", "adr_decision_sha256", "code_under_test_sha",
@@ -203,6 +210,6 @@ for (const pattern of [
 }
 if (errors.length > 0) {
   for (const error of errors) console.error(`- ${error}`);
-  process.exit(1);
+  await exitWithFlushedLogs(1);
 }
 console.log("B-EMBED-01 raw evidence satisfies the preregistered numeric policy.");
