@@ -461,8 +461,8 @@ Check는 Image/PDF의 `size_bytes`, Image `page_count=1`, PDF `page_count<=10`, 
 | `owner_id`, `case_id`, `case_input_id` | `uuid NN`, 복합 FK | 소유 입력 |
 | `bucket_id` | `text NN check = 'finshield-quarantine'` | Private Bucket |
 | `object_path` | `text NN UQ` | `<owner>/<case>/<random>.<safe_ext>` |
-| `safe_extension` | `text NN` | 서버 검증 확장자 |
-| `encryption_state` | `text NN` | Provider at-rest 암호화 확인 상태 |
+| `safe_extension` | `text NN check in (jpg,jpeg,png,pdf)` | 서버 검증 확장자 |
+| `encryption_state` | `text NN check in (UNKNOWN,VERIFIED,FAILED)` | Provider at-rest 암호화 확인 상태 |
 | `access_blocked_at` | `timestamptz` | 삭제 요청 즉시 Signed URL 발급 차단 |
 | `expires_at` | `timestamptz NN` | 최대 24시간 |
 | `deleted_at` | `timestamptz` | `storage.objects` 부재 확인 시각 |

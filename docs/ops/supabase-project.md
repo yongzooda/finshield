@@ -27,6 +27,12 @@ DB 명세 7절이 `project_ref`·host·bucket·expected migration version을 sec
 
 `0001_finshield_baseline.sql`은 멱등하다. 이미 적용한 프로젝트에 다시 실행해도 안전하다.
 
+붙여넣기 전에 로컬에서 먼저 돌린다. `supabase/tests/run-local.sh`가 격리된 PostgreSQL 컨테이너에 Supabase Stub 과 모든 Migration 을 순서대로 적용하고 제약·RLS 시험까지 실행한다. 운영 프로젝트에 접속하지 않는다. Docker 만 있으면 된다.
+
+```bash
+supabase/tests/run-local.sh
+```
+
 SQL Editor 는 여러 문장을 하나의 트랜잭션으로 실행한다. 중간에 실패하면 전체가 되돌아가므로 부분 적용 상태가 남지 않는다. 실패하면 오류를 고친 뒤 처음부터 다시 실행한다.
 
 ## 0001 적용 뒤 반드시 할 일
@@ -151,7 +157,7 @@ order by column_name;
 
 ## 현재 미해결
 
-- `B-SUPABASE-01`은 통과하지 않았다. 업무 테이블·RLS positive/negative 시험·Storage 정책이 아직 없다.
+- `B-SUPABASE-01`은 통과하지 않았다. 남은 업무 테이블은 명세 6.3~6.10 이고, Storage 정책과 main 실행 증거 harness 가 아직 없다. 제약·RLS positive/negative 시험은 `supabase/tests/`에 있고 로컬에서 46건이 통과한다. 증거로 채택하려면 같은 시험을 실제 프로젝트 DSN 으로 main 에서 실행해야 한다.
 - 저장소 Runtime 과 화면은 아직 PreCase 기준선이라 PreCase 코퍼스 테이블을 조회한다. `insight` 5개와 `verification` 화면이 빌드 시 사전 렌더되면서 `relation "cases" does not exist` 로 배포 전체를 실패시켰다. 여섯 화면의 사전 렌더를 끄고 요청 시점 렌더로 바꿔 빌드를 통과시켰다.
 - 이 화면들은 FinShield 전용 DB 에서 요청 시점에 실패한다. 데이터를 지어내지 않고 실패를 감추지 않기 위한 선택이며, FinShield 화면으로 재구현할 때 선언과 함께 제거한다.
 - 그동안 Vercel Production 은 환경변수 변경 이전 배포를 계속 서비스한다. 그 배포는 이전 DB 연결을 유지한다.
@@ -162,4 +168,5 @@ order by column_name;
 |---|---|---|
 | `0001_finshield_baseline.sql` | 적용 완료 | 첫 실행은 `drop owned by` 권한 부족으로 전체 롤백됐고, 수정 후 재실행해 적용했다 |
 | `0002_revoke_default_function_grants.sql` | 적용 완료 | `0001`이 빠뜨린 함수 기본 권한을 회수했다 |
-| `0003_profiles.sql` | 미적용 | 명세 6.1 계정·금융 프로필 3개 테이블과 RLS |
+| `0003_profiles.sql` | 적용 완료 | 명세 6.1 계정·금융 프로필 3개 테이블과 RLS |
+| `0004_financial_cases.sql` | 미적용 | 명세 6.2 FinancialCase·입력 7개 테이블, Enum 9종, RLS |
