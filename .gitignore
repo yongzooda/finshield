@@ -39,5 +39,8 @@ results/*.tmp
 results-*.jsonl
 results-*.json
 
+# 테스트가 매 실행마다 다시 쓰는 산출물 — 앱이 읽지 않는다
+measure/pii-n501.json
+
 # 개인 권한 설정 — 공유하지 않는다
 .claude/settings.local.json

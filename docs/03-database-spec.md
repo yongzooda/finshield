@@ -1641,7 +1641,7 @@ DB 결과와 외부 Side effect를 직접 한 요청에서 결합하지 않는�
 
 # 14. 기존 PreCase DB 자산 전환
 
-현재 `supabase/migrations/0001~0006`은 PreCase Snapshot으로, 15개 테이블·2개 View·`pg_trgm`·서버 역할 기반 RLS를 만든다. 회원별 FinShield 목표 Schema가 아니다.
+PreCase Snapshot Migration `0001~0006`은 `supabase/precase-baseline/`에 보관한다. 15개 테이블·2개 View·`pg_trgm`·서버 역할 기반 RLS를 만들며 회원별 FinShield 목표 Schema가 아니다. FinShield 전용 프로젝트에는 적용하지 않는다.
 
 ## 14.1 재사용·전환 Matrix
 

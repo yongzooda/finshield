@@ -1,7 +1,7 @@
 /**
  * 공통 열거·슬롯 타입 — 코드 쪽 단일 출처.
  *
- * 값의 정본은 DB CHECK 제약이다 (supabase/migrations, 0003이 최신).
+ * 값의 정본은 DB CHECK 제약이다 (supabase/precase-baseline, 0003이 최신).
  * 이 파일이 DB와 어긋나면 `npm test`의 enums-db 대조 테스트가 실패한다 —
  * 문서(10-db.md)가 마이그레이션보다 낡아 게이트가 오작동한 사고의 재발 방지 장치다.
  *
