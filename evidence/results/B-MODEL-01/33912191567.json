@@ -1,0 +1,68 @@
+{
+  "schema_version": 3,
+  "blocker_id": "B-MODEL-01",
+  "requirements_blob_sha": "27ce706010344fbcedebe3abd707febff0f1dc26",
+  "adr_decision_sha256": "f727c5323c503f65977416dfc365fd82f612aeddb8734b697c1c71859e900fa4",
+  "code_under_test_sha": "a658f7db94ee8aa2f38e886788478a489928ab1a",
+  "workflow_head_sha": "a658f7db94ee8aa2f38e886788478a489928ab1a",
+  "scope_sha256": "d56f80426e74a516ab46baf4e49c99f3d15d88694d6cbc9e1cb8f9bb2d0679e3",
+  "run": {
+    "id": 33912191567,
+    "attempt": 1
+  },
+  "observations": {
+    "auth": {
+      "http_status": 200,
+      "model_id": "claude-sonnet-5",
+      "request_id_present": true,
+      "rate_limit_headers_present": true,
+      "request_limit_observed": 10000,
+      "input_token_limit_observed": 10000000,
+      "output_token_limit_observed": 2000000
+    },
+    "normal": {
+      "total": 50,
+      "schema_passed": 50,
+      "strict_tool_passed": 50,
+      "post_validation_passed": 50,
+      "live_provider_requests": 100
+    },
+    "faults": {
+      "total": 20,
+      "categories": [
+        "429",
+        "refusal",
+        "schema_error",
+        "timeout"
+      ],
+      "false_successes": 0,
+      "fixture_mode": "deterministic_adapter_boundary"
+    },
+    "latency": {
+      "samples": 100,
+      "p95_ms": 2666
+    },
+    "text_runs": {
+      "samples": 20,
+      "p95_ms": 4731,
+      "p95_cost_usd": 0.006398
+    },
+    "file_runs": {
+      "samples": 20,
+      "p95_ms": 4758,
+      "p95_cost_usd": 0.0063739999999999995
+    }
+  },
+  "environment": {
+    "node_version": "v24.20.0",
+    "region": "github-hosted",
+    "fixture_set_hash": "5ea9603f32b646011054f9263f9f6400cca505231b302429dabc8cae62317681",
+    "pricing_snapshot_date": "2026-09-04",
+    "pricing_input_per_million_usd": 2,
+    "pricing_output_per_million_usd": 10,
+    "sdk_version": "0.117.1",
+    "provider_request_ids_hash": "b7f30a83a59100bae32524270bae80de7a685901b206f29bffb10b8d59ea26ec",
+    "fault_fixture_mode": "deterministic_adapter_boundary"
+  },
+  "redactions_applied": true
+}
