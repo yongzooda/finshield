@@ -6,7 +6,7 @@
 
 같은 날 Production `/api/health`는 `db` 검사를 `ok`로 반환했다. FinShield 전용 Supabase 프로젝트가 아직 없으므로 이 연결 대상은 FinShield 전용 DB가 아니다. Runtime에는 `statute_cache`, `error_reports`, `usage_counters`, `api_budget` 네 곳에 쓰기가 있고 `/api/event`는 공개 엔드포인트다. 즉 읽기뿐 아니라 쓰기가 섞일 수 있다.
 
-같은 응답에서 `law_api`는 `AUTH` 오류였다. 예시값 `precase`가 FinShield 배포에서 동작하지 않는다는 뜻이며, 등록 IP 문제와 별개로 사용 승인 값이 아니다.
+같은 응답에서 `law_api`는 `AUTH` 오류였다. 예시값 `precase`가 FinShield 배포에서 동작하지 않는다는 뜻이며, 등록 도메인 문제와 별개로 사용 승인 값이 아니다.
 
 조치 순서는 다음과 같다.
 
