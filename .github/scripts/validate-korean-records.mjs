@@ -33,6 +33,25 @@ export const validateKoreanRecord = ({ title, body = "", requireBody = false }) 
   return errors;
 };
 
+// GitHub은 PR 본문을 squash 커밋 메시지로 옮길 때 72열 기준 단어 단위로
+// 다시 줄바꿈한다. 잘린 조각에 한국어가 남지 않으면 병합 뒤에야 main 검사가
+// 실패하므로, PR 검사에서 이 형태를 미리 확인한다.
+export const SQUASH_WRAP_COLUMNS = 72;
+
+export const wrapSquashBody = (body, width = SQUASH_WRAP_COLUMNS) => body.replace(/\r\n/g, "\n").split("\n")
+  .flatMap((line) => {
+    if (line.length <= width) return [line];
+    const wrapped = [];
+    let current = "";
+    for (const token of line.split(" ")) {
+      if (!current) { current = token; continue; }
+      if (current.length + 1 + token.length <= width) current += ` ${token}`;
+      else { wrapped.push(current); current = token; }
+    }
+    wrapped.push(current);
+    return wrapped;
+  }).join("\n");
+
 export const validateCommitMessage = (message) => {
   const [title, ...body] = message.trim().split("\n");
   return validateKoreanRecord({ title, body: body.join("\n") });
@@ -42,7 +61,12 @@ const assertContext = (condition, message) => { if (!condition) throw new Error(
 const prefix = "/repos/yongzooda/finshield";
 export const validatePullRequest = async (pr, readJson) => {
   assertContext(Number.isSafeInteger(pr.number) && pr.number > 0, "PR 번호가 올바르지 않습니다.");
-  const errors = validateKoreanRecord({ title: pr.title, body: pr.body ?? "", requireBody: true });
+  const body = pr.body ?? "";
+  const errors = validateKoreanRecord({ title: pr.title, body, requireBody: true });
+  const wrapped = wrapSquashBody(body);
+  if (wrapped !== body) {
+    errors.push(...validateKoreanRecord({ body: wrapped }).map((e) => `squash ${SQUASH_WRAP_COLUMNS}열 줄바꿈 뒤: ${e}`));
+  }
   let total = 0;
   for (let page = 1; page <= 30; page++) {
     const commits = await readJson(`${prefix}/pulls/${pr.number}/commits?per_page=100&page=${page}`);
