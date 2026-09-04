@@ -1,0 +1,491 @@
+{
+  "schema_version": 1,
+  "classification": "development-probe-not-adoption-evidence",
+  "blocker_id": "B-EMBED-01",
+  "run_provenance": {
+    "run_id": 33877345188,
+    "job_id": 101037375335,
+    "run_attempt": 1,
+    "run_url": "https://github.com/yongzooda/finshield/actions/runs/33877345188",
+    "workflow_path": ".github/workflows/provider-embed-development-probe.yml",
+    "workflow_conclusion": "success",
+    "code_under_test_sha": "2ec62abcb32322e6956e53efdfee62f1f712bb7c",
+    "artifact_id": 9938417625,
+    "artifact_digest": "sha256:cf23a25e054dbd623d49f37270b599c18aa1e7351b7aab626c7e5ff54c7fc1e0",
+    "artifact_expires_at": "2026-10-04T13:19:48Z"
+  },
+  "provenance_limit": "Development split diagnostic. Not a gate holdout run, no adoption PR, no PASS policy. Never eligible for B-EMBED-01 PASS.",
+  "measured": {
+    "classification": "development-probe-not-adoption-evidence",
+    "contract": {
+      "model_id": "embed-v4.0",
+      "dimension": 1024,
+      "metric": "cosine",
+      "knn": "exact",
+      "retries": 0
+    },
+    "dataset": {
+      "fixture_set_hash": "ad38ca2d843cb82db3aa137343df2d2d24e65e060b7eca1e2fca5f764a1eb8b5",
+      "split": "development",
+      "documents": 168,
+      "queries": 20
+    },
+    "summary": {
+      "formula": "development-probe-full-rank-v1",
+      "queries": 20,
+      "units": 168,
+      "recall_curve": [
+        {
+          "k": 1,
+          "recall": 0.3400000000000001,
+          "queries_fully_recalled": 4
+        },
+        {
+          "k": 2,
+          "recall": 0.4900000000000001,
+          "queries_fully_recalled": 4
+        },
+        {
+          "k": 3,
+          "recall": 0.61,
+          "queries_fully_recalled": 4
+        },
+        {
+          "k": 5,
+          "recall": 0.8600000000000001,
+          "queries_fully_recalled": 7
+        },
+        {
+          "k": 7,
+          "recall": 0.9800000000000001,
+          "queries_fully_recalled": 18
+        },
+        {
+          "k": 10,
+          "recall": 1,
+          "queries_fully_recalled": 20
+        },
+        {
+          "k": 20,
+          "recall": 1,
+          "queries_fully_recalled": 20
+        },
+        {
+          "k": 50,
+          "recall": 1,
+          "queries_fully_recalled": 20
+        }
+      ],
+      "min_k_for_full_recall": {
+        "max": 8,
+        "median": 6,
+        "p95": 8
+      },
+      "per_query": [
+        {
+          "query_id": "q-91a0be8e886c4586",
+          "family": "dev_limit",
+          "relevant_total": 5,
+          "critical_total": 0,
+          "relevant_ranks": [
+            1,
+            2,
+            3,
+            5,
+            6
+          ],
+          "hard_negative_ranks": [
+            4,
+            7
+          ],
+          "min_k_for_full_recall": 6,
+          "hard_negatives_above_worst_relevant": 1,
+          "critical_ranks": []
+        },
+        {
+          "query_id": "q-d357561cbbea0440",
+          "family": "dev_limit",
+          "relevant_total": 5,
+          "critical_total": 0,
+          "relevant_ranks": [
+            1,
+            2,
+            4,
+            5,
+            6
+          ],
+          "hard_negative_ranks": [
+            3,
+            8
+          ],
+          "min_k_for_full_recall": 6,
+          "hard_negatives_above_worst_relevant": 1,
+          "critical_ranks": []
+        },
+        {
+          "query_id": "q-3025c4dd37e59c19",
+          "family": "dev_limit",
+          "relevant_total": 5,
+          "critical_total": 0,
+          "relevant_ranks": [
+            1,
+            2,
+            4,
+            5,
+            6
+          ],
+          "hard_negative_ranks": [
+            3,
+            7
+          ],
+          "min_k_for_full_recall": 6,
+          "hard_negatives_above_worst_relevant": 1,
+          "critical_ranks": []
+        },
+        {
+          "query_id": "q-864bacc284d4212d",
+          "family": "dev_limit",
+          "relevant_total": 5,
+          "critical_total": 0,
+          "relevant_ranks": [
+            1,
+            2,
+            3,
+            5,
+            6
+          ],
+          "hard_negative_ranks": [
+            4,
+            7
+          ],
+          "min_k_for_full_recall": 6,
+          "hard_negatives_above_worst_relevant": 1,
+          "critical_ranks": []
+        },
+        {
+          "query_id": "q-724c88d7c977a266",
+          "family": "dev_limit",
+          "relevant_total": 1,
+          "critical_total": 0,
+          "relevant_ranks": [
+            1
+          ],
+          "hard_negative_ranks": [
+            3,
+            7
+          ],
+          "min_k_for_full_recall": 1,
+          "hard_negatives_above_worst_relevant": 0,
+          "critical_ranks": []
+        },
+        {
+          "query_id": "q-f44ed7107a13e172",
+          "family": "dev_name",
+          "relevant_total": 5,
+          "critical_total": 0,
+          "relevant_ranks": [
+            1,
+            2,
+            3,
+            4,
+            7
+          ],
+          "hard_negative_ranks": [
+            5,
+            6
+          ],
+          "min_k_for_full_recall": 7,
+          "hard_negatives_above_worst_relevant": 2,
+          "critical_ranks": []
+        },
+        {
+          "query_id": "q-a67a81bc918c4126",
+          "family": "dev_name",
+          "relevant_total": 5,
+          "critical_total": 0,
+          "relevant_ranks": [
+            1,
+            2,
+            3,
+            5,
+            6
+          ],
+          "hard_negative_ranks": [
+            4,
+            7
+          ],
+          "min_k_for_full_recall": 6,
+          "hard_negatives_above_worst_relevant": 1,
+          "critical_ranks": []
+        },
+        {
+          "query_id": "q-6b6f83356c7e9a4a",
+          "family": "dev_name",
+          "relevant_total": 5,
+          "critical_total": 0,
+          "relevant_ranks": [
+            1,
+            2,
+            3,
+            4,
+            6
+          ],
+          "hard_negative_ranks": [
+            5,
+            7
+          ],
+          "min_k_for_full_recall": 6,
+          "hard_negatives_above_worst_relevant": 1,
+          "critical_ranks": []
+        },
+        {
+          "query_id": "q-ab85b0f395e135a5",
+          "family": "dev_name",
+          "relevant_total": 5,
+          "critical_total": 0,
+          "relevant_ranks": [
+            1,
+            2,
+            4,
+            5,
+            6
+          ],
+          "hard_negative_ranks": [
+            3,
+            7
+          ],
+          "min_k_for_full_recall": 6,
+          "hard_negatives_above_worst_relevant": 1,
+          "critical_ranks": []
+        },
+        {
+          "query_id": "q-b7170e6e16b4410d",
+          "family": "dev_name",
+          "relevant_total": 1,
+          "critical_total": 0,
+          "relevant_ranks": [
+            1
+          ],
+          "hard_negative_ranks": [
+            5,
+            6
+          ],
+          "min_k_for_full_recall": 1,
+          "hard_negatives_above_worst_relevant": 0,
+          "critical_ranks": []
+        },
+        {
+          "query_id": "q-c4cb9f0ac2927a6a",
+          "family": "dev_date",
+          "relevant_total": 5,
+          "critical_total": 0,
+          "relevant_ranks": [
+            1,
+            3,
+            5,
+            6,
+            8
+          ],
+          "hard_negative_ranks": [
+            2,
+            4
+          ],
+          "min_k_for_full_recall": 8,
+          "hard_negatives_above_worst_relevant": 2,
+          "critical_ranks": []
+        },
+        {
+          "query_id": "q-afadb93008da20aa",
+          "family": "dev_date",
+          "relevant_total": 5,
+          "critical_total": 0,
+          "relevant_ranks": [
+            1,
+            2,
+            4,
+            5,
+            6
+          ],
+          "hard_negative_ranks": [
+            3,
+            11
+          ],
+          "min_k_for_full_recall": 6,
+          "hard_negatives_above_worst_relevant": 1,
+          "critical_ranks": []
+        },
+        {
+          "query_id": "q-2a9087c01f2ae7dd",
+          "family": "dev_date",
+          "relevant_total": 5,
+          "critical_total": 0,
+          "relevant_ranks": [
+            2,
+            3,
+            4,
+            5,
+            7
+          ],
+          "hard_negative_ranks": [
+            1,
+            6
+          ],
+          "min_k_for_full_recall": 7,
+          "hard_negatives_above_worst_relevant": 2,
+          "critical_ranks": []
+        },
+        {
+          "query_id": "q-6afffbf4adb7c276",
+          "family": "dev_date",
+          "relevant_total": 5,
+          "critical_total": 0,
+          "relevant_ranks": [
+            2,
+            3,
+            4,
+            5,
+            7
+          ],
+          "hard_negative_ranks": [
+            1,
+            6
+          ],
+          "min_k_for_full_recall": 7,
+          "hard_negatives_above_worst_relevant": 2,
+          "critical_ranks": []
+        },
+        {
+          "query_id": "q-f3c36dd43cba2667",
+          "family": "dev_date",
+          "relevant_total": 1,
+          "critical_total": 0,
+          "relevant_ranks": [
+            1
+          ],
+          "hard_negative_ranks": [
+            3,
+            7
+          ],
+          "min_k_for_full_recall": 1,
+          "hard_negatives_above_worst_relevant": 0,
+          "critical_ranks": []
+        },
+        {
+          "query_id": "q-6a4ce54c6f4a543e",
+          "family": "dev_warning",
+          "relevant_total": 5,
+          "critical_total": 1,
+          "relevant_ranks": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "hard_negative_ranks": [
+            6,
+            7
+          ],
+          "min_k_for_full_recall": 5,
+          "hard_negatives_above_worst_relevant": 0,
+          "critical_ranks": [
+            2
+          ]
+        },
+        {
+          "query_id": "q-9c92122ae30cb3b2",
+          "family": "dev_warning",
+          "relevant_total": 5,
+          "critical_total": 1,
+          "relevant_ranks": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "hard_negative_ranks": [
+            6,
+            7
+          ],
+          "min_k_for_full_recall": 5,
+          "hard_negatives_above_worst_relevant": 0,
+          "critical_ranks": [
+            2
+          ]
+        },
+        {
+          "query_id": "q-c771ed065f2a393a",
+          "family": "dev_warning",
+          "relevant_total": 5,
+          "critical_total": 1,
+          "relevant_ranks": [
+            1,
+            2,
+            3,
+            5,
+            8
+          ],
+          "hard_negative_ranks": [
+            4,
+            9
+          ],
+          "min_k_for_full_recall": 8,
+          "hard_negatives_above_worst_relevant": 1,
+          "critical_ranks": [
+            5
+          ]
+        },
+        {
+          "query_id": "q-eca30ded19e01b27",
+          "family": "dev_warning",
+          "relevant_total": 5,
+          "critical_total": 1,
+          "relevant_ranks": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "hard_negative_ranks": [
+            6,
+            17
+          ],
+          "min_k_for_full_recall": 5,
+          "hard_negatives_above_worst_relevant": 0,
+          "critical_ranks": [
+            4
+          ]
+        },
+        {
+          "query_id": "q-7d515373d0551ccf",
+          "family": "dev_warning",
+          "relevant_total": 1,
+          "critical_total": 1,
+          "relevant_ranks": [
+            1
+          ],
+          "hard_negative_ranks": [
+            5,
+            7
+          ],
+          "min_k_for_full_recall": 1,
+          "hard_negatives_above_worst_relevant": 0,
+          "critical_ranks": [
+            1
+          ]
+        }
+      ]
+    },
+    "latency": {
+      "samples": 20,
+      "p50_ms": 128,
+      "p95_ms": 142
+    },
+    "usage": {
+      "billed_input_tokens": 6068,
+      "converted_cost_usd": 0.00072816
+    }
+  }
+}
