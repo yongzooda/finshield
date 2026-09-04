@@ -182,7 +182,7 @@ const expectPartialEvidence = async ({
       ["package.json", "ecb26cd086f874ea4f989d50f2719a8390c282de"],
       ["package-lock.json", "678296a5f7e2256799413740041886f29f939191"],
     ]);
-    const requirementsBlob = "5dd728c7d396ebfe283dd05eb79d56a792a03dfd";
+    const requirementsBlob = "27ce706010344fbcedebe3abd707febff0f1dc26";
     update(fixture, "docs/adr/001-p0-provider-stack.md", (source) => source.replace(
       "| `B-MODEL-01` | Anthropic Sonnet 5 auth·quota·structured output·strict tool·P95·cost | NOT-EVALUATED |",
       "| `B-MODEL-01` | Anthropic Sonnet 5 auth·quota·structured output·strict tool·P95·cost | PASS |",

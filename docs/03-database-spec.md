@@ -405,7 +405,7 @@ D-018이 지정한 Case·Run·Claim·Job과 여러 테이블에서 공유하는 
 | `declared_mime`, `detected_mime` | `text`, 최대 128자 | 선언·실측 MIME |
 | `magic_signature` | `text`, 최대 64자 | 허용 Signature Code, 원본 byte 아님 |
 | `size_bytes` | `bigint check 0..10485760` | P0 10MB 상한 |
-| `page_count` | `integer check 1..30` | PDF P0 30쪽, Image는 1 |
+| `page_count` | `integer check 1..10` | PDF P0 10쪽, Image는 1 |
 | `masked_text` | `text`, 최대 256KiB | 마스킹 후 영속 입력; 전체 원본 금지 |
 | `masked_text_hash` | `text check 64 hex` | 마스킹 결과 Digest |
 | `pii_policy_version` | `text` | PII Gate 버전 |
@@ -1748,7 +1748,7 @@ FinShield Production이 아직 없으므로 기존 `0001~0006`을 새 FinShield 
 
 ## 16.5 Storage·삭제 테스트
 
-- Path traversal, 이중 확장자, MIME/Magic 불일치, 10MB·30쪽 초과, 암호화·Active PDF 거부.
+- Path traversal, 이중 확장자, MIME/Magic 불일치, 10MB·10쪽 초과, 암호화·Active PDF 거부.
 - 다른 사용자·다른 Case·만료·삭제 요청 객체의 Signed URL 발급 거부.
 - Claim 확인·중단·Case 삭제 각각에서 Cleanup Job 생성.
 - Storage 삭제 실패 후 접근 차단 유지와 Retry.

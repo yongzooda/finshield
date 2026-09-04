@@ -7,7 +7,7 @@
 - 적용 범위: FinShield P0 대출 Text·Image·PDF 단일 수직 흐름
 - 최상위 기준: `docs/02-integrated-requirements.md`
 - 요구사항 기준 Parent Commit: `3b236cc9e03e518eb63fef8a3d70d40881858668`
-- 요구사항 문서 Git Blob SHA: `5dd728c7d396ebfe283dd05eb79d56a792a03dfd`
+- 요구사항 문서 Git Blob SHA: `27ce706010344fbcedebe3abd707febff0f1dc26`
 - 관련 요구사항: `N-QLT-009`, `N-QLT-010`, `N-PERF-005`, `N-PERF-009`, `N-AVL-001`, `N-AVL-006`, `N-AVL-008`, `N-OPS-003`, `N-OPS-004`, `AI-021`, `PC-005`, `INP-004`, `INP-006`, `INP-009`, `INP-011`, `INP-013`, `E-008`, `E-012`, `E-017`, `E-019`, `E-020`, `E-021`, `E-022`, `SEC-FILE-005`, `SEC-PRI-010`, `SEC-OPS-004`, `REV-001`, `ROLE-001`, `ROLE-003`, `OPS-004`, `EC-025`, `D-008`, `D-010`, `D-012`, `D-014`, `D-016`, `D-021`, `D-025`, `D-029`, `D-030`
 
 > 이 문서는 P0에 사용할 기술 조합과 실패 계약을 승인한다. 실제 자격증명·쿼터·한국어 검색 품질·OCR 정확도·RLS·삭제·재시도 증거가 대응 blocker의 `PASS` policy를 통과하기 전에는 개발 전제인 `N-QLT-010` Implementation Gate를 닫지 않는다. 출시 조건인 `N-QLT-009` Release Gate는 기능 구현 뒤 별도로 평가한다. 문서 선택을 Live 연동 성공으로 계산하지 않는다.
@@ -26,7 +26,7 @@ FinShield P0는 다음 조합으로 구현한다.
 | Vector 저장 | 사용 | Supabase Postgres `pgvector`, 공용 KB와 Case 임시 Vector 물리 분리, 초기 Exact KNN | 전용 Project·RLS 시험 전 |
 | 디지털 PDF | 사용 | Mozilla `pdfjs-dist` native text 우선, 실제 통과 버전을 lockfile에 고정 | Fixture 시험 전 |
 | Image·스캔 PDF | 제한 사용 | NAVER Cloud CLOVA OCR General, 원본 외부 전송 별도 동의 후 사용 | 키·1 TPS·정확도·삭제 계약 시험 전 |
-| 원본 파일 | 사용 | Supabase private Storage에 인증된 TUS direct upload, one-use slot, 최대 10 MiB·30쪽 | Token/URL·Bucket·RLS·삭제 시험 전 |
+| 원본 파일 | 사용 | Supabase private Storage에 인증된 TUS direct upload, one-use slot, 최대 10 MiB·10쪽 | Token/URL·Bucket·RLS·삭제 시험 전 |
 | 인증·원장 | 사용 | 전용 FinShield Supabase Auth/Postgres/RLS, Supavisor transaction pooler | 현재 PreCase DB와 분리 확인 전 |
 | 모델 실행 | 사용 | Vercel Node.js 24.x Fluid Functions, 모든 모델 호출은 단일 Model Gateway 경유 | 코드 이관 전 |
 | 내구 실행 | 제한 사용 | Vercel Workflow에 `job_id` 같은 식별자만 전달, 업무 원장은 Supabase | 설치·Replay·멱등 시험 전 |
@@ -88,7 +88,7 @@ Provider 장애, 키 부재, 쿼터 초과, Snapshot 만료, OCR 동의 거절, 
 | `N-OPS-003`, `N-OPS-004` | Supabase 공유 원장에서 호출 전 원자 reserve·호출 후 settle, process memory 금지 |
 | `AI-021`, `PC-005` | `Product/Institution`, `Fraud/Channel`, PreCase 기반 `Sales Conduct`, `Regulation & Dispute` 4개를 별도 Schema·Tool allowlist·run row로 순차 실행 |
 | `E-008`, `E-012`, `E-017`, `E-021` | timeout/retry, Tool 한도, 미연동 오표현 금지, 공개 MCP 비활성화 |
-| `INP-004`, `INP-006`, `INP-009`, `INP-011`, `INP-013` | 10 MiB(10,485,760 byte)·30쪽, Locator 보존, 비모델 PII Gate, 최대 24시간 삭제, Quarantine 처리 순서 |
+| `INP-004`, `INP-006`, `INP-009`, `INP-011`, `INP-013` | 10 MiB(10,485,760 byte)·10쪽, Locator 보존, 비모델 PII Gate, 최대 24시간 삭제, Quarantine 처리 순서 |
 | `SEC-FILE-005`, `SEC-PRI-010` | 짧은 signed URL·고아 객체 추적, 외부 OCR 별도 동의와 거절 시 전송 0회 |
 | `REV-001` | Lease·Heartbeat·Retry·Fencing을 가진 수동 재검증 Job |
 | `OPS-004` | Live, 정적 Fallback, Snapshot, Cache, 실시간 조회 Badge 분리 |
@@ -271,7 +271,7 @@ Parser 전에 확장자·선언 MIME·검출 MIME·Magic Byte를 비교하고 en
 
 ### 6.3 CLOVA OCR 제한 사용
 
-NAVER Cloud CLOVA OCR General은 한국어와 표를 지원하며 공식 한도상 JPG·PNG·PDF·TIFF, 파일당 50 MB를 다룬다. API PDF는 10쪽, Batch는 30쪽이다. 공식 문서의 서비스 계정당 권장 성능을 따라 기본 운영 안전 한도는 1 TPS로 두고, 고객지원으로 상향 승인된 경우에만 versioned 설정을 바꾼다. FinShield 자체 한도는 더 엄격한 10 MiB·30쪽을 유지한다.
+NAVER Cloud CLOVA OCR General은 한국어와 표를 지원하며 공식 한도상 JPG·PNG·PDF·TIFF, 파일당 50 MB를 다룬다. API PDF는 10쪽, Batch는 30쪽이다. 공식 문서의 서비스 계정당 권장 성능을 따라 기본 운영 안전 한도는 1 TPS로 두고, 고객지원으로 상향 승인된 경우에만 versioned 설정을 바꾼다. FinShield 자체 한도는 더 엄격한 10 MiB·10쪽이다. 30쪽은 Batch 경로를 요구하는데 기본 1 TPS에서 30쪽은 순수 호출만 30초가 걸려 §4.3의 파일 검사·Parser/OCR 35초 예산에 Batch poll과 파일 검증을 담을 여유가 없다. 동기 API 한도와 같은 10쪽으로 낮춰 Batch 없이 예산 안에서 끝낸다.
 
 마스킹 전 원본이 외부 Provider로 전송되므로 다음 동의 없이는 호출하지 않는다.
 
@@ -282,7 +282,7 @@ NAVER Cloud CLOVA OCR General은 한국어와 표를 지원하며 공식 한도�
 - 거절 시 Text 직접입력 경로
 - 동의 문구 버전과 시각
 
-10쪽 이하는 동기 OCR 후보, 11~30쪽은 Batch/Poll 후보지만, 어느 경로도 전체 Run 180초를 넘겨 가짜 완료할 수 없다. 기본 1 TPS를 공유 Rate Store에서 직렬화하고, timeout·429·5xx는 안전하게 보류한다. OCR 실패 페이지를 성공으로 숨기지 않으며 P0 복구는 전체 재업로드 또는 Text 직접입력이다.
+P0는 동기 OCR 경로만 사용한다. Batch/Poll은 30쪽 상한을 되살릴 때의 P1 후보이며, 어느 경로도 전체 Run 180초를 넘겨 가짜 완료할 수 없다. 기본 1 TPS를 공유 Rate Store에서 직렬화하고, timeout·429·5xx는 안전하게 보류한다. OCR 실패 페이지를 성공으로 숨기지 않으며 P0 복구는 전체 재업로드 또는 Text 직접입력이다.
 
 ### 6.4 삭제 계약
 

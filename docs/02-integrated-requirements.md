@@ -346,7 +346,7 @@ stateDiagram-v2
 | INP-001 | P0 | 실제 검증 입력으로 Text·JPEG/PNG Image·PDF를 지원해야 한다. | 각 형식으로 Case를 생성하고 Claim 확인 단계까지 진행한다. |
 | INP-002 | P1 | URL 원문 수집·검증을 지원할 수 있어야 한다. | SSRF 방어와 공식/비공식 출처 구분 후 Snapshot을 남긴다. |
 | INP-003 | P0 | 파일 확장자, MIME, Magic Byte를 함께 검증해야 한다. | 서로 불일치하거나 허용되지 않은 형식은 Parser 실행 전에 거부된다. |
-| INP-004 | P0 | 초기 운영 제한은 파일 10MB, PDF 30쪽으로 설정하되 구성값으로 관리해야 한다. | UI와 API가 같은 제한값을 사용하고 초과 사유를 표시한다. |
+| INP-004 | P0 | 초기 운영 제한은 파일 10MB, PDF 10쪽으로 설정하되 구성값으로 관리해야 한다. | UI와 API가 같은 제한값을 사용하고 초과 사유를 표시한다. |
 | INP-005 | P0 | 암호화·손상·실행성 콘텐츠가 포함된 PDF를 안전하게 처리해야 한다. | 해제 비밀번호를 수집하지 않고 거부 또는 안전한 텍스트 직접입력 경로를 제공한다. |
 | INP-006 | P0 | Image OCR과 PDF Text Parsing을 수행하고 페이지·영역 위치를 보존해야 한다. | 원본 삭제 전 Claim 확인 화면에서 페이지·영역을 대조하고, 삭제 후에는 마스킹된 발췌와 Locator만 조회한다. |
 | INP-007 | P0 | 낮은 추출 신뢰도의 숫자·기관명·상품명·URL을 강조해야 한다. | 사용자가 원문과 대조해 수정하며 미확인 항목은 자동 확정되지 않는다. |
@@ -893,7 +893,7 @@ Tool 이름은 기능명세에서 변경할 수 있지만 입력·출력 Schema,
 | ID | 우선순위 | 조건 | 시스템 동작 | 사용자 복구 |
 |---|---|---|---|---|
 | EC-001 | P0 | 지원하지 않는 파일 형식·Magic 불일치 | Parser 전 거부, 원본 삭제 Queue | 지원 형식·Text 입력 안내 |
-| EC-002 | P0 | 10MB·30쪽 제한 초과 | 413 계열 정규화 오류, 처리 미시작 | 파일 분할·축소 안내 |
+| EC-002 | P0 | 10MB·10쪽 제한 초과 | 413 계열 정규화 오류, 처리 미시작 | 파일 분할·축소 안내 |
 | EC-003 | P0 | 암호화·손상·Active Content PDF | 안전 거부, 원본 삭제 Queue | 비암호화 공식 문서·직접 Claim 입력 |
 | EC-004 | P1 | OCR·Parsing 일부 페이지 실패 | 성공 페이지 유지, 실패 페이지와 낮은 신뢰도 표시 | 페이지 재업로드·직접 수정; P0는 전체 재업로드·Text 직접입력 |
 | EC-005 | P0 | PII 마스킹 불확실 | 불확실 영역을 후속 Agent에 전달하지 않음 | 사용자 마스킹 확인·삭제 |
@@ -947,7 +947,7 @@ Tool 이름은 기능명세에서 변경할 수 있지만 입력·출력 Schema,
 | 공개 접근 | Landing, Live Seed Demo, 장애 시 정적 Fallback, 신뢰센터 | 로그인·SMTP 없이 실제 Agent 파이프라인과 사전계산 결과를 명확히 구분 |
 | 계정 | 가입·로그인·로그아웃, 다른 기기 완료 기록, 삭제 | 본인 데이터 RLS와 완료 Passport Cross-device 조회; 메일 기반 복구는 P1 |
 | Case·프로필 | 여러 Case, Lifecycle·Journey·Aftercare, 범주형 금융 프로필, Snapshot | 미입력 시 적합성만 보류, 가입·피해 상태와 검증 상태 분리, 버전 불변 |
-| 입력 | Text·Image·PDF, 파일 검사, OCR/Parsing, 비모델 PII Gate | 10MB·30쪽, 전체 재업로드·Text 복구, Claim 확인/중단/최대 24시간 원본 삭제 |
+| 입력 | Text·Image·PDF, 파일 검사, OCR/Parsing, 비모델 PII Gate | 10MB·10쪽, 전체 재업로드·Text 복구, Claim 확인/중단/최대 24시간 원본 삭제 |
 | Claim | 추출, 원문 위치, 사용자 추가·수정·삭제·검증대상 확정 | 사용자 확인 전 검증 금지, 부족 정보는 Claim별 보류; 동적 Gap 질문은 P1 |
 | Multi-Agent | P0 대출용 고정 3~4개 Domain Agent, CoVe·Red Team·Evidence Judge·Action Guide | 실제 독립 Run·Schema·Tool Allowlist·비용·실패 기록; 동적 선택·병렬화는 P1 |
 | Retrieval | Structured Lookup, Keyword+pgvector Hybrid RAG | 공용 KB와 사용자 데이터 격리, 빈 검색 보충 금지 |

@@ -91,7 +91,7 @@ if (architecture !== "ACCEPTED") fail("현재 ADR의 Architecture Decision은 AC
 requireMatch(adr, /문서 선택을 Live 연동 성공으로 계산하지 않는다/, "Architecture 승인과 Live 성공의 구분이 없습니다.");
 requireMatch(adr, /N-QLT-010[\s\S]{0,240}Implementation Gate[\s\S]{0,360}N-QLT-009[\s\S]{0,240}Release Gate/, "사전 Implementation Gate와 출시 Release Gate의 구분이 없습니다.");
 
-const expectedRequirementsBlob = "5dd728c7d396ebfe283dd05eb79d56a792a03dfd";
+const expectedRequirementsBlob = "27ce706010344fbcedebe3abd707febff0f1dc26";
 const actualRequirementsBlob = createHash("sha1")
   .update(`blob ${Buffer.byteLength(requirements)}\0`)
   .update(requirements)
@@ -123,7 +123,7 @@ const requirementContracts = [
   ["N-OPS-004", ["P0", "Serverless", "공유"]],
   ["AI-021", ["P0", "3~4개", "Product/Institution", "Fraud/Channel", "Sales/Regulation"]],
   ["PC-005", ["P0", "Sales Conduct Agent", "Regulation & Dispute Agent", "기존 PreCase Tool", "실제 실행"]],
-  ["INP-004", ["P0", "10MB", "30쪽"]],
+  ["INP-004", ["P0", "10MB", "10쪽"]],
   ["INP-006", ["P0", "OCR", "Locator"]],
   ["INP-009", ["P0", "PII Gate", "Embedding"]],
   ["INP-011", ["P0", "24시간", "삭제"]],
