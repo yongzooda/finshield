@@ -190,7 +190,7 @@ Anthropic 자격증명, 조직 한도, Sonnet 5 접근권한, 한국어 금융 F
 
 ### 4.4 외부 처리자 개인정보 조건
 
-PII Mask는 외부 처리자 계약을 대신하지 않는다. 실제 사용자 데이터 전송 전 Anthropic·Cohere·CLOVA 각각에 대해 학습 사용 여부, 기본/Zero Data Retention, 법적 보존 예외, DPA, 하위처리자, 처리 region, 지원 인력 접근, 삭제·감사 방법을 조직 설정과 계약에서 확인한다. Anthropic ZDR은 조직별 승인 여부를 확인하며 문서에 기능이 있다는 이유만으로 활성 상태라고 가정하지 않는다.
+PII Mask는 외부 처리자 계약을 대신하지 않는다. 실제 사용자 데이터 전송 전 Anthropic·Cohere·CLOVA와 회원 Case·프로필·원본 파일을 보관하는 Supabase 각각에 대해 학습 사용 여부, 기본/Zero Data Retention, 법적 보존 예외, DPA, 하위처리자, 처리 region, 지원 인력 접근, 삭제·감사 방법을 조직 설정과 계약에서 확인한다. Anthropic ZDR은 조직별 승인 여부를 확인하며 문서에 기능이 있다는 이유만으로 활성 상태라고 가정하지 않는다.
 
 마스킹 Fixture에는 이름·전화·주민번호·계좌·주소뿐 아니라 금융 프로필, 자유서술 간접식별자와 문서 metadata를 포함한다. 잔존 PII가 의심되면 Anthropic·Cohere 호출과 영구 저장을 모두 fail-closed한다. `B-PROCESSOR-PRIVACY`가 닫히기 전에는 완전한 합성 Fixture만 외부 Provider에 보낸다.
 
@@ -333,7 +333,9 @@ Preview는 Production과 다른 Supabase Project 또는 최소한 격리된 Sche
 
 ### 8.1 국가법령정보
 
-P0 법령 근거는 국가법령정보 공동활용 API에서 수집한 불변 Snapshot을 기본으로 조회한다. 요청 시점 Live API를 기본 경로로 선택하지 않은 이유는 공식 공지가 `OC`에 등록된 IP와 실제 요청 IP 불일치 시 오류가 날 수 있음을 밝히며, Hobby Vercel의 고정 egress IP가 보장되지 않기 때문이다.
+P0 법령 근거는 국가법령정보 공동활용 API에서 수집한 불변 Snapshot을 기본으로 조회한다. 요청 시점 Live 조회 결과를 그대로 판정 근거로 쓰면 같은 판정을 나중에 재현할 수 없고 인용한 조문의 시행일·원문 hash를 고정할 수 없기 때문이다.
+
+실제 호출 제약은 IP가 아니라 등록 도메인이다. 법제처는 신청 시 등록한 도메인과 요청의 `Referer`를 대조한다. 2026-09-05 FinShield 전용 계정에 배포 도메인을 등록하자 Vercel Production의 `law_api` 검사가 통과했고, 그 전 실패는 다른 프로젝트 도메인이 등록돼 있었기 때문이다. 따라서 동적 egress IP는 차단 사유가 아니며, 신청 계정과 등록 도메인을 프로젝트마다 분리해야 한다. 다른 프로젝트의 등록 도메인을 `Referer`로 쓰지 않는다.
 
 수집기는 다음을 검증한다.
 
@@ -613,7 +615,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `B-STORAGE-01` | authenticated TUS·one-use slot·10 MiB·MIME/Magic Byte·cross-user/worker RLS | NOT-EVALUATED | positive/negative test와 발급 URL/token 재사용 거부 |
 | `B-DELETE-01` | 확인·중단·Case 삭제·기발급 URL·24시간 cleanup | NOT-EVALUATED | §15.1 물리 삭제 합격 + deletion ledger |
 | `B-SUPABASE-01` | 전용 Project·최소권한 role·pooler 6543·pgvector·Migration/RLS | NOT-EVALUATED | §15.1 cross-user/worker 시험과 preflight 합격 |
-| `B-PROCESSOR-PRIVACY` | Anthropic·Cohere·CLOVA 학습/보존/DPA/region/하위처리자·PII fail-closed | NOT-EVALUATED | §15.1 Processor privacy + 계약 inventory |
+| `B-PROCESSOR-PRIVACY` | Anthropic·Cohere·CLOVA·Supabase 학습/보존/DPA/region/하위처리자·PII fail-closed | NOT-EVALUATED | §15.1 Processor privacy + 계약 inventory |
 | `B-PRIVACY-VERCEL` | Vercel plan·고객 콘텐츠 조건·DPA·region·Workflow RBAC/보존 | NOT-EVALUATED | 합성 외 실제 데이터 처리 허용 근거 승인 |
 | `B-LAW-01` | OC·registered IP·Preview/Production 403/429/5xx·D+1 | NOT-EVALUATED | sanitized response ledger와 snapshot hash |
 | `B-SOURCE-02` | 공공데이터/FSS key·quota·pagination·license label | NOT-EVALUATED | API response metadata와 source registry |
@@ -635,6 +637,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 4. 실패 Fixture와 fallback 표시를 함께 통과시킨다.
 5. Provider별 success·timeout·quota·ambiguous outcome과 인프라 retry/replay를 포함한 component vertical spike를 통과한다.
 6. 이 ADR, `HANDOFF.md`, README와 CI validator의 Implementation 상태를 같은 PR에서 갱신한다.
+7. P0 Claim 판정 품질 평가셋과 수용식을 `B-CLAIM-01` 기준으로 사전등록한다. 기능을 만든 뒤 판정 품질을 처음 정의하지 않는다.
 
 키가 존재한다는 사실, Dashboard의 초록 Deploy, 공식 문서 링크, mock response만으로는 차단을 해제할 수 없다.
 
@@ -659,6 +662,7 @@ Implementation Gate가 `GO`가 된 뒤 기능을 구현하고 다음을 별도 �
 | `B-DEMO-01` | 비회원 격리 Live Seed가 한 동작으로 실제 Agent Pipeline 실행 | NOT-EVALUATED | `ROLE-001`, `ROLE-003`, `EC-025` E2E; 정적 Fallback 명시 |
 | `B-E2E-01` | Auth→File→OCR→Mask→Claim→Agent→CoVe/Red Team→Policy→Passport→완료 결과의 다른 기기 조회 | NOT-EVALUATED | Production-like Live Vertical Slice; skip 0개 |
 | `B-BUILD-01` | Production Build·Migration·env/key preflight·보안 Gate | NOT-EVALUATED | `N-QLT-009`, `N-AVL-006`, `SEC-OPS-004` 증거 |
+| `B-CLAIM-01` | 사전등록 Claim 평가셋의 판정 품질과 금지 동작 0건 | NOT-EVALUATED | §15.1 Claim 판정 품질 합격 + query별 상태 원장 |
 
 Release blocker도 같은 네 상태를 사용한다. Implementation Gate가 `GO`이기 전에는 평가를 시작할 수 없다. `PASS`는 release 전용 trusted harness·raw-metric policy를 먼저 추가한 뒤 schema v3 `evidence/release-gate.json`과 동일한 `A = W`·채택 PR provenance와 27일 TTL로 검증하며, policy가 등록되지 않은 blocker는 `PASS`를 거부한다. 모두 `NOT-EVALUATED`이면 Release Gate는 `NOT-EVALUATED`, 평가가 시작됐지만 하나라도 PASS가 아니면 `NO-GO`, 모두 PASS이면 `GO`다.
 
@@ -697,6 +701,7 @@ Release blocker도 같은 네 상태를 사용한다. Implementation Gate가 `GO
 | Health·Runtime | health 100회 + DB fault + Preview/Production 각 3 deploy | health의 외부 Provider 호출 0건, DB fault HTTP 오표현 0건, 실제 Node/region/deploy ID 기록 100% |
 | 연결 단절·상태 복원 | Text/Image/PDF 각 단절·취소 10 + Revalidation 단절 10 | 동기 하위 Abort 전달 P95 ≤2초, terminal 상태 누락 0건, 소유자 상태 조회 일치 100%, Revalidation 오취소 0건 |
 | Component vertical spike | 합성 `햇살론15` Text·Image·PDF 각 3회 + Provider fault 각 1회 | 실제 Provider·Source·Storage·DB·Workflow 경로 skip 0개, 기대 terminal·비용·삭제 원장 100% 일치 |
+| Claim 판정 품질 | 사전등록 Claim 평가셋. `N-QLT-004`가 요구하는 6개 상태 표본을 모두 포함 | 금지 동작 0건: 근거 없는 확정, 검색 0건의 안전 판정, 유사사례로 사기·위법 확정, 없는 Citation·URL·수치, 복제 출처의 독립 근거 증가, 미확인 OCR 숫자·부정어 확정, 모든 정상 사례 보류. Claim extraction·verification precision·unsupported rate·coverage·conflict/abstention·정상 오탐의 표본 배분과 수용값은 평가셋과 함께 별도 PR에서 사전등록한다. 분모 0은 `N/A`이며 상태 표본 누락은 평가 실패다 |
 
 Model 비용은 2026-09-04 공식 Sonnet 5 표준 단가인 input USD 2/MTok, output USD 10/MTok Snapshot으로 계산한다. OCR·Embedding은 각 실행일의 실제 청구 단가를 별도로 고정한다. 한 합격선이라도 미달이면 해당 blocker는 해제하지 않고 최적화·범위 변경·Provider 변경 중 하나를 ADR 변경으로 결정한다.
 

@@ -330,7 +330,7 @@ const implementationBlockers = [
   "B-SPIKE-01",
 ];
 const implementationRows = parseGateRows("### 14.2 Implementation Gate 차단 항목", "### 14.3 Implementation Gate 전환 규칙");
-const releaseBlockers = ["B-DEMO-01", "B-E2E-01", "B-BUILD-01"];
+const releaseBlockers = ["B-DEMO-01", "B-E2E-01", "B-BUILD-01", "B-CLAIM-01"];
 const releaseRows = parseGateRows("### 14.4 Release Gate 차단 항목", "### 14.5 제출 후 CI 무결성 강화");
 
 const blockerStatuses = new Set(["NOT-EVALUATED", "PASS", "FAIL", "BLOCKED"]);
