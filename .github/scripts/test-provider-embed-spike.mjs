@@ -28,6 +28,9 @@ await assert.rejects(assertUnmeasuredGate({ ...audit, readJson: async (path) => 
   ? { total_count: 1, workflow_runs: [{ id: 10, head_sha: "b".repeat(40) }] } : { sha: "a".repeat(40) } }), /already dispatched/);
 await assert.rejects(assertUnmeasuredGate({ ...audit, readJson: async () => { throw new Error("forbidden"); } }), /forbidden/);
 await assert.rejects(assertUnmeasuredGate({ ...audit, readJson: async () => ({ total_count: 101, workflow_runs: [] }) }), /truncated/);
+await assert.rejects(assertUnmeasuredGate({ ...audit, readJson: async () => ({ total_count: 1, workflow_runs: [] }) }), /truncated/);
+await assert.rejects(assertUnmeasuredGate({ ...audit, readJson: async () => ({ total_count: 2,
+  workflow_runs: [{ id: 21, head_sha: "b".repeat(40) }, { id: 21, head_sha: "b".repeat(40) }] }) }), /invalid/);
 await assert.rejects(assertUnmeasuredGate({ ...audit, readJson: async () => ({ total_count: 1001, workflow_runs: [] }) }), /incomplete/);
 for (const mutate of [
   (f) => f.cases[0].queries[0].relevant_units.push("u6"),

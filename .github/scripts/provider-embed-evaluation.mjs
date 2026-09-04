@@ -87,13 +87,19 @@ export const loadEmbedFixtures = (root) => {
 export const assertUnmeasuredGate = async ({ repository, runId, attempt, fixtureBlob, readJson }) => {
   requireValue(repository === "yongzooda/finshield" && Number.isSafeInteger(runId) && runId > 0
     && attempt === 1 && /^[0-9a-f]{40}$/.test(fixtureBlob), "holdout context or rerun");
-  let checked = 0;
+  let checked = 0, total;
+  const seenRuns = new Set();
   for (let page = 1; page <= 10; page++) {
     const history = await readJson(`/repos/${repository}/actions/workflows/provider-embed-evidence.yml/runs?branch=main&event=workflow_dispatch&per_page=100&page=${page}`);
     requireValue(Array.isArray(history?.workflow_runs) && Number.isSafeInteger(history.total_count)
       && history.total_count >= 0 && history.total_count <= 1000, "incomplete holdout history");
+    total ??= history.total_count;
+    requireValue(history.total_count === total
+      && history.workflow_runs.length === Math.min(100, total - (page - 1) * 100), "truncated or changing holdout history");
     for (const run of history.workflow_runs) {
-      requireValue(Number.isSafeInteger(run.id) && /^[0-9a-f]{40}$/.test(run.head_sha), "invalid holdout history row");
+      requireValue(Number.isSafeInteger(run.id) && run.id > 0 && !seenRuns.has(run.id)
+        && /^[0-9a-f]{40}$/.test(run.head_sha), "invalid holdout history row");
+      seenRuns.add(run.id);
       if (run.id >= runId) continue;
       const previous = await readJson(`/repos/${repository}/contents/${FIXTURE_PATH}?ref=${run.head_sha}`, true);
       if (previous === null) continue; // Explicit HTTP 404: pre-v2 commits have no v2 fixture.
@@ -102,7 +108,6 @@ export const assertUnmeasuredGate = async ({ repository, runId, attempt, fixture
       checked++;
     }
     if (page * 100 >= history.total_count) return checked;
-    requireValue(history.workflow_runs.length === 100, "truncated holdout history");
   }
   throw new Error("Embedding evaluation: holdout history limit");
 };
