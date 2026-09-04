@@ -82,6 +82,17 @@ select
   has_schema_privilege('authenticated', 'demo',    'USAGE') as auth_demo;
 ```
 
+기본 권한도 확인한다. `anon` 과 `authenticated` 가 어떤 객체 종류에도 남아 있으면 안 된다. `r` 은 테이블, `S` 는 시퀀스, `f` 는 함수다.
+
+```sql
+select defaclnamespace::regnamespace::text as schema, defaclobjtype as kind, defaclacl::text as acl
+from pg_default_acl
+where defaclnamespace::regnamespace::text in ('public','private','kb','demo')
+order by 1, 2;
+```
+
+`0001` 적용 직후 조회에서 `public [f]` 에 `anon=X/postgres` 와 `authenticated=X/postgres` 가 남아 있었다. `0002` 가 이를 회수한다.
+
 ## 현재 미해결
 
 - `B-SUPABASE-01`은 통과하지 않았다. 업무 테이블·RLS positive/negative 시험·Storage 정책이 아직 없다.
@@ -91,6 +102,7 @@ select
 
 ## 적용 이력
 
-| Migration | 적용 시각 | 비고 |
+| Migration | 적용 | 비고 |
 |---|---|---|
-| `0001_finshield_baseline.sql` | 미적용 | 적용 후 이 표를 갱신한다 |
+| `0001_finshield_baseline.sql` | 적용 완료 | 첫 실행은 `drop owned by` 권한 부족으로 전체 롤백됐고, 수정 후 재실행해 적용했다 |
+| `0002_revoke_default_function_grants.sql` | 미적용 | `0001`이 빠뜨린 함수 기본 권한을 회수한다 |
