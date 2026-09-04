@@ -29,10 +29,12 @@ const root = resolve(fileURLToPath(new URL("../../", import.meta.url)));
 const validatorPath = ".github/scripts/validate-provider-stack-adr.mjs";
 const fixturePaths = [
   validatorPath,
-  ".github/fixtures/provider-embed-v1.json",
+  ".github/fixtures/provider-embed-v2.json",
   ".github/fixtures/provider-model-v1.json",
   ".github/scripts/provider-adr-digest.mjs",
   ".github/scripts/provider-embed-policy.mjs",
+  ".github/scripts/provider-embed-evaluation.mjs",
+  ".github/scripts/test-provider-embed-spike.mjs",
   ".github/scripts/provider-embed-spike.mjs",
   ".github/scripts/provider-evidence.mjs",
   ".github/scripts/provider-model-policy.mjs",
@@ -54,6 +56,7 @@ const fixturePaths = [
   "docs/03-database-spec.md",
   "docs/adr/001-p0-provider-stack.md",
   "docs/ops/provider-embed-spike.md",
+  "docs/ops/quality-evaluation-plan.md",
   "package.json",
   "package-lock.json",
 ];
@@ -444,10 +447,12 @@ for (const trustedAPathMismatch of [
   const metricErrors = [];
   validateEmbedEvidenceResult({ observations: {
     contract: { model_id: "embed-v4.0", dimension: 1024, metric: "cosine", document_input_type: "search_document", query_input_type: "search_query", embedding_type: "float", knn: "exact" },
-    dataset: { topics: 20, documents: 140, queries: 100, hard_negative_documents: 40, hard_negative_queries: 40, risk_queries: 30 },
+    dataset: { formula_version: "query-macro-unit-recall-v2", fixture_set: "finshield-korean-finance-embed-v2", split: "gate", families: 20, documents: 168, queries: 100, hard_negative_documents: 40, hard_negative_queries: 100, risk_queries: 30 },
     quality: { top_k: 5, recall_at_5: 0.89, risk_core_recall_at_5: 1, precision_at_5: 0.8 },
+    retrieval: { rows: [], counts: [], slices: [] },
+    samples: { queries: [], documents: [] },
     latency: { query_samples: 100, query_p50_ms: 500, query_p95_ms: 1400, exact_knn_samples: 100, exact_knn_p95_ms: 2 },
-    usage: { provider_requests: 102, embedded_inputs: 240, billed_input_tokens: 1000, price_per_million_usd: 0.12, calculated_cost_usd: 0.00012 },
+    usage: { provider_requests: 102, embedded_inputs: 268, billed_input_tokens: 1000, price_per_million_usd: 0.12, calculated_cost_usd: 0.00012 },
     provider: { http_status: 200, request_ids_present: 102, unique_request_ids: 102, rate_limit_headers_observed: true },
   }, environment: {
     node_version: "v24.4.1",
@@ -542,7 +547,8 @@ expectFail(
 
 for (const [name, path] of [
   ["trusted embed workflow changes invalidate its policy pin", ".github/workflows/provider-embed-evidence.yml"],
-  ["trusted embed fixture changes invalidate its policy pin", ".github/fixtures/provider-embed-v1.json"],
+  ["trusted embed fixture changes invalidate its policy pin", ".github/fixtures/provider-embed-v2.json"],
+  ["trusted embed evaluation changes invalidate its policy pin", ".github/scripts/provider-embed-evaluation.mjs"],
   ["trusted embed harness changes invalidate its policy pin", ".github/scripts/run-provider-embed-evidence.mjs"],
   ["trusted embed policy changes invalidate its policy pin", ".github/scripts/provider-embed-policy.mjs"],
   ["trusted embed spike changes invalidate its policy pin", ".github/scripts/provider-embed-spike.mjs"],

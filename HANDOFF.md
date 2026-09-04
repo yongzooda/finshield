@@ -36,6 +36,7 @@
 ## 다음 작업 순서
 
 1. `N-QLT-010` Live Spike 증거 확보와 Implementation `NO-GO` 차단 해제
+   - `B-EMBED-01`: v1 run `33861971976` 품질 실패·평가 설계 결함 이력 보존. v2는 질의별 qrels·unit Recall·단일 질문·분리 평가셋·slice·원장 재계산으로 교체한다. `docs/ops/provider-embed-spike.md`, `docs/ops/quality-evaluation-plan.md`에 따라 첫 main 실행과 별도 채택을 진행하며 PASS 전 상태는 변경하지 않는다.
 2. P0 `docs/04-feature-spec.md` — Implementation Gate가 `GO`가 된 뒤 확정
 3. 인증·FinancialCase·Claim·Evidence 수직 구현
 4. Image·PDF File Gateway·OCR·PII Gate 구현
