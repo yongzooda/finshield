@@ -596,7 +596,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `EVID-CI-01` | 저장소 baseline | OBSERVED | typecheck·lint·test와 Vercel Preview status를 `check` job이 확인 |
 | `EVID-DOC-01` | Provider 공개 기술 문서 | DOCUMENTED | Anthropic·Cohere·Supabase·CLOVA·Vercel 공개 문서의 명시된 모델 ID·기술 제한·API 동작을 2026-09-03 확인; DPA·보존·리전·계약 승인이 아님 |
 | `EVID-LAW-01` | Law 등록 IP 위험 | DOCUMENTED | 공식 공지에서 OC 등록 IP와 요청 IP 불일치 오류 가능성 확인 |
-| `EVID-MODEL-01` | Anthropic Sonnet 5 Live Spike | STALE | main run `33783765337`, artifact `9904797224`; 합성 50건·100 live request·결정적 fault 20건 합격했으나 이 개정의 ADR decision digest 변경으로 채택이 무효; 결과 파일과 실행 이력은 보존하고 재측정한다 |
+| `EVID-MODEL-01` | Anthropic Sonnet 5 Live Spike | PASS | 재정의 후 main run `33883439885`, artifact `9940998820`; 합성 50건·100 live request·결정적 fault 20건, schema·strict tool·P95·비용 policy 합격. 이전 run `33783765337`은 digest 변경으로 채택이 무효가 됐고 결과 파일은 보존한다 |
 
 위 PASS는 제품 Live Vertical Slice PASS가 아니다. GitHub의 Vercel status는 build/deploy 성공을 뜻하며 Provider key·OCR·RLS·Workflow 기능 성공을 증명하지 않는다.
 
@@ -604,7 +604,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 
 | 차단 ID | 실제로 필요한 증거 | 현재 상태 | 해제 조건 |
 |---|---|---|---|
-| `B-MODEL-01` | Anthropic Sonnet 5 auth·quota·structured output·strict tool·P95·cost | NOT-EVALUATED | §15.1 Model schema·policy·비용 합격 + sanitized artifact |
+| `B-MODEL-01` | Anthropic Sonnet 5 auth·quota·structured output·strict tool·P95·cost | PASS | §15.1 Model schema·policy·비용 합격 + sanitized artifact |
 | `B-EMBED-01` | Cohere 1차 후보 생성 Recall@20·P95·cost | NOT-EVALUATED | §15.1 후보 생성 합격 + versioned raw metric artifact |
 | `B-RETRIEVAL-01` | Metadata Filter·Keyword FTS·Vector·Rerank 종단 top 5 품질 | NOT-EVALUATED | §15.1 종단 Retrieval 합격 + query별 단계 원장; `B-SUPABASE-01` 선행 |
 | `B-OCR-01` | PDF.js·CLOVA 한국어 숫자·부정어·기관명·URL·표 Fixture | NOT-EVALUATED | §15.1 OCR·Parser 합격 + page별 diff |
