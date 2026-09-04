@@ -19,6 +19,15 @@ psql_run() {
   docker exec -i "$CONTAINER" psql -U postgres -d "$DB" -v ON_ERROR_STOP=1 -q
 }
 
+# Migration 은 멱등하게 drop ... if exists 를 쓴다. 빈 DB 에서는 그때마다
+# "does not exist, skipping" NOTICE 가 쏟아져 진짜 경고를 가린다. 적용
+# 단계에서만 NOTICE 를 숨기고 시험 단계에서는 그대로 둔다. 시험은 NOTICE
+# 로 통과 여부를 보고하기 때문이다.
+psql_apply() {
+  docker exec -i -e PGOPTIONS='-c client_min_messages=warning' \
+    "$CONTAINER" psql -U postgres -d "$DB" -v ON_ERROR_STOP=1 -q
+}
+
 if ! docker inspect "$CONTAINER" >/dev/null 2>&1; then
   echo "컨테이너 $CONTAINER 를 새로 만든다 ($IMAGE)"
   docker run -d --name "$CONTAINER" -e POSTGRES_PASSWORD=local "$IMAGE" >/dev/null
@@ -34,10 +43,10 @@ docker exec "$CONTAINER" psql -U postgres -c "drop database if exists $DB" >/dev
 docker exec "$CONTAINER" psql -U postgres -c "create database $DB" >/dev/null
 
 echo "== Migration 적용 =="
-psql_run < "$ROOT/supabase/tests/00_supabase_stub.sql" >/dev/null
+psql_apply < "$ROOT/supabase/tests/00_supabase_stub.sql" >/dev/null
 echo "  ✓ 00_supabase_stub.sql"
 for file in "$ROOT"/supabase/migrations/*.sql; do
-  psql_run < "$file" >/dev/null
+  psql_apply < "$file" >/dev/null
   echo "  ✓ $(basename "$file")"
 done
 

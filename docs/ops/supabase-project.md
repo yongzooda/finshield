@@ -155,9 +155,23 @@ where grantee = 'authenticated' and table_name = 'profiles' and privilege_type =
 order by column_name;
 ```
 
+### `0004` 적용 후 확인
+
+적용 뒤에는 사람이 표를 눈으로 대조하지 않고 digest 로 비교한다.
+
+```bash
+node supabase/tests/verify-remote.mjs
+```
+
+이 스크립트는 `.env.local` 의 `DATABASE_URL`(`finshield_worker`)로 접속해 pooler 포트, 제약 정의 digest, RLS enable+force, `anon` 권한 잔존, `private`·`kb`·`demo` 노출, 회원 테이블 접근 거부를 확인한다. DSN 과 비밀번호는 출력하지 않는다.
+
+로컬 기준 digest 는 `supabase/tests/run-local.sh` 를 돌린 뒤 같은 질의로 얻는다. 두 값이 다르면 대시보드에서 손으로 바꾼 객체가 있거나 Migration 이 부분 적용된 것이다.
+
+2026-09-05 확인 결과는 10개 테이블 제약 113건, digest `c1a134cad660fe10` 으로 로컬 기준과 완전히 일치했다. RLS 는 10개 테이블 모두 enable+force 이고, `anon` 권한 잔존과 `private`·`kb`·`demo` 노출은 0건이며, `finshield_worker` 는 회원 테이블 세 곳 모두에서 `42501` 로 거부됐다.
+
 ## 현재 미해결
 
-- `B-SUPABASE-01`은 통과하지 않았다. 남은 업무 테이블은 명세 6.3~6.10 이고, Storage 정책과 main 실행 증거 harness 가 아직 없다. 제약·RLS positive/negative 시험은 `supabase/tests/`에 있고 로컬에서 46건이 통과한다. 증거로 채택하려면 같은 시험을 실제 프로젝트 DSN 으로 main 에서 실행해야 한다.
+- `B-SUPABASE-01`은 통과하지 않았다. 남은 업무 테이블은 명세 6.3~6.10 이고, Storage 정책과 main 실행 증거 harness 가 아직 없다. 제약·RLS positive/negative 시험은 `supabase/tests/`에 있고 로컬에서 46건이 통과한다. 운영 프로젝트는 `verify-remote.mjs` Preflight 만 통과한 상태다. 증거로 채택하려면 같은 시험을 실제 프로젝트 DSN 으로 main 에서 실행해야 한다.
 - 저장소 Runtime 과 화면은 아직 PreCase 기준선이라 PreCase 코퍼스 테이블을 조회한다. `insight` 5개와 `verification` 화면이 빌드 시 사전 렌더되면서 `relation "cases" does not exist` 로 배포 전체를 실패시켰다. 여섯 화면의 사전 렌더를 끄고 요청 시점 렌더로 바꿔 빌드를 통과시켰다.
 - 이 화면들은 FinShield 전용 DB 에서 요청 시점에 실패한다. 데이터를 지어내지 않고 실패를 감추지 않기 위한 선택이며, FinShield 화면으로 재구현할 때 선언과 함께 제거한다.
 - 그동안 Vercel Production 은 환경변수 변경 이전 배포를 계속 서비스한다. 그 배포는 이전 DB 연결을 유지한다.
@@ -169,4 +183,4 @@ order by column_name;
 | `0001_finshield_baseline.sql` | 적용 완료 | 첫 실행은 `drop owned by` 권한 부족으로 전체 롤백됐고, 수정 후 재실행해 적용했다 |
 | `0002_revoke_default_function_grants.sql` | 적용 완료 | `0001`이 빠뜨린 함수 기본 권한을 회수했다 |
 | `0003_profiles.sql` | 적용 완료 | 명세 6.1 계정·금융 프로필 3개 테이블과 RLS |
-| `0004_financial_cases.sql` | 미적용 | 명세 6.2 FinancialCase·입력 7개 테이블, Enum 9종, RLS |
+| `0004_financial_cases.sql` | 적용 완료 | 명세 6.2 FinancialCase·입력 7개 테이블, Enum 9종, RLS |
