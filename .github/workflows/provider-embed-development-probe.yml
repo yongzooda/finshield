@@ -1,0 +1,74 @@
+name: Provider Embedding Development Probe
+
+# Development-split diagnostic only. This workflow never scores the B-EMBED-01
+# gate holdout and never produces adoption evidence, so it must stay separate
+# from provider-embed-evidence.yml whose dispatch history guards that holdout.
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: Confirm this is a development-split diagnostic, not gate evidence
+        required: true
+        type: choice
+        options:
+          - development-probe
+
+permissions:
+  contents: read
+
+concurrency:
+  group: provider-embed-development-probe-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    name: provider-embedding-development-probe
+    if: github.ref == 'refs/heads/main'
+    environment: provider-spike
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout trusted harness
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: trusted
+          persist-credentials: false
+          ref: ${{ github.sha }}
+
+      - name: Set up Node 24
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+
+      - name: Install trusted dependencies
+        run: npm --prefix trusted ci --ignore-scripts
+
+      - name: Validate trusted main commit
+        env:
+          WORKFLOW_HEAD_SHA: ${{ github.sha }}
+        run: |
+          if [[ "${GITHUB_REF}" != "refs/heads/main" || ! "${WORKFLOW_HEAD_SHA}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::development probe must run from an immutable main commit"
+            exit 1
+          fi
+          test "$(git -C trusted rev-parse HEAD)" = "${WORKFLOW_HEAD_SHA}"
+
+      - name: Run development split contract test
+        run: node trusted/.github/scripts/test-provider-embed-development-probe.mjs
+
+      - name: Run development split rank probe
+        env:
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+          PROBE_OUTPUT_PATH: ${{ github.workspace }}/probe-output/development-probe.json
+          TRUSTED_REPOSITORY: ${{ github.workspace }}/trusted
+        run: node trusted/.github/scripts/provider-embed-development-probe.mjs
+
+      - name: Upload development probe diagnostic
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: development-probe-${{ github.sha }}
+          path: probe-output/development-probe.json
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 9

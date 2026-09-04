@@ -55,6 +55,10 @@
 
 결과에는 Query·문서 전문, vector, API key, 원본 Provider request ID, 원본 응답을 저장하지 않는다. query/document/unit ID, cosine score, 정답 hit 분자·분모, slice, 개별 지연·청구 token만 저장한다. Request ID는 중복 확인 후 정렬된 목록의 SHA-256만 저장한다. 같은 Source의 서로 다른 passage를 독립 출처로 세지 않는다.
 
+## 개발용 split 측정과의 구분
+
+`Provider Embedding Development Probe` workflow는 개발용 4가족 20질문만 채점하는 진단 도구이며 Gate 실행이 아니다. Gate holdout 이력을 소비하지 않고 artifact도 채택 대상이 아니다. 두 workflow를 혼동해 dispatch하지 않는다. 상세는 [v2 실패 원인 분해](provider-embed-failure-analysis.md) 7절에 있다.
+
 ## 실패 이력과 진단
 
 - Run `33860915928`, main `7036ba1d27e6eba8c995eba1673e2211c6a3b904`: 설치가 약 5분 걸려 취소를 요청했으나, 그 직후 설치가 완료되어 문서 batch 2개와 Query 98개까지 처리한 뒤 HTTP 429 발생. Run은 cancelled, artifact 0개이며 채택하지 않는다.
