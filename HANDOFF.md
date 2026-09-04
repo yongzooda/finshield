@@ -8,7 +8,7 @@
 - 상위 기획: `docs/01-product-plan.md`
 - DB 구현 기준: `docs/03-database-spec.md`
 - Provider Stack ADR: `docs/adr/001-p0-provider-stack.md`
-- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — 검색 blocker 재정의 뒤 `B-MODEL-01`을 재측정해 다시 채택했고, 나머지 19개 blocker가 미해제다.
+- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `.env.example`을 FinShield 기준으로 다시 쓰면서 scope digest가 바뀌어 `B-MODEL-01` 채택이 다시 무효가 됐다. 재측정 대기이며 나머지 19개 blocker도 미해제다.
 - Product Release Gate (`N-QLT-009`): `NOT-EVALUATED` — P0 기능 구현 뒤 평가
 - 배포: Vercel `finshield` Production 연결 완료 (`https://finshield-gamma.vercel.app`)
 - 기존 PreCase 저장소·배포: 유지
@@ -37,6 +37,7 @@
 - [x] `B-EMBED-01` v2 실패 원인 분해와 개발용 split 전체 순위 측정
 - [x] 검색 blocker를 `AI-007` 파이프라인에 맞춰 1차 후보 생성과 종단 Retrieval로 재정의
 - [x] 재정의 뒤 `B-MODEL-01` main Live Evidence 재측정과 재채택
+- [x] `.env.example`을 PreCase 복사본에서 FinShield 기준으로 재작성
 
 ## 다음 작업 순서
 

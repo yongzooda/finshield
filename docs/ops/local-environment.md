@@ -1,5 +1,21 @@
 # 로컬 환경변수 설정
 
+## PreCase 자원 혼용 위험
+
+2026-09-04 확인에서 `.env.example`이 PreCase 파일과 사실상 같았고 `LAW_API_OC`의 예시값이 `precase`였다. 이 예제를 그대로 따라 `.env.local`과 Vercel 환경변수를 채우면 FinShield가 PreCase 자원을 그대로 쓰게 된다.
+
+같은 날 Production `/api/health`는 `db` 검사를 `ok`로 반환했다. FinShield 전용 Supabase 프로젝트가 아직 없으므로 이 연결 대상은 FinShield 전용 DB가 아니다. Runtime에는 `statute_cache`, `error_reports`, `usage_counters`, `api_budget` 네 곳에 쓰기가 있고 `/api/event`는 공개 엔드포인트다. 즉 읽기뿐 아니라 쓰기가 섞일 수 있다.
+
+같은 응답에서 `law_api`는 `AUTH` 오류였다. 예시값 `precase`가 FinShield 배포에서 동작하지 않는다는 뜻이며, 등록 IP 문제와 별개로 사용 승인 값이 아니다.
+
+조치 순서는 다음과 같다.
+
+1. FinShield 전용 Supabase 프로젝트를 만들고 최소 권한 Runtime 롤의 pooler DSN을 확보한다.
+2. Vercel Production·Preview의 `DATABASE_URL`, `ANTHROPIC_API_KEY`, `LAW_API_OC`를 FinShield 전용 값으로 교체하고 재배포한다.
+3. 로컬 `.env.local`도 같은 기준으로 교체한다.
+4. 교체 전까지 FinShield 배포로 트래픽을 유도하지 않는다.
+5. PreCase DB에 FinShield 배포가 남긴 행이 있는지 별도로 확인한다. 확인과 정리는 PreCase 운영자 판단으로 수행하고 이 저장소에서 PreCase에 쓰기 작업을 하지 않는다.
+
 ## 현재 확인 결과와 영향
 
 2026-09-04 확인 당시 사용자 기본 폴더와 두 Codex 작업 폴더에는 `.env.example`만 있었고 `.env`·`.env.local`은 없었다. 파일명·권한만 확인했으며 비밀값은 조회하지 않았다.
@@ -30,12 +46,12 @@ open -e .env.local
 |---|---|
 | `DATABASE_URL` | 확인된 **FinShield 전용 개발 DB**의 최소 권한 Runtime 연결 문자열. 다른 프로젝트·PreCase·운영 DB 또는 관리자 계정으로 임시 대체하지 않는다. 현재 `SET_IN_VERCEL`은 사용 가능한 연결 문자열이 아니다. |
 | `ANTHROPIC_API_KEY` | 로컬 외부 호출이 승인된 경우에만 별도 개발용 키. GitHub에 등록했다는 사실만으로 파일에 생기지 않는다. 키를 채팅·이슈·PR에 붙이지 않는다. |
-| `ANTHROPIC_MODEL` | 현재 예제의 `claude-opus-5`는 이전 Runtime 호환 값이며 FinShield 품질 승인 모델이라는 뜻이 아니다. B-MODEL-01 시험은 별도 고정 `claude-sonnet-5`를 사용한다. 이 예제는 Evidence 범위에 고정돼 있어 별도 검토 없이 기본 모델을 바꾸지 않는다. |
-| `LAW_API_OC` | FinShield에서 사용할 본인의 승인된 법제처 OC. 예제의 `precase`는 실제 사용 승인 값으로 간주하지 않는다. |
+| `ANTHROPIC_MODEL` | 예제 기본값을 ADR 4.1이 P0 기본 모델로 고정한 `claude-sonnet-5`로 맞췄다. `claude-opus-5`는 별도 평가를 통과한 고위험 재판정에만 허용하며 기본 경로와 자동 fallback에 쓰지 않는다. 모델을 바꾸면 `CONFIDENCE_THRESHOLD`를 재보정한다. 이 파일은 `B-MODEL-01` Evidence scope이므로 변경할 때마다 재측정이 필요하다. |
+| `LAW_API_OC` | FinShield에서 사용할 본인의 승인된 법제처 OC. 예제에서 `precase`를 제거했다. Production에서 이 값이 `AUTH` 오류를 낸 것을 확인했다. |
 | `LAW_API_BASE` | 예제의 공식 API 주소를 유지한다. OC·등록 IP·egress 검증을 대신하지 않는다. |
 | `PUBLIC_MCP_ENABLED` | 반드시 `false`를 유지한다. |
 | 상한·예산·세션 변수 | 예제의 모든 항목을 유지한다. 누락하면 환경 검증이 실패한다. |
-| `BATCH_DATABASE_URL` | 일반 로컬 앱 실행에 불필요하다. 배치·Migration 권한이 별도 확인되기 전에는 실제 관리자 값을 넣거나 관련 스크립트를 실행하지 않는다. |
+| `BATCH_DATABASE_URL` | 일반 로컬 앱 실행에 불필요하며 비워 두는 것이 기본이다. 배치·Migration 권한이 별도 확인되기 전에는 실제 관리자 값을 넣거나 관련 스크립트를 실행하지 않는다. Vercel 환경변수에도 넣지 않는다. |
 | `OPS_ALERT_WEBHOOK_URL` | 선택 항목. 사용하지 않으면 주석을 유지한다. |
 | `COHERE_API_KEY` | 현재 main 전용 임베딩 시험은 GitHub `provider-spike`에만 필요하다. 로컬 앱용 예제에 없는 것이 이번 시험의 실패 원인이 아니다. |
 
