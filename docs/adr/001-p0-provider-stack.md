@@ -20,9 +20,9 @@ FinShield P0는 다음 조합으로 구현한다.
 
 | 영역 | 분류 | P0 결정 | 현재 판정 |
 |---|---|---|---|
-| 생성 모델 | 사용 | Anthropic `claude-sonnet-5` 고정 Snapshot, Structured Output, Strict Tool Use | 자격증명·지연·비용 실측 전 |
+| 생성 모델 | 사용 | Anthropic `claude-sonnet-5` 고정 Snapshot, Structured Output, Strict Tool Use | 1차 실측 합격, 이 개정으로 재측정 대기 |
 | 고비용 모델 | 제한 사용 | `claude-opus-5`는 별도 평가를 통과한 고위험 Claim 재판정에만 허용 | 기본 경로 금지 |
-| 임베딩 | 사용 | Cohere `embed-v4.0`, 1024차원, cosine, 문서 `search_document`·질의 `search_query` | 한국어 금융 Recall/P95 실측 전 |
+| 임베딩 | 사용 | Cohere `embed-v4.0`, 1024차원, cosine, 문서 `search_document`·질의 `search_query` | 1차 후보 생성 단계로 한정, Recall@20 실측 전 |
 | Vector 저장 | 사용 | Supabase Postgres `pgvector`, 공용 KB와 Case 임시 Vector 물리 분리, 초기 Exact KNN | 전용 Project·RLS 시험 전 |
 | 디지털 PDF | 사용 | Mozilla `pdfjs-dist` native text 우선, 실제 통과 버전을 lockfile에 고정 | Fixture 시험 전 |
 | Image·스캔 PDF | 제한 사용 | NAVER Cloud CLOVA OCR General, 원본 외부 전송 별도 동의 후 사용 | 키·1 TPS·정확도·삭제 계약 시험 전 |
@@ -217,6 +217,19 @@ P0 임베딩은 Cohere `embed-v4.0`을 1024차원으로 사용한다. 공식 문
 
 P0 corpus는 작고 재현 가능한 평가가 우선이므로 초기에는 Exact KNN을 사용한다. Keyword 검색 결과와 Vector 검색 결과를 합성하되, 한쪽이 비었다고 Seed 근거를 삽입하지 않는다. HNSW는 corpus 크기와 P95가 Exact KNN 한계를 실제로 보인 뒤 P1에서 recall 손실을 비교해 도입한다.
 
+검색은 `AI-007`이 규정한 `Metadata Filter → Keyword → Vector → Authority/Freshness/Relevance Rerank` 순서를 따르고, 두 단계로 나눠 증명한다.
+
+| 단계 | 역할 | blocker | 무엇을 증명하는가 |
+|---|---|---|---|
+| Vector 1차 후보 생성 | Filter를 통과한 문서에서 후보 풀 20개 산출 | `B-EMBED-01` | 필요한 근거가 후보 풀 안에 빠짐없이 들어오는가 |
+| 종단 Retrieval | Filter·Keyword·Vector·Rerank를 거친 최종 top 5 | `B-RETRIEVAL-01` | 최종 결과가 대상·시점이 맞는 근거만 담는가 |
+
+`AI-006`에 따라 기관·상품 식별과 정확한 수치 조회는 Structured Retrieval을 우선하고, Vector 유사도만으로 사실을 확정하지 않는다. 대상 식별자와 시점 판별은 Metadata Filter와 Freshness Rerank가 담당하며 Vector 단계 단독에 요구하지 않는다.
+
+1차 후보 생성에서 빠진 근거는 이후 어떤 단계로도 복구할 수 없으므로 후보 풀에서 부분 회수를 허용하지 않는다. 후보 풀 크기는 Rerank 입력 상한과 corpus 대비 비율에서 정하고 관측된 순위 분포에 맞추지 않는다.
+
+Keyword 단계는 `kb.knowledge_chunks.search_vector`의 실제 Postgres FTS 경로를 사용한다. 따라서 `B-RETRIEVAL-01`은 `B-SUPABASE-01` 통과에 의존하며, FTS를 응용 코드의 근사 구현으로 대체해 통과시키지 않는다. Rerank는 `kb.source_snapshots`의 `authority_level`·`effective_from`·`effective_to`·`source_fingerprint`를 사용하는 결정적 단계이고, 같은 `source_fingerprint`는 독립 근거 수를 늘리지 않는다.
+
 Live Gate 평가셋은 최소 다음을 포함한다.
 
 - 한국어 개인신용대출 상품명·금리·중도상환·부대비용 Query
@@ -225,7 +238,7 @@ Live Gate 평가셋은 최소 다음을 포함한다.
 - 최신/만료 Snapshot 구분
 - 소비자경보의 선입금, 원격제어앱, 정부지원 사칭, OTP 요구 표현
 
-수용 기준은 평가셋 버전과 함께 기록한다. 최소 top-k Recall 기준과 P95 목표를 숫자로 확정하지 못한 상태는 Gate 통과가 아니다. Cohere 키와 실제 한국어 금융 평가가 `B-EMBED-01` policy를 통과하기 전에는 Vector 판정을 미검증으로 취급한다.
+수용 기준은 평가셋 버전과 함께 기록한다. 최소 top-k Recall 기준과 P95 목표를 숫자로 확정하지 못한 상태는 Gate 통과가 아니다. 두 단계 모두 새 시나리오 가족의 미측정 평가셋을 사용하고 이미 노출된 평가셋을 재사용하지 않는다. 실제 한국어 금융 평가가 `B-EMBED-01`과 `B-RETRIEVAL-01` policy를 통과하기 전에는 검색 판정을 미검증으로 취급한다. 후보 생성 결과를 종단 품질 합격으로 표시하지 않는다.
 
 ---
 
@@ -583,7 +596,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `EVID-CI-01` | 저장소 baseline | OBSERVED | typecheck·lint·test와 Vercel Preview status를 `check` job이 확인 |
 | `EVID-DOC-01` | Provider 공개 기술 문서 | DOCUMENTED | Anthropic·Cohere·Supabase·CLOVA·Vercel 공개 문서의 명시된 모델 ID·기술 제한·API 동작을 2026-09-03 확인; DPA·보존·리전·계약 승인이 아님 |
 | `EVID-LAW-01` | Law 등록 IP 위험 | DOCUMENTED | 공식 공지에서 OC 등록 IP와 요청 IP 불일치 오류 가능성 확인 |
-| `EVID-MODEL-01` | Anthropic Sonnet 5 Live Spike | PASS | main run `33783765337`, artifact `9904797224`; 합성 50건·100 live request·결정적 fault 20건, schema·strict tool·P95·비용 policy 합격 |
+| `EVID-MODEL-01` | Anthropic Sonnet 5 Live Spike | STALE | main run `33783765337`, artifact `9904797224`; 합성 50건·100 live request·결정적 fault 20건 합격했으나 이 개정의 ADR decision digest 변경으로 채택이 무효; 결과 파일과 실행 이력은 보존하고 재측정한다 |
 
 위 PASS는 제품 Live Vertical Slice PASS가 아니다. GitHub의 Vercel status는 build/deploy 성공을 뜻하며 Provider key·OCR·RLS·Workflow 기능 성공을 증명하지 않는다.
 
@@ -591,8 +604,9 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 
 | 차단 ID | 실제로 필요한 증거 | 현재 상태 | 해제 조건 |
 |---|---|---|---|
-| `B-MODEL-01` | Anthropic Sonnet 5 auth·quota·structured output·strict tool·P95·cost | PASS | §15.1 Model schema·policy·비용 합격 + sanitized artifact |
-| `B-EMBED-01` | Cohere 한국어 금융 Recall@5·hard negative·P95·cost | NOT-EVALUATED | §15.1 Embedding 합격 + versioned raw metric artifact |
+| `B-MODEL-01` | Anthropic Sonnet 5 auth·quota·structured output·strict tool·P95·cost | NOT-EVALUATED | §15.1 Model schema·policy·비용 합격 + sanitized artifact |
+| `B-EMBED-01` | Cohere 1차 후보 생성 Recall@20·P95·cost | NOT-EVALUATED | §15.1 후보 생성 합격 + versioned raw metric artifact |
+| `B-RETRIEVAL-01` | Metadata Filter·Keyword FTS·Vector·Rerank 종단 top 5 품질 | NOT-EVALUATED | §15.1 종단 Retrieval 합격 + query별 단계 원장; `B-SUPABASE-01` 선행 |
 | `B-OCR-01` | PDF.js·CLOVA 한국어 숫자·부정어·기관명·URL·표 Fixture | NOT-EVALUATED | §15.1 OCR·Parser 합격 + page별 diff |
 | `B-FILE-SAFETY` | encrypted/active/polyglot/bomb·격리 parser·dependency advisory | NOT-EVALUATED | §15.1 File safety 합격 |
 | `B-CONSENT-01` | OCR 동의/거절·외부 전송·삭제 격리 prototype | NOT-EVALUATED | §15.1 동의 거절 전송 0건 + 감사 row |
@@ -670,7 +684,8 @@ Release blocker도 같은 네 상태를 사용한다. Implementation Gate가 `GO
 |---|---:|---|
 | Model schema·policy | 정상 50 + refusal/timeout/429/schema 오류 20 | 정상 100% Zod post-validation, 오류의 성공 오표현 0건, 단일 호출 P95 ≤10초 |
 | Model 전체 비용 | 대표 Text 20 + Image/PDF 20 | Text P95 ≤105초·Run당 ≤USD 0.50, Image/PDF P95 ≤155초·Run당 ≤USD 0.80 |
-| Embedding | versioned 한국어 금융 Query ≥100, hard negative ≥30 | Recall@5 ≥0.90, 위험 핵심문서 Recall@5 =1.00, Precision@5 ≥0.80, P95 ≤1.5초 |
+| 1차 후보 생성 | versioned 한국어 금융 Query ≥100, hard negative ≥30 | 후보 풀 20에서 관련 unit Recall =1.00, 위험 핵심문서 Recall =1.00, P95 ≤1.5초 |
+| 종단 Retrieval | 같은 평가셋의 Filter·Keyword·Vector·Rerank 종단 결과 | Recall@5 ≥0.90, 위험 핵심문서 Recall@5 =1.00, Precision@5 ≥0.80, 모든 slice Recall@5 ≥0.90, 가족별 Precision@5 ≥0.80, P95 ≤1.5초, Filter의 정답 제외 0건, 중복 `source_fingerprint`의 독립 근거 증가 0건 |
 | OCR·Parser 정확도 | Text/Image/digital/scanned PDF ≥30문서·총 ≥100쪽 | 숫자·금리·부정어 exact 100%, 기관·상품·URL field F1 ≥0.98, 지원 페이지 성공 ≥0.95, 10쪽 P95 ≤35초 |
 | File safety | encrypted/active/embedded/polyglot/bomb/malformed ≥50 | 위험 입력 거부 100%, secret/network 접근 0건, process crash가 Agent Runtime에 전파 0건 |
 | Storage·RLS | cross-owner/worker 200 + closed slot/token reuse 20 | 허용되지 않은 read/write 0건, `upsert` 0건, 즉시 앱 접근차단 P95 ≤2초 |
@@ -690,7 +705,8 @@ Model 비용은 2026-09-04 공식 Sonnet 5 표준 단가인 input USD 2/MTok, ou
 | 시험 묶음 | 최소 시험 | 저장할 증거 |
 |---|---|---|
 | Model | 합성 50건 실제 auth·structured schema·strict tool·quota header·token/cost; refusal·timeout·429·schema error adapter fixture 20건 | model ID, latency/P95, sanitized usage·비용, request ID hash, fixture/fault mode |
-| Embedding | Korean query set, hard negative, dimension, cosine, exact KNN | eval version, Recall@k, P50/P95, cost |
+| 1차 후보 생성 | Korean query set, hard negative, dimension, cosine, exact KNN, 후보 풀 20 | eval version, Recall@k, 질문별 최소 k, P50/P95, cost |
+| 종단 Retrieval | Metadata Filter 대상·기준일, Postgres FTS, Vector, Authority/Freshness/Relevance Rerank | 단계별 후보 수, 최종 top 5 ID/score, Filter 제외 사유, fingerprint 그룹, P50/P95 |
 | Parser/OCR | Text·digital PDF·scanned PDF·Image, 숫자·부정어·표·URL | fixture hash, page result, expected/actual diff |
 | Storage | direct upload, 4.5MB 초과, 10MiB reject, RLS, signed download | object metadata, HTTP code, deletion ledger |
 | Supabase | owner isolation, profile snapshot, immutable result, vector separation | migration hash, policy test output |

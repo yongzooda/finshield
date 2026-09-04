@@ -45,9 +45,11 @@ PASS가 하나도 없는 창을 최소화하도록 ADR을 건드리지 않는 �
 2. 재정의된 두 blocker의 수용식·평가셋 사전등록 문서. 측정 전에 검토·병합한다.
 3. 새 시나리오 가족의 미측정 평가셋과 두 harness, 오프라인 계약 시험. pin된 파일을 수정하지 않고 새 파일로 만든다.
 
-### 2단계 — ADR 변경 한 번
+### 2단계 — ADR 변경 한 번 (완료)
 
-4. 한 PR에서 5.2·14.2·15.1·15.2 재정의, 새 component blocker 행 추가, `B-MODEL-01` 상태 되돌림과 index entry 제거, 새 blocker의 trusted policy 등록, `HANDOFF.md`·README·운영 문서 동기화를 함께 수행한다.
+4. 한 PR에서 5.2·14.2·15.1·15.2 재정의, `B-RETRIEVAL-01` 행 추가, `B-MODEL-01` 상태 되돌림과 index entry 제거, 검증기 blocker 목록 갱신, `HANDOFF.md`·README·운영 문서 동기화를 수행했다. 새 blocker의 trusted policy는 harness가 생기는 PR에서 등록한다. `PASS`가 0개이므로 그전까지 검증기는 evidence 검사를 건너뛴다.
+
+의존성은 추측으로 미리 넣지 않았다. `pdfjs-dist` 같은 항목을 나중에 추가하면 `B-MODEL-01`이 다시 무효가 되어 재측정이 한 번 더 필요하다. 쓰지 않는 의존성을 미리 넣는 위험과 재측정 비용을 견줘 후자를 선택했다.
 
 ### 3단계 — 재측정과 채택
 

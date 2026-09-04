@@ -1,6 +1,6 @@
 # B-MODEL-01 Provider Model Spike
 
-이 문서는 `N-QLT-010`의 `B-MODEL-01`을 재현 가능한 GitHub Actions artifact로 측정하고 별도 PR에서 채택하는 절차다. Harness가 구현됐거나 API key가 존재한다는 사실만으로 blocker를 `PASS`로 바꾸지 않는다.
+이 문서는 `N-QLT-010`의 `B-MODEL-01`을 재현 가능한 GitHub Actions artifact로 측정하고 별도 PR에서 채택하는 절차다. run `33783765337`의 1차 합격은 검색 blocker 재정의로 ADR decision digest가 바뀌어 채택이 무효가 됐다. 결과 파일과 실행 이력은 보존하고 같은 harness·합격식으로 다시 측정한다. Harness가 구현됐거나 API key가 존재한다는 사실만으로 blocker를 `PASS`로 바꾸지 않는다.
 
 ## 측정 계약
 
