@@ -116,7 +116,29 @@ Provider HTTP P95와 비용은 이 실행에서 조기 종료로 로그가 누�
 
 위 가설은 개발용 4가족 20질문에서만 검증한다. Gate holdout으로 검증하지 않는다.
 
-## 7. 후속 작업에서 지킬 것
+## 7. 개발용 split 순위 측정
+
+6절의 첫 번째 가설인 `누락된 정답 문서의 실제 순위`는 개발용 split에서 직접 측정한다. 이 값이 다음 판단을 가른다.
+
+- 누락 문서가 후보 풀 안쪽에 있으면 `AI-007`의 Metadata Filter와 Authority/Freshness Rerank 단계로 회복할 수 있다.
+- 후보 풀 밖이면 표현 자체의 한계이므로 Provider·차원 변경 검토가 필요하다.
+
+측정 도구는 `.github/scripts/provider-embed-development-probe.mjs`이고 `Provider Embedding Development Probe` workflow로 main에서 실행한다.
+
+| 항목 | 값 |
+|---|---|
+| 채점 대상 | 개발용 4가족 20질문만. Gate 질문은 Provider로 전송하지 않는다 |
+| 검색 corpus | Gate와 같은 전체 168 passage |
+| 기록 | 질문별 모든 관련 unit과 hard-negative unit의 전체 순위, 점수 |
+| 파생값 | `k = 1, 2, 3, 5, 7, 10, 20, 50`의 Recall@k, 질문별 모든 정답을 담는 최소 k, 정답보다 위의 hard negative 수 |
+| 계약 | Gate와 동일. `embed-v4.0`, 1024차원, float, cosine, Exact KNN, 재시도 없음, 요청 시작 간격 1,100ms |
+| Provider 요청 | 문서 batch 2회 + 질의 20회 = 22회 |
+
+경계는 다음과 같다. 이 실행은 Gate holdout을 소비하지 않도록 `provider-embed-evidence.yml`과 다른 workflow를 쓴다. 결과는 `development-probe-not-adoption-evidence`로 분류하며 `PASS` 판정 필드를 만들지 않고 `evidence/results/`와 Gate index에 쓰지 않는다. 채점 대상에 Gate 질문이 섞이면 실패로 종료한다. pin된 harness 파일은 수정하지 않고 export된 함수만 재사용한다.
+
+개발용 20질문은 4가족의 변형이므로 독립 사건 20개가 아니다. 이 측정으로 서비스 정확도나 Gate 통과 가능성을 발표하지 않는다.
+
+## 8. 후속 작업에서 지킬 것
 
 - 같은 v2 holdout을 다시 실행하지 않는다. 이미 노출된 회귀셋이다.
 - 라벨·질문·합격선을 결과에 맞춰 바꾸지 않는다. 불리한 질문을 빼지 않는다.
