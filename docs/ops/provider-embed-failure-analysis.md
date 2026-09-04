@@ -166,7 +166,13 @@ main `2ec62abcb32322e6956e53efdfee62f1f712bb7c`에서 run `33877345188`, job `10
 
 이 결론은 Gate 합격이 아니다. 실제 Filter·Rerank가 정답을 남기고 hard negative만 제거하는지는 아직 측정하지 않았다.
 
-## 8. 후속 작업에서 지킬 것
+## 8. 재정의 방향
+
+7.2의 결론에 따라 `B-EMBED-01`을 `AI-007` 파이프라인에 맞춰 재정의하기로 했다. Vector 단계는 1차 후보 생성으로 두고 Metadata Filter→Keyword→Vector→Rerank 전체를 별도 component blocker로 평가한다.
+
+이 재정의는 측정 결과를 본 뒤 수용식을 바꾸는 것이다. ADR 본문 변경이 `B-MODEL-01`의 기존 PASS를 무효화하므로 재시험과 재채택이 필요하다. 영향 분석과 단계별 순서는 [재정의 영향 분석과 순서](embed-blocker-redefinition-plan.md)에 있다.
+
+## 9. 후속 작업에서 지킬 것
 
 - 같은 v2 holdout을 다시 실행하지 않는다. 이미 노출된 회귀셋이다.
 - 라벨·질문·합격선을 결과에 맞춰 바꾸지 않는다. 불리한 질문을 빼지 않는다.
