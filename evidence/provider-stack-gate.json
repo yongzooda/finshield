@@ -19,7 +19,7 @@
       "artifact_digest": "sha256:a9afca7a87be037a44973a892798f9adba353c4b689e8c4f2ce501235889bd52",
       "result_path": "evidence/results/B-MODEL-01/33883439885.json",
       "result_sha256": "9015db728e20727c0be0b2b75bb21746657a15481df8fce569db8445b1e508d4",
-      "adoption_pr_number": 0,
+      "adoption_pr_number": 52,
       "adopted_at": "2026-09-04T14:29:33Z"
     }
   }
