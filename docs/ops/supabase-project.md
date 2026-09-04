@@ -83,7 +83,8 @@ select
 ## 현재 미해결
 
 - `B-SUPABASE-01`은 통과하지 않았다. 업무 테이블·RLS positive/negative 시험·Storage 정책이 아직 없다.
-- 저장소 Runtime 과 화면은 아직 PreCase 기준선이라 빌드 시 PreCase 테이블을 조회한다. 그래서 이 프로젝트를 가리키는 Vercel 빌드는 실패한다. FinShield 화면으로 교체되기 전까지 정상 상태로 취급한다.
+- 저장소 Runtime 과 화면은 아직 PreCase 기준선이라 PreCase 코퍼스 테이블을 조회한다. `insight` 5개와 `verification` 화면이 빌드 시 사전 렌더되면서 `relation "cases" does not exist` 로 배포 전체를 실패시켰다. 여섯 화면의 사전 렌더를 끄고 요청 시점 렌더로 바꿔 빌드를 통과시켰다.
+- 이 화면들은 FinShield 전용 DB 에서 요청 시점에 실패한다. 데이터를 지어내지 않고 실패를 감추지 않기 위한 선택이며, FinShield 화면으로 재구현할 때 선언과 함께 제거한다.
 - 그동안 Vercel Production 은 환경변수 변경 이전 배포를 계속 서비스한다. 그 배포는 이전 DB 연결을 유지한다.
 
 ## 적용 이력

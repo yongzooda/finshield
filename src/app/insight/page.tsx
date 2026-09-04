@@ -20,7 +20,13 @@ export const metadata: Metadata = {
 };
 
 /** 코퍼스가 늘면 값이 바뀐다. 1시간마다 다시 만든다 */
-export const revalidate = 3600;
+/**
+ * PreCase 기준선 화면이다. PreCase 코퍼스 테이블을 읽으므로 FinShield 전용
+ * DB에는 대상 테이블이 없다. 빌드 시 사전 렌더하면 존재하지 않는 관계를
+ * 조회해 배포 자체가 실패한다. 실패를 감추지 않고 요청 시점으로 옮긴다.
+ * FinShield 화면으로 재구현할 때 이 선언과 함께 제거한다.
+ */
+export const dynamic = "force-dynamic";
 
 const CARDS = [
   {
