@@ -418,7 +418,7 @@ D-018이 지정한 Case·Run·Claim·Job과 여러 테이블에서 공유하는 
 | `error_code` | `text`, 최대 64자 | Sanitized 오류 Code |
 | `created_at`, `updated_at` | `timestamptz NN` | 처리 시각 |
 
-Check는 Image/PDF의 `size_bytes`, Image `page_count=1`, PDF `page_count<=30`, Text의 Storage 객체 부재, `raw_expires_at <= created_at + interval '24 hours'`, `input_stage=RAW_DELETED → raw_delete_status=SUCCEEDED and raw_deleted_at is not null`을 강제한다. 역방향은 정상 경로인 `input_outcome=ACTIVE and claim_confirmed_at is not null`일 때만 적용하고, 조기 중단·실패·삭제에서는 마지막 처리 단계를 보존한 채 원본 삭제 축만 종결한다. P0 `URL` 행은 만들지 않고 P1 Feature Gate가 켜진 뒤에만 서버에서 생성한다.
+Check는 Image/PDF의 `size_bytes`, Image `page_count=1`, PDF `page_count<=10`, Text의 Storage 객체 부재, `raw_expires_at <= created_at + interval '24 hours'`, `input_stage=RAW_DELETED → raw_delete_status=SUCCEEDED and raw_deleted_at is not null`을 강제한다. 역방향은 정상 경로인 `input_outcome=ACTIVE and claim_confirmed_at is not null`일 때만 적용하고, 조기 중단·실패·삭제에서는 마지막 처리 단계를 보존한 채 원본 삭제 축만 종결한다. P0 `URL` 행은 만들지 않고 P1 Feature Gate가 켜진 뒤에만 서버에서 생성한다.
 
 ### `public.case_input_pages`
 
@@ -426,7 +426,7 @@ Check는 Image/PDF의 `size_bytes`, Image `page_count=1`, PDF `page_count<=30`, 
 |---|---|---|
 | `id` | `uuid PK` | 페이지·Image 단위 |
 | `owner_id`, `case_id`, `case_input_id` | `uuid NN`, 복합 FK | 소유 입력 |
-| `page_no` | `integer NN check 1..30` | 1-based |
+| `page_no` | `integer NN check 1..10` | 1-based |
 | `parse_status` | `text NN` | `PENDING|SUCCEEDED|FAILED|BLOCKED` |
 | `width`, `height` | `integer check > 0` | Locator 좌표 기준, 있으면 저장 |
 | `masked_text` | `text`, 최대 64KiB | 페이지별 마스킹 발췌 |
