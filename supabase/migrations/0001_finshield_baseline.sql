@@ -90,16 +90,24 @@ grant usage on schema public, private, kb, demo to finshield_worker;
 -- ------------------------------------------------------------
 -- 6. PreCase 로그인 역할 폐기 (명세 14.1, 14.2)
 --    app_runtime·batch_loader 는 FinShield 목표 모델에서 폐기 대상이다.
---    drop owned by 가 남은 Grant 를 함께 회수한다. 두 역할은 객체를 소유하지 않는다.
+--
+--    drop owned by 를 쓰지 않는다. Supabase 의 postgres 는 superuser 가 아니고,
+--    PostgreSQL 16 부터 CREATEROLE 역할이 만든 역할의 멤버십 기본값이
+--    admin=true, inherit=false, set=false 다. 대상 역할의 권한을 상속하지
+--    않으므로 drop owned by 는 permission denied 로 실패한다.
+--
+--    두 역할은 객체를 소유하지 않고 스키마 USAGE 만 갖는다. 부여했던 권한을
+--    명시적으로 회수하고 역할을 지운다. 회수하지 못한 권한이 남아 있으면
+--    drop role 이 의존성을 알리며 실패하므로 조용히 넘어가지 않는다.
 -- ------------------------------------------------------------
 do $$
 begin
   if exists (select 1 from pg_roles where rolname = 'app_runtime') then
-    execute 'drop owned by app_runtime';
+    execute 'revoke all on schema public, private, kb, demo from app_runtime';
     execute 'drop role app_runtime';
   end if;
   if exists (select 1 from pg_roles where rolname = 'batch_loader') then
-    execute 'drop owned by batch_loader';
+    execute 'revoke all on schema public, private, kb, demo from batch_loader';
     execute 'drop role batch_loader';
   end if;
 end
