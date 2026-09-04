@@ -1,6 +1,6 @@
 # B-MODEL-01 Provider Model Spike
 
-이 문서는 `N-QLT-010`의 `B-MODEL-01`을 재현 가능한 GitHub Actions artifact로 측정하고 별도 PR에서 채택하는 절차다. run `33783765337`의 1차 합격은 검색 blocker 재정의로 ADR decision digest가 바뀌어 채택이 무효가 됐다. 같은 harness와 합격식으로 main `41e8a5f61e676844935880ab0b59ed5bd0a005c9`에서 다시 측정한 run `33883439885`을 PR #52로 채택했다. 무효가 된 이전 결과 파일도 이력으로 보존한다. ADR 본문을 다시 바꾸면 같은 재측정이 한 번 더 필요하다. Harness가 구현됐거나 API key가 존재한다는 사실만으로 blocker를 `PASS`로 바꾸지 않는다.
+이 문서는 `N-QLT-010`의 `B-MODEL-01`을 재현 가능한 GitHub Actions artifact로 측정하고 별도 PR에서 채택하는 절차다. run `33783765337`의 1차 합격은 검색 blocker 재정의로 ADR decision digest가 바뀌어 채택이 무효가 됐다. 같은 harness와 합격식으로 main `41e8a5f61e676844935880ab0b59ed5bd0a005c9`에서 다시 측정한 run `33883439885`을 PR #52로 채택했다. 그 뒤 `.env.example`을 FinShield 기준으로 다시 쓰면서 scope digest가 바뀌어 이 채택도 무효가 됐다. 무효가 된 결과 파일은 모두 이력으로 보존하고 같은 harness로 재측정한다. scope 파일이나 ADR 본문을 바꿀 때마다 같은 재측정이 필요하다. Harness가 구현됐거나 API key가 존재한다는 사실만으로 blocker를 `PASS`로 바꾸지 않는다.
 
 ## 측정 계약
 
