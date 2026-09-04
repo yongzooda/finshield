@@ -27,6 +27,8 @@ DB 명세 7절이 `project_ref`·host·bucket·expected migration version을 sec
 
 `0001_finshield_baseline.sql`은 멱등하다. 이미 적용한 프로젝트에 다시 실행해도 안전하다.
 
+SQL Editor 는 여러 문장을 하나의 트랜잭션으로 실행한다. 중간에 실패하면 전체가 되돌아가므로 부분 적용 상태가 남지 않는다. 실패하면 오류를 고친 뒤 처음부터 다시 실행한다.
+
 ## 0001 적용 뒤 반드시 할 일
 
 `0001`은 `app_runtime` 로그인 역할을 폐기하고 `finshield_worker`를 `NOLOGIN`으로 만든다. 비밀번호를 Migration 에 넣지 않기 때문이다 (명세 14.1). 따라서 적용 직후에는 사용할 수 있는 Runtime 연결이 없다.
