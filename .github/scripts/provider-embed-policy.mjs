@@ -50,7 +50,7 @@ export const validateEmbedEvidenceResult = (result, fail) => {
   }
   if (!exactKeys(result?.environment, [
     "node_version", "region", "fixture_set_hash", "pricing_snapshot_date", "pricing_source",
-    "transport", "provider_request_ids_hash", "api_version", "official_text_input_limit_per_minute",
+    "transport", "provider_request_ids_hash", "api_version", "official_text_input_limit_per_minute", "request_interval_ms",
   ])
     || !/^v24\./.test(result.environment.node_version ?? "")
     || !/^[a-z0-9-]{2,32}$/.test(result.environment.region ?? "")
@@ -60,7 +60,8 @@ export const validateEmbedEvidenceResult = (result, fail) => {
     || result.environment.transport !== "native-fetch"
     || !/^[0-9a-f]{64}$/.test(result.environment.provider_request_ids_hash ?? "")
     || result.environment.api_version !== "v2"
-    || result.environment.official_text_input_limit_per_minute !== 2000) {
+    || result.environment.official_text_input_limit_per_minute !== 2000
+    || result.environment.request_interval_ms !== 1100) {
     fail("B-EMBED-01 environment·fixture·가격·transport·공식 quota inventory가 승인 기준과 다릅니다.");
   }
 };

@@ -459,6 +459,7 @@ for (const trustedAPathMismatch of [
     provider_request_ids_hash: "e".repeat(64),
     api_version: "v2",
     official_text_input_limit_per_minute: 2000,
+    request_interval_ms: 1100,
   } }, (message) => metricErrors.push(message));
   if (!metricErrors.some((message) => message.includes("Recall@5"))) {
     throw new Error("embedding recall below 0.90 must be rejected");
