@@ -4,6 +4,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node
 import { resolve } from "node:path";
 import { adrDecisionDigest } from "./provider-adr-digest.mjs";
 import { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
+import { assertUnmeasuredGate, FIXTURE_PATH } from "./provider-embed-evaluation.mjs";
 import {
   OFFICIAL_TEXT_INPUT_LIMIT_PER_MINUTE,
   PRICING_SNAPSHOT_DATE,
@@ -53,13 +54,16 @@ if (!/^[0-9a-f]{40}$/.test(codeSha ?? "") || codeSha !== workflowSha || !reposit
 const requirements = readAtCommit("docs/02-integrated-requirements.md");
 const adr = readAtCommit("docs/adr/001-p0-provider-stack.md");
 const scopePaths = [
-  ".github/fixtures/provider-embed-v1.json",
+  ".github/fixtures/provider-embed-v2.json",
+  ".github/scripts/provider-embed-evaluation.mjs",
   ".github/scripts/provider-adr-digest.mjs",
   ".github/scripts/provider-embed-policy.mjs",
   ".github/scripts/provider-embed-spike.mjs",
   ".github/scripts/run-provider-embed-evidence.mjs",
   ".github/workflows/provider-embed-evidence.yml",
   "docs/ops/provider-embed-spike.md",
+  "docs/ops/quality-evaluation-plan.md",
+  ".github/scripts/test-provider-embed-spike.mjs",
 ];
 const scopeInventory = scopePaths.sort().map((path) => ({
   path,
@@ -84,6 +88,22 @@ if (mode === "--run") {
     process.exit(1);
   }
   try {
+    const token = process.env.GITHUB_TOKEN;
+    if (!token) throw new Error("Embedding holdout audit token is required.");
+    await assertUnmeasuredGate({
+      repository: process.env.GITHUB_REPOSITORY,
+      runId: Number(process.env.GITHUB_RUN_ID), attempt: Number(process.env.GITHUB_RUN_ATTEMPT),
+      fixtureBlob: gitBlobSha(Buffer.from(readAtCommit(FIXTURE_PATH))),
+      readJson: async (path, allowMissing = false) => {
+        const response = await fetch(`https://api.github.com${path}`, {
+          headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" },
+          signal: AbortSignal.timeout(10_000), redirect: "error",
+        });
+        if (response.status === 404 && allowMissing) return null;
+        if (response.status !== 200) throw new Error("Embedding holdout history could not be verified.");
+        return response.json();
+      },
+    });
     const spike = await runEmbedSpike({
       root: repository,
       apiKey: process.env.COHERE_API_KEY,
@@ -117,8 +137,13 @@ if (mode === "--run") {
       redactions_applied: true,
     };
     const resultErrors = [];
-    // Trusted aggregate schema only: no external response body, ID, text or vector.
-    console.log(`B-EMBED-01 aggregate metrics: ${JSON.stringify(spike.observations)}`);
+    // Fixed ID/number-only rows permit failed-run diagnosis without raw text,
+    // vectors, response bodies or request IDs. They are NOT adoption artifacts.
+    const { retrieval, samples, ...aggregate } = spike.observations;
+    for (const row of retrieval.rows) console.log(`B-EMBED-01 ranking: ${JSON.stringify(row)}`);
+    console.log(`B-EMBED-01 quality slices: ${JSON.stringify(retrieval.slices)}`);
+    console.log(`B-EMBED-01 measured samples: ${JSON.stringify(samples)}`);
+    console.log(`B-EMBED-01 aggregate metrics: ${JSON.stringify(aggregate)}`);
     validateEmbedEvidenceResult(result, (message) => resultErrors.push(message));
     if (resultErrors.length > 0) {
       for (const message of resultErrors) console.error(`B-EMBED-01 policy failure: ${message}`);

@@ -1,0 +1,3519 @@
+{
+  "schema_version": 2,
+  "fixture_set": "finshield-korean-finance-embed-v2",
+  "status": "preregistered",
+  "scope": "synthetic multi-facet retrieval; not factual financial advice or product quality evidence",
+  "split_policy": "scenario-family-disjoint; author-visible, provider-unmeasured gate set; not independently blind",
+  "cases": [
+    {
+      "id": "loan_terms",
+      "split": "gate",
+      "coverage": [
+        "product",
+        "numeric"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "상품 식별",
+          "text": "합성 다온은행 새길신용대출의 상품코드는 DA-L11이며 새길플러스와 다른 상품이다.",
+          "source_family": "synthetic-loan_terms",
+          "evidence_unit": "loan_terms-1"
+        },
+        {
+          "key": "u2",
+          "facet": "현재 금리",
+          "text": "다온은행 새길신용대출 DA-L11의 2026년 9월 기본 연금리는 6.2%이며 우대 적용 하한은 5.7%다.",
+          "source_family": "synthetic-loan_terms",
+          "evidence_unit": "loan_terms-2"
+        },
+        {
+          "key": "u3",
+          "facet": "한도",
+          "text": "다온은행 새길신용대출 DA-L11의 대출 한도는 최대 2400만원이며 심사 결과에 따라 줄어든다.",
+          "source_family": "synthetic-loan_terms",
+          "evidence_unit": "loan_terms-3"
+        },
+        {
+          "key": "u4",
+          "facet": "상환",
+          "text": "다온은행 새길신용대출 DA-L11은 36개월 원리금균등상환이며 매월 납부한다.",
+          "source_family": "synthetic-loan_terms",
+          "evidence_unit": "loan_terms-4"
+        },
+        {
+          "key": "u5",
+          "facet": "우대 유지",
+          "text": "다온은행 새길신용대출 DA-L11의 우대 0.5%포인트는 급여이체 유지 조건이며 미충족 시 기본금리를 적용한다.",
+          "source_family": "synthetic-loan_terms",
+          "evidence_unit": "loan_terms-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 다온은행 새길플러스 DA-L12는 연 4.2%, 최대 5000만원의 담보대출이다.",
+          "source_family": "synthetic-loan_terms",
+          "evidence_unit": "loan_terms-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "다온은행 새길신용대출 DA-L11의 2025년 안내에는 연 7.0%가 적혀 있으며 2026년 9월 조건은 아니다.",
+          "source_family": "synthetic-loan_terms",
+          "evidence_unit": "loan_terms-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "다온은행 새길신용대출의 2026년 9월 상품 구분, 기본·우대금리, 한도, 상환, 우대조건을 함께 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(상품 식별·현재 금리·한도·상환·우대 유지)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "새길플러스와 혼동하지 않게 DA-L11의 현재 금리와 우대 요건, 빌릴 수 있는 금액과 갚는 방식을 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(상품 식별·현재 금리·한도·상환·우대 유지)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "다온 새길 신용 대출의 2026년 9월 조건표가 필요해. 상품 식별부터 금리·한도·납부 방식·급여이체 조건까지.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(상품 식별·현재 금리·한도·상환·우대 유지)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "DA-L11 대출을 검토해요. 다른 상품이나 작년 자료 말고 이번 9월의 기본금리, 우대, 금액 한도와 상환 근거를 모아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(상품 식별·현재 금리·한도·상환·우대 유지)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "새길신용대출 DA-L11의 2026년 9월 기본금리와 우대 하한은 얼마인가요?",
+          "relevant_units": [
+            "u2"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '현재 금리'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "mixed_bank",
+      "split": "gate",
+      "coverage": [
+        "institution",
+        "mixed_name",
+        "product"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "기관 식별",
+          "text": "합성 누리은행의 영문 표기는 Nuri Bank이고 기관코드는 NR-21이다. 누리저축은행 NS-21과 별개다.",
+          "source_family": "synthetic-mixed_bank",
+          "evidence_unit": "mixed_bank-1"
+        },
+        {
+          "key": "u2",
+          "facet": "상품 종류",
+          "text": "누리은행 Nuri Bank NR-21이 취급하는 디딤신용 NR-C4는 개인신용대출이다.",
+          "source_family": "synthetic-mixed_bank",
+          "evidence_unit": "mixed_bank-2"
+        },
+        {
+          "key": "u3",
+          "facet": "공식 주소",
+          "text": "누리은행 NR-21의 디딤신용 NR-C4 안내 페이지는 https://nuri.example/loans/c4 이다.",
+          "source_family": "synthetic-mixed_bank",
+          "evidence_unit": "mixed_bank-3"
+        },
+        {
+          "key": "u4",
+          "facet": "신청 경로",
+          "text": "누리은행 NR-21의 디딤신용 NR-C4는 영업점과 공식 앱에서만 신청을 받는다.",
+          "source_family": "synthetic-mixed_bank",
+          "evidence_unit": "mixed_bank-4"
+        },
+        {
+          "key": "u5",
+          "facet": "발행자",
+          "text": "누리은행 디딤신용 NR-C4의 2026년 9월 안내 발행자는 누리은행 여신관리부다.",
+          "source_family": "synthetic-mixed_bank",
+          "evidence_unit": "mixed_bank-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 누리저축은행 Nuri Savings Bank NS-21의 디딤론 NS-C4는 다른 기관의 상품이다.",
+          "source_family": "synthetic-mixed_bank",
+          "evidence_unit": "mixed_bank-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "누리투자 Nuri Investment NR-I1의 디딤펀드는 투자상품이며 은행 신용대출이 아니다.",
+          "source_family": "synthetic-mixed_bank",
+          "evidence_unit": "mixed_bank-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "Nuri Bank 디딤신용의 기관 식별, 대출종류, 공식 페이지, 신청경로, 안내 발행자를 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(기관 식별·상품 종류·공식 주소·신청 경로·발행자)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "누리 Bank NR-21의 NR-C4 상품을 대상으로 기관 식별과 상품 종류, 공식 주소·접수창구·문서 발행부서를 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(기관 식별·상품 종류·공식 주소·신청 경로·발행자)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "누리 은행 디딤 신용 안내가 맞는지 기관코드부터 상품종류, URL, 신청방법, 발행자까지 대조하려고 해요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(기관 식별·상품 종류·공식 주소·신청 경로·발행자)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "Nuri Savings가 아닌 Nuri Bank 대출의 기관명과 디딤신용 상품, 공식 웹주소와 신청 창구 및 발행 주체를 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(기관 식별·상품 종류·공식 주소·신청 경로·발행자)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "Nuri Bank의 기관코드는 무엇인가요?",
+          "relevant_units": [
+            "u1"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '기관 식별'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "fresh_snapshot",
+      "split": "gate",
+      "coverage": [
+        "freshness",
+        "numeric",
+        "product"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "적용 버전",
+          "text": "합성 온빛은행 이어봄대출 OB-7의 최신 조건서 V3는 2026년 9월 1일부터 적용된다. V2는 8월 31일 만료다.",
+          "source_family": "synthetic-fresh_snapshot",
+          "evidence_unit": "fresh_snapshot-1"
+        },
+        {
+          "key": "u2",
+          "facet": "금리",
+          "text": "온빛은행 이어봄대출 OB-7 V3의 기본 연금리는 6.8%다.",
+          "source_family": "synthetic-fresh_snapshot",
+          "evidence_unit": "fresh_snapshot-2"
+        },
+        {
+          "key": "u3",
+          "facet": "한도",
+          "text": "온빛은행 이어봄대출 OB-7 V3의 최대 한도는 1800만원이다.",
+          "source_family": "synthetic-fresh_snapshot",
+          "evidence_unit": "fresh_snapshot-3"
+        },
+        {
+          "key": "u4",
+          "facet": "기간",
+          "text": "온빛은행 이어봄대출 OB-7 V3의 계약기간은 24개월이다.",
+          "source_family": "synthetic-fresh_snapshot",
+          "evidence_unit": "fresh_snapshot-4"
+        },
+        {
+          "key": "u5",
+          "facet": "중도상환",
+          "text": "온빛은행 이어봄대출 OB-7 V3의 중도상환수수료율은 0.4%이며 잔여기간에 따라 계산한다.",
+          "source_family": "synthetic-fresh_snapshot",
+          "evidence_unit": "fresh_snapshot-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "온빛은행 이어봄대출 OB-7 V2의 연금리는 5.1%, 한도는 3000만원이며 2026년 8월 31일 만료됐다.",
+          "source_family": "synthetic-fresh_snapshot",
+          "evidence_unit": "fresh_snapshot-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "온빛은행 이어봄플러스 OB-8의 2026년 9월 금리는 4.8%이며 이어봄대출 OB-7과 다른 상품이다.",
+          "source_family": "synthetic-fresh_snapshot",
+          "evidence_unit": "fresh_snapshot-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "2026년 9월 4일 기준 이어봄대출 OB-7의 유효 버전, 금리, 한도, 기간, 중도상환 비용을 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(적용 버전·금리·한도·기간·중도상환)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "이어봄대출 작년 금리가 아닌 현재 V3 적용일과 이율·대출금액 상한·약정기간·중도상환 조건이 필요해요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(적용 버전·금리·한도·기간·중도상환)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "온빛 이어봄 OB-7의 9월 유효 조건을 모두 대조해 줘. 버전과 금리, 한도, 계약기간, 조기상환수수료요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(적용 버전·금리·한도·기간·중도상환)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "만료된 V2와 구별해서 이어봄대출의 현행 적용기간, 연금리, 한도와 계약기간·중도상환율 근거를 모아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(적용 버전·금리·한도·기간·중도상환)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "2026년 9월 이어봄대출 OB-7 V3의 기본금리는 얼마인가요?",
+          "relevant_units": [
+            "u2"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '금리'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "prepayment",
+      "split": "gate",
+      "coverage": [
+        "fees",
+        "numeric",
+        "negation"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "부과기간",
+          "text": "합성 마루은행 가벼운신용 MR-3은 대출 후 12개월 이내 조기상환에 중도상환수수료를 적용한다.",
+          "source_family": "synthetic-prepayment",
+          "evidence_unit": "prepayment-1"
+        },
+        {
+          "key": "u2",
+          "facet": "요율",
+          "text": "마루은행 가벼운신용 MR-3의 중도상환수수료 기본률은 0.6%다.",
+          "source_family": "synthetic-prepayment",
+          "evidence_unit": "prepayment-2"
+        },
+        {
+          "key": "u3",
+          "facet": "계산식",
+          "text": "마루은행 가벼운신용 MR-3의 조기상환 비용은 상환원금에 수수료율과 잔여기간 비율을 곱한다.",
+          "source_family": "synthetic-prepayment",
+          "evidence_unit": "prepayment-3"
+        },
+        {
+          "key": "u4",
+          "facet": "면제",
+          "text": "마루은행 가벼운신용 MR-3은 대출 실행 후 12개월이 지나면 중도상환수수료가 없다.",
+          "source_family": "synthetic-prepayment",
+          "evidence_unit": "prepayment-4"
+        },
+        {
+          "key": "u5",
+          "facet": "이자 구분",
+          "text": "마루은행 가벼운신용 MR-3의 매월 이자는 중도상환수수료와 별도 비용이다.",
+          "source_family": "synthetic-prepayment",
+          "evidence_unit": "prepayment-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "마루은행 가벼운플러스 MR-4는 첫날부터 중도상환수수료가 없으며 MR-3 조건이 아니다.",
+          "source_family": "synthetic-prepayment",
+          "evidence_unit": "prepayment-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "마루은행 가벼운신용 MR-3은 소득확인 서류를 온라인으로 제출할 수 있다.",
+          "source_family": "synthetic-prepayment",
+          "evidence_unit": "prepayment-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "MR-3 가벼운신용을 일찍 갚을 때 수수료 적용기간·율·계산법·면제시점과 이자 구분을 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(부과기간·요율·계산식·면제·이자 구분)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "마루 가벼운 신용의 조기상환 비용을 알아봐줘. 언제 붙고 몇 퍼센트인지, 잔여기간 계산과 면제, 월 이자와의 차이까지.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(부과기간·요율·계산식·면제·이자 구분)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "MR-4 말고 MR-3의 중도상환수수료 부과기간과 요율, 산식, 면제 경계, 이자 별도 여부를 대조하고 싶어요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(부과기간·요율·계산식·면제·이자 구분)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "대출 1년 안과 밖에서 가벼운신용 MR-3의 조기상환 비용이 어떻게 달라지는지 계산 기준과 월 이자와의 구분도 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(부과기간·요율·계산식·면제·이자 구분)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "가벼운신용 MR-3은 실행 후 언제 중도상환수수료가 면제되나요?",
+          "relevant_units": [
+            "u4"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '면제'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "guarantee",
+      "split": "gate",
+      "coverage": [
+        "fees",
+        "numeric"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "비용 성격",
+          "text": "합성 고운보증 연계 고운대출 GW-9의 보증료는 보증 제공에 대한 비용으로 대출 이자와 구분한다.",
+          "source_family": "synthetic-guarantee",
+          "evidence_unit": "guarantee-1"
+        },
+        {
+          "key": "u2",
+          "facet": "요율",
+          "text": "고운대출 GW-9의 보증료 기준은 보증잔액 연 0.8%다.",
+          "source_family": "synthetic-guarantee",
+          "evidence_unit": "guarantee-2"
+        },
+        {
+          "key": "u3",
+          "facet": "청구서",
+          "text": "고운대출 GW-9 보증료는 고운보증의 전자청구서에서 산정 내역을 확인한다.",
+          "source_family": "synthetic-guarantee",
+          "evidence_unit": "guarantee-3"
+        },
+        {
+          "key": "u4",
+          "facet": "납부 경로",
+          "text": "고운대출 GW-9의 보증료 납부는 계약에 지정된 기관 수납경로를 이용하며 개인 상담원 계좌를 쓰지 않는다.",
+          "source_family": "synthetic-guarantee",
+          "evidence_unit": "guarantee-4"
+        },
+        {
+          "key": "u5",
+          "facet": "환급",
+          "text": "고운대출 GW-9을 중도 종료하면 남은 보증기간의 보증료 환급 여부를 계약 조건으로 확인한다.",
+          "source_family": "synthetic-guarantee",
+          "evidence_unit": "guarantee-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "고운대출 GW-9의 이자 납입일은 매월 20일이며 보증료 청구일을 뜻하지 않는다.",
+          "source_family": "synthetic-guarantee",
+          "evidence_unit": "guarantee-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 고운주택대출 GW-H9의 보증료는 연 0.3%로 고운대출 GW-9과 다른 계약이다.",
+          "source_family": "synthetic-guarantee",
+          "evidence_unit": "guarantee-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "고운대출 GW-9 보증료의 성격·요율·청구서 확인·납부경로·중도종료 환급을 알아봐줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(비용 성격·요율·청구서·납부 경로·환급)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "개인 상담원에게 보내라는 돈이 GW-9 보증료인지 확인하려고 해요. 이자 구분과 요율, 청구·수납·환급 근거를 모아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(비용 성격·요율·청구서·납부 경로·환급)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "고운 보증 연계 대출의 보증료가 무엇이고 얼마인지, 어디서 산정을 확인하고 어떻게 납부·환급하는지 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(비용 성격·요율·청구서·납부 경로·환급)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "GW-H9과 혼동하지 말고 GW-9의 보증료 정의, 연간 요율, 청구서, 기관 납부, 남은 기간 환급 조건을 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(비용 성격·요율·청구서·납부 경로·환급)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "고운대출 GW-9 보증료 산정 내역은 어디서 확인하나요?",
+          "relevant_units": [
+            "u3"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '청구서'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "repayment",
+      "split": "gate",
+      "coverage": [
+        "numeric",
+        "product"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "기간과 방식",
+          "text": "합성 해솔은행 균형신용 HS-2는 30개월 원금균등상환 대출이다.",
+          "source_family": "synthetic-repayment",
+          "evidence_unit": "repayment-1"
+        },
+        {
+          "key": "u2",
+          "facet": "원금 분할",
+          "text": "해솔은행 균형신용 HS-2의 원금은 약정기간 동안 매월 같은 금액으로 나누어 납부한다.",
+          "source_family": "synthetic-repayment",
+          "evidence_unit": "repayment-2"
+        },
+        {
+          "key": "u3",
+          "facet": "잔액 이자",
+          "text": "해솔은행 균형신용 HS-2의 이자는 남은 원금 잔액을 기준으로 계산한다.",
+          "source_family": "synthetic-repayment",
+          "evidence_unit": "repayment-3"
+        },
+        {
+          "key": "u4",
+          "facet": "납부일",
+          "text": "해솔은행 균형신용 HS-2의 납부일은 매월 15일이며 휴일이면 다음 영업일이다.",
+          "source_family": "synthetic-repayment",
+          "evidence_unit": "repayment-4"
+        },
+        {
+          "key": "u5",
+          "facet": "총납입액",
+          "text": "해솔은행 균형신용 HS-2는 원금이 줄면서 이자 부담이 달라져 매월 총납입액이 같지 않을 수 있다.",
+          "source_family": "synthetic-repayment",
+          "evidence_unit": "repayment-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "해솔은행 균형플러스 HS-3는 원리금균등상환으로 총납입액이 일정한 별도 상품이다.",
+          "source_family": "synthetic-repayment",
+          "evidence_unit": "repayment-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "해솔은행 균형신용 HS-2의 대출 신청은 모바일 앱에서 가능하다.",
+          "source_family": "synthetic-repayment",
+          "evidence_unit": "repayment-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "균형신용 HS-2의 기간·원금 상환방식·이자기준·납부일·총납입액 변화를 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(기간과 방식·원금 분할·잔액 이자·납부일·총납입액)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "해솔 균형 신용 원금균등 대출을 검토해요. 기간과 원금·이자 계산, 휴일 납부일, 월별 금액 변화 자료가 필요해요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(기간과 방식·원금 분할·잔액 이자·납부일·총납입액)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "HS-3가 아닌 HS-2를 어떻게 갚는지 약정기간, 매월 원금, 잔액 이자, 납부시점, 총액 변화까지 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(기간과 방식·원금 분할·잔액 이자·납부일·총납입액)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "HS-2 월 납입액이 매번 같다는 설명을 대조하려고 합니다. 기간·원금분할·이자산정·납입일·총액 근거를 모아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(기간과 방식·원금 분할·잔액 이자·납부일·총납입액)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "균형신용 HS-2 납부일이 휴일이면 언제 내나요?",
+          "relevant_units": [
+            "u4"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '납부일'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "eligibility",
+      "split": "gate",
+      "coverage": [
+        "product",
+        "numeric",
+        "negation"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "재직",
+          "text": "합성 이든은행 첫걸음신용 ED-5의 신청 대상은 재직기간 6개월 이상인 근로소득자다.",
+          "source_family": "synthetic-eligibility",
+          "evidence_unit": "eligibility-1"
+        },
+        {
+          "key": "u2",
+          "facet": "소득",
+          "text": "이든은행 첫걸음신용 ED-5의 소득 요건은 연소득 2400만원 이상이다.",
+          "source_family": "synthetic-eligibility",
+          "evidence_unit": "eligibility-2"
+        },
+        {
+          "key": "u3",
+          "facet": "증빙",
+          "text": "이든은행 첫걸음신용 ED-5는 재직확인서와 소득확인 자료를 심사에 사용한다.",
+          "source_family": "synthetic-eligibility",
+          "evidence_unit": "eligibility-3"
+        },
+        {
+          "key": "u4",
+          "facet": "승인 보장 한계",
+          "text": "이든은행 첫걸음신용 ED-5는 신청 자격 충족만으로 대출 승인을 보장하지 않는다.",
+          "source_family": "synthetic-eligibility",
+          "evidence_unit": "eligibility-4"
+        },
+        {
+          "key": "u5",
+          "facet": "최종 심사",
+          "text": "이든은행 첫걸음신용 ED-5의 최종 승인과 한도는 개별 심사 결과로 확인한다.",
+          "source_family": "synthetic-eligibility",
+          "evidence_unit": "eligibility-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "이든은행 첫걸음사업자 ED-B5는 사업기간 12개월 이상인 사업자용 별도 대출이다.",
+          "source_family": "synthetic-eligibility",
+          "evidence_unit": "eligibility-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "이든은행 첫걸음신용 ED-5의 모바일 신청 페이지는 주말에도 열린다.",
+          "source_family": "synthetic-eligibility",
+          "evidence_unit": "eligibility-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "첫걸음신용 ED-5의 재직·소득 요건, 제출 증빙, 자격과 승인 차이, 최종 한도 결정 근거를 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(재직·소득·증빙·승인 보장 한계·최종 심사)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "이든 첫걸음 신용의 지원 대상인지 확인해요. 재직기간·연소득·서류와 승인 보장 여부·한도심사까지 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(재직·소득·증빙·승인 보장 한계·최종 심사)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "ED-B5 사업자대출 말고 ED-5 근로자대출의 대상과 소득 기준, 증빙, 승인·한도 판단 과정을 검토해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(재직·소득·증빙·승인 보장 한계·최종 심사)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "ED-5 조건만 맞으면 무조건 승인된다는 설명을 확인하려고 해요. 재직·소득·서류·승인한계·심사결과 근거를 모아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(재직·소득·증빙·승인 보장 한계·최종 심사)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "첫걸음신용 ED-5 신청에는 얼마의 연소득이 필요한가요?",
+          "relevant_units": [
+            "u2"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '소득'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "fee_schedule",
+      "split": "gate",
+      "coverage": [
+        "fees",
+        "numeric"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "비용 구분",
+          "text": "합성 여울은행 한결신용 YW-6의 계약서에는 약정 이자와 부대비용을 별도 항목으로 표시한다.",
+          "source_family": "synthetic-fee_schedule",
+          "evidence_unit": "fee_schedule-1"
+        },
+        {
+          "key": "u2",
+          "facet": "취급수수료",
+          "text": "여울은행 한결신용 YW-6은 대출 취급수수료를 받지 않는 조건이다.",
+          "source_family": "synthetic-fee_schedule",
+          "evidence_unit": "fee_schedule-2"
+        },
+        {
+          "key": "u3",
+          "facet": "중도상환",
+          "text": "여울은행 한결신용 YW-6의 중도상환수수료는 실행 후 1년 안에 0.5%를 잔여기간 비례로 적용한다.",
+          "source_family": "synthetic-fee_schedule",
+          "evidence_unit": "fee_schedule-3"
+        },
+        {
+          "key": "u4",
+          "facet": "증명서비",
+          "text": "여울은행 한결신용 YW-6의 증명서 발급비용은 요청한 증명서 종류별 수수료표로 확인한다.",
+          "source_family": "synthetic-fee_schedule",
+          "evidence_unit": "fee_schedule-4"
+        },
+        {
+          "key": "u5",
+          "facet": "약정 밖 청구",
+          "text": "여울은행 한결신용 YW-6의 약정 밖 비용 요구는 담당 창구에서 계약 항목과 수취 주체를 다시 확인한다.",
+          "source_family": "synthetic-fee_schedule",
+          "evidence_unit": "fee_schedule-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "여울은행 한결신용 YW-6의 신청서에는 이름과 생년월일 입력란이 있다.",
+          "source_family": "synthetic-fee_schedule",
+          "evidence_unit": "fee_schedule-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "여울은행 한결사업 YW-B6는 법인 고객용으로 취급수수료 0.2%를 받는 다른 상품이다.",
+          "source_family": "synthetic-fee_schedule",
+          "evidence_unit": "fee_schedule-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "한결신용 YW-6의 이자와 부대비용 구분, 취급비, 조기상환비, 증명서비, 약정 밖 청구 확인절차를 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(비용 구분·취급수수료·중도상환·증명서비·약정 밖 청구)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "YW-B6와 구별해서 YW-6에 어떤 비용이 붙는지 이자·취급·중도상환·증명서·추가청구 항목을 대조해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(비용 구분·취급수수료·중도상환·증명서비·약정 밖 청구)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "여울 한결 신용 비용표를 확인하려고 해요. 이자 외 취급비와 조기상환율, 증명서 발급비 및 계약 밖 요구 대응까지.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(비용 구분·취급수수료·중도상환·증명서비·약정 밖 청구)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "YW-6 대출에 추가 비용을 내라고 합니다. 비용 분류, 취급수수료 없음, 중도상환 조건, 발급비, 계약대조 근거를 모아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(비용 구분·취급수수료·중도상환·증명서비·약정 밖 청구)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "한결신용 YW-6의 취급수수료는 있나요?",
+          "relevant_units": [
+            "u2"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '취급수수료'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "delinquency",
+      "split": "gate",
+      "coverage": [
+        "numeric",
+        "negation"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "연체 발생",
+          "text": "합성 라온은행 잇는신용 RA-8은 약정 납부일을 넘기면 연체 조건을 적용한다.",
+          "source_family": "synthetic-delinquency",
+          "evidence_unit": "delinquency-1"
+        },
+        {
+          "key": "u2",
+          "facet": "가산금리",
+          "text": "라온은행 잇는신용 RA-8의 연체 가산금리는 약정금리에 3%포인트를 더한다.",
+          "source_family": "synthetic-delinquency",
+          "evidence_unit": "delinquency-2"
+        },
+        {
+          "key": "u3",
+          "facet": "상한",
+          "text": "라온은행 잇는신용 RA-8의 연체 적용금리는 계약상 연 15%를 넘지 않는다.",
+          "source_family": "synthetic-delinquency",
+          "evidence_unit": "delinquency-3"
+        },
+        {
+          "key": "u4",
+          "facet": "납입기록",
+          "text": "라온은행 잇는신용 RA-8의 실제 납부 지연 상태는 거래 내역과 납입 기록으로 확인한다.",
+          "source_family": "synthetic-delinquency",
+          "evidence_unit": "delinquency-4"
+        },
+        {
+          "key": "u5",
+          "facet": "점수 단정 한계",
+          "text": "라온은행 잇는신용 RA-8은 신용점수가 변하지 않았다는 이유만으로 연체가 없다고 단정할 수 없다.",
+          "source_family": "synthetic-delinquency",
+          "evidence_unit": "delinquency-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "라온은행 잇는주택 RA-H8의 연체 상한은 계약상 연 12%이며 RA-8과 다른 상품이다.",
+          "source_family": "synthetic-delinquency",
+          "evidence_unit": "delinquency-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 라온은행 잇는주택 RA-H8의 약정 납부일은 매월 10일이며 RA-8의 조건이 아니다.",
+          "source_family": "synthetic-delinquency",
+          "evidence_unit": "delinquency-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "잇는신용 RA-8의 연체 발생 조건과 가산율·상한, 납부기록 확인, 신용점수만으로 판단 못 하는 이유를 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(연체 발생·가산금리·상한·납입기록·점수 단정 한계)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "RA-8 연체 여부와 비용을 검토해요. 지연의 기준, 3%포인트 가산과 상한, 납입내역, 점수 해석까지 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(연체 발생·가산금리·상한·납입기록·점수 단정 한계)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "라온 잇는 신용 연체 안내 전체가 필요해요. 언제 연체인지와 추가금리·최고 적용률·기록 확인·점수의 한계를 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(연체 발생·가산금리·상한·납입기록·점수 단정 한계)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "신용점수가 그대로니 RA-8 연체도 없다는 말이 맞는지, 지연 조건과 가산이자·상한·확인자료를 함께 대조해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(연체 발생·가산금리·상한·납입기록·점수 단정 한계)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "잇는신용 RA-8의 신용점수가 그대로면 연체가 없었다고 단정할 수 있나요?",
+          "relevant_units": [
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '점수 단정 한계'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "rate_discount",
+      "split": "gate",
+      "coverage": [
+        "numeric",
+        "negation"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "기본금리",
+          "text": "합성 가온은행 보탬신용 GA-4의 기본금리는 2026년 9월 기준 연 7.3%다.",
+          "source_family": "synthetic-rate_discount",
+          "evidence_unit": "rate_discount-1"
+        },
+        {
+          "key": "u2",
+          "facet": "급여 우대",
+          "text": "가온은행 보탬신용 GA-4의 급여이체 우대는 0.4%포인트다.",
+          "source_family": "synthetic-rate_discount",
+          "evidence_unit": "rate_discount-2"
+        },
+        {
+          "key": "u3",
+          "facet": "자동납부 우대",
+          "text": "가온은행 보탬신용 GA-4의 자동납부 우대는 0.2%포인트다.",
+          "source_family": "synthetic-rate_discount",
+          "evidence_unit": "rate_discount-3"
+        },
+        {
+          "key": "u4",
+          "facet": "최저금리 조건",
+          "text": "가온은행 보탬신용 GA-4는 두 우대조건을 모두 충족해야 최저 연 6.7%가 적용된다.",
+          "source_family": "synthetic-rate_discount",
+          "evidence_unit": "rate_discount-4"
+        },
+        {
+          "key": "u5",
+          "facet": "유지 실패",
+          "text": "가온은행 보탬신용 GA-4의 우대조건을 유지하지 않으면 해당 우대폭을 다음 산정 시 제외한다.",
+          "source_family": "synthetic-rate_discount",
+          "evidence_unit": "rate_discount-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "가온은행 보탬신용 GA-4의 2025년 금리표는 기본 연 6.0%였고 현재 표가 아니다.",
+          "source_family": "synthetic-rate_discount",
+          "evidence_unit": "rate_discount-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "가온은행 보탬예금 GA-D4의 우대금리는 예금 이율이며 보탬신용 금리가 아니다.",
+          "source_family": "synthetic-rate_discount",
+          "evidence_unit": "rate_discount-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "보탬신용 GA-4의 현재 기본금리, 급여·자동납부 우대폭, 최저금리 요건과 조건 미유지 처리를 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(기본금리·급여 우대·자동납부 우대·최저금리 조건·유지 실패)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "가온 보탬 신용 광고의 6.7%를 누구나 받는지 기본률과 두 우대항목, 결합조건·유지요건까지 대조해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(기본금리·급여 우대·자동납부 우대·최저금리 조건·유지 실패)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "GA-D4 예금이 아닌 GA-4 대출의 9월 금리와 두 가지 할인, 최저금리와 우대 중단 조건이 필요해요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(기본금리·급여 우대·자동납부 우대·최저금리 조건·유지 실패)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "보탬신용 최신 금리표 전체를 확인해 줘. 기본 이율, 급여이체·자동납부 혜택, 최저 적용 기준, 미충족 시 변경까지.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(기본금리·급여 우대·자동납부 우대·최저금리 조건·유지 실패)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "보탬신용 GA-4 급여이체 우대폭은 얼마인가요?",
+          "relevant_units": [
+            "u2"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '급여 우대'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "product_scope",
+      "split": "gate",
+      "coverage": [
+        "product",
+        "institution"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "용도",
+          "text": "합성 솔빛은행 새봄생활 SB-L2는 개인 생활자금용 신용대출이다.",
+          "source_family": "synthetic-product_scope",
+          "evidence_unit": "product_scope-1"
+        },
+        {
+          "key": "u2",
+          "facet": "기관",
+          "text": "솔빛은행 새봄생활 SB-L2의 취급기관 식별자는 솔빛은행 SB-01이다.",
+          "source_family": "synthetic-product_scope",
+          "evidence_unit": "product_scope-2"
+        },
+        {
+          "key": "u3",
+          "facet": "주소",
+          "text": "솔빛은행 새봄생활 SB-L2의 공식 상품 안내는 https://solbit.example/products/l2 에 있다.",
+          "source_family": "synthetic-product_scope",
+          "evidence_unit": "product_scope-3"
+        },
+        {
+          "key": "u4",
+          "facet": "신청",
+          "text": "솔빛은행 새봄생활 SB-L2는 지점 상담과 공식 앱으로 신청할 수 있다.",
+          "source_family": "synthetic-product_scope",
+          "evidence_unit": "product_scope-4"
+        },
+        {
+          "key": "u5",
+          "facet": "문서",
+          "text": "솔빛은행 새봄생활 SB-L2 조건서는 2026년 9월 발행된 SB-L2-V1 문서를 기준으로 한다.",
+          "source_family": "synthetic-product_scope",
+          "evidence_unit": "product_scope-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 솔빛저축은행 SS-01의 새봄생활 SS-L2는 이름은 같지만 다른 기관·다른 상품이다.",
+          "source_family": "synthetic-product_scope",
+          "evidence_unit": "product_scope-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "솔빛은행 새봄사업 SB-B2는 사업자 운전자금 대출이며 개인 생활자금 상품이 아니다.",
+          "source_family": "synthetic-product_scope",
+          "evidence_unit": "product_scope-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "새봄생활 SB-L2의 대출 용도, 취급기관, 공식 상품주소, 신청방법, 기준 문서를 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(용도·기관·주소·신청·문서)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "솔빛저축은행 새봄생활과 헷갈려요. SB-L2의 기관과 용도, 공식 URL·접수창구·조건서 버전을 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(용도·기관·주소·신청·문서)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "솔빛 은행 새봄 생활 대출이 무엇인지 용도와 기관코드, 상품 페이지·신청경로·문서기준을 대조하고 싶어요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(용도·기관·주소·신청·문서)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "SB-B2가 아닌 개인용 새봄생활의 상품 성격, 운영기관, 공식 안내, 접수방법과 9월 조건서 근거가 필요해요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(용도·기관·주소·신청·문서)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "새봄생활 SB-L2 공식 상품 안내 URL을 찾아줘.",
+          "relevant_units": [
+            "u3"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '주소'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "historical_terms",
+      "split": "gate",
+      "coverage": [
+        "freshness",
+        "numeric"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "역사 버전",
+          "text": "합성 세온은행 늘봄신용 SE-6의 V1 조건서는 2026년 6월 계약에 적용되는 역사 버전이다.",
+          "source_family": "synthetic-historical_terms",
+          "evidence_unit": "historical_terms-1"
+        },
+        {
+          "key": "u2",
+          "facet": "금리",
+          "text": "세온은행 늘봄신용 SE-6 V1의 기본 연금리는 8.1%다.",
+          "source_family": "synthetic-historical_terms",
+          "evidence_unit": "historical_terms-2"
+        },
+        {
+          "key": "u3",
+          "facet": "한도",
+          "text": "세온은행 늘봄신용 SE-6 V1의 한도는 최대 1200만원이다.",
+          "source_family": "synthetic-historical_terms",
+          "evidence_unit": "historical_terms-3"
+        },
+        {
+          "key": "u4",
+          "facet": "기간",
+          "text": "세온은행 늘봄신용 SE-6 V1의 상환기간은 18개월이다.",
+          "source_family": "synthetic-historical_terms",
+          "evidence_unit": "historical_terms-4"
+        },
+        {
+          "key": "u5",
+          "facet": "수수료",
+          "text": "세온은행 늘봄신용 SE-6 V1의 중도상환수수료율은 0.7%다.",
+          "source_family": "synthetic-historical_terms",
+          "evidence_unit": "historical_terms-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "세온은행 늘봄신용 SE-6 V2는 2026년 9월 신규 계약용으로 금리 7.4%, 한도 2000만원이다.",
+          "source_family": "synthetic-historical_terms",
+          "evidence_unit": "historical_terms-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "세온은행 늘봄예금 SE-D6의 2026년 6월 연이율은 3.0%이며 대출 조건이 아니다.",
+          "source_family": "synthetic-historical_terms",
+          "evidence_unit": "historical_terms-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "2026년 6월 계약 당시 늘봄신용 SE-6의 버전·금리·한도·기간·중도상환율을 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(역사 버전·금리·한도·기간·수수료)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "늘봄신용 현재 안내 말고 6월 계약서 V1의 적용 범위, 이율, 금액상한과 상환·조기상환 조건이 필요해요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(역사 버전·금리·한도·기간·수수료)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "SE-6 과거 계약을 검토해요. 2026년 6월 버전과 기본금리·한도·기간·중도상환비를 대조해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(역사 버전·금리·한도·기간·수수료)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "세온 늘봄 신용의 6월 체결 조건 전체를 확인하고 싶어요. 역사 버전과 금리·한도·기간·수수료를 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(역사 버전·금리·한도·기간·수수료)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "2026년 6월 계약 늘봄신용 SE-6 V1 금리는 얼마였나요?",
+          "relevant_units": [
+            "u2"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '금리'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "application",
+      "split": "gate",
+      "coverage": [
+        "mixed_name",
+        "institution"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "본인확인",
+          "text": "합성 Hanul Bank 하늘은행 HN-10의 바로신용 HN-C1은 공식 앱에서 본인 확인 후 신청한다.",
+          "source_family": "synthetic-application",
+          "evidence_unit": "application-1"
+        },
+        {
+          "key": "u2",
+          "facet": "조건 확인",
+          "text": "하늘은행 바로신용 HN-C1은 신청 전에 최신 상품설명서의 대출 조건을 확인하도록 안내한다.",
+          "source_family": "synthetic-application",
+          "evidence_unit": "application-2"
+        },
+        {
+          "key": "u3",
+          "facet": "증빙 제출",
+          "text": "하늘은행 바로신용 HN-C1은 소득증빙을 공식 앱의 서류제출 메뉴로 접수한다.",
+          "source_family": "synthetic-application",
+          "evidence_unit": "application-3"
+        },
+        {
+          "key": "u4",
+          "facet": "결과 조회",
+          "text": "하늘은행 바로신용 HN-C1의 승인 여부는 앱의 심사결과 화면에서 확인한다.",
+          "source_family": "synthetic-application",
+          "evidence_unit": "application-4"
+        },
+        {
+          "key": "u5",
+          "facet": "약정",
+          "text": "하늘은행 바로신용 HN-C1은 승인 뒤 약정내용을 확인하고 계약을 체결해야 실행된다.",
+          "source_family": "synthetic-application",
+          "evidence_unit": "application-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 Hanul Savings 하늘저축은행 HNS-10의 바로신용 HNS-C1은 다른 기관의 상품이다.",
+          "source_family": "synthetic-application",
+          "evidence_unit": "application-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "하늘은행 HN-10의 채용지원 서류는 별도 채용 사이트로 제출한다.",
+          "source_family": "synthetic-application",
+          "evidence_unit": "application-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "Hanul Bank 바로신용의 본인확인·설명서·소득서류 제출·심사결과·약정 실행 절차를 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(본인확인·조건 확인·증빙 제출·결과 조회·약정)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "하늘 Bank HN-C1 신청을 검토해요. 공식 앱 인증부터 조건확인, 자료제출, 승인조회, 계약까지 근거가 필요해요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(본인확인·조건 확인·증빙 제출·결과 조회·약정)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "Hanul Savings 말고 하늘은행 바로신용의 신청 순서와 설명서, 증빙, 결과확인, 실행 전 약정을 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(본인확인·조건 확인·증빙 제출·결과 조회·약정)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "하늘 은행 바로 신용 대출 신청 과정 전체를 대조해 줘. 인증·조건검토·소득서류·승인조회·최종계약이요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(본인확인·조건 확인·증빙 제출·결과 조회·약정)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "Hanul Bank 바로신용 HN-C1 심사결과는 어디서 확인하나요?",
+          "relevant_units": [
+            "u4"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '결과 조회'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "rejection",
+      "split": "gate",
+      "coverage": [
+        "negation",
+        "product"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "공식 결과",
+          "text": "합성 도담은행 디딤생활 DD-8의 거절 여부는 공식 앱의 최종 심사결과를 기준으로 확인한다.",
+          "source_family": "synthetic-rejection",
+          "evidence_unit": "rejection-1"
+        },
+        {
+          "key": "u2",
+          "facet": "지연 해석",
+          "text": "도담은행 디딤생활 DD-8의 처리기간이 길다는 이유만으로 거절됐다고 판단하지 않는다.",
+          "source_family": "synthetic-rejection",
+          "evidence_unit": "rejection-2"
+        },
+        {
+          "key": "u3",
+          "facet": "점수 해석",
+          "text": "도담은행 디딤생활 DD-8은 신용점수 하나만으로 거절 원인을 확정하지 않는다.",
+          "source_family": "synthetic-rejection",
+          "evidence_unit": "rejection-3"
+        },
+        {
+          "key": "u4",
+          "facet": "사유 범위",
+          "text": "도담은행 디딤생활 DD-8의 거절 사유는 기관이 제공하는 공식 안내 범위에서 확인한다.",
+          "source_family": "synthetic-rejection",
+          "evidence_unit": "rejection-4"
+        },
+        {
+          "key": "u5",
+          "facet": "보완 문의",
+          "text": "도담은행 디딤생활 DD-8의 자료 보완이나 재신청 가능 여부는 공식 상담창구에 문의한다.",
+          "source_family": "synthetic-rejection",
+          "evidence_unit": "rejection-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "도담은행 디딤사업 DD-B8은 사업자용이며 별도의 심사체계를 적용한다.",
+          "source_family": "synthetic-rejection",
+          "evidence_unit": "rejection-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "도담은행 디딤생활 DD-8의 정기 이자 납부일은 매월 25일이다.",
+          "source_family": "synthetic-rejection",
+          "evidence_unit": "rejection-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "디딤생활 DD-8의 거절 확인과 지연·점수 해석, 공식 사유 조회, 보완·재신청 문의 근거를 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(공식 결과·지연 해석·점수 해석·사유 범위·보완 문의)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "DD-8 심사가 늦어 불안해요. 최종 결과 확인, 지연과 신용점수의 한계, 사유 안내와 후속 문의를 함께 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(공식 결과·지연 해석·점수 해석·사유 범위·보완 문의)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "도담 디딤 생활 거절 사유를 추측하지 않으려 해요. 공식 결과, 지연·점수 해석, 제공 사유와 보완 절차를 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(공식 결과·지연 해석·점수 해석·사유 범위·보완 문의)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "DD-B8 말고 DD-8의 심사결과가 거절인지 확인하는 방법과 지연·점수만으로 단정하면 안 되는 이유, 사유·재신청 안내가 필요해요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(공식 결과·지연 해석·점수 해석·사유 범위·보완 문의)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "디딤생활 DD-8 처리가 늦으면 거절된 건가요?",
+          "relevant_units": [
+            "u2"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '지연 해석'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "upfront",
+      "split": "gate",
+      "coverage": [
+        "risk",
+        "negation",
+        "fees"
+      ],
+      "risk_critical": true,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "위험 대응",
+          "text": "합성 미소지원 MS-11 권유에서 대출 실행 전 개인 계좌에 보증금을 보내라는 요구는 진행을 중단하고 확인할 위험 신호다.",
+          "source_family": "synthetic-upfront",
+          "evidence_unit": "upfront-1"
+        },
+        {
+          "key": "u2",
+          "facet": "정상수납 구분",
+          "text": "미소지원 MS-11 관련 합성 경보는 개인계좌 선입금과 약정에 따른 기관 수납을 구분한다.",
+          "source_family": "synthetic-upfront",
+          "evidence_unit": "upfront-2"
+        },
+        {
+          "key": "u3",
+          "facet": "독립 확인",
+          "text": "미소지원 MS-11 권유의 발신자가 준 연락처 대신 독립적으로 찾은 기관 공식 창구로 확인한다.",
+          "source_family": "synthetic-upfront",
+          "evidence_unit": "upfront-3"
+        },
+        {
+          "key": "u4",
+          "facet": "승인보장 한계",
+          "text": "미소지원 MS-11 권유에서 입금하면 승인이 보장된다는 주장은 공식 심사결과를 대신하지 않는다.",
+          "source_family": "synthetic-upfront",
+          "evidence_unit": "upfront-4"
+        },
+        {
+          "key": "u5",
+          "facet": "법적 단정 한계",
+          "text": "미소지원 MS-11 관련 합성 경보만으로 개별 거래의 법적 사기를 확정하지 않고 확인 범위와 한계를 남긴다.",
+          "source_family": "synthetic-upfront",
+          "evidence_unit": "upfront-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 미소주택 MS-H11의 보증금은 임대인에게 맡기는 임대차 보증금으로 미소지원 MS-11 대출 전 송금 요구와 다른 계약이다.",
+          "source_family": "synthetic-upfront",
+          "evidence_unit": "upfront-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "미소적금 MS-S11의 월 납입금은 저축상품 적립금으로 대출 전 보증금이 아니다.",
+          "source_family": "synthetic-upfront",
+          "evidence_unit": "upfront-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "미소지원 MS-11 대출 전 개인계좌 보증금 요구의 위험, 정상 수납과 차이, 공식 확인, 승인보장 주장과 사기 단정 한계를 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(위험 대응·정상수납 구분·독립 확인·승인보장 한계·법적 단정 한계)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "입금하면 MS-11 승인이 난대요. 중단할 신호인지, 기관 납부와 어떻게 다른지, 확인 경로와 승인·법적 단정의 한계를 검토해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(위험 대응·정상수납 구분·독립 확인·승인보장 한계·법적 단정 한계)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "MS-11 사전 보증금 권유를 확인하려고 해요. 개인계좌 위험·정상 수납 구별·독립 연락·승인 보장·확정 한계 근거가 필요해요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(위험 대응·정상수납 구분·독립 확인·승인보장 한계·법적 단정 한계)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "미소 지원 대출 선입금 안내를 대조해 줘. 위험 행동과 정상 청구의 차이, 별도 공식 연락, 승인 주장의 한계와 법적 사기 단정 여부까지.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(위험 대응·정상수납 구분·독립 확인·승인보장 한계·법적 단정 한계)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "미소지원 MS-11 대출 전 개인계좌 보증금 요구를 받으면 어떻게 하나요?",
+          "relevant_units": [
+            "u1"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '위험 대응'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "remote",
+      "split": "gate",
+      "coverage": [
+        "risk",
+        "negation"
+      ],
+      "risk_critical": true,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "원격앱 대응",
+          "text": "합성 청솔대출 CS-13 상담에서 휴대전화 원격제어 앱 설치를 요구하면 연결을 중단하고 별도 확인한다.",
+          "source_family": "synthetic-remote",
+          "evidence_unit": "remote-1"
+        },
+        {
+          "key": "u2",
+          "facet": "화면 노출",
+          "text": "청솔대출 CS-13 관련 합성 경보는 화면 공유로 인증정보가 노출될 수 있다고 설명한다.",
+          "source_family": "synthetic-remote",
+          "evidence_unit": "remote-2"
+        },
+        {
+          "key": "u3",
+          "facet": "업로드 구분",
+          "text": "청솔대출 CS-13의 공식 서류 업로드와 기기 원격제어 권한 제공은 다른 행위다.",
+          "source_family": "synthetic-remote",
+          "evidence_unit": "remote-3"
+        },
+        {
+          "key": "u4",
+          "facet": "기관명 한계",
+          "text": "청솔대출 CS-13 상담원이 기관명을 안다는 사실만으로 원격접속 요구가 안전해지는 것은 아니다.",
+          "source_family": "synthetic-remote",
+          "evidence_unit": "remote-4"
+        },
+        {
+          "key": "u5",
+          "facet": "독립 확인",
+          "text": "청솔대출 CS-13 원격접속 요구는 상담 링크가 아닌 독립적으로 찾은 공식 창구로 확인한다.",
+          "source_family": "synthetic-remote",
+          "evidence_unit": "remote-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "청솔은행 내부 직원용 원격업무 CS-EMP는 관리 기기에서 사용하는 사내 절차다.",
+          "source_family": "synthetic-remote",
+          "evidence_unit": "remote-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "청솔대출 CS-13은 분할상환 신청 시 약정일에 원금을 납부한다.",
+          "source_family": "synthetic-remote",
+          "evidence_unit": "remote-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "CS-13 상담의 원격앱·화면공유 위험, 서류 업로드와 차이, 기관명만 믿을 수 없는 이유와 공식 확인 방법을 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(원격앱 대응·화면 노출·업로드 구분·기관명 한계·독립 확인)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "청솔대출 원격접속을 허용해 달래요. 중단 기준, 화면 노출, 업로드와 구별, 기관명 사칭 가능성과 확인 경로가 필요해요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(원격앱 대응·화면 노출·업로드 구분·기관명 한계·독립 확인)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "청솔 대출 CS-13의 앱설치 요구를 검토해 줘. 원격제어와 화면공유, 정상 업로드 차이, 기관명 신뢰 한계, 재확인까지.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(원격앱 대응·화면 노출·업로드 구분·기관명 한계·독립 확인)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "CS-13 상담원이 은행 이름을 정확히 알아요. 원격설치·공유 위험과 서류 제출 차이, 이름만으로 안전한지 및 공식 확인 근거를 모아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(원격앱 대응·화면 노출·업로드 구분·기관명 한계·독립 확인)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "청솔대출 CS-13 상담원이 원격제어 앱 설치를 요구하면 어떻게 해야 하나요?",
+          "relevant_units": [
+            "u1"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '원격앱 대응'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "impersonation_v2",
+      "split": "gate",
+      "coverage": [
+        "risk",
+        "institution",
+        "negation"
+      ],
+      "risk_critical": true,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "기관 주장",
+          "text": "합성 바른지원 BR-14를 권유하는 정부기관 명의 연락은 발신자의 기관 주장만으로 공식 연락임이 확인되지 않는다.",
+          "source_family": "synthetic-impersonation_v2",
+          "evidence_unit": "impersonation_v2-1"
+        },
+        {
+          "key": "u2",
+          "facet": "발신번호",
+          "text": "바른지원 BR-14 관련 합성 경보는 발신번호가 대표번호와 같아 보여도 조작 가능성을 확인해야 한다고 설명한다.",
+          "source_family": "synthetic-impersonation_v2",
+          "evidence_unit": "impersonation_v2-2"
+        },
+        {
+          "key": "u3",
+          "facet": "상품명 지식",
+          "text": "바른지원 BR-14의 상품명을 정확히 아는 것만으로 연락 주체의 신원이 입증되지 않는다.",
+          "source_family": "synthetic-impersonation_v2",
+          "evidence_unit": "impersonation_v2-3"
+        },
+        {
+          "key": "u4",
+          "facet": "독립 확인",
+          "text": "바른지원 BR-14 사칭 여부는 문자에 적힌 번호가 아닌 별도로 찾은 공식 대표창구로 확인한다.",
+          "source_family": "synthetic-impersonation_v2",
+          "evidence_unit": "impersonation_v2-4"
+        },
+        {
+          "key": "u5",
+          "facet": "경보 한계",
+          "text": "바른지원 BR-14 관련 유사 사칭 경보는 참고 근거이며 해당 통화의 법적 사기를 단독으로 확정하지 않는다.",
+          "source_family": "synthetic-impersonation_v2",
+          "evidence_unit": "impersonation_v2-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "바른지원 BR-14의 공식 상품 안내서는 정부지원 대출의 일반 지원 요건을 설명한다.",
+          "source_family": "synthetic-impersonation_v2",
+          "evidence_unit": "impersonation_v2-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "바른장학 BR-S14의 신청 안내는 장학금 안내이며 대출 전화의 발신자 확인 자료가 아니다.",
+          "source_family": "synthetic-impersonation_v2",
+          "evidence_unit": "impersonation_v2-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "BR-14 정부기관 명의 대출 연락의 기관 주장·발신번호·상품명 한계, 독립 확인과 경보의 참고 한계를 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(기관 주장·발신번호·상품명 지식·독립 확인·경보 한계)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "대표번호와 같은 번호로 바른지원 상품명을 정확히 말했어요. 기관 사칭 여부를 판단할 때 주장·번호·이름의 한계와 확인 방법, 확정 한계가 필요해요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(기관 주장·발신번호·상품명 지식·독립 확인·경보 한계)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "바른 지원 BR-14 전화가 공식인지 확인해 줘. 기관명, 발신번호와 상품 지식만 믿을 수 있는지, 공식 재확인과 경보 해석까지.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(기관 주장·발신번호·상품명 지식·독립 확인·경보 한계)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "BR-14 사칭 의심 연락에 대해 기관 주장, 번호 조작, 상품명 지식, 별도 공식 연락, 유사경보만으로 확정 금지 근거를 모아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(기관 주장·발신번호·상품명 지식·독립 확인·경보 한계)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "정부기관에서 바른지원 BR-14를 권유한다는데 기관 이름을 말했다는 것만으로 공식 연락인가요?",
+          "relevant_units": [
+            "u1"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '기관 주장'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "otp",
+      "split": "gate",
+      "coverage": [
+        "risk",
+        "negation"
+      ],
+      "risk_critical": true,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "OTP",
+          "text": "합성 다솜대출 DS-15 상담원이 OTP 일회용 인증번호를 알려 달라고 요구하면 전달하지 않는다.",
+          "source_family": "synthetic-otp",
+          "evidence_unit": "otp-1"
+        },
+        {
+          "key": "u2",
+          "facet": "비밀번호",
+          "text": "다솜대출 DS-15 관련 합성 경보는 계좌 비밀번호를 전화 상담원에게 말하지 않도록 안내한다.",
+          "source_family": "synthetic-otp",
+          "evidence_unit": "otp-2"
+        },
+        {
+          "key": "u3",
+          "facet": "신분문서 구분",
+          "text": "다솜대출 DS-15의 신분확인 문서 제출은 인증 비밀값을 타인에게 전달하는 행위와 구분한다.",
+          "source_family": "synthetic-otp",
+          "evidence_unit": "otp-3"
+        },
+        {
+          "key": "u4",
+          "facet": "목적 주장 한계",
+          "text": "다솜대출 DS-15 상담의 본인확인 목적 주장만으로 OTP 전달이 안전해지지는 않는다.",
+          "source_family": "synthetic-otp",
+          "evidence_unit": "otp-4"
+        },
+        {
+          "key": "u5",
+          "facet": "대응",
+          "text": "다솜대출 DS-15에서 인증정보를 요구받으면 상담을 중단하고 별도 공식 창구에 확인한다.",
+          "source_family": "synthetic-otp",
+          "evidence_unit": "otp-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 다솜적금 DS-S15의 공식 앱 로그인 안내는 적금 계좌 접속 절차이며 DS-15 전화상담 요청의 확인 자료가 아니다.",
+          "source_family": "synthetic-otp",
+          "evidence_unit": "otp-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "다솜적금 DS-S15의 납입 확인번호는 대출 상담의 OTP 요청과 관련 없는 적금 거래표시다.",
+          "source_family": "synthetic-otp",
+          "evidence_unit": "otp-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "DS-15 상담의 OTP·비밀번호 요구, 신분증 제출과 차이, 본인확인 주장 한계, 중단·공식 확인 근거를 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(OTP·비밀번호·신분문서 구분·목적 주장 한계·대응)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "다솜대출에서 본인확인이라며 인증번호와 비밀번호를 물어요. 제공 금지, 서류 제출과 구분, 목적 주장과 대응을 검토해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(OTP·비밀번호·신분문서 구분·목적 주장 한계·대응)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "다솜 대출 DS-15 인증정보 요청을 확인해 줘. OTP와 비밀번호, 문서 신원확인과 차이, 상담원 목적 주장 및 대응 방법까지.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(OTP·비밀번호·신분문서 구분·목적 주장 한계·대응)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "DS-15 전화상담에 인증번호를 읽어줘도 되는지 비밀번호 원칙과 서류제출 구별, 본인확인 한계·공식 문의를 함께 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(OTP·비밀번호·신분문서 구분·목적 주장 한계·대응)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "다솜대출 DS-15 상담원에게 OTP를 읽어줘도 되나요?",
+          "relevant_units": [
+            "u1"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: 'OTP'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "channel",
+      "split": "gate",
+      "coverage": [
+        "risk",
+        "institution",
+        "negation"
+      ],
+      "risk_critical": true,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "별도 공식주소",
+          "text": "합성 봄빛대출 BB-16 관련 합성 경보는 문자 링크를 바로 누르지 말고 기관 공식 사이트를 별도로 찾도록 안내한다.",
+          "source_family": "synthetic-channel",
+          "evidence_unit": "channel-1"
+        },
+        {
+          "key": "u2",
+          "facet": "호스트 대조",
+          "text": "봄빛대출 BB-16의 공식 사이트 목록과 전달된 URL의 정규화된 호스트를 정확히 대조한다.",
+          "source_family": "synthetic-channel",
+          "evidence_unit": "channel-2"
+        },
+        {
+          "key": "u3",
+          "facet": "광고 한계",
+          "text": "봄빛대출 BB-16 관련 검색 광고가 상단에 있다는 사실은 해당 주소의 공식성을 보증하지 않는다.",
+          "source_family": "synthetic-channel",
+          "evidence_unit": "channel-3"
+        },
+        {
+          "key": "u4",
+          "facet": "기관명 한계",
+          "text": "봄빛대출 BB-16 취급기관의 이름이 맞아도 그 기관이 문자 링크를 소유한다는 증거는 아니다.",
+          "source_family": "synthetic-channel",
+          "evidence_unit": "channel-4"
+        },
+        {
+          "key": "u5",
+          "facet": "검사 범위",
+          "text": "봄빛대출 BB-16의 URL 문자열 대조만 수행한 경우 웹페이지 내용이나 접속 안전성까지 검사했다고 표현하지 않는다.",
+          "source_family": "synthetic-channel",
+          "evidence_unit": "channel-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "봄빛대출 BB-16의 공식 약정서는 원금 납부 일정과 이자 계산을 설명한다.",
+          "source_family": "synthetic-channel",
+          "evidence_unit": "channel-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "봄빛문화 BB-C16의 공연 예매 링크는 대출기관의 공식 신청 주소가 아니다.",
+          "source_family": "synthetic-channel",
+          "evidence_unit": "channel-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "BB-16 문자 링크의 독립 공식주소 확인·호스트 대조·광고 순위 한계·기관명 한계·문자열 검사 범위를 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(별도 공식주소·호스트 대조·광고 한계·기관명 한계·검사 범위)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "봄빛대출 검색광고와 문자 주소를 믿어도 될까요? 공식 사이트 찾기, 호스트 비교, 광고·기관명 한계와 검사 범위를 대조해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(별도 공식주소·호스트 대조·광고 한계·기관명 한계·검사 범위)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "봄빛 대출 BB-16 링크 확인 기준을 모아줘. 별도 접속, 정확한 호스트, 광고 순위, 기관 이름, URL 문자열 분석의 한계요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(별도 공식주소·호스트 대조·광고 한계·기관명 한계·검사 범위)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "BB-16 기관명이 맞는 문자 링크의 공식성을 확인하려고 해요. 독립 사이트·호스트 일치·광고와 이름의 한계·본문 미검사 구분이 필요해요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(별도 공식주소·호스트 대조·광고 한계·기관명 한계·검사 범위)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "봄빛대출 BB-16 문자 링크를 바로 눌러도 되나요?",
+          "relevant_units": [
+            "u1"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '별도 공식주소'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "broker",
+      "split": "gate",
+      "coverage": [
+        "risk",
+        "fees",
+        "negation"
+      ],
+      "risk_critical": true,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "성공보수 대응",
+          "text": "합성 한빛지원 HB-17 알선업자가 별도 성공보수를 요구하면 지급을 중단하고 공식 창구에 확인한다.",
+          "source_family": "synthetic-broker",
+          "evidence_unit": "broker-1"
+        },
+        {
+          "key": "u2",
+          "facet": "지급시점 한계",
+          "text": "한빛지원 HB-17 관련 합성 경보는 승인 뒤 지급한다는 이유만으로 별도 중개비 요구가 안전해지지 않는다고 설명한다.",
+          "source_family": "synthetic-broker",
+          "evidence_unit": "broker-2"
+        },
+        {
+          "key": "u3",
+          "facet": "이자 구별",
+          "text": "한빛지원 HB-17의 은행 약정이자와 알선업자 성공보수는 수취 주체와 비용 성격이 다르다.",
+          "source_family": "synthetic-broker",
+          "evidence_unit": "broker-3"
+        },
+        {
+          "key": "u4",
+          "facet": "청구 기록",
+          "text": "한빛지원 HB-17 중개비 요구를 확인할 때는 청구 주체와 계약상 항목을 구분해 기록한다.",
+          "source_family": "synthetic-broker",
+          "evidence_unit": "broker-4"
+        },
+        {
+          "key": "u5",
+          "facet": "법적 판단 한계",
+          "text": "한빛지원 HB-17의 개별 수수료 요구에 대한 법적 결론은 관련 공식 근거와 적용 사실을 확인하기 전 확정하지 않는다.",
+          "source_family": "synthetic-broker",
+          "evidence_unit": "broker-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "한빛지원 HB-17의 대출 만기 연장은 별도의 신용심사를 거친다.",
+          "source_family": "synthetic-broker",
+          "evidence_unit": "broker-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "한빛주택 HB-H17의 감정평가 비용은 담보평가 업체 청구로 알선업자 성공보수와 다른 항목이다.",
+          "source_family": "synthetic-broker",
+          "evidence_unit": "broker-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "HB-17 알선 성공보수의 중단·확인, 승인 뒤 지급의 한계, 이자와 차이, 청구 기록, 법적 확정 한계를 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(성공보수 대응·지급시점 한계·이자 구별·청구 기록·법적 판단 한계)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "한빛지원 승인 후에만 중개비를 달래요. 지급 중단과 확인, 지급시점 의미, 은행 이자 구별, 청구항목과 법적 판단 근거가 필요해요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(성공보수 대응·지급시점 한계·이자 구별·청구 기록·법적 판단 한계)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "한빛 지원 HB-17 알선료를 검토해 줘. 성공보수 요구 대응과 승인 후 지급, 약정이자 차이, 계약 대조와 확정 한계까지.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(성공보수 대응·지급시점 한계·이자 구별·청구 기록·법적 판단 한계)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "HB-17 성공보수가 은행 이자와 같은 비용이라는 설명을 확인해 줘. 요구 대응·승인시점·비용 차이·수취주체·법적 판단 한계도요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(성공보수 대응·지급시점 한계·이자 구별·청구 기록·법적 판단 한계)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "한빛지원 HB-17 알선 성공보수를 요구받으면 어떻게 해야 하나요?",
+          "relevant_units": [
+            "u1"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '성공보수 대응'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "dev_limit",
+      "split": "development",
+      "coverage": [
+        "numeric",
+        "product"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "한도",
+          "text": "합성 아람은행 디딤신용 AR-1의 최대 대출 한도는 1600만원이다.",
+          "source_family": "synthetic-dev_limit",
+          "evidence_unit": "dev_limit-1"
+        },
+        {
+          "key": "u2",
+          "facet": "기간",
+          "text": "아람은행 디딤신용 AR-1의 계약기간은 20개월이다.",
+          "source_family": "synthetic-dev_limit",
+          "evidence_unit": "dev_limit-2"
+        },
+        {
+          "key": "u3",
+          "facet": "금리",
+          "text": "아람은행 디딤신용 AR-1의 기본 연금리는 7.6%다.",
+          "source_family": "synthetic-dev_limit",
+          "evidence_unit": "dev_limit-3"
+        },
+        {
+          "key": "u4",
+          "facet": "상환",
+          "text": "아람은행 디딤신용 AR-1은 만기일시상환이다.",
+          "source_family": "synthetic-dev_limit",
+          "evidence_unit": "dev_limit-4"
+        },
+        {
+          "key": "u5",
+          "facet": "심사",
+          "text": "아람은행 디딤신용 AR-1은 개별심사로 실제 한도가 결정된다.",
+          "source_family": "synthetic-dev_limit",
+          "evidence_unit": "dev_limit-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "아람은행 디딤주택 AR-H1의 최대 한도는 9000만원이다.",
+          "source_family": "synthetic-dev_limit",
+          "evidence_unit": "dev_limit-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "아람은행 AR-1의 채용 안내는 직원 모집 자료다.",
+          "source_family": "synthetic-dev_limit",
+          "evidence_unit": "dev_limit-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "아람 AR-1 한도·기간·금리·상환·개별심사를 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(한도·기간·금리·상환·심사)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "아람 디딤신용 최대금액과 기간, 이율, 갚는 법과 한도심사를 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(한도·기간·금리·상환·심사)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "AR-H1 아닌 AR-1의 금액상한·기간·금리·상환방식·심사를 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(한도·기간·금리·상환·심사)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "아람 대출 AR-1 계약의 한도·기간·금리·상환·심사조건이 필요해요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(한도·기간·금리·상환·심사)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "아람 디딤신용 AR-1의 대출 한도는 얼마인가요?",
+          "relevant_units": [
+            "u1"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '한도'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "dev_name",
+      "split": "development",
+      "coverage": [
+        "institution",
+        "mixed_name"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "기관",
+          "text": "합성 Serin Bank 세린은행 기관코드는 SR-1이다.",
+          "source_family": "synthetic-dev_name",
+          "evidence_unit": "dev_name-1"
+        },
+        {
+          "key": "u2",
+          "facet": "상품",
+          "text": "세린은행 SR-1의 연결대출 SR-C1은 신용대출이다.",
+          "source_family": "synthetic-dev_name",
+          "evidence_unit": "dev_name-2"
+        },
+        {
+          "key": "u3",
+          "facet": "주소",
+          "text": "세린은행 연결대출의 공식 주소는 https://serin.example/c1 이다.",
+          "source_family": "synthetic-dev_name",
+          "evidence_unit": "dev_name-3"
+        },
+        {
+          "key": "u4",
+          "facet": "접수",
+          "text": "세린은행 SR-C1 신청은 영업점에서 한다.",
+          "source_family": "synthetic-dev_name",
+          "evidence_unit": "dev_name-4"
+        },
+        {
+          "key": "u5",
+          "facet": "발행",
+          "text": "세린은행 SR-C1 문서는 2026년 9월 여신부가 발행했다.",
+          "source_family": "synthetic-dev_name",
+          "evidence_unit": "dev_name-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "Serin Savings 세린저축은행은 SR-S1이라는 별도 기관이다.",
+          "source_family": "synthetic-dev_name",
+          "evidence_unit": "dev_name-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "세린은행 채용 원서는 채용팀에 제출한다.",
+          "source_family": "synthetic-dev_name",
+          "evidence_unit": "dev_name-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "Serin Bank 연결대출의 기관·상품종류·주소·신청·발행자를 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(기관·상품·주소·접수·발행)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "세린 Bank 연결대출의 기관코드와 종류, URL, 접수창구, 발행부서를 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(기관·상품·주소·접수·발행)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "세린 저축은행 아닌 SR-1의 연결대출 식별·종류·주소·신청경로·문서 발행자를 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(기관·상품·주소·접수·발행)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "세린 은행 연결 대출의 기관명과 상품종류·공식URL·접수·발행 근거를 모아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(기관·상품·주소·접수·발행)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "세린은행 SR-C1의 신청 창구는 어디인가요?",
+          "relevant_units": [
+            "u4"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '접수'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "dev_date",
+      "split": "development",
+      "coverage": [
+        "freshness",
+        "numeric"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "버전",
+          "text": "합성 푸른은행 푸른신용 PU-1 V2는 2026년 9월 적용 조건이다.",
+          "source_family": "synthetic-dev_date",
+          "evidence_unit": "dev_date-1"
+        },
+        {
+          "key": "u2",
+          "facet": "금리",
+          "text": "푸른신용 PU-1 V2 금리는 연 8.3%다.",
+          "source_family": "synthetic-dev_date",
+          "evidence_unit": "dev_date-2"
+        },
+        {
+          "key": "u3",
+          "facet": "한도",
+          "text": "푸른신용 PU-1 V2 한도는 1100만원이다.",
+          "source_family": "synthetic-dev_date",
+          "evidence_unit": "dev_date-3"
+        },
+        {
+          "key": "u4",
+          "facet": "기간",
+          "text": "푸른신용 PU-1 V2 기간은 22개월이다.",
+          "source_family": "synthetic-dev_date",
+          "evidence_unit": "dev_date-4"
+        },
+        {
+          "key": "u5",
+          "facet": "수수료",
+          "text": "푸른신용 PU-1 V2 중도상환수수료는 없다.",
+          "source_family": "synthetic-dev_date",
+          "evidence_unit": "dev_date-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "푸른신용 PU-1 V1은 2026년 8월 만료됐고 금리 6.0%다.",
+          "source_family": "synthetic-dev_date",
+          "evidence_unit": "dev_date-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "푸른예금 PU-D1의 금리는 예금 이율이다.",
+          "source_family": "synthetic-dev_date",
+          "evidence_unit": "dev_date-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "PU-1의 9월 버전·금리·한도·기간·중도상환 조건을 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(버전·금리·한도·기간·수수료)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "푸른신용 현재 V2 적용시점, 이율·최대금액·기간·조기상환비를 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(버전·금리·한도·기간·수수료)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "PU-1 만료 V1 말고 9월 버전과 금리·한도·기간·수수료를 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(버전·금리·한도·기간·수수료)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "푸른 신용 PU-1의 2026년 9월 조건서·이자율·한도·기간·조기상환 근거가 필요해요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(버전·금리·한도·기간·수수료)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "푸른신용 PU-1 V2 금리를 알려줘.",
+          "relevant_units": [
+            "u2"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '금리'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    },
+    {
+      "id": "dev_warning",
+      "split": "development",
+      "coverage": [
+        "risk",
+        "negation"
+      ],
+      "risk_critical": true,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "중단",
+          "text": "합성 너울지원 NW-1에서 개인계좌 선입금을 요구하면 진행을 중단한다.",
+          "source_family": "synthetic-dev_warning",
+          "evidence_unit": "dev_warning-1"
+        },
+        {
+          "key": "u2",
+          "facet": "수납 구별",
+          "text": "너울지원 NW-1 선입금과 기관의 정상 약정 수납은 구분한다.",
+          "source_family": "synthetic-dev_warning",
+          "evidence_unit": "dev_warning-2"
+        },
+        {
+          "key": "u3",
+          "facet": "독립 확인",
+          "text": "너울지원 NW-1 확인은 별도 공식 창구로 한다.",
+          "source_family": "synthetic-dev_warning",
+          "evidence_unit": "dev_warning-3"
+        },
+        {
+          "key": "u4",
+          "facet": "승인 한계",
+          "text": "너울지원 NW-1 입금만으로 승인이 보장되지 않는다.",
+          "source_family": "synthetic-dev_warning",
+          "evidence_unit": "dev_warning-4"
+        },
+        {
+          "key": "u5",
+          "facet": "법적 한계",
+          "text": "너울지원 NW-1 경보만으로 개별 거래의 법적 사기를 확정하지 않는다.",
+          "source_family": "synthetic-dev_warning",
+          "evidence_unit": "dev_warning-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 너울주택 NW-H1의 보증금은 임대차 계약의 보증금이며 NW-1 대출 송금 요구와 다른 거래다.",
+          "source_family": "synthetic-dev_warning",
+          "evidence_unit": "dev_warning-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "너울적금 NW-S1은 저축상품이다.",
+          "source_family": "synthetic-dev_warning",
+          "evidence_unit": "dev_warning-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "NW-1 선입금 중단·정상수납 구별·독립확인·승인보장·법적확정 한계를 찾아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(중단·수납 구별·독립 확인·승인 한계·법적 한계)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "너울지원 선송금 요구를 검토해 줘. 중단과 정상납부 구분, 공식확인, 승인과 법적판단 한계까지.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(중단·수납 구별·독립 확인·승인 한계·법적 한계)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "NW-1 개인계좌 보증금의 위험, 정상 수납과 차이, 확인 경로, 승인 보장 여부·사기 단정 한계가 필요해요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(중단·수납 구별·독립 확인·승인 한계·법적 한계)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "너울 지원의 사전입금에 대해 중단·기관납부 구별·별도 연락·승인 불확실·사기 확정 제한 근거를 모아줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문에 명시된 다섯 항목(중단·수납 구별·독립 확인·승인 한계·법적 한계)을 각각 직접 다룬다. 다른 대상·시점 또는 요청 밖 사실은 제외한다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "너울지원 NW-1 개인계좌 선입금 요구에 어떻게 대응하나요?",
+          "relevant_units": [
+            "u1"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "단일 사실 질의: '중단'만 직접 답한다. 같은 상품의 다른 항목은 이 질문의 정답이 아니다."
+        }
+      ]
+    }
+  ]
+}

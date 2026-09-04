@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: provider-embed-evidence-${{ inputs.blocker_id }}-${{ github.sha }}
@@ -58,6 +59,7 @@ jobs:
           EVIDENCE_REGION: github-hosted
           GITHUB_RUN_ATTEMPT: ${{ github.run_attempt }}
           GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_TOKEN: ${{ github.token }}
           TRUSTED_REPOSITORY: ${{ github.workspace }}/trusted
           WORKFLOW_HEAD_SHA: ${{ github.sha }}
         run: node trusted/.github/scripts/run-provider-embed-evidence.mjs --run
