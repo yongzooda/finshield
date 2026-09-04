@@ -56,7 +56,7 @@ Runner는 Provider 호출 전에 GitHub dispatch 이력과 과거 commit의 fixt
 
 Recall은 관련 항목 중 찾은 비율, Precision은 반환 항목 중 관련 비율이라는 [IR 기본 정의](https://nlp.stanford.edu/IR-book/html/htmledition/evaluation-of-unranked-retrieval-sets-1.html)를 따른다. v1의 지정 primary hit와 다르므로 v1/v2 점수를 성능 개선 전후처럼 비교하지 않는다. 상위 합격 수치와 Provider·dimension·cosine·Exact KNN 선택은 변경하지 않는다.
 
-v2의 완벽한 순위도 단일질문 20개 때문에 Precision 최고값은 (80×5 + 20×1)/500 = 0.84다. 이론상 가능한 기준인지 먼저 확인했으며 0.80을 낮추거나 관련 문서를 추가하지 않는다. 전체 통과에는 적어도 400/500 relevant hit가 필요하다. 표본 구성이 매우 엄격하다는 한계를 공개하고, 실제 실패를 봐도 단일질문을 제거하지 않는다.
+v2의 완벽한 순위도 단일질문 20개 때문에 Precision 최고값은 (80×5 + 20×1)/500 = 0.84다. 이론상 가능한 기준인지 먼저 확인했으며 0.80을 낮추거나 관련 문서를 추가하지 않는다. 전체 통과에는 적어도 400/500 relevant hit가 필요하다. 표본 구성이 매우 엄격하다는 한계를 공개하고, 실제 실패를 봐도 단일질문을 제거하지 않는다. 다중 항목 질문은 관련 unit 수와 top-k가 모두 5라서 해당 slice의 Precision@5와 Recall@5가 항상 같은 값이 된다. 두 지표를 독립된 두 축으로 읽지 않는다. 단일질문 20개가 만점이라고 가정하면 Recall 0.90은 정답 칸 370, Precision 0.80은 정답 칸 400을 요구하므로 v2에서는 Precision 선이 더 엄격하다. 가족별 Precision 0.80은 관련 칸 상한 21에 분모 25이므로 가족당 누락 허용치가 1칸이다. 실측 분해는 [v2 실패 원인 분해](provider-embed-failure-analysis.md)에 있다.
 
 전체 수치만 공개하지 않는다. 보존한 query별 counts에서 단일/다중, 시나리오 가족, numeric/mixed_name/freshness 등 slice와 각 slice의 위험 핵심 Recall을 함께 재계산한다. v2의 추가 사전등록 조건으로 모든 slice의 Recall ≥0.90, 각 가족의 Precision ≥0.80을 요구해 특정 가족의 실패가 전체 평균에 가려지지 않게 한다. 단일 질문 slice의 Precision 상한은 0.20이므로 이 slice에 0.80을 잘못 적용하지 않는다. 위험 표본이 없는 slice는 위험 지표를 null로 표시한다. 위험 핵심 누락은 평균으로 상쇄하지 않는다. 품질 문제가 있으면 B-EMBED-01을 해제하지 않는다.
 
