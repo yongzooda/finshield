@@ -93,6 +93,62 @@ order by 1, 2;
 
 `0001` 적용 직후 조회에서 `public [f]` 에 `anon=X/postgres` 와 `authenticated=X/postgres` 가 남아 있었다. `0002` 가 이를 회수한다.
 
+### 닫지 못한 기본 권한
+
+`0002` 적용 뒤에도 부여자가 `supabase_admin` 인 항목 세 개가 남는다.
+
+```
+public [S] {... anon=rwU/supabase_admin, authenticated=rwU/supabase_admin ...}
+public [f] {... anon=X/supabase_admin,   authenticated=X/supabase_admin ...}
+public [r] {... anon=arwdDxtm/supabase_admin, authenticated=arwdDxtm/supabase_admin ...}
+```
+
+이 설정은 `supabase_admin` 이 만드는 객체에만 적용된다. Migration 은 `postgres` 로 실행하므로 우리가 만드는 객체에는 영향이 없다. `postgres` 는 `supabase_admin` 의 멤버가 아니어서 이 항목을 바꿀 수 없고, Supabase 플랫폼 기본값이므로 통제 밖이다.
+
+확인 시점에 `supabase_admin` 이 `public` 에 소유한 테이블·뷰·함수는 0건이었다. 실제 노출은 없지만 기본 권한을 완전히 닫았다고 표현하지 않는다. 대신 `public` 의 모든 객체 소유자가 `postgres` 인지 주기적으로 확인한다.
+
+```sql
+select n.nspname, c.relname, r.rolname as owner
+from pg_class c
+join pg_namespace n on n.oid = c.relnamespace
+join pg_roles r on r.oid = c.relowner
+where n.nspname in ('public','private','kb','demo')
+  and c.relkind in ('r','v','m','S')
+  and r.rolname <> 'postgres';
+```
+
+결과가 0행이어야 한다.
+
+### `0003` 적용 후 확인
+
+```sql
+select
+  (select count(*)::int from pg_tables
+     where schemaname = 'public'
+       and tablename in ('profiles','financial_profiles','financial_profile_versions'))   as tables,        -- 3
+  (select count(*)::int from pg_tables
+     where schemaname = 'public' and rowsecurity
+       and tablename in ('profiles','financial_profiles','financial_profile_versions'))   as rls_enabled,   -- 3
+  (select count(*)::int from pg_class
+     where relnamespace = 'public'::regnamespace and relrowsecurity and relforcerowsecurity
+       and relname in ('profiles','financial_profiles','financial_profile_versions'))     as rls_forced,    -- 3
+  (select count(*)::int from pg_policies where schemaname = 'public')                     as policies,      -- 7
+  (select count(*)::int from pg_type
+     where typnamespace = 'public'::regnamespace
+       and typname in ('app_role','explanation_mode'))                                    as enums,         -- 2
+  (select count(*)::int from information_schema.role_table_grants
+     where grantee = 'anon' and table_schema = 'public')                                  as anon_grants;   -- 0
+```
+
+`app_role` 컬럼이 사용자 UPDATE 대상에서 빠졌는지 따로 확인한다. 결과에 `app_role` 이 없어야 한다.
+
+```sql
+select column_name
+from information_schema.column_privileges
+where grantee = 'authenticated' and table_name = 'profiles' and privilege_type = 'UPDATE'
+order by column_name;
+```
+
 ## 현재 미해결
 
 - `B-SUPABASE-01`은 통과하지 않았다. 업무 테이블·RLS positive/negative 시험·Storage 정책이 아직 없다.
@@ -105,4 +161,5 @@ order by 1, 2;
 | Migration | 적용 | 비고 |
 |---|---|---|
 | `0001_finshield_baseline.sql` | 적용 완료 | 첫 실행은 `drop owned by` 권한 부족으로 전체 롤백됐고, 수정 후 재실행해 적용했다 |
-| `0002_revoke_default_function_grants.sql` | 미적용 | `0001`이 빠뜨린 함수 기본 권한을 회수한다 |
+| `0002_revoke_default_function_grants.sql` | 적용 완료 | `0001`이 빠뜨린 함수 기본 권한을 회수했다 |
+| `0003_profiles.sql` | 미적용 | 명세 6.1 계정·금융 프로필 3개 테이블과 RLS |
