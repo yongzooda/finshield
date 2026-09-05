@@ -8,7 +8,7 @@
 - 상위 기획: `docs/01-product-plan.md`
 - DB 구현 기준: `docs/03-database-spec.md`
 - Provider Stack ADR: `docs/adr/001-p0-provider-stack.md`
-- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`·`B-EMBED-01`이 `PASS`이고 나머지 18개가 미해제다. `GO` 전환에는 Claim 판정 품질 평가셋 사전등록도 필요하다.
+- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`이 `PASS`이고 나머지 16개가 미해제다. `GO` 전환에는 Claim 판정 품질 평가셋 사전등록도 필요하다.
 - Product Release Gate (`N-QLT-009`): `NOT-EVALUATED` — P0 기능 구현 뒤 평가한다. Claim 판정 품질 `B-CLAIM-01`을 포함해 4개다.
 - 배포: Vercel `finshield` Production 연결 완료 (`https://finshield-gamma.vercel.app`)
 - 기존 PreCase 저장소·배포: 유지
@@ -46,7 +46,7 @@
 - [x] FinShield 전용 Supabase 프로젝트 생성과 Migration 기준선 전환
 - [x] 명세 6절 표·7.2 서버 함수·9.3 안전 View를 Migration `0004`~`0017`로 구현, 로컬 불변식 시험 432건
 - [x] `B-SUPABASE-01` 증거 harness (기준 DB digest 대조·교차 소유 거부 행렬)와 main 전용 workflow
-- [x] `B-SOURCE-02`·`B-SOURCE-03` 햇살론15 Snapshot harness와 main 전용 workflow
+- [x] `B-SOURCE-02`·`B-SOURCE-03` 햇살론15 Snapshot harness와 main 전용 workflow, 측정·채택 (run `33981161310`·`33981225371`)
 
 ## 다음 작업 순서
 

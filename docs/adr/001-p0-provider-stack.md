@@ -604,6 +604,8 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `EVID-LAW-01` | Law 등록 IP 위험 | DOCUMENTED | 공식 공지에서 OC 등록 IP와 요청 IP 불일치 오류 가능성 확인 |
 | `EVID-MODEL-01` | Anthropic Sonnet 5 Live Spike | PASS | Claim 단위 ADR 변경 뒤 main run `33956322908`, artifact `9966535003`로 재측정; 합성 50건·100 live request·결정적 fault 20건에서 schema·strict tool·P95·비용 policy 합격. 무효가 된 run `33783765337`·`33883439885`·`33912191567`의 결과 파일도 이력으로 보존한다 |
 | `EVID-EMBED-01` | Cohere embed-v4.0 Claim 단위 1차 후보 생성 Live Spike | PASS | 사전등록 7절 구성(Metadata Filter → Claim 단위 Exact KNN, 후보 풀 20)으로 v5 평가셋을 main run `33956964817`, artifact `9966699530`에서 측정. Claim별 Recall@20 1.00, Case 합집합 Recall 1.00, 위험 핵심 Recall 1.00, 전량 회수 100/100, 최악 minimum_k 13, Query P95 559ms. 문단 단위였던 v3 run `33954521524`(0.902)·v4 run `33955613801`(0.970)은 이력으로 보존 |
+| `EVID-SOURCE-02` | 공공데이터포털 금융위·진흥원 API key·quota·license Live Snapshot | PASS | main run `33981225371`, artifact `9973809814`. 두 API 결과 코드 `00`, serviceKey 인증 성공, 금융위 총건수 19를 1 page 로 전량 수신, 개발계정 트래픽 10,000회, 라이선스 `이용허락범위 제한 없음`(2026-09-05 확인)을 source registry 관측으로 보존. serviceKey 는 결과·로그·URL 기록에서 지움 |
+| `EVID-SOURCE-03` | Demo `햇살론15` 상품·취급기관 Snapshot | PASS | main run `33981161310`, artifact `9973794051`. 금융위 `햇살론15` 레코드 19건(기준년월 이력, 현재 기준월 `202602` 1건, 47 필드), 진흥원 취급기관 16개(상품명 join 16/16, 은행 16 대 금융위 표기 "대출협약은행 12개"), 공식 상품 페이지 200·제목·1397, 사칭 신고센터 200·1397·사칭·중개수수료 표지. 이용안내 페이지는 실행 환경에서 기본 틀만 돌려줘 수수료 미요구 문구 Snapshot 은 아직 없음 |
 
 위 PASS는 제품 Live Vertical Slice PASS가 아니다. GitHub의 Vercel status는 build/deploy 성공을 뜻하며 Provider key·OCR·RLS·Workflow 기능 성공을 증명하지 않는다.
 
@@ -623,8 +625,8 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `B-PROCESSOR-PRIVACY` | Anthropic·Cohere·CLOVA·Supabase 학습/보존/DPA/region/하위처리자·PII fail-closed | NOT-EVALUATED | §15.1 Processor privacy + 계약 inventory |
 | `B-PRIVACY-VERCEL` | Hobby plan·고객 콘텐츠 조건·region·Log 보존·Workflow RBAC과 실개인정보 미처리 강제 | NOT-EVALUATED | plan 조건 기록 + §15.1 Processor privacy 합격; 실데이터 운영 시 DPA plan 재평가 |
 | `B-LAW-01` | OC·등록 도메인 `Referer`·Preview/Production 403/429/5xx·D+1 | NOT-EVALUATED | sanitized response ledger와 snapshot hash |
-| `B-SOURCE-02` | 공공데이터/FSS key·quota·pagination·license label | NOT-EVALUATED | API response metadata와 source registry |
-| `B-SOURCE-03` | Demo `햇살론15` 정확 product/institution record | BLOCKED | 두 API의 immutable snapshot과 official product URL |
+| `B-SOURCE-02` | 공공데이터/FSS key·quota·pagination·license label | PASS | API response metadata와 source registry |
+| `B-SOURCE-03` | Demo `햇살론15` 정확 product/institution record | PASS | 두 API의 immutable snapshot과 official product URL |
 | `B-JOB-01` | Workflow deploy·replay·retry·orphan·fencing·cancel·ambiguous Provider | NOT-EVALUATED | §15.1 Workflow 합격 + fault run/DB state |
 | `B-RATE-01` | 원자 reserve/settle·multi-instance rate·CLOVA 기본 1 TPS | NOT-EVALUATED | §15.1 Rate·Budget 합격 |
 | `B-DEADLINE-01` | Text 120초·Image/PDF 180초 abort·status 조회·partial save | NOT-EVALUATED | §4.3 예산 합·§15.1 P95/단절 복원 합격 + terminal row |
