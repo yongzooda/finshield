@@ -57,7 +57,7 @@
       "artifact_digest": "sha256:f885743b531efd81de3fa1650219f12b1b3553206b926c842947e7a80962fc0f",
       "result_path": "evidence/results/B-SOURCE-03/33981161310.json",
       "result_sha256": "b81cb67cfa6923f4ba863d23a8338122aeafbd1223c33083cdb69b9f7f5e4546",
-      "adoption_pr_number": 0,
+      "adoption_pr_number": 116,
       "adopted_at": "2026-09-05T17:34:05Z"
     },
     "B-SOURCE-02": {
@@ -76,7 +76,7 @@
       "artifact_digest": "sha256:bdd284b94fb9ff36a15fe99c2ec111f536798bf7d47a4d08d419f7872a71ff76",
       "result_path": "evidence/results/B-SOURCE-02/33981225371.json",
       "result_sha256": "e9e7c11c1d9ef8f5509ad1fb039ecfb212dfd1c115e8b54e2d67ef89087c993a",
-      "adoption_pr_number": 0,
+      "adoption_pr_number": 116,
       "adopted_at": "2026-09-05T17:34:08Z"
     }
   }
