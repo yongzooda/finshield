@@ -45,6 +45,14 @@ PASS가 하나도 없는 창을 최소화하도록 ADR을 건드리지 않는 �
 2. 재정의된 두 blocker의 수용식·평가셋 사전등록 문서. 측정 전에 검토·병합한다.
 3. 새 시나리오 가족의 미측정 평가셋과 두 harness, 오프라인 계약 시험. pin된 파일을 수정하지 않고 새 파일로 만든다.
 
+`.github/fixtures/provider-embed-v3.json`과 `.github/scripts/provider-embed-candidate-evaluation.mjs`로 이 단계를 시작했다. v2 fixture와 v2 평가 모듈은 그대로 둔다.
+
+v3는 시나리오 가족 24개(gate 20, development 4), 문서 168개, 질의 120개다. gate는 질의 100개, 위험 핵심 질의 30개, 단일 근거 질의 20개, 다중 항목 질의 80개, 서로 다른 hard negative unit 40개다. v2와 가족 이름 겹침 0건, 문장 겹침 0건이며 오프라인 시험이 그 사실을 매 PR에서 확인한다.
+
+후보 풀은 20으로 고정했고 corpus 168 unit의 약 12%다. 채점기는 풀 20을 넘는 결과와 unit 중복, 점수 역순, document·unit 불일치를 거부한다. 풀을 늘려 Recall을 올리는 우회를 막기 위해서다.
+
+질의별 `minimum_k`를 함께 기록한다. 모든 관련 unit을 담는 데 실제로 필요했던 풀 크기이며 여유를 보기 위한 진단값이다. 합격 판정에는 쓰지 않는다.
+
 ### 2단계 — ADR 변경 한 번 (완료)
 
 4. 한 PR에서 5.2·14.2·15.1·15.2 재정의, `B-RETRIEVAL-01` 행 추가, `B-MODEL-01` 상태 되돌림과 index entry 제거, 검증기 blocker 목록 갱신, `HANDOFF.md`·README·운영 문서 동기화를 수행했다. 새 blocker의 trusted policy는 harness가 생기는 PR에서 등록한다. `PASS`가 0개이므로 그전까지 검증기는 evidence 검사를 건너뛴다.
