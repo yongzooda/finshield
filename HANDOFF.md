@@ -51,7 +51,10 @@
 ## 다음 작업 순서
 
 1. `N-QLT-010` Live Spike 증거 확보와 Implementation `NO-GO` 차단 해제
-   - `B-EMBED-01`: v1 run `33861971976` 실패 이력 보존. PR #33의 v2 첫 main run `33870910880`도 품질 실패(순위 원장 재계산 Recall 0.888 / 위험 28/30 / Precision 0.728, Artifact 0). 상세는 issue #29. 지연·비용 로그는 조기 종료로 누락돼 검증 불가하며 추정하지 않는다. v2는 노출된 회귀셋으로 보존하고 재실행하지 않는다. 다음은 원인 분석·검색 설계 검토 후 새 가족 미측정 평가셋의 사전등록이다. `docs/ops/quality-evaluation-plan.md`에 따라 기준 완화·결과 맞춤 라벨 수정 없이 진행하며 Gate 상태를 변경하지 않는다.
+   - `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`은 채택됐다. `B-EMBED-01` v1·v2 실패 이력(run `33861971976`·`33870910880`, issue #29)은 회귀셋으로 보존하고 재실행하지 않는다.
+   - `B-SUPABASE-01`: harness는 병합됐고 운영 프로젝트에 `0009`~`0017` 적용과 `provider-spike` 환경 secret `FINSHIELD_DATABASE_URL` 등록이 남았다. 절차는 `docs/ops/supabase-project.md`를 따른다.
+   - 채택된 `B-SOURCE-03` 결과는 `scripts/kb/load-source-snapshots.mjs`로 `kb.source_snapshots`에 적재한다. 운영 적재는 Migration 적용 뒤 한다.
+   - 나머지 16개 blocker는 `docs/ops/quality-evaluation-plan.md`에 따라 기준 완화·결과 맞춤 라벨 수정 없이 진행하며 Gate 상태를 변경하지 않는다.
 2. P0 `docs/04-feature-spec.md` — Implementation Gate가 `GO`가 된 뒤 확정
 3. 인증·FinancialCase·Claim·Evidence 수직 구현
 4. Image·PDF File Gateway·OCR·PII Gate 구현
@@ -74,7 +77,7 @@
 - DB 명세가 확정됐다는 사실은 Migration·RLS·Storage Policy가 구현·적용됐거나 P0 기능이 작동한다는 뜻이 아니다.
 - Provider ADR의 Architecture Decision이 승인됐다는 사실은 Implementation 또는 Product Release Gate 통과를 뜻하지 않는다.
 - 공개 `/api/mcp`는 P0에서 GET·OPTIONS·POST 모두 404 `MCP_DISABLED`로 차단하며, 기존 MCP protocol 구현은 P1 재검증 전까지 외부 route에서 사용하지 않는다.
-- Anthropic Sonnet 5의 auth·quota·schema·strict tool·지연·비용은 FinShield 전용 Workspace 키로 `B-MODEL-01` 범위에서 Live 검증됐다. 무효가 된 이전 run 세 건의 결과 파일도 이력으로 보존한다. 무효가 된 이전 run `33783765337`·`33883439885`의 결과 파일도 이력으로 보존한다. Cohere `embed-v4.0`, CLOVA OCR, 공공데이터·법제처 API는 아직 Live 검증되지 않았다.
+- Anthropic Sonnet 5의 auth·quota·schema·strict tool·지연·비용은 FinShield 전용 Workspace 키로 `B-MODEL-01` 범위에서 Live 검증됐다. 무효가 된 이전 run 세 건(`33783765337`·`33883439885`·`33912191567`)의 결과 파일도 이력으로 보존한다. Cohere `embed-v4.0`은 `B-EMBED-01`, 공공데이터 금융위·진흥원 API는 `B-SOURCE-02`·`B-SOURCE-03` 범위에서 Live 검증됐다. CLOVA OCR과 법제처 API는 아직 Live 검증되지 않았다.
 - 전용 FinShield Supabase Project·RLS·authenticated TUS one-use slot·24시간 물리 삭제와 Vercel Workflow Replay·Fencing은 아직 검증되지 않았다.
 - 법제처는 등록 도메인 `Referer`를 대조한다. 동적 egress IP는 차단 사유가 아니지만 배포 도메인이 바뀌면 재등록이 필요하므로 request-time Live 조회를 기본값으로 두지 않고 공식 Snapshot 수집 경로를 검증한다.
 - Vercel Function region은 `vercel.json`의 `regions`로 `icn1`(서울)에 고정한다. Supabase 프로젝트가 `ap-northeast-2`라 기본값 `iad1`이면 DB 왕복마다 태평양을 건넌다. Hobby는 단일 region까지 허용한다.
