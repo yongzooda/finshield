@@ -1,0 +1,3510 @@
+{
+  "schema_version": 3,
+  "fixture_set": "finshield-korean-finance-embed-v3",
+  "status": "preregistered",
+  "scope": "synthetic Korean consumer-finance retrieval for first-stage candidate generation; not factual financial advice, product quality evidence, or legal interpretation",
+  "split_policy": "scenario-family-disjoint from v2 and within v3; author-visible, provider-unmeasured gate set; not independently blind",
+  "cases": [
+    {
+      "id": "phishing_app",
+      "split": "gate",
+      "coverage": [
+        "risk",
+        "institution",
+        "mixed_name"
+      ],
+      "risk_critical": true,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "상담 채널 진위",
+          "text": "합성 나루저축은행의 공식 대출 상담은 nARU-Bank 대표번호와 공식 앱에서만 진행하며 개인 메신저 상담은 운영하지 않는다.",
+          "source_family": "synthetic-phishing_app",
+          "evidence_unit": "phishing_app-1"
+        },
+        {
+          "key": "u2",
+          "facet": "설치 요구",
+          "text": "나루저축은행을 사칭한 상담자가 NaruFast.apk 파일을 문자로 보내 설치를 요구한 사례가 접수됐다.",
+          "source_family": "synthetic-phishing_app",
+          "evidence_unit": "phishing_app-2"
+        },
+        {
+          "key": "u3",
+          "facet": "원격제어 요구",
+          "text": "설치 뒤 원격제어 권한과 통화 가로채기 권한을 요구하면 정상 대출 절차가 아니다.",
+          "source_family": "synthetic-phishing_app",
+          "evidence_unit": "phishing_app-3"
+        },
+        {
+          "key": "u4",
+          "facet": "공식 확인 경로",
+          "text": "금융회사 사칭 여부는 금융감독원 금융소비자 정보포털 파인의 제도권 금융회사 조회로 확인한다.",
+          "source_family": "synthetic-phishing_app",
+          "evidence_unit": "phishing_app-4"
+        },
+        {
+          "key": "u5",
+          "facet": "피해 대응",
+          "text": "사칭 앱을 설치했다면 즉시 통신사와 금융회사에 지급정지를 요청하고 휴대폰을 초기화하기 전에 증거를 보존한다.",
+          "source_family": "synthetic-phishing_app",
+          "evidence_unit": "phishing_app-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 나루카드의 NaruPay 앱은 카드 결제 전용이며 대출 상담 기능이 없다.",
+          "source_family": "synthetic-phishing_app",
+          "evidence_unit": "phishing_app-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "나루저축은행의 2024년 안내문에는 상담 전용 메신저 채널이 있었으나 2026년 9월 현재 운영하지 않는다.",
+          "source_family": "synthetic-phishing_app",
+          "evidence_unit": "phishing_app-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "nARU-Bank 상담이라며 NaruFast.apk 설치를 요구하는데 정상 절차인지, 어떻게 확인하고 무엇을 해야 하는지 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "나루저축은행 사칭이 의심돼요. 공식 상담 채널이 무엇인지, 앱 설치와 원격제어 요구가 정상인지, 조회와 대응 방법까지 정리해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "문자로 받은 apk 설치 요구가 나루저축은행 정식 절차인가요? 공식 채널, 권한 요구의 의미, 제도권 조회, 피해 시 조치를 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u2"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "2026년 9월 기준으로 나루저축은행이 개인 메신저 상담을 하는지, NaruFast 설치 요구를 어떻게 판단할지, 신고 경로가 어디인지 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "나루저축은행의 공식 대출 상담 채널은 무엇인가요?",
+          "relevant_units": [
+            "u1"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "advance_fee",
+      "split": "gate",
+      "coverage": [
+        "risk",
+        "fees",
+        "numeric"
+      ],
+      "risk_critical": true,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "선입금 요구",
+          "text": "합성 한들대부가 대출 실행 전 보증예치금 명목으로 80만원을 먼저 보내라고 요구한 사례가 있다.",
+          "source_family": "synthetic-advance_fee",
+          "evidence_unit": "advance_fee-1"
+        },
+        {
+          "key": "u2",
+          "facet": "법적 판단",
+          "text": "대출을 조건으로 실행 전에 수수료·예치금을 요구하는 행위는 대부업법상 금지되며 정상 금융회사는 요구하지 않는다.",
+          "source_family": "synthetic-advance_fee",
+          "evidence_unit": "advance_fee-2"
+        },
+        {
+          "key": "u3",
+          "facet": "전산 오류 주장",
+          "text": "전산 등급 조정비 30만원을 입금하면 한도가 올라간다는 설명은 실제 심사 절차에 존재하지 않는다.",
+          "source_family": "synthetic-advance_fee",
+          "evidence_unit": "advance_fee-3"
+        },
+        {
+          "key": "u4",
+          "facet": "송금 후 회수",
+          "text": "이미 송금했다면 즉시 거래은행에 지급정지를 신청하고 경찰청 112 신고와 함께 계좌 지급정지 절차를 밟는다.",
+          "source_family": "synthetic-advance_fee",
+          "evidence_unit": "advance_fee-4"
+        },
+        {
+          "key": "u5",
+          "facet": "정상 비용 구분",
+          "text": "정상 대출에서 차주가 부담하는 비용은 인지세와 보증료처럼 약정서에 명시되고 대출금에서 정산되는 항목이다.",
+          "source_family": "synthetic-advance_fee",
+          "evidence_unit": "advance_fee-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 한들캐피탈의 자동차 담보대출은 취급수수료 1.2%를 대출 실행 시 원금에서 공제한다.",
+          "source_family": "synthetic-advance_fee",
+          "evidence_unit": "advance_fee-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "한들대부의 2025년 상품설명서에는 예치금 항목이 없었고 2026년 9월 현재도 존재하지 않는다.",
+          "source_family": "synthetic-advance_fee",
+          "evidence_unit": "advance_fee-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "대출 실행 전에 보증예치금 80만원을 보내라는데 정상인가요? 법적으로 어떤지, 등급 조정비 30만원 주장은 무엇인지, 이미 보냈다면 어떻게 할지 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "한들대부가 선입금 80만원을 요구합니다. 이런 요구가 허용되는지, 정상 대출에서 내는 비용은 무엇인지, 송금했을 때 조치까지 확인해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u2"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "실행 전 30만원 입금하면 한도가 오른다는 말이 사실인지, 예치금 요구의 법적 성격은 무엇인지, 회수 절차와 정상 수수료 구분을 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "2026년 9월 기준 한들대부 대출에서 선입금 요구가 정당한지, 어떤 비용만 정상인지, 80만원을 이미 보낸 경우 대응을 정리해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u2"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "대출 실행 전 수수료나 예치금을 요구하는 행위는 법적으로 어떻게 되나요?",
+          "relevant_units": [
+            "u2"
+          ],
+          "critical_units": [
+            "u2"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "identity_forgery",
+      "split": "gate",
+      "coverage": [
+        "risk",
+        "negation"
+      ],
+      "risk_critical": true,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "서류 위조 요구",
+          "text": "합성 벼리론 상담자가 재직증명서의 근무기간과 소득금액을 실제와 다르게 적어 제출하라고 안내한 사례가 있다.",
+          "source_family": "synthetic-identity_forgery",
+          "evidence_unit": "identity_forgery-1"
+        },
+        {
+          "key": "u2",
+          "facet": "불법성",
+          "text": "소득·재직 서류를 사실과 다르게 꾸며 대출을 받으면 차주도 사기죄와 사문서위조 책임을 질 수 있다.",
+          "source_family": "synthetic-identity_forgery",
+          "evidence_unit": "identity_forgery-2"
+        },
+        {
+          "key": "u3",
+          "facet": "불이익",
+          "text": "적발되면 대출은 기한이익 상실로 즉시 상환 대상이 되고 금융질서문란행위자로 등록될 수 있다.",
+          "source_family": "synthetic-identity_forgery",
+          "evidence_unit": "identity_forgery-3"
+        },
+        {
+          "key": "u4",
+          "facet": "정상 대안",
+          "text": "소득이 부족하면 정책서민금융 상품이나 보증기관 연계 상품을 통해 자격 요건 안에서 심사받는 방법이 있다.",
+          "source_family": "synthetic-identity_forgery",
+          "evidence_unit": "identity_forgery-4"
+        },
+        {
+          "key": "u5",
+          "facet": "거절 방법",
+          "text": "상담자가 위조를 권유하면 통화를 중단하고 녹취와 문자를 보존한 뒤 금융감독원 불법사금융 신고센터에 신고한다.",
+          "source_family": "synthetic-identity_forgery",
+          "evidence_unit": "identity_forgery-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 벼리캐피탈은 재직증명서 대신 건강보험 자격득실확인서를 받는 상품을 별도로 운영한다.",
+          "source_family": "synthetic-identity_forgery",
+          "evidence_unit": "identity_forgery-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "벼리론의 2024년 심사기준은 재직 6개월 이상이었으나 2026년 9월 기준은 3개월 이상이다.",
+          "source_family": "synthetic-identity_forgery",
+          "evidence_unit": "identity_forgery-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "상담자가 재직증명서 소득을 실제보다 높여 적으라는데 해도 되나요? 법적 책임과 불이익, 정상적인 대안과 거절 방법을 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u2"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "벼리론에서 서류를 사실과 다르게 쓰라고 안내받았습니다. 위법인지, 걸리면 어떻게 되는지, 소득이 부족할 때 방법과 신고처를 확인해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u2"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "소득을 부풀려 제출하면 안 되는 이유와 처벌, 대출에 미치는 영향, 자격 안에서 받을 수 있는 상품과 대응 절차를 정리해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u3"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "재직기간을 늘려 적으라는 권유가 정상 심사 절차가 아닌 근거와 책임, 적발 시 결과, 합법적 대안, 신고 방법을 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u2"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "소득·재직 서류를 사실과 다르게 꾸며 대출받으면 차주는 어떤 책임을 지나요?",
+          "relevant_units": [
+            "u2"
+          ],
+          "critical_units": [
+            "u2"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "unregistered_lender",
+      "split": "gate",
+      "coverage": [
+        "risk",
+        "institution",
+        "numeric"
+      ],
+      "risk_critical": true,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "등록번호 확인",
+          "text": "합성 솔빛머니가 제시한 대부업 등록번호 2026-서울강남-9999는 금융소비자 정보포털 조회에서 확인되지 않는다.",
+          "source_family": "synthetic-unregistered_lender",
+          "evidence_unit": "unregistered_lender-1"
+        },
+        {
+          "key": "u2",
+          "facet": "미등록 영업",
+          "text": "등록하지 않고 대부업을 영위하면 대부업법 위반이며 그 계약의 이자 약정은 무효가 될 수 있다.",
+          "source_family": "synthetic-unregistered_lender",
+          "evidence_unit": "unregistered_lender-2"
+        },
+        {
+          "key": "u3",
+          "facet": "조회 경로",
+          "text": "대부업자 등록 여부는 지방자치단체 대부업 통합조회와 금융감독원 등록 조회에서 상호와 등록번호로 확인한다.",
+          "source_family": "synthetic-unregistered_lender",
+          "evidence_unit": "unregistered_lender-3"
+        },
+        {
+          "key": "u4",
+          "facet": "계약 전 확인",
+          "text": "계약 전에 등록번호, 상호, 대표자, 영업소 주소가 조회 결과와 일치하는지 대조하고 불일치하면 진행하지 않는다.",
+          "source_family": "synthetic-unregistered_lender",
+          "evidence_unit": "unregistered_lender-4"
+        },
+        {
+          "key": "u5",
+          "facet": "신고 경로",
+          "text": "미등록 대부 의심은 금융감독원 불법사금융 신고센터 1332와 관할 경찰서에 신고한다.",
+          "source_family": "synthetic-unregistered_lender",
+          "evidence_unit": "unregistered_lender-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 솔빛캐피탈은 여신전문금융업 등록업체이며 대부업 등록번호와는 체계가 다르다.",
+          "source_family": "synthetic-unregistered_lender",
+          "evidence_unit": "unregistered_lender-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "솔빛머니의 2025년 광고에 적힌 등록번호 2025-서울강남-1234도 현재 조회되지 않는다.",
+          "source_family": "synthetic-unregistered_lender",
+          "evidence_unit": "unregistered_lender-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "등록번호 2026-서울강남-9999가 조회되지 않는데 계약해도 되나요? 미등록 영업의 법적 효과, 조회 경로, 계약 전 확인과 신고처를 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "솔빛머니 대부업 등록 여부를 어떻게 확인하는지, 미등록이면 이자 약정이 어떻게 되는지, 대조할 항목과 신고 번호까지 정리해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u2"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "제시받은 등록번호가 조회 결과와 다릅니다. 등록 확인 방법, 위반 여부, 계약 전 대조 항목, 1332 신고 절차를 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u1"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "2026년 9월 기준 솔빛머니가 등록 대부업자인지, 미등록이면 무엇이 문제인지, 어디서 조회하고 어떻게 신고하는지 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u2"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "등록하지 않고 대부업을 하면 그 계약의 이자 약정은 어떻게 되나요?",
+          "relevant_units": [
+            "u2"
+          ],
+          "critical_units": [
+            "u2"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "usury_rate",
+      "split": "gate",
+      "coverage": [
+        "risk",
+        "numeric",
+        "fees"
+      ],
+      "risk_critical": true,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "제시 금리",
+          "text": "합성 도담크레딧이 제시한 연 34.8% 금리는 현행 법정 최고금리 상한을 넘는다.",
+          "source_family": "synthetic-usury_rate",
+          "evidence_unit": "usury_rate-1"
+        },
+        {
+          "key": "u2",
+          "facet": "법정 상한",
+          "text": "이자제한법과 대부업법 시행령의 최고이자율은 연 20%이며 이를 초과하는 이자 약정은 초과분이 무효다.",
+          "source_family": "synthetic-usury_rate",
+          "evidence_unit": "usury_rate-2"
+        },
+        {
+          "key": "u3",
+          "facet": "이자 산입 범위",
+          "text": "사례금·수수료·공제금 등 명칭과 무관하게 대주가 받는 금전은 이자에 산입해 최고이자율을 계산한다.",
+          "source_family": "synthetic-usury_rate",
+          "evidence_unit": "usury_rate-3"
+        },
+        {
+          "key": "u4",
+          "facet": "초과분 반환",
+          "text": "이미 초과 이자를 지급했다면 부당이득으로 반환을 청구할 수 있고 원본에 충당할 수 있다.",
+          "source_family": "synthetic-usury_rate",
+          "evidence_unit": "usury_rate-4"
+        },
+        {
+          "key": "u5",
+          "facet": "상담 경로",
+          "text": "최고금리 위반이 의심되면 금융감독원 불법사금융 신고센터와 대한법률구조공단 상담을 이용한다.",
+          "source_family": "synthetic-usury_rate",
+          "evidence_unit": "usury_rate-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 도담저축은행의 신용대출 연 14.9%는 최고이자율 범위 안이며 별개 상품이다.",
+          "source_family": "synthetic-usury_rate",
+          "evidence_unit": "usury_rate-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "도담크레딧의 2018년 계약서에는 연 27.9%가 적혀 있으나 당시 상한과 현재 상한은 다르다.",
+          "source_family": "synthetic-usury_rate",
+          "evidence_unit": "usury_rate-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "연 34.8%를 제시받았는데 합법인가요? 법정 상한이 몇 퍼센트인지, 수수료도 이자에 들어가는지, 이미 낸 초과분과 상담처를 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u2"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "도담크레딧의 34.8% 약정이 이자제한법상 어떻게 되는지, 상한 20%와의 관계, 사례금 산입 여부, 반환 청구와 신고처를 정리해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u2"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "최고이자율을 넘는 이자를 냈습니다. 상한 기준, 초과분의 효력, 수수료 명목 금전의 취급, 돌려받는 방법과 상담 창구를 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u2"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "2026년 9월 기준 연 34.8% 대출이 위법인지, 20% 상한에 무엇이 포함되는지, 초과 지급분 처리와 도움받을 곳을 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u2"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "현행 법정 최고이자율은 연 몇 퍼센트인가요?",
+          "relevant_units": [
+            "u2"
+          ],
+          "critical_units": [
+            "u2"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "account_lending",
+      "split": "gate",
+      "coverage": [
+        "risk",
+        "negation"
+      ],
+      "risk_critical": true,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "통장 대여 요구",
+          "text": "합성 미르파이낸스 상담자가 대출 실적을 만들어야 한다며 본인 명의 통장과 체크카드를 보내달라고 요구했다.",
+          "source_family": "synthetic-account_lending",
+          "evidence_unit": "account_lending-1"
+        },
+        {
+          "key": "u2",
+          "facet": "법적 성격",
+          "text": "통장·카드·인증수단을 타인에게 넘기면 전자금융거래법 위반이며 대가 여부와 관계없이 처벌 대상이다.",
+          "source_family": "synthetic-account_lending",
+          "evidence_unit": "account_lending-2"
+        },
+        {
+          "key": "u3",
+          "facet": "피해 확대",
+          "text": "양도한 계좌가 사기 이용계좌가 되면 명의인도 지급정지와 금융거래 제한을 받고 손해배상 청구를 당할 수 있다.",
+          "source_family": "synthetic-account_lending",
+          "evidence_unit": "account_lending-3"
+        },
+        {
+          "key": "u4",
+          "facet": "정상 절차 부정",
+          "text": "정상 대출 심사는 계좌 실물이나 인증수단 양도를 요구하지 않으며 본인 명의 계좌로 입금만 한다.",
+          "source_family": "synthetic-account_lending",
+          "evidence_unit": "account_lending-4"
+        },
+        {
+          "key": "u5",
+          "facet": "대응",
+          "text": "이미 넘겼다면 즉시 은행에 분실·양도 사실을 알리고 지급정지 후 경찰에 신고해 명의도용 피해를 기록한다.",
+          "source_family": "synthetic-account_lending",
+          "evidence_unit": "account_lending-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 미르은행은 대출 실행 계좌를 본인 명의로만 지정하도록 약관에 정하고 있다.",
+          "source_family": "synthetic-account_lending",
+          "evidence_unit": "account_lending-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "미르파이낸스의 2023년 안내에는 실적 계좌 제도가 언급됐으나 현재 그런 제도는 없다.",
+          "source_family": "synthetic-account_lending",
+          "evidence_unit": "account_lending-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "대출 실적을 만든다며 통장과 체크카드를 보내라는데 해도 되나요? 위법인지, 어떤 피해가 생기는지, 정상 절차와 대응을 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u2"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "미르파이낸스가 인증수단 양도를 요구합니다. 전자금융거래법상 문제, 계좌가 악용될 때 결과, 정상 심사 방식과 조치를 정리해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u2"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "통장을 넘기면 처벌받는지, 사기 계좌가 되면 명의인은 어떻게 되는지, 대출 심사가 원래 그런 요구를 하는지, 이미 넘겼을 때 방법을 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u3"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "체크카드 양도 요구가 정상 대출 절차가 아닌 근거와 법적 책임, 계좌 악용 시 불이익, 신고와 지급정지 절차를 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [
+            "u2"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "통장이나 인증수단을 타인에게 넘기면 어떤 법에 저촉되나요?",
+          "relevant_units": [
+            "u2"
+          ],
+          "critical_units": [
+            "u2"
+          ],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "policy_eligibility",
+      "split": "gate",
+      "coverage": [
+        "product",
+        "numeric"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "대상 요건",
+          "text": "합성 새싹론15의 지원 대상은 연소득 3500만원 이하이거나 연소득 4500만원 이하이면서 개인신용평점 하위 20%인 사람이다.",
+          "source_family": "synthetic-policy_eligibility",
+          "evidence_unit": "policy_eligibility-1"
+        },
+        {
+          "key": "u2",
+          "facet": "한도",
+          "text": "새싹론15의 대출 한도는 최대 1400만원이며 자금 용도에 따라 생계자금은 300만원까지다.",
+          "source_family": "synthetic-policy_eligibility",
+          "evidence_unit": "policy_eligibility-2"
+        },
+        {
+          "key": "u3",
+          "facet": "금리",
+          "text": "새싹론15의 2026년 9월 기준 금리는 연 15.9%이며 성실상환 시 금리 인하가 적용된다.",
+          "source_family": "synthetic-policy_eligibility",
+          "evidence_unit": "policy_eligibility-3"
+        },
+        {
+          "key": "u4",
+          "facet": "기간",
+          "text": "새싹론15의 상환 기간은 3년 또는 5년 원리금균등분할상환 중에서 선택한다.",
+          "source_family": "synthetic-policy_eligibility",
+          "evidence_unit": "policy_eligibility-4"
+        },
+        {
+          "key": "u5",
+          "facet": "신청 경로",
+          "text": "새싹론15는 서민금융진흥원 앱과 서민금융통합지원센터, 협약 금융회사 창구에서 신청한다.",
+          "source_family": "synthetic-policy_eligibility",
+          "evidence_unit": "policy_eligibility-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 새싹론17의 지원 대상은 연소득 4500만원 이하이며 한도가 2000만원으로 다른 상품이다.",
+          "source_family": "synthetic-policy_eligibility",
+          "evidence_unit": "policy_eligibility-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "새싹론15의 2024년 금리는 연 15.9%가 아닌 연 17.9%였으며 현재 조건이 아니다.",
+          "source_family": "synthetic-policy_eligibility",
+          "evidence_unit": "policy_eligibility-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "새싹론15의 2026년 9월 기준 대상 소득 요건, 한도, 금리, 상환 기간, 신청 경로를 함께 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "새싹론17과 헷갈리지 않게 새싹론15의 자격, 최대 1400만원 한도, 현재 금리, 3년·5년 상환, 어디서 신청하는지 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "연소득 3500만원 이하면 새싹론15를 받을 수 있나요? 한도와 15.9% 금리, 상환 방식, 신청 창구까지 정리해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "작년 자료 말고 2026년 9월 기준 새싹론15의 요건·한도·금리·기간·접수처를 근거와 함께 모아주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "새싹론15의 2026년 9월 기준 금리는 몇 퍼센트인가요?",
+          "relevant_units": [
+            "u3"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "guarantee_fee",
+      "split": "gate",
+      "coverage": [
+        "fees",
+        "numeric"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "보증료율",
+          "text": "합성 새싹론15의 보증료율은 연 1.0%이며 보증 잔액을 기준으로 산정한다.",
+          "source_family": "synthetic-guarantee_fee",
+          "evidence_unit": "guarantee_fee-1"
+        },
+        {
+          "key": "u2",
+          "facet": "납부 방식",
+          "text": "보증료는 대출 실행일에 1년치를 선납하고 이후 매년 갱신 시점에 다시 납부한다.",
+          "source_family": "synthetic-guarantee_fee",
+          "evidence_unit": "guarantee_fee-2"
+        },
+        {
+          "key": "u3",
+          "facet": "실효 부담",
+          "text": "표면금리 연 15.9%에 보증료 연 1.0%를 더하면 차주의 연간 실질 부담은 약 16.9% 수준이 된다.",
+          "source_family": "synthetic-guarantee_fee",
+          "evidence_unit": "guarantee_fee-3"
+        },
+        {
+          "key": "u4",
+          "facet": "환급",
+          "text": "중도상환으로 보증 기간이 줄면 남은 기간에 해당하는 보증료는 일할 계산해 환급한다.",
+          "source_family": "synthetic-guarantee_fee",
+          "evidence_unit": "guarantee_fee-4"
+        },
+        {
+          "key": "u5",
+          "facet": "연체 시",
+          "text": "보증료를 내지 않으면 보증이 해지될 수 있고 이 경우 대출은 기한이익 상실 사유가 된다.",
+          "source_family": "synthetic-guarantee_fee",
+          "evidence_unit": "guarantee_fee-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 새싹전세보증의 보증료율은 연 0.3%이며 대출 보증과 산정 기준이 다르다.",
+          "source_family": "synthetic-guarantee_fee",
+          "evidence_unit": "guarantee_fee-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "새싹론15의 2023년 보증료율은 연 0.7%였으며 현재 요율이 아니다.",
+          "source_family": "synthetic-guarantee_fee",
+          "evidence_unit": "guarantee_fee-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "새싹론15 보증료율이 몇 퍼센트인지, 언제 내는지, 금리 15.9%에 더하면 실제 부담이 얼마인지, 중도상환 환급과 미납 시 결과를 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "보증료 연 1.0%를 선납하는지 분납하는지, 실질 부담률 계산, 환급 기준, 미납했을 때 대출에 미치는 영향을 정리해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "전세보증 요율과 헷갈리지 않게 새싹론15 대출 보증료의 요율·납부시기·실효부담·환급·연체 결과를 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "2026년 9월 기준 보증료율과 납부 방법, 16.9% 수준이라는 실질 부담 근거, 조기상환 시 환급, 미납 위험을 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "새싹론15의 보증료율은 연 몇 퍼센트인가요?",
+          "relevant_units": [
+            "u1"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "overdue_rate",
+      "split": "gate",
+      "coverage": [
+        "numeric",
+        "fees"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "연체이자율",
+          "text": "합성 새싹론15의 연체이자율은 약정이자율에 연 3%포인트를 더하되 법정 최고금리를 넘지 못한다.",
+          "source_family": "synthetic-overdue_rate",
+          "evidence_unit": "overdue_rate-1"
+        },
+        {
+          "key": "u2",
+          "facet": "기산 시점",
+          "text": "연체이자는 납입기일 다음 날부터 실제 상환일까지 연체된 금액에 대해 계산한다.",
+          "source_family": "synthetic-overdue_rate",
+          "evidence_unit": "overdue_rate-2"
+        },
+        {
+          "key": "u3",
+          "facet": "적용 대상",
+          "text": "연체 초기에는 미납 회차 금액에만 붙고 기한이익 상실 이후에는 남은 원금 전체에 붙는다.",
+          "source_family": "synthetic-overdue_rate",
+          "evidence_unit": "overdue_rate-3"
+        },
+        {
+          "key": "u4",
+          "facet": "기한이익 상실",
+          "text": "원리금을 2개월 이상 연체하면 기한이익이 상실되어 잔액 전부를 즉시 갚아야 할 수 있다.",
+          "source_family": "synthetic-overdue_rate",
+          "evidence_unit": "overdue_rate-4"
+        },
+        {
+          "key": "u5",
+          "facet": "신용 영향",
+          "text": "연체 정보는 신용평가에 반영되며 단기 연체라도 신용평점이 하락할 수 있다.",
+          "source_family": "synthetic-overdue_rate",
+          "evidence_unit": "overdue_rate-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 새싹카드의 리볼빙 연체이자율은 연 24%로 별도 약관을 따른다.",
+          "source_family": "synthetic-overdue_rate",
+          "evidence_unit": "overdue_rate-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "새싹론15의 2022년 약관은 연 6%포인트 가산이었으며 현재 기준이 아니다.",
+          "source_family": "synthetic-overdue_rate",
+          "evidence_unit": "overdue_rate-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "새싹론15를 연체하면 이자율이 얼마나 오르는지, 언제부터 붙는지, 어떤 금액에 붙는지, 2개월 넘기면 어떻게 되는지와 신용 영향을 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "연 3%포인트 가산이 맞는지, 기산일과 대상 금액, 기한이익 상실 요건, 신용평점 영향까지 정리해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "카드 리볼빙과 다르게 새싹론15의 연체이자 계산 방식, 미납 회차와 잔액의 차이, 상실 기준, 신용 반영을 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "2026년 9월 약관 기준 연체 가산율과 상한, 계산 시작일, 원금 전체에 붙는 시점, 신용에 남는 영향을 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "새싹론15의 연체이자율은 약정이자율에 몇 퍼센트포인트를 더하나요?",
+          "relevant_units": [
+            "u1"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "early_repay_fee",
+      "split": "gate",
+      "coverage": [
+        "fees",
+        "numeric"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "수수료 유무",
+          "text": "합성 새싹론15는 중도상환수수료를 받지 않으며 언제든 전액 또는 일부를 갚을 수 있다.",
+          "source_family": "synthetic-early_repay_fee",
+          "evidence_unit": "early_repay_fee-1"
+        },
+        {
+          "key": "u2",
+          "facet": "보증료 정산",
+          "text": "중도상환하면 남은 기간 보증료는 일할 계산해 돌려받는다.",
+          "source_family": "synthetic-early_repay_fee",
+          "evidence_unit": "early_repay_fee-2"
+        },
+        {
+          "key": "u3",
+          "facet": "이자 절감",
+          "text": "원리금균등상환에서 조기 상환하면 남은 기간 이자가 줄어 총 상환액이 감소한다.",
+          "source_family": "synthetic-early_repay_fee",
+          "evidence_unit": "early_repay_fee-3"
+        },
+        {
+          "key": "u4",
+          "facet": "신청 방법",
+          "text": "중도상환은 협약 금융회사 창구나 앱에서 상환일과 금액을 지정해 신청한다.",
+          "source_family": "synthetic-early_repay_fee",
+          "evidence_unit": "early_repay_fee-4"
+        },
+        {
+          "key": "u5",
+          "facet": "성실상환 인센티브",
+          "text": "성실상환 중 조기 전액 상환하면 이후 금리 인하 혜택은 더 적용되지 않는다.",
+          "source_family": "synthetic-early_repay_fee",
+          "evidence_unit": "early_repay_fee-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 새싹주택담보대출은 3년 이내 상환 시 최대 1.2%의 중도상환수수료를 부과한다.",
+          "source_family": "synthetic-early_repay_fee",
+          "evidence_unit": "early_repay_fee-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "새싹론15의 2021년 약관에는 0.5% 중도상환수수료 조항이 있었으나 현재는 없다.",
+          "source_family": "synthetic-early_repay_fee",
+          "evidence_unit": "early_repay_fee-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "새싹론15를 미리 갚으면 수수료가 있는지, 보증료는 어떻게 되는지, 이자가 얼마나 주는지, 신청 방법과 인센티브 영향을 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "주택담보대출과 달리 새싹론15의 중도상환 조건이 어떤지, 1.2% 같은 수수료가 붙는지, 환급과 절감 효과, 절차를 정리해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "조기 상환 시 부담과 이득을 함께 보고 싶어요. 수수료 유무, 보증료 일할 환급, 총이자 감소, 신청 경로, 금리 인하 관계를 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "2026년 9월 기준 중도상환수수료 조항이 있는지, 과거 0.5% 조항과의 차이, 환급·절감·신청·인센티브까지 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "새싹론15에 중도상환수수료가 있나요?",
+          "relevant_units": [
+            "u1"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "income_docs",
+      "split": "gate",
+      "coverage": [
+        "product",
+        "negation"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "근로소득 증빙",
+          "text": "합성 새싹론15의 근로소득자는 재직증명서와 소득금액증명원 또는 건강보험 자격득실확인서를 제출한다.",
+          "source_family": "synthetic-income_docs",
+          "evidence_unit": "income_docs-1"
+        },
+        {
+          "key": "u2",
+          "facet": "사업소득 증빙",
+          "text": "사업소득자는 사업자등록증명과 소득금액증명원을 제출하며 최근 과세기간 자료를 기준으로 한다.",
+          "source_family": "synthetic-income_docs",
+          "evidence_unit": "income_docs-2"
+        },
+        {
+          "key": "u3",
+          "facet": "무소득 처리",
+          "text": "증빙 가능한 소득이 없으면 자격 판단을 보류하며 소득이 없다는 이유만으로 부적격을 확정하지 않는다.",
+          "source_family": "synthetic-income_docs",
+          "evidence_unit": "income_docs-3"
+        },
+        {
+          "key": "u4",
+          "facet": "대체 증빙 불가",
+          "text": "통장 입금 내역이나 급여 명세 사진만으로는 소득 증빙을 대체할 수 없다.",
+          "source_family": "synthetic-income_docs",
+          "evidence_unit": "income_docs-4"
+        },
+        {
+          "key": "u5",
+          "facet": "유효기간",
+          "text": "제출 서류는 발급일로부터 1개월 이내여야 하며 기간이 지나면 다시 발급받아야 한다.",
+          "source_family": "synthetic-income_docs",
+          "evidence_unit": "income_docs-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 새싹론17은 소득 증빙 없이 신용평점만으로 심사하는 별도 상품이다.",
+          "source_family": "synthetic-income_docs",
+          "evidence_unit": "income_docs-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "새싹론15의 2023년 기준은 발급일 3개월 이내였으며 현재 기준이 아니다.",
+          "source_family": "synthetic-income_docs",
+          "evidence_unit": "income_docs-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "새싹론15에 어떤 소득 서류가 필요한지, 사업소득자는 무엇을 내는지, 소득이 없으면 어떻게 되는지, 통장 사본으로 되는지와 유효기간을 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "근로·사업소득 증빙 목록과 무소득일 때 처리, 대체 증빙이 안 되는 이유, 서류 발급 기한을 정리해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "새싹론17과 달리 새싹론15가 요구하는 서류가 무엇인지, 급여 명세 사진이 되는지, 소득이 없을 때 결론, 기한을 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "2026년 9월 기준 제출 서류와 발급 기한, 사업자 서류, 소득 미확인 시 판단, 인정되지 않는 자료를 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "증빙 가능한 소득이 없으면 새싹론15 자격은 어떻게 판단하나요?",
+          "relevant_units": [
+            "u3"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "credit_effect",
+      "split": "gate",
+      "coverage": [
+        "product",
+        "numeric"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "조회 영향",
+          "text": "합성 새싹론15 신청을 위한 신용조회 자체는 개인신용평점을 떨어뜨리지 않는다.",
+          "source_family": "synthetic-credit_effect",
+          "evidence_unit": "credit_effect-1"
+        },
+        {
+          "key": "u2",
+          "facet": "실행 영향",
+          "text": "대출이 실행되면 부채가 늘어 신용평점이 일시적으로 하락할 수 있다.",
+          "source_family": "synthetic-credit_effect",
+          "evidence_unit": "credit_effect-2"
+        },
+        {
+          "key": "u3",
+          "facet": "상환 영향",
+          "text": "연체 없이 상환을 이어가면 상환 이력이 쌓여 평점 회복에 도움이 된다.",
+          "source_family": "synthetic-credit_effect",
+          "evidence_unit": "credit_effect-3"
+        },
+        {
+          "key": "u4",
+          "facet": "정책금융 가점",
+          "text": "서민금융진흥원 협약 상품의 성실상환 실적은 일부 평가모형에서 긍정 요인으로 반영된다.",
+          "source_family": "synthetic-credit_effect",
+          "evidence_unit": "credit_effect-4"
+        },
+        {
+          "key": "u5",
+          "facet": "다중채무",
+          "text": "3개 이상 금융회사에서 동시에 대출을 보유하면 다중채무자로 분류되어 평가에 불리하게 작용한다.",
+          "source_family": "synthetic-credit_effect",
+          "evidence_unit": "credit_effect-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 새싹카드의 현금서비스 이용 실적은 카드론과 함께 별도 항목으로 평가된다.",
+          "source_family": "synthetic-credit_effect",
+          "evidence_unit": "credit_effect-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "2019년까지는 조회 이력 자체가 평점에 반영됐으나 현재 기준은 다르다.",
+          "source_family": "synthetic-credit_effect",
+          "evidence_unit": "credit_effect-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "새싹론15를 신청만 해도 신용점수가 떨어지나요? 실행 후 변화, 상환 이력 효과, 정책금융 가점, 3개 이상 대출의 영향을 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "조회와 실행 중 무엇이 평점에 영향을 주는지, 성실상환의 효과, 다중채무 기준, 정책상품 반영을 정리해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "카드 현금서비스와 구분해서 새싹론15가 신용평점에 미치는 영향을 조회·실행·상환·가점·다중채무 관점으로 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "2026년 9월 기준으로 신용조회가 점수를 깎는지, 대출 실행 후 회복 경로, 3개 이상 보유 시 불이익을 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "새싹론15 신청을 위한 신용조회 자체가 신용평점을 떨어뜨리나요?",
+          "relevant_units": [
+            "u1"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "broker_fee_cap",
+      "split": "gate",
+      "coverage": [
+        "fees",
+        "numeric",
+        "institution"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "수취 금지",
+          "text": "대부중개업자는 대출을 받으려는 사람에게서 중개수수료를 받을 수 없다.",
+          "source_family": "synthetic-broker_fee_cap",
+          "evidence_unit": "broker_fee_cap-1"
+        },
+        {
+          "key": "u2",
+          "facet": "대주 부담",
+          "text": "중개수수료는 대부업자가 중개업자에게 지급하며 그 상한은 대출금액에 따라 시행령으로 정해진다.",
+          "source_family": "synthetic-broker_fee_cap",
+          "evidence_unit": "broker_fee_cap-2"
+        },
+        {
+          "key": "u3",
+          "facet": "요구 시 대응",
+          "text": "합성 온새미로중개가 차주에게 수수료 40만원을 요구했다면 지급 의무가 없고 신고 대상이다.",
+          "source_family": "synthetic-broker_fee_cap",
+          "evidence_unit": "broker_fee_cap-3"
+        },
+        {
+          "key": "u4",
+          "facet": "반환 청구",
+          "text": "이미 지급한 중개수수료는 부당이득으로 반환을 청구할 수 있다.",
+          "source_family": "synthetic-broker_fee_cap",
+          "evidence_unit": "broker_fee_cap-4"
+        },
+        {
+          "key": "u5",
+          "facet": "확인 경로",
+          "text": "중개업자 등록 여부와 제재 이력은 금융소비자 정보포털에서 상호로 조회한다.",
+          "source_family": "synthetic-broker_fee_cap",
+          "evidence_unit": "broker_fee_cap-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 온새미로자산관리는 채권추심업체로 대부중개 등록과는 다른 업종이다.",
+          "source_family": "synthetic-broker_fee_cap",
+          "evidence_unit": "broker_fee_cap-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "2015년 이전 계약에는 차주 부담 중개수수료 조항이 있었으나 현재 허용되지 않는다.",
+          "source_family": "synthetic-broker_fee_cap",
+          "evidence_unit": "broker_fee_cap-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "중개업체가 수수료 40만원을 요구합니다. 차주가 내야 하는지, 누가 부담하는지, 이미 냈다면 어떻게 하는지, 업체 조회 방법을 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "대부중개 수수료를 차주에게 받을 수 있는지, 상한은 누가 정하는지, 요구받았을 때 대응과 반환 청구, 등록 확인을 정리해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "온새미로중개의 수수료 요구가 정당한지, 법이 정한 부담 주체, 지급한 돈의 회수, 조회 경로를 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "2026년 9월 기준 차주 부담 중개수수료가 허용되는지, 40만원 요구의 성격, 반환과 신고, 업체 확인 방법을 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "대부중개업자가 대출받는 사람에게서 중개수수료를 받을 수 있나요?",
+          "relevant_units": [
+            "u1"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "explain_duty",
+      "split": "gate",
+      "coverage": [
+        "product",
+        "negation"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "설명 대상",
+          "text": "금융상품판매업자는 대출성 상품의 금리, 상환 방법, 부대비용, 연체 시 불이익을 계약 전에 설명해야 한다.",
+          "source_family": "synthetic-explain_duty",
+          "evidence_unit": "explain_duty-1"
+        },
+        {
+          "key": "u2",
+          "facet": "확인 절차",
+          "text": "설명한 내용은 서면이나 전자적 방법으로 제공하고 소비자가 이해했음을 확인받아야 한다.",
+          "source_family": "synthetic-explain_duty",
+          "evidence_unit": "explain_duty-2"
+        },
+        {
+          "key": "u3",
+          "facet": "위반 효과",
+          "text": "설명의무를 위반하면 소비자는 계약 해지를 요구하거나 손해배상을 청구할 수 있다.",
+          "source_family": "synthetic-explain_duty",
+          "evidence_unit": "explain_duty-3"
+        },
+        {
+          "key": "u4",
+          "facet": "입증 책임",
+          "text": "설명의무 위반 여부를 다툴 때 고의·과실이 없었다는 점은 판매업자가 증명해야 한다.",
+          "source_family": "synthetic-explain_duty",
+          "evidence_unit": "explain_duty-4"
+        },
+        {
+          "key": "u5",
+          "facet": "녹취 보관",
+          "text": "전화로 체결한 계약은 설명 과정을 녹취해 보관하며 소비자는 열람을 요청할 수 있다.",
+          "source_family": "synthetic-explain_duty",
+          "evidence_unit": "explain_duty-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 새싹보험의 청약 단계 설명의무는 보장성 상품 기준으로 별도 항목이 적용된다.",
+          "source_family": "synthetic-explain_duty",
+          "evidence_unit": "explain_duty-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "2020년 이전 대출 계약에는 현재와 같은 설명서 확인 절차가 없었다.",
+          "source_family": "synthetic-explain_duty",
+          "evidence_unit": "explain_duty-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "대출 계약 전에 무엇을 설명받아야 하는지, 확인 절차가 어떤지, 설명이 없었으면 무엇을 할 수 있는지, 입증 책임과 녹취 열람을 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "설명의무 범위와 서면 확인, 위반 시 해지·배상, 누가 증명하는지, 전화 계약 녹취 보관을 정리해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "보험 청약과 구분해서 대출성 상품의 설명의무 항목, 이해 확인 방법, 위반 효과, 증명 책임, 녹취 요청을 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "금리와 연체 불이익을 설명받지 못했습니다. 설명 대상, 확인 절차, 구제 수단, 입증 부담, 녹취 열람을 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "설명의무 위반을 다툴 때 고의·과실이 없다는 점은 누가 증명하나요?",
+          "relevant_units": [
+            "u4"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "ad_rule",
+      "split": "gate",
+      "coverage": [
+        "product",
+        "negation",
+        "institution"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "필수 표시",
+          "text": "대출성 상품 광고에는 금리 범위, 상환 기간, 부대비용, 연체이자율을 함께 표시해야 한다.",
+          "source_family": "synthetic-ad_rule",
+          "evidence_unit": "ad_rule-1"
+        },
+        {
+          "key": "u2",
+          "facet": "금지 표현",
+          "text": "누구나 승인, 무조건 최저금리 같은 확정적 표현은 소비자를 오인하게 하므로 사용할 수 없다.",
+          "source_family": "synthetic-ad_rule",
+          "evidence_unit": "ad_rule-2"
+        },
+        {
+          "key": "u3",
+          "facet": "심의 절차",
+          "text": "금융상품 광고는 준법감시인 확인 등 내부 심의를 거쳐야 한다.",
+          "source_family": "synthetic-ad_rule",
+          "evidence_unit": "ad_rule-3"
+        },
+        {
+          "key": "u4",
+          "facet": "사칭 광고",
+          "text": "합성 새싹금융의 상호와 로고를 무단 사용한 광고는 사칭이며 해당 회사와 무관하다.",
+          "source_family": "synthetic-ad_rule",
+          "evidence_unit": "ad_rule-4"
+        },
+        {
+          "key": "u5",
+          "facet": "신고",
+          "text": "허위·과장 광고는 금융감독원에 신고할 수 있고 광고 화면을 캡처해 증거로 제출한다.",
+          "source_family": "synthetic-ad_rule",
+          "evidence_unit": "ad_rule-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 새싹증권의 투자광고는 투자 위험 고지 등 별도 기준을 따른다.",
+          "source_family": "synthetic-ad_rule",
+          "evidence_unit": "ad_rule-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "새싹금융의 2022년 광고 지침에는 연체이자율 표시 의무가 없었다.",
+          "source_family": "synthetic-ad_rule",
+          "evidence_unit": "ad_rule-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "누구나 승인이라는 대출 광고를 봤습니다. 광고에 무엇이 표시돼야 하는지, 그 표현이 되는지, 심의 절차와 사칭 여부, 신고 방법을 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "대출 광고 필수 표시 항목, 쓰면 안 되는 표현, 내부 심의, 상호 무단 사용 판단, 신고 경로를 정리해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "투자광고와 구분해서 대출성 상품 광고의 표시 의무, 오인 표현 금지, 심의, 사칭 광고 대응을 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "2026년 9월 기준 광고에 연체이자율을 넣어야 하는지, 확정적 표현 사용 가능 여부, 심의와 사칭, 증거 제출을 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "대출성 상품 광고에서 누구나 승인 같은 표현을 쓸 수 있나요?",
+          "relevant_units": [
+            "u2"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "cooling_off",
+      "split": "gate",
+      "coverage": [
+        "product",
+        "freshness",
+        "numeric"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "행사 기간",
+          "text": "대출성 상품의 청약철회는 계약서류를 받은 날 또는 계약 체결일부터 14일 이내에 할 수 있다.",
+          "source_family": "synthetic-cooling_off",
+          "evidence_unit": "cooling_off-1"
+        },
+        {
+          "key": "u2",
+          "facet": "행사 방법",
+          "text": "청약철회는 서면, 전자우편, 휴대전화 문자 등 기록이 남는 방법으로 통지한다.",
+          "source_family": "synthetic-cooling_off",
+          "evidence_unit": "cooling_off-2"
+        },
+        {
+          "key": "u3",
+          "facet": "반환 범위",
+          "text": "철회하면 원금과 이미 받은 날까지의 이자, 인지세 등 부대비용을 함께 반환해야 한다.",
+          "source_family": "synthetic-cooling_off",
+          "evidence_unit": "cooling_off-3"
+        },
+        {
+          "key": "u4",
+          "facet": "불이익 금지",
+          "text": "청약철회를 이유로 불이익을 주거나 신용정보에 부정적으로 기록할 수 없다.",
+          "source_family": "synthetic-cooling_off",
+          "evidence_unit": "cooling_off-4"
+        },
+        {
+          "key": "u5",
+          "facet": "횟수 제한",
+          "text": "같은 금융회사에서 1년에 2회를 초과해 철회하면 이후 신규 계약이 거절될 수 있다.",
+          "source_family": "synthetic-cooling_off",
+          "evidence_unit": "cooling_off-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 새싹보험의 보장성 상품 청약철회 기간은 별도 기준으로 정해져 있다.",
+          "source_family": "synthetic-cooling_off",
+          "evidence_unit": "cooling_off-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "2020년 이전 대출 계약에는 14일 청약철회권이 적용되지 않았다.",
+          "source_family": "synthetic-cooling_off",
+          "evidence_unit": "cooling_off-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "대출 계약을 물리고 싶습니다. 며칠 안에 해야 하는지, 어떻게 통지하는지, 무엇을 돌려줘야 하는지, 불이익과 횟수 제한을 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "청약철회 14일 기산점, 기록이 남는 통지 방법, 원금·이자·비용 반환 범위, 신용 기록 영향, 연 2회 제한을 정리해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "보험 청약철회와 구분해서 대출 청약철회의 기간, 방법, 반환, 불이익 금지, 횟수 제한을 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "2026년 9월 기준 계약서류 수령일부터 며칠인지, 문자로 통지해도 되는지, 인지세도 돌려주는지, 반복 행사 제한을 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "대출성 상품의 청약철회는 며칠 이내에 해야 하나요?",
+          "relevant_units": [
+            "u1"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "bundle_sale",
+      "split": "gate",
+      "coverage": [
+        "product",
+        "negation",
+        "fees"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "구속성 판매 금지",
+          "text": "대출을 조건으로 예금이나 보험 가입을 강요하는 구속성 판매는 금지된다.",
+          "source_family": "synthetic-bundle_sale",
+          "evidence_unit": "bundle_sale-1"
+        },
+        {
+          "key": "u2",
+          "facet": "판단 기준",
+          "text": "대출 실행일 전후 1개월 안에 월수입의 1%를 넘는 금융상품에 가입시키면 구속성 판매로 본다.",
+          "source_family": "synthetic-bundle_sale",
+          "evidence_unit": "bundle_sale-2"
+        },
+        {
+          "key": "u3",
+          "facet": "합성 사례",
+          "text": "합성 새싹은행 상담자가 대출 승인 조건으로 월 20만원 저축보험 가입을 요구했다면 검토 대상이다.",
+          "source_family": "synthetic-bundle_sale",
+          "evidence_unit": "bundle_sale-3"
+        },
+        {
+          "key": "u4",
+          "facet": "소비자 조치",
+          "text": "강요를 받았다면 가입을 거절할 수 있고 이미 가입했다면 해지와 원상회복을 요구할 수 있다.",
+          "source_family": "synthetic-bundle_sale",
+          "evidence_unit": "bundle_sale-4"
+        },
+        {
+          "key": "u5",
+          "facet": "신고",
+          "text": "구속성 판매는 금융감독원에 신고할 수 있으며 상담 녹취와 가입 시점 자료가 증거가 된다.",
+          "source_family": "synthetic-bundle_sale",
+          "evidence_unit": "bundle_sale-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 새싹은행의 자율 가입 적금은 금리 우대 조건일 뿐 대출 승인 요건이 아니다.",
+          "source_family": "synthetic-bundle_sale",
+          "evidence_unit": "bundle_sale-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "2013년 이전에는 구속성 판매 판단 기준이 현재와 달랐다.",
+          "source_family": "synthetic-bundle_sale",
+          "evidence_unit": "bundle_sale-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "대출 승인 조건으로 보험 가입을 요구받았습니다. 금지되는지, 판단 기준이 무엇인지, 거절과 해지가 되는지, 신고 방법을 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "구속성 판매 금지 내용, 1개월·월수입 1% 기준, 저축보험 요구 사례 판단, 원상회복, 증거와 신고를 정리해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "금리 우대용 자율 가입과 구분해서 강요 여부를 어떻게 보는지, 기준 수치, 거절 권리, 신고 절차를 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "2026년 9월 기준 대출 전후 어느 기간의 가입이 문제인지, 월 20만원 요구가 해당하는지, 해지 요구와 신고를 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "구속성 판매 여부는 대출 실행 전후 어느 기간과 금액 기준으로 판단하나요?",
+          "relevant_units": [
+            "u2"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "term_extend",
+      "split": "gate",
+      "coverage": [
+        "product",
+        "numeric",
+        "freshness"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "연장 요건",
+          "text": "합성 새싹론15의 만기 연장은 연체가 없고 상환 실적이 6개월 이상일 때 신청할 수 있다.",
+          "source_family": "synthetic-term_extend",
+          "evidence_unit": "term_extend-1"
+        },
+        {
+          "key": "u2",
+          "facet": "연장 기간",
+          "text": "만기는 1회에 최대 12개월까지 연장할 수 있으며 총 상환 기간은 60개월을 넘지 못한다.",
+          "source_family": "synthetic-term_extend",
+          "evidence_unit": "term_extend-2"
+        },
+        {
+          "key": "u3",
+          "facet": "금리 재산정",
+          "text": "연장 시 금리는 신청 시점 기준으로 다시 산정하며 기존 금리가 그대로 유지되지 않는다.",
+          "source_family": "synthetic-term_extend",
+          "evidence_unit": "term_extend-3"
+        },
+        {
+          "key": "u4",
+          "facet": "신청 시기",
+          "text": "만기일 30일 전부터 신청할 수 있고 만기일 이후에는 연장이 아닌 신규 심사를 받아야 한다.",
+          "source_family": "synthetic-term_extend",
+          "evidence_unit": "term_extend-4"
+        },
+        {
+          "key": "u5",
+          "facet": "보증 갱신",
+          "text": "연장 시 보증 기간도 함께 갱신되며 갱신분 보증료를 다시 납부한다.",
+          "source_family": "synthetic-term_extend",
+          "evidence_unit": "term_extend-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 새싹론17은 만기 연장 제도가 없고 재대출로만 처리한다.",
+          "source_family": "synthetic-term_extend",
+          "evidence_unit": "term_extend-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "새싹론15의 2022년 기준 연장 한도는 1회 6개월이었으며 현재와 다르다.",
+          "source_family": "synthetic-term_extend",
+          "evidence_unit": "term_extend-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "새싹론15 만기를 연장하려면 어떤 조건이 필요한지, 얼마나 늘릴 수 있는지, 금리가 그대로인지, 언제 신청하고 보증료는 어떻게 되는지 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "연체 없음과 6개월 실적 요건, 1회 12개월·총 60개월 한도, 금리 재산정, 만기 30일 전 신청, 보증 갱신을 정리해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "새싹론17과 달리 새싹론15에 연장 제도가 있는지, 기간 상한, 금리 변동, 신청 기한, 추가 보증료를 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "2026년 9월 기준 연장 요건과 최대 기간, 만기 이후 신청하면 어떻게 되는지, 금리와 보증료 처리를 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "새싹론15의 만기는 1회에 최대 몇 개월까지 연장할 수 있나요?",
+          "relevant_units": [
+            "u2"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "debt_relief",
+      "split": "gate",
+      "coverage": [
+        "product",
+        "institution"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "신속채무조정",
+          "text": "연체 30일 이하 또는 연체 우려가 있는 사람은 신용회복위원회의 신속채무조정으로 상환 유예를 신청할 수 있다.",
+          "source_family": "synthetic-debt_relief",
+          "evidence_unit": "debt_relief-1"
+        },
+        {
+          "key": "u2",
+          "facet": "프리워크아웃",
+          "text": "연체 31일 이상 89일 이하이면 이자율 조정 중심의 프리워크아웃 대상이 된다.",
+          "source_family": "synthetic-debt_relief",
+          "evidence_unit": "debt_relief-2"
+        },
+        {
+          "key": "u3",
+          "facet": "개인워크아웃",
+          "text": "연체 90일 이상이면 원금 감면이 가능한 개인워크아웃을 신청할 수 있다.",
+          "source_family": "synthetic-debt_relief",
+          "evidence_unit": "debt_relief-3"
+        },
+        {
+          "key": "u4",
+          "facet": "신청 경로",
+          "text": "채무조정은 신용회복위원회 사이버상담부와 전국 서민금융통합지원센터에서 접수한다.",
+          "source_family": "synthetic-debt_relief",
+          "evidence_unit": "debt_relief-4"
+        },
+        {
+          "key": "u5",
+          "facet": "법원 절차 구분",
+          "text": "개인회생과 파산은 법원 절차이며 신용회복위원회 채무조정과 별개다.",
+          "source_family": "synthetic-debt_relief",
+          "evidence_unit": "debt_relief-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 새싹자산관리의 채권 매입 후 자체 감면 제안은 공적 채무조정 제도가 아니다.",
+          "source_family": "synthetic-debt_relief",
+          "evidence_unit": "debt_relief-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "2019년 기준 프리워크아웃 대상은 연체 30일 초과 90일 미만이었다.",
+          "source_family": "synthetic-debt_relief",
+          "evidence_unit": "debt_relief-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "연체가 시작됐는데 어떤 채무조정을 받을 수 있나요? 연체 일수별 제도, 원금 감면 가능 시점, 접수처, 법원 절차와의 차이를 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "신속채무조정·프리워크아웃·개인워크아웃의 대상 연체 기간, 각 제도의 조정 내용, 신청 창구, 개인회생과의 구분을 정리해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "자산관리회사의 자체 감면 제안과 구분해서 공적 채무조정 제도의 종류와 요건, 접수 경로, 법원 절차 여부를 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "연체 90일이 넘으면 무엇을 신청할 수 있는지, 그 전 단계 제도는 무엇인지, 어디서 접수하고 회생과 어떻게 다른지 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "연체 90일 이상이면 어떤 채무조정 제도를 신청할 수 있나요?",
+          "relevant_units": [
+            "u3"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "dispute_route",
+      "split": "gate",
+      "coverage": [
+        "institution",
+        "mixed_name"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "1차 창구",
+          "text": "금융 분쟁은 먼저 해당 금융회사의 민원 창구에 접수하고 처리 결과를 서면으로 받는다.",
+          "source_family": "synthetic-dispute_route",
+          "evidence_unit": "dispute_route-1"
+        },
+        {
+          "key": "u2",
+          "facet": "금감원 분쟁조정",
+          "text": "회사 처리에 이의가 있으면 금융감독원 e-금융민원센터 eFinance 창구로 분쟁조정을 신청한다.",
+          "source_family": "synthetic-dispute_route",
+          "evidence_unit": "dispute_route-2"
+        },
+        {
+          "key": "u3",
+          "facet": "조정 효력",
+          "text": "조정안을 양 당사자가 수락하면 재판상 화해와 같은 효력이 생긴다.",
+          "source_family": "synthetic-dispute_route",
+          "evidence_unit": "dispute_route-3"
+        },
+        {
+          "key": "u4",
+          "facet": "소송 병행",
+          "text": "조정 신청 중에도 소송을 제기할 수 있으나 소송이 진행되면 조정 절차는 중지될 수 있다.",
+          "source_family": "synthetic-dispute_route",
+          "evidence_unit": "dispute_route-4"
+        },
+        {
+          "key": "u5",
+          "facet": "소액 특례",
+          "text": "2000만원 이하 분쟁은 조정안 제시 전 금융회사가 소송을 제기할 수 없는 특례가 적용된다.",
+          "source_family": "synthetic-dispute_route",
+          "evidence_unit": "dispute_route-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 새싹공제회 KoreaSaessak 공제 분쟁은 별도 공제분쟁조정 절차를 따른다.",
+          "source_family": "synthetic-dispute_route",
+          "evidence_unit": "dispute_route-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "2015년까지는 소액 분쟁 소송 제기 제한 특례가 없었다.",
+          "source_family": "synthetic-dispute_route",
+          "evidence_unit": "dispute_route-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "대출 관련 분쟁을 어디에 먼저 접수하는지, eFinance 분쟁조정은 언제 쓰는지, 조정 효력과 소송 병행, 2000만원 특례를 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "금융회사 민원 창구와 금융감독원 e-금융민원센터의 순서, 조정 수락의 효력, 소송과의 관계, 소액 분쟁 특례를 정리해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "공제 분쟁과 구분해서 금융 분쟁조정의 1차 창구, eFinance 신청, 재판상 화해 효력, 소송 중지, 소액 특례를 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "2026년 9월 기준 분쟁조정 절차 순서, KoreaSaessak 같은 공제와의 구분, 조정안 효력, 2000만원 이하 특례를 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "금융 분쟁조정에서 조정안을 양 당사자가 수락하면 어떤 효력이 생기나요?",
+          "relevant_units": [
+            "u3"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "dev_rate_notice",
+      "split": "development",
+      "coverage": [
+        "freshness",
+        "numeric"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "현재 금리",
+          "text": "합성 벼리새희망대출의 2026년 9월 기준 금리는 연 9.4%다.",
+          "source_family": "synthetic-dev_rate_notice",
+          "evidence_unit": "dev_rate_notice-1"
+        },
+        {
+          "key": "u2",
+          "facet": "변경 고지",
+          "text": "금리 변경은 시행 15일 전까지 홈페이지와 문자로 고지한다.",
+          "source_family": "synthetic-dev_rate_notice",
+          "evidence_unit": "dev_rate_notice-2"
+        },
+        {
+          "key": "u3",
+          "facet": "변동 주기",
+          "text": "변동금리는 3개월마다 기준금리 변동분을 반영해 재산정한다.",
+          "source_family": "synthetic-dev_rate_notice",
+          "evidence_unit": "dev_rate_notice-3"
+        },
+        {
+          "key": "u4",
+          "facet": "고정 전환",
+          "text": "약정 후 1회에 한해 잔여 기간 고정금리로 전환할 수 있다.",
+          "source_family": "synthetic-dev_rate_notice",
+          "evidence_unit": "dev_rate_notice-4"
+        },
+        {
+          "key": "u5",
+          "facet": "전환 비용",
+          "text": "고정 전환 시 별도 수수료는 없으나 전환 후 금리는 전환 시점 기준으로 정한다.",
+          "source_family": "synthetic-dev_rate_notice",
+          "evidence_unit": "dev_rate_notice-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 벼리생활안정대출의 금리는 연 7.2%로 다른 상품이다.",
+          "source_family": "synthetic-dev_rate_notice",
+          "evidence_unit": "dev_rate_notice-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "벼리새희망대출의 2025년 9월 금리는 연 11.0%였다.",
+          "source_family": "synthetic-dev_rate_notice",
+          "evidence_unit": "dev_rate_notice-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "벼리새희망대출의 2026년 9월 금리와 변경 고지 방법, 변동 주기, 고정 전환 조건과 비용을 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "금리 9.4%가 언제 기준인지, 바뀌면 며칠 전에 알려주는지, 3개월 재산정과 고정 전환을 정리해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "생활안정대출과 구분해서 새희망대출의 현재 금리, 고지 기한, 변동 주기, 전환 규정을 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "작년 금리 말고 지금 적용되는 금리와 고지 절차, 재산정 주기, 전환 가능 횟수와 비용을 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "벼리새희망대출의 2026년 9월 기준 금리는 몇 퍼센트인가요?",
+          "relevant_units": [
+            "u1"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "dev_limit_tier",
+      "split": "development",
+      "coverage": [
+        "numeric",
+        "product"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "기본 한도",
+          "text": "합성 벼리새희망대출의 기본 한도는 1000만원이다.",
+          "source_family": "synthetic-dev_limit_tier",
+          "evidence_unit": "dev_limit_tier-1"
+        },
+        {
+          "key": "u2",
+          "facet": "상향 요건",
+          "text": "6개월 이상 연체 없이 상환하면 최대 500만원까지 한도 상향을 신청할 수 있다.",
+          "source_family": "synthetic-dev_limit_tier",
+          "evidence_unit": "dev_limit_tier-2"
+        },
+        {
+          "key": "u3",
+          "facet": "총 한도",
+          "text": "상향을 포함한 총 한도는 1500만원을 넘지 못한다.",
+          "source_family": "synthetic-dev_limit_tier",
+          "evidence_unit": "dev_limit_tier-3"
+        },
+        {
+          "key": "u4",
+          "facet": "심사 반영",
+          "text": "한도 상향은 소득과 부채 재심사를 거치며 자동으로 적용되지 않는다.",
+          "source_family": "synthetic-dev_limit_tier",
+          "evidence_unit": "dev_limit_tier-4"
+        },
+        {
+          "key": "u5",
+          "facet": "하향 사유",
+          "text": "연체가 발생하면 미사용 한도가 축소되거나 정지될 수 있다.",
+          "source_family": "synthetic-dev_limit_tier",
+          "evidence_unit": "dev_limit_tier-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 벼리마이너스통장의 한도는 3000만원이며 산정 방식이 다르다.",
+          "source_family": "synthetic-dev_limit_tier",
+          "evidence_unit": "dev_limit_tier-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "벼리새희망대출의 2024년 기본 한도는 800만원이었다.",
+          "source_family": "synthetic-dev_limit_tier",
+          "evidence_unit": "dev_limit_tier-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "벼리새희망대출의 기본 한도와 상향 요건, 총 한도 상한, 심사 여부, 한도가 줄어드는 경우를 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "1000만원에서 얼마나 올릴 수 있는지, 6개월 요건이 맞는지, 1500만원 상한과 재심사, 연체 영향을 정리해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "마이너스통장과 구분해서 새희망대출의 한도 체계, 상향 절차, 상한, 축소 사유를 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "2026년 9월 기준 기본 한도와 상향 폭, 총 한도, 자동 적용 여부, 연체 시 처리를 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "벼리새희망대출의 상향을 포함한 총 한도 상한은 얼마인가요?",
+          "relevant_units": [
+            "u3"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "dev_channel_verify",
+      "split": "development",
+      "coverage": [
+        "institution",
+        "risk"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "공식 채널",
+          "text": "합성 벼리금융의 대출 안내는 공식 홈페이지와 대표번호로만 이루어진다.",
+          "source_family": "synthetic-dev_channel_verify",
+          "evidence_unit": "dev_channel_verify-1"
+        },
+        {
+          "key": "u2",
+          "facet": "직원 확인",
+          "text": "상담 직원의 소속과 등록 여부는 금융소비자 정보포털에서 조회한다.",
+          "source_family": "synthetic-dev_channel_verify",
+          "evidence_unit": "dev_channel_verify-2"
+        },
+        {
+          "key": "u3",
+          "facet": "링크 주의",
+          "text": "문자에 포함된 단축 URL로 접속을 요구하면 진위를 먼저 확인한다.",
+          "source_family": "synthetic-dev_channel_verify",
+          "evidence_unit": "dev_channel_verify-3"
+        },
+        {
+          "key": "u4",
+          "facet": "계좌 확인",
+          "text": "입금 계좌 예금주가 금융회사 상호와 다르면 진행하지 않는다.",
+          "source_family": "synthetic-dev_channel_verify",
+          "evidence_unit": "dev_channel_verify-4"
+        },
+        {
+          "key": "u5",
+          "facet": "신고",
+          "text": "사칭 의심은 금융감독원 1332로 신고한다.",
+          "source_family": "synthetic-dev_channel_verify",
+          "evidence_unit": "dev_channel_verify-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 벼리보험의 콜센터 번호는 대출 상담과 무관하다.",
+          "source_family": "synthetic-dev_channel_verify",
+          "evidence_unit": "dev_channel_verify-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "벼리금융의 2023년 상담 채널에는 별도 메신저가 포함돼 있었다.",
+          "source_family": "synthetic-dev_channel_verify",
+          "evidence_unit": "dev_channel_verify-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "벼리금융 상담이 진짜인지 확인하는 방법과 직원 조회, 문자 링크 주의점, 계좌 확인, 신고처를 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "공식 채널이 무엇인지, 상담 직원을 어떻게 조회하는지, 단축 URL과 예금주 확인, 1332 신고를 정리해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "보험 콜센터와 구분해서 대출 상담 공식 경로, 직원 확인, 링크와 계좌 점검, 신고 절차를 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "2026년 9월 기준 벼리금융의 상담 채널과 진위 확인 방법, 입금 계좌 대조, 사칭 신고를 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "벼리금융의 공식 대출 안내 채널은 무엇인가요?",
+          "relevant_units": [
+            "u1"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    },
+    {
+      "id": "dev_consent_scope",
+      "split": "development",
+      "coverage": [
+        "negation",
+        "product"
+      ],
+      "risk_critical": false,
+      "documents": [
+        {
+          "key": "u1",
+          "facet": "필수 동의",
+          "text": "대출 심사에 필요한 신용정보 조회 동의는 필수 항목이다.",
+          "source_family": "synthetic-dev_consent_scope",
+          "evidence_unit": "dev_consent_scope-1"
+        },
+        {
+          "key": "u2",
+          "facet": "선택 동의",
+          "text": "마케팅 활용 동의는 선택 항목이며 거부해도 심사에 불이익이 없다.",
+          "source_family": "synthetic-dev_consent_scope",
+          "evidence_unit": "dev_consent_scope-2"
+        },
+        {
+          "key": "u3",
+          "facet": "거부 고지",
+          "text": "선택 동의를 거부할 수 있다는 사실을 알리지 않으면 위법이다.",
+          "source_family": "synthetic-dev_consent_scope",
+          "evidence_unit": "dev_consent_scope-3"
+        },
+        {
+          "key": "u4",
+          "facet": "보유 기간",
+          "text": "동의한 개인정보의 보유 기간은 목적 달성 시까지이며 별도로 고지한다.",
+          "source_family": "synthetic-dev_consent_scope",
+          "evidence_unit": "dev_consent_scope-4"
+        },
+        {
+          "key": "u5",
+          "facet": "철회",
+          "text": "동의는 언제든 철회할 수 있고 철회 시 해당 목적의 처리는 중단된다.",
+          "source_family": "synthetic-dev_consent_scope",
+          "evidence_unit": "dev_consent_scope-5"
+        },
+        {
+          "key": "u6",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "합성 벼리멤버십의 제3자 제공 동의는 대출 심사와 목적이 다르다.",
+          "source_family": "synthetic-dev_consent_scope",
+          "evidence_unit": "dev_consent_scope-6"
+        },
+        {
+          "key": "u7",
+          "facet": "다른 대상·시점 또는 요청하지 않은 사실",
+          "text": "2019년 이전에는 선택 동의 거부권 고지 의무가 지금과 달랐다.",
+          "source_family": "synthetic-dev_consent_scope",
+          "evidence_unit": "dev_consent_scope-7"
+        }
+      ],
+      "queries": [
+        {
+          "key": "q1",
+          "text": "대출 신청 시 어떤 동의가 필수이고 어떤 것이 선택인지, 거부해도 되는지, 보유 기간과 철회 방법을 알려줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q2",
+          "text": "신용정보 조회 동의와 마케팅 동의의 구분, 거부권 고지 의무, 보유 기간 안내, 철회 효과를 정리해 주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q3",
+          "text": "멤버십 제3자 제공과 구분해서 대출 심사 동의의 범위, 선택 항목 거부, 고지 의무, 철회를 확인해 줘.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q4",
+          "text": "2026년 9월 기준 선택 동의를 거부하면 심사에 불이익이 있는지, 고지 의무, 보유 기간, 철회 절차를 알려주세요.",
+          "relevant_units": [
+            "u1",
+            "u2",
+            "u3",
+            "u4",
+            "u5"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        },
+        {
+          "key": "q5",
+          "text": "마케팅 활용 동의를 거부하면 대출 심사에 불이익이 있나요?",
+          "relevant_units": [
+            "u2"
+          ],
+          "critical_units": [],
+          "hard_negative_units": [
+            "u6",
+            "u7"
+          ],
+          "rationale": "질문이 요구한 사실만 관련으로 표시한다. 다른 대상·시점 문서와 요청 밖 사실은 hard negative 로 둔다. 지지 여부가 아니라 답에 필요한 관련성 기준이다."
+        }
+      ]
+    }
+  ]
+}

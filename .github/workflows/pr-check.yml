@@ -75,6 +75,9 @@ jobs:
       - name: Provider Embedding Development Probe Contract Test
         run: node .github/scripts/test-provider-embed-development-probe.mjs
 
+      - name: Provider Embedding Candidate Contract Test
+        run: node .github/scripts/test-provider-embed-candidate.mjs
+
       - name: 한국어 기록 검사 회귀 테스트
         run: node .github/scripts/test-korean-records.mjs
 
