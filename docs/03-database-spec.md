@@ -1048,8 +1048,8 @@ Manifest는 UPDATE하지 않고 새 버전을 추가한다. 운영 활성·폐�
 
 | 테이블 | 핵심 컬럼 | 제약·목적 |
 |---|---|---|
-| `agent_definitions` | `id`, `agent_code`, `version`, `input_schema_version`, `output_schema_version`, `prompt_version`, `role`, `definition_hash`, `created_at` | `UQ(agent_code, version)`, 불변 정의 |
-| `tool_definitions` | `id`, `tool_code`, `version`, `transport`, `input_schema_version`, `output_schema_version`, `max_payload_bytes`, `max_batch_size`, `timeout_ms`, `retry_limit`, `definition_hash`, `created_at` | `UQ(tool_code, version)`, 오류·크기 계약 |
+| `agent_definitions` | `id`, `agent_code`, `version`, `input_schema_version`, `output_schema_version`, `prompt_version`, `role`, `definition_hash`, `created_at` | `UQ(agent_code, version)`, 불변 정의. `role`은 `ORCHESTRATOR|INTAKE|DOMAIN|COVE|RED_TEAM|EVIDENCE_JUDGE|ACTION_GUIDE` |
+| `tool_definitions` | `id`, `tool_code`, `version`, `transport`, `input_schema_version`, `output_schema_version`, `max_payload_bytes`, `max_batch_size`, `timeout_ms`, `retry_limit`, `definition_hash`, `created_at` | `UQ(tool_code, version)`, 오류·크기 계약. `timeout_ms`는 ADR 9.2 Image·PDF Run deadline 180,000 이하 |
 | `agent_tool_allowlists` | `agent_definition_id`, `tool_definition_id`, `purpose_code`, `created_at` | 복합 PK; 미등록 Tool 호출 차단 |
 
 P0 대출 Manifest는 Product/Institution, Fraud/Channel, PreCase 기반 Sales Conduct, Regulation & Dispute의 고정된 4개 Domain Agent와 CoVe·Red Team·Judge·Guide의 실제 정의를 포함한다.
