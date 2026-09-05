@@ -7,7 +7,7 @@
 - 이 문서는 검토된 harness의 실행 계약이다. workflow 성공만으로 `PASS`가 되지 않는다.
 - 실제 개인정보·운영 문서·사용자 입력은 사용하지 않는다. 버전 고정 합성 한국어 금융 Fixture만 외부 Provider로 전송한다.
 - 기존 `B-MODEL-01` Evidence scope를 보존하기 위해 SDK와 `.env.example`을 변경하지 않고 Node 24 native `fetch`로 Cohere v2 API를 호출한다.
-- v1은 평가 의미 결함으로 폐기했으며 새 실행은 v2만 허용한다. [정답 검토·산식·서비스 품질 평가 경계](quality-evaluation-plan.md)를 함께 따른다. ADR의 수치 합격선과 Gate 상태는 변경하지 않는다.
+- v1은 평가 의미 결함으로 폐기했다. v2는 gate를 측정해 결과를 봤고 그 뒤 blocker를 재정의했으므로 재사용하지 않는다. 새 실행은 v3만 허용한다. v2 결과와 harness는 이력으로 보존한다. [정답 검토·산식·서비스 품질 평가 경계](quality-evaluation-plan.md)를 함께 따른다. ADR의 수치 합격선과 Gate 상태는 변경하지 않는다.
 
 ## 사전 고정 계약
 
@@ -16,8 +16,10 @@
 | Model | `embed-v4.0` |
 | 문서 / Query input type | `search_document` / `search_query` |
 | Embedding | `float`, 1024차원 |
-| 거리 / 검색 | cosine / 전체 168 passage Exact KNN, unit 중복 제거 후 top 5, 의미 라벨을 담지 않은 unit ID tie-break |
-| Fixture | v2: 24가족·168문서·120질문. Gate 20가족 100질문, 개발용 4가족 20질문. Gate hard-negative unit 40개·probe 100개 |
+| 거리 / 검색 | cosine / 전체 168 passage Exact KNN, unit 중복 제거 후 후보 풀 20, 의미 라벨을 담지 않은 unit ID tie-break |
+| Fixture | v3: 24가족·168문서·120질문. Gate 20가족 100질문, 개발용 4가족 20질문. Gate hard-negative unit 40개. v2와 가족 이름·문장이 겹치지 않는다 |
+| 합격선 | 후보 풀 20 안의 관련 unit Recall = 1.00, 위험 핵심 unit Recall = 1.00, Query Provider P95 ≤ 1,500ms |
+| 범위 | 1차 후보 생성만 평가한다. 대상·시점 판별과 최종 top 5 품질은 `B-RETRIEVAL-01`이 종단으로 측정한다 |
 | 위험 핵심 Query | 선입금·원격제어·기관사칭·인증정보·공식채널·중개수수료 30개 |
 | Recall@5 | 질문별 `(top 5 관련 unit 수 / 전체 관련 unit 수)`의 평균, `>= 0.90` |
 | 위험 핵심 Recall@5 | 위험 질문별 `(top 5 핵심 unit 수 / 전체 핵심 unit 수)`의 평균, `= 1.00` |

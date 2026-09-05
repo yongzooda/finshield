@@ -1,11 +1,7 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { tmpdir } from "node:os";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { adrDecisionDigest, computeEvidenceScopeDigest, evidencePolicies, gitBlobSha } from "./provider-evidence.mjs";
-import { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
 import { assertUnmeasuredGate, expandEmbedFixtures, scoreRankings } from "./provider-embed-evaluation.mjs";
 import { buildEmbedRequest, cosineSimilarity, createEmbedPacer, embeddingCostUsd, evaluateRetrieval,
   exactKnn, FIXTURE_PATH, loadEmbedFixtures, percentile, retryAfterSeconds, runEmbedSpike } from "./provider-embed-spike.mjs";
@@ -122,46 +118,9 @@ const spike = await runEmbedSpike({ root, apiKey: "sk-test-not-real-key", fetchI
 assert.equal(requests, 102); assert.equal(waits, 101); assert.equal(virtualNow, 111100);
 assert.deepEqual(spike.observations.quality, { top_k: 5, recall_at_5: 1, risk_core_recall_at_5: 1, precision_at_5: 0.84 });
 assert.equal(spike.observations.retrieval.counts.reduce((sum, r) => sum + r.relevant_hits, 0), 420);
-const result = { observations: spike.observations, environment: {
-  node_version: "v24.4.1", region: "github-hosted", fixture_set_hash: fixtures.fixtureSetHash,
-  pricing_snapshot_date: "2026-09-04", pricing_source: "https://cohere.com/pricing",
-  transport: "native-fetch", provider_request_ids_hash: spike.providerRequestIdsHash,
-  api_version: "v2", official_text_input_limit_per_minute: 2000, request_interval_ms: 1100,
-} };
-const errorsFor = (r) => { const errors = []; validateEmbedEvidenceResult(r, (e) => errors.push(e)); return errors; };
-assert.deepEqual(errorsFor(result), []);
-for (const mutate of [
-  (r) => r.observations.quality.recall_at_5 = 0.89,
-  (r) => r.observations.quality.risk_core_recall_at_5 = 0.99,
-  (r) => r.observations.quality.precision_at_5 = 0.79,
-  (r) => r.observations.retrieval.rows.pop(),
-  (r) => r.observations.retrieval.rows[1] = r.observations.retrieval.rows[0],
-  (r) => r.observations.retrieval.rows[0].ranking[0].document_id = "unknown",
-  (r) => r.observations.retrieval.rows[0].ranking[1] = r.observations.retrieval.rows[0].ranking[0],
-  (r) => r.observations.retrieval.rows[0].ranking[0].score = NaN,
-  (r) => r.observations.retrieval.rows[0].ranking[0].prompt = "must reject extra data",
-  (r) => r.observations.retrieval.counts[0].relevant_hits = 999,
-  (r) => r.observations.retrieval.slices[0].recall_at_5 = 0,
-  (r) => r.observations.samples.queries[0].billed_input_tokens++,
-  (r) => r.observations.samples.queries[1].query_id = r.observations.samples.queries[0].query_id,
-  (r) => r.observations.samples.documents[0].input_count++,
-  (r) => r.observations.latency.query_p95_ms = 1501,
-  (r) => r.observations.contract.dimension = 768,
-  (r) => r.observations.usage.calculated_cost_usd++,
-  (r) => r.environment.fixture_set_hash = "0".repeat(64),
-  (r) => r.observations.dataset.split = "development",
-]) {
-  const bad = structuredClone(result); mutate(bad); assert.ok(errorsFor(bad).length > 0);
-}
-// Correctly recomputed bad rankings still fail thresholds: never trust a success
-// aggregate or an ID's alphabetical order in place of actual retrieval.
-const bad = structuredClone(result);
-bad.observations.retrieval.rows = gate.map((q) => ({ query_id: q.id, ranking: fixtures.documents.filter((d) => !q.relevant_unit_ids.includes(d.unit_id))
-  .slice(0, 5).map((d) => ({ document_id: d.id, unit_id: d.unit_id, score: 1 })) }));
-const recomputed = scoreRankings({ queries: gate, documents: fixtures.documents, rows: bad.observations.retrieval.rows });
-bad.observations.quality = recomputed.quality; bad.observations.retrieval.counts = recomputed.counts;
-bad.observations.retrieval.slices = recomputed.slices;
-assert.ok(errorsFor(bad).some((e) => e.includes("Recall@5")));
+// 정책·실행기 통합 시험은 재정의된 v3 쪽으로 옮겼다.
+// test-provider-embed-candidate.mjs 를 본다. 이 파일은 v2 fixture 계약,
+// 지표 oracle, Provider 계약 계층만 남긴다.
 const noWait = { wait: async () => {} };
 await assert.rejects(runEmbedSpike({ root, apiKey: "", fetchImpl: fakeFetch, pacer: noWait }), /COHERE_API_KEY/);
 let limited = 0;
@@ -173,55 +132,4 @@ await assert.rejects(runEmbedSpike({ root, apiKey: "sk-test-not-real-key", pacer
   new Response(JSON.stringify({ id: "synthetic-id", embeddings: { float: [[1, 0]] }, meta: { billed_units: { input_tokens: 1 } } }),
     { status: 200, headers: { "content-type": "application/json" } }) }), /dimension/);
 
-// Commit-bound runner validation in a disposable repository, never overwrite a
-// user's evidence-output/result.json or depend on uncommitted parent scope.
-const temporary = realpathSync(mkdtempSync(resolve(tmpdir(), "finshield-embed-test-")));
-try {
-  const policy = evidencePolicies["B-EMBED-01"];
-  for (const path of [...policy.scopePaths, "docs/02-integrated-requirements.md", "docs/adr/001-p0-provider-stack.md"]) {
-    mkdirSync(dirname(resolve(temporary, path)), { recursive: true }); copyFileSync(resolve(root, path), resolve(temporary, path));
-  }
-  const git = (...args) => {
-    const r = spawnSync("git", args, { cwd: temporary, encoding: "utf8" }); assert.equal(r.status, 0, r.stderr); return r.stdout.trim();
-  };
-  git("init", "-q"); git("add", ".");
-  git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "-c", "commit.gpgsign=false", "commit", "-qm", "fixture");
-  const revision = git("rev-parse", "HEAD");
-  const runnerResult = { schema_version: 3, blocker_id: "B-EMBED-01",
-    requirements_blob_sha: gitBlobSha(readFileSync(resolve(temporary, "docs/02-integrated-requirements.md"))),
-    adr_decision_sha256: adrDecisionDigest(readFileSync(resolve(temporary, "docs/adr/001-p0-provider-stack.md"), "utf8")),
-    code_under_test_sha: revision, workflow_head_sha: revision,
-    scope_sha256: computeEvidenceScopeDigest(temporary, policy, (e) => assert.fail(e)),
-    run: { id: 777, attempt: 1 }, ...result, redactions_applied: true };
-  mkdirSync(resolve(temporary, "evidence-output"));
-  const output = resolve(temporary, "evidence-output/result.json");
-  writeFileSync(output, JSON.stringify(runnerResult));
-  assert.ok(readFileSync(output).byteLength < 512 * 1024);
-  const env = { ...process.env, BLOCKER_ID: "B-EMBED-01", CODE_UNDER_TEST_SHA: revision, WORKFLOW_HEAD_SHA: revision,
-    TRUSTED_REPOSITORY: temporary, GITHUB_RUN_ID: "777", GITHUB_RUN_ATTEMPT: "1" };
-  const validate = () => spawnSync(process.execPath, [resolve(root, ".github/scripts/run-provider-embed-evidence.mjs"), "--validate"],
-    { cwd: temporary, env, encoding: "utf8" });
-  let run = validate(); assert.equal(run.status, 0, run.stdout + run.stderr);
-  runnerResult.observations.quality.precision_at_5 = 1; writeFileSync(output, JSON.stringify(runnerResult));
-  run = validate(); assert.notEqual(run.status, 0);
-  const stdoutPrefix = `${"x".repeat(256 * 1024)}stdout-diagnostic-tail\n`;
-  const stderrPrefix = `${"y".repeat(256 * 1024)}stderr-diagnostic-tail\n`;
-  const preload = `const original=console.error;console.error=(...args)=>{console.error=original;`
-    + `process.stdout.write("x".repeat(256*1024)+"stdout-diagnostic-tail\\n");`
-    + `process.stderr.write("y".repeat(256*1024)+"stderr-diagnostic-tail\\n");original(...args)};`;
-  run = spawnSync(process.execPath, ["--import", `data:text/javascript,${encodeURIComponent(preload)}`,
-    resolve(root, ".github/scripts/run-provider-embed-evidence.mjs"), "--validate"],
-  { cwd: temporary, env, encoding: "utf8", maxBuffer: 4 * 1024 * 1024 });
-  assert.equal(run.status, 1);
-  assert.ok(run.stdout.startsWith(stdoutPrefix), "failed runner must drain stdout");
-  assert.ok(run.stderr.startsWith(stderrPrefix), "failed runner must drain stderr");
-  assert.match(run.stderr, /재계산 불일치/);
-  const mutantPath = resolve(temporary, ".github/scripts/run-provider-embed-evidence.mjs");
-  writeFileSync(mutantPath, readFileSync(mutantPath, "utf8").replaceAll("await exitWithFlushedLogs(1)", "process.exit(1)"));
-  const mutant = spawnSync(process.execPath, ["--import", `data:text/javascript,${encodeURIComponent(preload)}`,
-    mutantPath, "--validate"], { cwd: temporary, env, encoding: "utf8", maxBuffer: 4 * 1024 * 1024 });
-  assert.equal(mutant.status, 1);
-  assert.ok(!mutant.stdout.startsWith(stdoutPrefix) || !mutant.stderr.startsWith(stderrPrefix),
-    "regression must reproduce the old pipe truncation");
-} finally { rmSync(temporary, { recursive: true, force: true }); }
-console.log("Embedding v2 tests passed: 100 gate / 20 development queries; 200 metric oracle trials; qrel, rank, trace, split, billing and provenance mutations. No Live calls.");
+console.log("Embedding v2 계약 시험 통과: gate 100 / development 20 질의, 지표 oracle 200회, qrel·순위·분할·과금 변형. Live 호출 없음.");

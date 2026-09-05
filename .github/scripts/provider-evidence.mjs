@@ -30,18 +30,22 @@ const TRUSTED_MODEL_SPIKE_BLOB = "7448338a029999476c4ec0580ca181dbe50e8135";
 const TRUSTED_PACKAGE_JSON_BLOB = "ecb26cd086f874ea4f989d50f2719a8390c282de";
 const TRUSTED_PACKAGE_LOCK_BLOB = "678296a5f7e2256799413740041886f29f939191";
 const EMBED_WORKFLOW_PATH = ".github/workflows/provider-embed-evidence.yml";
-const EMBED_FIXTURE_PATH = ".github/fixtures/provider-embed-v2.json";
+const EMBED_FIXTURE_PATH = ".github/fixtures/provider-embed-v3.json";
+const EMBED_CANDIDATE_EVALUATION_PATH = ".github/scripts/provider-embed-candidate-evaluation.mjs";
+const EMBED_CANDIDATE_SPIKE_PATH = ".github/scripts/provider-embed-candidate-spike.mjs";
 const EMBED_EVALUATION_PATH = ".github/scripts/provider-embed-evaluation.mjs";
-const TRUSTED_EMBED_EVALUATION_BLOB = "a477a30f0d56321fa1f32a16cdf8891227ad9bb2";
+const TRUSTED_EMBED_EVALUATION_BLOB = "abe7d8151282cf5161884643d15c14adb06c5bc5";
 const EMBED_HARNESS_PATH = ".github/scripts/run-provider-embed-evidence.mjs";
 const EMBED_POLICY_PATH = ".github/scripts/provider-embed-policy.mjs";
 const EMBED_SPIKE_PATH = ".github/scripts/provider-embed-spike.mjs";
 const EMBED_OPS_PATH = "docs/ops/provider-embed-spike.md";
 const TRUSTED_EMBED_WORKFLOW_BLOB = "e8916c44d5cbca33b0a630d588a57e6cc79c0910";
-const TRUSTED_EMBED_FIXTURE_BLOB = "36f6897666a18bee64417bbfd83cebefd0cd4c7c";
-const TRUSTED_EMBED_HARNESS_BLOB = "e8a1919a16bf49cd3dc0dcd57d0df12e6610a438";
-const TRUSTED_EMBED_POLICY_BLOB = "a875f9055e577397e8e38aae1bad1bc2161bb974";
-const TRUSTED_EMBED_SPIKE_BLOB = "b9fd7a599b6f2fba3d281c6dc512ca31c6a7dbff";
+const TRUSTED_EMBED_FIXTURE_BLOB = "1debaf439f9d48f1e507d50a6cddee46dc5c629e";
+const TRUSTED_EMBED_CANDIDATE_EVALUATION_BLOB = "ed3c1427763b87923586d52a9dad8609821eb5e1";
+const TRUSTED_EMBED_CANDIDATE_SPIKE_BLOB = "a80b7abb359d15cc97a493146546c4ede58e2160";
+const TRUSTED_EMBED_HARNESS_BLOB = "e4ced35eab4a882a1fb07be2f7b3f8a5deb0650f";
+const TRUSTED_EMBED_POLICY_BLOB = "09ea828b99f97b63f6948c763480fae38e2aef1f";
+const TRUSTED_EMBED_SPIKE_BLOB = "73e0a270b8e04ddd70a1317459e578a7247f8110";
 const MAX_ARCHIVE_BYTES = 2 * 1024 * 1024;
 const MAX_RESULT_BYTES = 512 * 1024;
 const MAX_EVIDENCE_AGE_MS = 27 * 24 * 60 * 60 * 1000;
@@ -152,10 +156,14 @@ const embedEvidencePolicy = {
     Object.freeze({ path: EMBED_POLICY_PATH, blobSha: TRUSTED_EMBED_POLICY_BLOB }),
     Object.freeze({ path: EMBED_SPIKE_PATH, blobSha: TRUSTED_EMBED_SPIKE_BLOB }),
     Object.freeze({ path: EMBED_EVALUATION_PATH, blobSha: TRUSTED_EMBED_EVALUATION_BLOB }),
+    Object.freeze({ path: EMBED_CANDIDATE_EVALUATION_PATH, blobSha: TRUSTED_EMBED_CANDIDATE_EVALUATION_BLOB }),
+    Object.freeze({ path: EMBED_CANDIDATE_SPIKE_PATH, blobSha: TRUSTED_EMBED_CANDIDATE_SPIKE_BLOB }),
   ]),
   jobName: "provider-embedding-evidence / B-EMBED-01",
   scopePaths: Object.freeze([
     EMBED_FIXTURE_PATH,
+    EMBED_CANDIDATE_EVALUATION_PATH,
+    EMBED_CANDIDATE_SPIKE_PATH,
     EMBED_EVALUATION_PATH,
     ADR_DIGEST_PATH,
     EMBED_POLICY_PATH,
@@ -164,6 +172,7 @@ const embedEvidencePolicy = {
     EMBED_WORKFLOW_PATH,
     EMBED_OPS_PATH,
     "docs/ops/quality-evaluation-plan.md",
+    ".github/scripts/test-provider-embed-candidate.mjs",
     ".github/scripts/test-provider-embed-spike.mjs",
   ]),
   validate: validateEmbedEvidenceResult,

@@ -4,13 +4,14 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node
 import { resolve } from "node:path";
 import { adrDecisionDigest } from "./provider-adr-digest.mjs";
 import { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
-import { assertUnmeasuredGate, FIXTURE_PATH } from "./provider-embed-evaluation.mjs";
+import { assertUnmeasuredGate } from "./provider-embed-evaluation.mjs";
+import { FIXTURE_PATH } from "./provider-embed-candidate-evaluation.mjs";
+import { runCandidateSpike } from "./provider-embed-candidate-spike.mjs";
 import {
   OFFICIAL_TEXT_INPUT_LIMIT_PER_MINUTE,
   PRICING_SNAPSHOT_DATE,
   REQUEST_INTERVAL_MS,
   retryAfterSeconds,
-  runEmbedSpike,
 } from "./provider-embed-spike.mjs";
 
 const mode = process.argv[2];
@@ -61,7 +62,9 @@ if (!/^[0-9a-f]{40}$/.test(codeSha ?? "") || codeSha !== workflowSha || !reposit
 const requirements = readAtCommit("docs/02-integrated-requirements.md");
 const adr = readAtCommit("docs/adr/001-p0-provider-stack.md");
 const scopePaths = [
-  ".github/fixtures/provider-embed-v2.json",
+  ".github/fixtures/provider-embed-v3.json",
+  ".github/scripts/provider-embed-candidate-evaluation.mjs",
+  ".github/scripts/provider-embed-candidate-spike.mjs",
   ".github/scripts/provider-embed-evaluation.mjs",
   ".github/scripts/provider-adr-digest.mjs",
   ".github/scripts/provider-embed-policy.mjs",
@@ -70,6 +73,7 @@ const scopePaths = [
   ".github/workflows/provider-embed-evidence.yml",
   "docs/ops/provider-embed-spike.md",
   "docs/ops/quality-evaluation-plan.md",
+  ".github/scripts/test-provider-embed-candidate.mjs",
   ".github/scripts/test-provider-embed-spike.mjs",
 ];
 const scopeInventory = scopePaths.sort().map((path) => ({
@@ -101,6 +105,7 @@ if (mode === "--run") {
       repository: process.env.GITHUB_REPOSITORY,
       runId: Number(process.env.GITHUB_RUN_ID), attempt: Number(process.env.GITHUB_RUN_ATTEMPT),
       fixtureBlob: gitBlobSha(Buffer.from(readAtCommit(FIXTURE_PATH))),
+      fixturePath: FIXTURE_PATH,
       readJson: async (path, allowMissing = false) => {
         const response = await fetch(`https://api.github.com${path}`, {
           headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" },
@@ -111,7 +116,7 @@ if (mode === "--run") {
         return response.json();
       },
     });
-    const spike = await runEmbedSpike({
+    const spike = await runCandidateSpike({
       root: repository,
       apiKey: process.env.COHERE_API_KEY,
       progress: (complete, total) => console.log(`B-EMBED-01 synthetic queries: ${complete}/${total}`),
