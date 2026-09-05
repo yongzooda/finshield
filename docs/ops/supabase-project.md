@@ -181,7 +181,7 @@ node supabase/tests/verify-remote.mjs
 
 ## 현재 미해결
 
-- `B-SUPABASE-01`은 통과하지 않았다. 남은 업무 묶음은 명세 15절의 12(Budget·Rate·Audit)·13(Demo·평가)·14(Seed·KB 적재)·15(Smoke Gate)와 7.2 의 Run·Case 상태 함수, 9.3 의 안전 View 이고 main 실행 증거 harness 가 아직 없다. 제약·RLS·Storage·Cleanup positive/negative 시험은 `supabase/tests/`에 있고 로컬에서 347건이 통과한다. 운영 프로젝트는 `verify-remote.mjs` Preflight 만 통과한 상태다. 증거로 채택하려면 같은 시험을 실제 프로젝트 DSN 으로 main 에서 실행해야 한다.
+- `B-SUPABASE-01`은 통과하지 않았다. 남은 업무 묶음은 명세 15절의 12(Budget·Rate·Audit)·13(Demo·평가)·14(Seed·KB 적재)·15(Smoke Gate)와 7.2 의 Run·Case 상태 함수, 9.3 의 안전 View 이고 main 실행 증거 harness 가 아직 없다. 제약·RLS·Storage·Cleanup positive/negative 시험은 `supabase/tests/`에 있고 로컬에서 390건이 통과한다. 운영 프로젝트는 `verify-remote.mjs` Preflight 만 통과한 상태다. 증거로 채택하려면 같은 시험을 실제 프로젝트 DSN 으로 main 에서 실행해야 한다.
 - 저장소 Runtime 과 화면은 아직 PreCase 기준선이라 PreCase 코퍼스 테이블을 조회한다. `insight` 5개와 `verification` 화면이 빌드 시 사전 렌더되면서 `relation "cases" does not exist` 로 배포 전체를 실패시켰다. 여섯 화면의 사전 렌더를 끄고 요청 시점 렌더로 바꿔 빌드를 통과시켰다.
 - 이 화면들은 FinShield 전용 DB 에서 요청 시점에 실패한다. 데이터를 지어내지 않고 실패를 감추지 않기 위한 선택이며, FinShield 화면으로 재구현할 때 선언과 함께 제거한다.
 - 그동안 Vercel Production 은 환경변수 변경 이전 배포를 계속 서비스한다. 그 배포는 이전 DB 연결을 유지한다.
@@ -204,3 +204,4 @@ node supabase/tests/verify-remote.mjs
 | `0012_jobs_notifications_aftercare.sql` | 미적용 | 명세 6.6·6.7 재검증 Job·Runtime·Event·Passport Diff·알림·알림 설정·가입 후 점검·답변·Checklist 9개 표, `verification_runs.revalidation_job_id` FK 보완. 종결 Job 의 Diff·Run·Passport 정합성은 Deferred Trigger, 가입 확인 없는 점검 시작과 NO_CHANGE 위험 알림은 Trigger 로 차단. Job Claim·최종화 함수는 Outbox 뒤 |
 | `0013_storage_cleanup_outbox.sql` | 미적용 | 명세 10·12·13·6.9 Private Bucket 두 개, `storage.objects` 본인 slot INSERT 정책, `input_objects` 경로 구성·slot 강제, Cleanup Job·Outbox·Idempotency·삭제 요청·Ledger·Case Embedding 6개 표, Cleanup enqueue·claim·finish·Sweeper·Signed URL 확인·Case 삭제 요청·Purge 함수. 성공 기록은 `storage.objects` 부재를 다시 조회한 뒤에만 남긴다 |
 | `0014_budget_rate_audit.sql` | 미적용 | 명세 6.9·6.11 예산 상한·Counter·예약·Rate·감사·Source Cache·Circuit 8개 표, reserve·settle·release·reconcile, Rate 소비, Provider 1 TPS 직렬화·Circuit Breaker, Cache 갱신·조회, 감사 기록, 90일·24시간·13개월 Retention 함수. 상한 설정이 없는 범위는 예약을 거부한다 |
+| `0015_case_run_functions.sql` | 미적용 | 명세 4.2~4.4·7.2·9.3·11.2 의 Case 생성·전이, 입력 단계 전진, Run 생성·시작·실패, 재검증 enqueue·claim·heartbeat·fail·cancel, 공용 KB·Case Vector 검색 함수. 최종화 함수는 다음 Migration |
