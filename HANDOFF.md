@@ -8,7 +8,7 @@
 - 상위 기획: `docs/01-product-plan.md`
 - DB 구현 기준: `docs/03-database-spec.md`
 - Provider Stack ADR: `docs/adr/001-p0-provider-stack.md`
-- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`만 `PASS`이고 나머지 19개가 미해제다. `GO` 전환에는 Claim 판정 품질 평가셋 사전등록도 필요하다.
+- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`·`B-EMBED-01`이 `PASS`이고 나머지 18개가 미해제다. `GO` 전환에는 Claim 판정 품질 평가셋 사전등록도 필요하다.
 - Product Release Gate (`N-QLT-009`): `NOT-EVALUATED` — P0 기능 구현 뒤 평가한다. Claim 판정 품질 `B-CLAIM-01`을 포함해 4개다.
 - 배포: Vercel `finshield` Production 연결 완료 (`https://finshield-gamma.vercel.app`)
 - 기존 PreCase 저장소·배포: 유지
@@ -39,7 +39,7 @@
 - [x] 재정의 뒤 `B-MODEL-01` main Live Evidence 재측정과 재채택
 - [x] 재정의된 `B-EMBED-01` 을 v4 평가셋으로 main 에서 측정. `FAIL`(Recall@20 0.97)
 - [x] ADR 15.1 미달 규칙에 따라 최적화를 선택. 검색 단위를 사용자 문단에서 Claim 하나로 바꿨다. 합격선·풀 크기·Filter 계약은 그대로다. 측정 뒤 재구성이라는 사실을 제출 문서에 명시한다
-- [ ] Claim 단위 v5 평가셋과 harness, `B-EMBED-01` 재측정
+- [x] Claim 단위 v5 평가셋과 harness, `B-EMBED-01` 측정·채택 (run `33956964817`, Claim별 Recall@20 1.00)
 - [x] `B-MODEL-01` 재측정과 재채택 (run `33956322908`)
 - [x] FinShield 전용 Anthropic Workspace 키로 `B-MODEL-01` 재측정과 채택
 - [x] `.env.example`을 PreCase 복사본에서 FinShield 기준으로 재작성
