@@ -30,7 +30,8 @@ if (!resultPath || (emitSql === apply)) {
 const result = JSON.parse(readFileSync(resolve(process.cwd(), resultPath), "utf8"));
 if (result.blocker_id !== "B-SOURCE-03" || result.schema_version !== 3) throw new Error("B-SOURCE-03 결과 파일이 아니다");
 const { contract, fsc, kinfa, official_pages: pages, registry } = result.observations;
-if (!/^source-snapshot-two-api-cross-check-v2$/.test(contract.formula_version)) throw new Error(`지원하지 않는 산식 버전 ${contract.formula_version}`);
+// 채택된 결과는 산식 v6(PR #116, run 33981161310)이다. v2~v5 결과는 채택되지 않았으므로 받지 않는다.
+if (!/^source-snapshot-two-api-cross-check-v6$/.test(contract.formula_version)) throw new Error(`지원하지 않는 산식 버전 ${contract.formula_version}`);
 
 const LICENSE_CODE = "DATA_GO_KR_NO_RESTRICTION";
 const FRESH_HOURS = 24; // ADR 8.5 갱신 후보 6~24시간의 상한. 실제 TTL 은 재실행 결과로 정한다.
