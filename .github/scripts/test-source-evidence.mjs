@@ -115,6 +115,8 @@ assert.ok(observations.official_pages[0].title.includes(PRODUCT_NAME));
 assert.equal(observations.official_pages[1].markers.no_broker_fee, true);
 assert.equal(observations.official_pages[2].markers.impersonation, true);
 assert.equal(observations.fsc.snapshots[0].sha256, sha256Hex(canonicalJson(fscOldItem)));
+assert.equal(observations.kinfa.snapshots[0].official_id, `data.go.kr:15074508:1:${sha256Hex("1101110000001").slice(0, 12)}`);
+assert.ok(!/\d{13}/.test(observations.kinfa.snapshots.map((s) => s.official_id).join(" ")));
 const result = (blockerId, obs = observations) => ({ blocker_id: blockerId, observations: JSON.parse(JSON.stringify(obs)) });
 const errorsOf = (r) => { const errors = []; validateSourceEvidenceResult(r, (m) => errors.push(m)); return errors; };
 assert.deepEqual(errorsOf(result("B-SOURCE-02")), []);
