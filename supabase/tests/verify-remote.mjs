@@ -17,11 +17,11 @@ import { createHash } from "node:crypto";
 import { resolve } from "node:path";
 import postgres from "postgres";
 
-export const TRACKED_TABLES = Object.freeze([
-  "financial_cases", "case_inputs", "case_input_pages", "case_input_findings",
-  "case_events", "private.input_objects", "private.ocr_artifacts",
-  "profiles", "financial_profiles", "financial_profile_versions",
-]);
+// 추적 대상을 손으로 나열하지 않는다. Migration 이 테이블을 추가할 때마다
+// 목록이 낡아 digest 가 조용히 다른 범위를 재게 된다. 실제로 0005 적용 직후
+// 그 일이 일어났다. FinShield 가 쓰는 네 스키마의 모든 일반 테이블을 대상으로
+// 삼고, 범위 자체를 결과에 함께 남긴다.
+export const TRACKED_SCHEMAS = Object.freeze(["public", "private", "kb", "demo"]);
 
 export const constraintDigest = (definitions) =>
   createHash("sha256").update([...definitions].sort().join("\n")).digest("hex");
@@ -43,11 +43,18 @@ const run = async () => {
     if (url.port !== "6543") failures.push(`pooler 포트가 6543 이 아니다: ${url.port}`);
 
     const constraints = await sql`
-      select conrelid::regclass::text || ' ' || conname || ' '
-             || pg_get_constraintdef(oid) as definition
-        from pg_constraint
-       where conrelid::regclass::text = any(${TRACKED_TABLES})`;
-    console.log(`제약 ${constraints.length}건, digest ${constraintDigest(constraints.map((r) => r.definition)).slice(0, 16)}`);
+      select c.relnamespace::regnamespace::text || '.' || c.relname || ' '
+             || con.conname || ' ' || pg_get_constraintdef(con.oid) as definition
+        from pg_constraint con
+        join pg_class c on c.oid = con.conrelid
+       where c.relkind = 'r'
+         and c.relnamespace::regnamespace::text = any(${TRACKED_SCHEMAS})`;
+    const tables = await sql`
+      select count(*)::int as total
+        from pg_class c
+       where c.relkind = 'r'
+         and c.relnamespace::regnamespace::text = any(${TRACKED_SCHEMAS})`;
+    console.log(`테이블 ${tables[0].total}개, 제약 ${constraints.length}건, digest ${constraintDigest(constraints.map((r) => r.definition)).slice(0, 16)}`);
 
     const rls = await sql`
       select c.relnamespace::regnamespace || '.' || c.relname as name,
