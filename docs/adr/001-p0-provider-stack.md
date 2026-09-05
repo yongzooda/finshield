@@ -221,12 +221,16 @@ P0 corpus는 작고 재현 가능한 평가가 우선이므로 초기에는 Exac
 
 | 단계 | 역할 | blocker | 무엇을 증명하는가 |
 |---|---|---|---|
-| Vector 1차 후보 생성 | Filter를 통과한 문서에서 후보 풀 20개 산출 | `B-EMBED-01` | 필요한 근거가 후보 풀 안에 빠짐없이 들어오는가 |
+| Vector 1차 후보 생성 | Filter를 통과한 문서에서 Claim 하나를 질의로 후보 풀 20개 산출. Case 풀은 Claim 풀의 합집합 | `B-EMBED-01` | Claim을 확인하거나 반박할 근거가 후보 풀 안에 빠짐없이 들어오는가 |
 | 종단 Retrieval | Filter·Keyword·Vector·Rerank를 거친 최종 top 5 | `B-RETRIEVAL-01` | 최종 결과가 대상·시점이 맞는 근거만 담는가 |
 
 `AI-006`에 따라 기관·상품 식별과 정확한 수치 조회는 Structured Retrieval을 우선하고, Vector 유사도만으로 사실을 확정하지 않는다. 대상 식별자와 시점 판별은 Metadata Filter와 Freshness Rerank가 담당하며 Vector 단계 단독에 요구하지 않는다.
 
 1차 후보 생성에서 빠진 근거는 이후 어떤 단계로도 복구할 수 없으므로 후보 풀에서 부분 회수를 허용하지 않는다. 후보 풀 크기는 Rerank 입력 상한과 corpus 대비 비율에서 정하고 관측된 순위 분포에 맞추지 않는다.
+
+질의 단위는 사용자 문단이 아니라 Claim 하나다. 요구사항은 Intake가 추출한 Material Claim을 CoVe가 별도 질문·검색으로 독립 재검증하도록 정하므로, 근거 검색은 Claim마다 일어난다. 여러 사실을 한 문장에 묶은 문단을 통째로 임베딩해 검색하는 경로는 제품에 없다.
+
+이 결정은 2026-09-05 v3·v4 측정 뒤에 내렸다. 문단 단위 다중 항목 질의는 Filter 없이 Recall@20 0.902, Filter 뒤 0.970으로 두 번 미달했고, 단일 사실 질의는 두 번 다 1.00이었다. 미달을 보고 합격선을 낮춘 것이 아니라 §15.1의 미달 규칙에 따라 검색 단위를 제품 구조에 맞춘 것이며, 합격선·후보 풀 크기·Filter 계약은 그대로다. 측정 뒤 재구성이라는 사실은 제출 문서에 명시한다.
 
 Keyword 단계는 `kb.knowledge_chunks.search_vector`의 실제 Postgres FTS 경로를 사용한다. 따라서 `B-RETRIEVAL-01`은 `B-SUPABASE-01` 통과에 의존하며, FTS를 응용 코드의 근사 구현으로 대체해 통과시키지 않는다. Rerank는 `kb.source_snapshots`의 `authority_level`·`effective_from`·`effective_to`·`source_fingerprint`를 사용하는 결정적 단계이고, 같은 `source_fingerprint`는 독립 근거 수를 늘리지 않는다.
 
@@ -254,7 +258,7 @@ Vercel Function의 요청·응답 body 한도는 4.5 MB이고 FinShield 입력 �
 4. 서버가 소유권, object metadata, Magic Byte, MIME, 최대 10 MiB를 다시 검증한다.
 5. 결과 PDF도 4.5 MB를 넘을 수 있으므로 Function 응답 대신 짧은 수명의 signed download URL을 사용한다.
 
-Bucket은 public으로 전환하지 않는다. object path에는 `owner_id/case_id/input_id/random-id`를 쓰고 원본 파일명·이름·전화번호를 넣지 않는다. path는 재사용하지 않는다. RLS는 사용자 자신의 열린 upload slot에 대한 제한된 쓰기만 허용하며 서버 검증 전 읽기를 허용하지 않는다. Supabase가 발급한 TUS upload URL의 유효시간을 앱 설정만으로 짧아졌다고 가정하지 않고, slot 폐쇄 뒤 이미 발급된 URL·token으로 PATCH/재업로드가 가능한지 Live Gate에서 검사한다.
+Bucket은 public으로 전환하지 않는다. object path에는 `owner_id/case_id/input_id/random.<safe_ext>`를 쓰고 원본 파일명·이름·전화번호를 넣지 않는다. `safe_ext`는 서버가 Magic Byte로 검증한 확장자다. path는 재사용하지 않는다. RLS는 사용자 자신의 열린 upload slot에 대한 제한된 쓰기만 허용하며 서버 검증 전 읽기를 허용하지 않는다. Supabase가 발급한 TUS upload URL의 유효시간을 앱 설정만으로 짧아졌다고 가정하지 않고, slot 폐쇄 뒤 이미 발급된 URL·token으로 PATCH/재업로드가 가능한지 Live Gate에서 검사한다.
 
 ### 6.2 Parser 우선순위
 
@@ -598,8 +602,8 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `EVID-CI-01` | 저장소 baseline | OBSERVED | typecheck·lint·test와 Vercel Preview status를 `check` job이 확인 |
 | `EVID-DOC-01` | Provider 공개 기술 문서 | DOCUMENTED | Anthropic·Cohere·Supabase·CLOVA·Vercel 공개 문서의 명시된 모델 ID·기술 제한·API 동작을 2026-09-03 확인; DPA·보존·리전·계약 승인이 아님 |
 | `EVID-LAW-01` | Law 등록 IP 위험 | DOCUMENTED | 공식 공지에서 OC 등록 IP와 요청 IP 불일치 오류 가능성 확인 |
-| `EVID-MODEL-01` | Anthropic Sonnet 5 Live Spike | PASS | FinShield 전용 Anthropic Workspace 키로 재측정한 main run `33912191567`, artifact `9951898766`; 합성 50건·100 live request·결정적 fault 20건에서 schema·strict tool·P95·비용 policy 합격. 무효가 된 run `33783765337`·`33883439885`의 결과 파일도 이력으로 보존한다 |
-| `EVID-EMBED-01` | Cohere embed-v4.0 1차 후보 생성 Live Spike | FAIL | 사전등록 구성(Metadata Filter → Exact KNN, 후보 풀 20)으로 v4 평가셋을 main run `33955613801`에서 측정. 관련 unit Recall@20 0.97, 전량 회수 88/100, 위험 핵심 Recall 1.00, Query P95 466ms. 합격선 1.00 미달. Filter 없이 잰 v3 run `33954521524`(Recall 0.902)은 사전등록 구성이 아니라 기준선 관측으로만 보존 |
+| `EVID-MODEL-01` | Anthropic Sonnet 5 Live Spike | STALE | run `33912191567`이 합격했으나 이 ADR 변경으로 decision digest가 바뀌어 채택이 무효; run `33783765337`·`33883439885`와 함께 결과 파일을 보존하고 같은 harness로 재측정한다 |
+| `EVID-EMBED-01` | Cohere embed-v4.0 1차 후보 생성 Live Spike | STALE | 사전등록 구성(Metadata Filter → Exact KNN, 후보 풀 20)으로 v4 평가셋을 main run `33955613801`에서 측정. 관련 unit Recall@20 0.97, 전량 회수 88/100, 위험 핵심 Recall 1.00, Query P95 466ms. 합격선 1.00 미달. Filter 없이 잰 v3 run `33954521524`(Recall 0.902)은 사전등록 구성이 아니라 기준선 관측으로만 보존. 두 측정 모두 문단 단위 질의라 Claim 단위로 바꾼 현재 계약의 증거가 아니며 이력으로 보존 |
 
 위 PASS는 제품 Live Vertical Slice PASS가 아니다. GitHub의 Vercel status는 build/deploy 성공을 뜻하며 Provider key·OCR·RLS·Workflow 기능 성공을 증명하지 않는다.
 
@@ -607,8 +611,8 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 
 | 차단 ID | 실제로 필요한 증거 | 현재 상태 | 해제 조건 |
 |---|---|---|---|
-| `B-MODEL-01` | Anthropic Sonnet 5 auth·quota·structured output·strict tool·P95·cost | PASS | §15.1 Model schema·policy·비용 합격 + sanitized artifact |
-| `B-EMBED-01` | Cohere 1차 후보 생성 Recall@20·P95·cost | FAIL | §15.1 후보 생성 합격 + versioned raw metric artifact |
+| `B-MODEL-01` | Anthropic Sonnet 5 auth·quota·structured output·strict tool·P95·cost | NOT-EVALUATED | §15.1 Model schema·policy·비용 합격 + sanitized artifact |
+| `B-EMBED-01` | Cohere Claim 단위 1차 후보 생성 Recall@20·P95·cost | NOT-EVALUATED | §15.1 후보 생성 합격 + versioned raw metric artifact |
 | `B-RETRIEVAL-01` | Metadata Filter·Keyword FTS·Vector·Rerank 종단 top 5 품질 | NOT-EVALUATED | §15.1 종단 Retrieval 합격 + query별 단계 원장; `B-SUPABASE-01` 선행 |
 | `B-OCR-01` | PDF.js·CLOVA 한국어 숫자·부정어·기관명·URL·표 Fixture | NOT-EVALUATED | §15.1 OCR·Parser 합격 + page별 diff |
 | `B-FILE-SAFETY` | encrypted/active/polyglot/bomb·격리 parser·dependency advisory | NOT-EVALUATED | §15.1 File safety 합격 |
@@ -689,7 +693,7 @@ Release blocker도 같은 네 상태를 사용한다. Implementation Gate가 `GO
 |---|---:|---|
 | Model schema·policy | 정상 50 + refusal/timeout/429/schema 오류 20 | 정상 100% Zod post-validation, 오류의 성공 오표현 0건, 단일 호출 P95 ≤10초 |
 | Model 전체 비용 | 대표 Text 20 + Image/PDF 20 | Text P95 ≤105초·Run당 ≤USD 0.50, Image/PDF P95 ≤155초·Run당 ≤USD 0.80 |
-| 1차 후보 생성 | versioned 한국어 금융 Query ≥100, hard negative ≥30 | 후보 풀 20에서 관련 unit Recall =1.00, 위험 핵심문서 Recall =1.00, P95 ≤1.5초 |
+| 1차 후보 생성 | versioned 한국어 금융 Claim ≥100 (참·거짓 Claim 각 ≥30 포함), hard negative ≥30 | Claim별 후보 풀 20에서 관련 unit Recall =1.00, Case 합집합 풀 Recall =1.00, 위험 핵심문서 Recall =1.00, P95 ≤1.5초 |
 | 종단 Retrieval | 같은 평가셋의 Filter·Keyword·Vector·Rerank 종단 결과 | Recall@5 ≥0.90, 위험 핵심문서 Recall@5 =1.00, Precision@5 ≥0.80, 모든 slice Recall@5 ≥0.90, 가족별 Precision@5 ≥0.80, P95 ≤1.5초, Filter의 정답 제외 0건, 중복 `source_fingerprint`의 독립 근거 증가 0건 |
 | OCR·Parser 정확도 | Text/Image/digital/scanned PDF ≥30문서·총 ≥100쪽 | 숫자·금리·부정어 exact 100%, 기관·상품·URL field F1 ≥0.98, 지원 페이지 성공 ≥0.95, 10쪽 P95 ≤35초 |
 | File safety | encrypted/active/embedded/polyglot/bomb/malformed ≥50 | 위험 입력 거부 100%, secret/network 접근 0건, process crash가 Agent Runtime에 전파 0건 |
@@ -711,7 +715,7 @@ Model 비용은 2026-09-04 공식 Sonnet 5 표준 단가인 input USD 2/MTok, ou
 | 시험 묶음 | 최소 시험 | 저장할 증거 |
 |---|---|---|
 | Model | 합성 50건 실제 auth·structured schema·strict tool·quota header·token/cost; refusal·timeout·429·schema error adapter fixture 20건 | model ID, latency/P95, sanitized usage·비용, request ID hash, fixture/fault mode |
-| 1차 후보 생성 | Korean query set, hard negative, dimension, cosine, exact KNN, 후보 풀 20 | eval version, Recall@k, 질문별 최소 k, P50/P95, cost |
+| 1차 후보 생성 | Korean claim set, 참·거짓 Claim, hard negative, Metadata Filter, dimension, cosine, exact KNN, 후보 풀 20 | eval version, Claim별 Recall@k, Case 합집합 풀 크기·Recall, Claim별 최소 k, P50/P95, cost |
 | 종단 Retrieval | Metadata Filter 대상·기준일, Postgres FTS, Vector, Authority/Freshness/Relevance Rerank | 단계별 후보 수, 최종 top 5 ID/score, Filter 제외 사유, fingerprint 그룹, P50/P95 |
 | Parser/OCR | Text·digital PDF·scanned PDF·Image, 숫자·부정어·표·URL | fixture hash, page result, expected/actual diff |
 | Storage | direct upload, 4.5MB 초과, 10MiB reject, RLS, signed download | object metadata, HTTP code, deletion ledger |
@@ -769,6 +773,7 @@ Live 시험은 Preview 격리 환경에서 먼저 수행한 뒤 Production과 �
 
 ### 기각한 대안
 
+- 사용자 문단 단위 Vector 1차 검색: v3·v4 측정에서 다중 항목 질의 Recall@20이 0.902·0.970으로 두 번 미달. 제품은 Claim마다 검색하므로 Claim 단위로 전환하고 기각
 - Anthropic 자체 Embedding: 공식적으로 제공하지 않으므로 기각
 - Voyage를 P0 기본 Embedding으로 즉시 채택: 한국어 금융 평가 없이 한국어 지원을 추정할 수 없어 제한 후보
 - AWS Textract: 한국어 P0 OCR 지원 근거가 부족해 P1 비교 후보에서도 우선순위 낮음

@@ -19,7 +19,7 @@ Evidence-Verified Multi-Agent 금융 의사결정 생애주기 검증 플랫폼
 - DB 구현 기준은 [docs/03-database-spec.md](./docs/03-database-spec.md)
 - P0 Provider·외부 연동·실행 인프라 결정과 Implementation/Release Gate는 [docs/adr/001-p0-provider-stack.md](./docs/adr/001-p0-provider-stack.md)
 
-현재 Commit은 문서·개발 기준선이다. `B-MODEL-01` Live Evidence는 FinShield 전용 Anthropic Workspace 키로 재측정해 채택했고, 나머지 19개 Provider·실행 인프라 blocker가 남아 `N-QLT-010` Implementation Gate는 `NO-GO`이고, `N-QLT-009` Release Gate는 기능 구현 뒤 평가한다. FinShield의 로그인·파일 입력·Claim Engine·Multi-Agent·재검증 기능이 모두 구현됐다는 의미가 아니다.
+현재 Commit은 문서·개발 기준선이다. `B-MODEL-01` Live Evidence는 세 번 합격했으나 ADR 변경으로 채택이 무효가 되어 재측정 대기다. 20개 Provider·실행 인프라 blocker가 모두 남아 `N-QLT-010` Implementation Gate는 `NO-GO`이고, `N-QLT-009` Release Gate는 기능 구현 뒤 평가한다. FinShield의 로그인·파일 입력·Claim Engine·Multi-Agent·재검증 기능이 모두 구현됐다는 의미가 아니다.
 
 P0 Evidence는 active main Ruleset·strict required `check`·SHA 고정 Action·mutation test·main 실행·별도 Adoption PR로 관리한다. GitHub Organization Required Workflow와 외부 App attestation은 제출 후 강화 항목이며, 완료 전 증거를 외부 독립 CI가 보증했다고 표현하지 않는다.
 

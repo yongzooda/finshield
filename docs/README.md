@@ -7,7 +7,7 @@
 | `03-database-spec.md` | ERD·컬럼·제약·RLS·보존정책 | 확정·DB 구현 기준 |
 | `adr/001-p0-provider-stack.md` | P0 Provider·공식 출처·Storage·Job·실패 계약 | Architecture 승인·Implementation Gate `NO-GO` |
 | `ops/ci-integrity-preflight.md` | `B-CI-INTEGRITY` 외부 통제 준비 상태·강화 절차 | P0 비차단·제출 후 강화 `DEFERRED` |
-| `ops/provider-model-spike.md` | `B-MODEL-01` Sonnet 5 실행·비용·증거 채택 절차 | 전용 Workspace 키로 재측정·채택 완료 |
+| `ops/provider-model-spike.md` | `B-MODEL-01` Sonnet 5 실행·비용·증거 채택 절차 | 세 번 합격·ADR 변경으로 채택 무효·재측정 대기 |
 | `ops/supabase-project.md` | FinShield 전용 Supabase 프로젝트 사실·Migration 적용·검증 | `0001`~`0003` 적용 완료 |
 | `ops/adr-correction-backlog.md` | ADR 본문 정정 대기 목록과 재측정 비용 | 대기 1건 |
 | `ops/provider-ocr-spike.md` | CLOVA OCR 도메인·요금·한도와 쪽수 상한 결정 근거 | 사실 기록, 측정 전 |
