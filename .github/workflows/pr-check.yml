@@ -81,6 +81,9 @@ jobs:
       - name: Supabase Evidence Policy Contract Test
         run: node .github/scripts/test-supabase-evidence.mjs
 
+      - name: Source Snapshot Contract Test
+        run: node .github/scripts/test-source-evidence.mjs
+
       - name: 한국어 기록 검사 회귀 테스트
         run: node .github/scripts/test-korean-records.mjs
 

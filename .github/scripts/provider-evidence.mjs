@@ -8,11 +8,13 @@ import { adrDecisionDigest, maskNonRenderedMarkdown } from "./provider-adr-diges
 import { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
 import { validateModelEvidenceResult } from "./provider-model-policy.mjs";
 import { expectedInventory as supabaseExpectedInventory, validateSupabaseEvidenceResult } from "./supabase-evidence-policy.mjs";
+import { validateSourceEvidenceResult } from "./source-evidence-policy.mjs";
 
 export { adrDecisionDigest } from "./provider-adr-digest.mjs";
 export { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
 export { validateModelEvidenceResult } from "./provider-model-policy.mjs";
 export { validateSupabaseEvidenceResult } from "./supabase-evidence-policy.mjs";
+export { validateSourceEvidenceResult } from "./source-evidence-policy.mjs";
 
 const REPOSITORY = "yongzooda/finshield";
 const EVIDENCE_WORKFLOW_NAME = "Provider Spike Evidence";
@@ -58,6 +60,14 @@ const TRUSTED_SUPABASE_WORKFLOW_BLOB = "7a4e3bebe8fcacaf4e25d2d2de45c066ff6a7e9f
 const TRUSTED_SUPABASE_HARNESS_BLOB = "df3dc2a024f7d83b8c203e2b47b6ae06b0b2f4b4";
 const TRUSTED_SUPABASE_POLICY_BLOB = "6af6fc5af1ee7dce25166a6976fc95af92b96a33";
 const TRUSTED_SUPABASE_VERIFY_REMOTE_BLOB = "f591211ef39a6e20d1143bd4add2d322e474d9c8";
+const SOURCE_WORKFLOW_PATH = ".github/workflows/source-evidence.yml";
+const SOURCE_HARNESS_PATH = ".github/scripts/run-source-evidence.mjs";
+const SOURCE_POLICY_PATH = ".github/scripts/source-evidence-policy.mjs";
+const SOURCE_SPIKE_PATH = ".github/scripts/source-snapshot-spike.mjs";
+const TRUSTED_SOURCE_WORKFLOW_BLOB = "2c7c7300fb2a8305e72230b9e60d6f790df6fb4f";
+const TRUSTED_SOURCE_HARNESS_BLOB = "7f8b5a61de52b108cd2290a6128c6b5a56cc58b5";
+const TRUSTED_SOURCE_POLICY_BLOB = "9f23ba0a4e05d60eaa302068823d6d8cdb703397";
+const TRUSTED_SOURCE_SPIKE_BLOB = "bf57c65e665e0c6887697644a6a9b18affb6a5d5";
 const MAX_ARCHIVE_BYTES = 2 * 1024 * 1024;
 const MAX_RESULT_BYTES = 512 * 1024;
 const MAX_EVIDENCE_AGE_MS = 27 * 24 * 60 * 60 * 1000;
@@ -230,12 +240,42 @@ const supabaseEvidencePolicy = {
   validate: validateSupabaseEvidenceResult,
 };
 
+// 두 Source blocker 는 같은 harness·같은 관측값을 쓰고 dispatch 입력이 blocker 를 정한다.
+const sourceEvidencePolicy = (blockerId) => ({
+  gate: "implementation",
+  workflowName: "Source Snapshot Evidence",
+  workflowPath: SOURCE_WORKFLOW_PATH,
+  workflowBlobSha: TRUSTED_SOURCE_WORKFLOW_BLOB,
+  harnessPath: SOURCE_HARNESS_PATH,
+  harnessBlobSha: TRUSTED_SOURCE_HARNESS_BLOB,
+  trustedExecutionFiles: Object.freeze([
+    Object.freeze({ path: SOURCE_WORKFLOW_PATH, blobSha: TRUSTED_SOURCE_WORKFLOW_BLOB }),
+    Object.freeze({ path: SOURCE_HARNESS_PATH, blobSha: TRUSTED_SOURCE_HARNESS_BLOB }),
+    Object.freeze({ path: SOURCE_POLICY_PATH, blobSha: TRUSTED_SOURCE_POLICY_BLOB }),
+    Object.freeze({ path: SOURCE_SPIKE_PATH, blobSha: TRUSTED_SOURCE_SPIKE_BLOB }),
+    Object.freeze({ path: ADR_DIGEST_PATH, blobSha: TRUSTED_ADR_DIGEST_BLOB }),
+  ]),
+  jobName: `source-evidence / ${blockerId}`,
+  scopePaths: Object.freeze([
+    ADR_DIGEST_PATH,
+    SOURCE_SPIKE_PATH,
+    SOURCE_POLICY_PATH,
+    SOURCE_HARNESS_PATH,
+    ".github/scripts/test-source-evidence.mjs",
+    SOURCE_WORKFLOW_PATH,
+    "docs/ops/source-snapshot-spike.md",
+  ]),
+  validate: validateSourceEvidenceResult,
+});
+
 // PASS is fail-closed: each remaining blocker gets a policy only with its real
 // harness. A prose criterion or a hand-authored `result: PASS` is never enough.
 export const evidencePolicies = Object.freeze({
   "B-MODEL-01": modelEvidencePolicy,
   "B-EMBED-01": embedEvidencePolicy,
   "B-SUPABASE-01": supabaseEvidencePolicy,
+  "B-SOURCE-02": sourceEvidencePolicy("B-SOURCE-02"),
+  "B-SOURCE-03": sourceEvidencePolicy("B-SOURCE-03"),
 });
 
 export const computeEvidenceScopeDigest = (root, policy, fail) => {
