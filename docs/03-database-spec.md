@@ -1476,7 +1476,7 @@ Guide만 실패한 경우 Claim·Evidence·축 결과는 보존하고 Run을 `PA
 - `private.search_public_knowledge(...)`: Metadata·본문 크기·후보 수 상한을 적용하고 Provenance를 함께 반환한다.
 - `private.search_case_knowledge(...)`: 서버 전용, 요청 Owner·Case 고정 후 임시 Vector를 검색한다.
 
-View는 PostgreSQL 지원 범위에서 `security_invoker=true`를 사용하고 기반 RLS를 따른다. 그렇지 않으면 View를 Exposed Schema에 두지 않고 Owner 검증 RPC로 대체한다.
+View는 PostgreSQL 지원 범위에서 `security_invoker=true`를 사용하고 기반 RLS를 따른다. 그렇지 않으면 View를 Exposed Schema에 두지 않고 Owner 검증 RPC로 대체한다. 회원 SELECT 가 없는 Run·Agent·Tool·Evidence 표는 `public.case_runs_json`, `public.passport_claims_json`, `public.guide_channels_json` 같은 `auth.uid()` 검증 정의자 Helper 가 Sanitized 요약만 돌려주고, `run_progress_v` 는 소유자 조건을 직접 건 정의자 View 다. 신뢰센터 View 는 공개 행만 담는 정의자 View 다.
 
 ## 9.4 P1 Trusted Reviewer
 
