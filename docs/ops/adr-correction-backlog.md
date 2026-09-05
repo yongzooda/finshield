@@ -13,7 +13,13 @@ digest 가 달라지고, 이미 채택한 Implementation `PASS` 증거가 모두
 
 ## 대기 중
 
-### 1. 임시 객체 경로 형식이 ADR 과 DB 명세에서 다르다
+없음.
+
+## 처리 완료
+
+### 1. 임시 객체 경로 형식이 ADR 과 DB 명세에서 다르다 (2026-09-05 처리)
+
+`owner_id/case_id/input_id/random.<safe_ext>` 로 통일했다. ADR 6.1 과 DB 명세 6.2 를 같은 PR 에서 고쳤다. `B-EMBED-01` Claim 단위 전환 ADR 변경에 묶어 처리해 별도 재측정 비용은 들지 않았다.
 
 - ADR 6.1: `owner_id/case_id/input_id/random-id`
 - DB 명세 6.2 `private.input_objects.object_path`: `<owner>/<case>/<random>.<safe_ext>`
@@ -27,7 +33,5 @@ digest 가 달라지고, 이미 채택한 Implementation `PASS` 증거가 모두
 
 영향 blocker: `B-STORAGE-01`, `B-DELETE-01`
 
-## 처리 완료
-
-없음. 2026-09-05 Hobby·법제처 등록 도메인 정정은 채택된 `PASS` 가 0개일 때
-처리해 재측정 비용이 없었다.
+2026-09-05 Hobby·법제처 등록 도메인 정정은 채택된 `PASS` 가 0개일 때 처리해
+재측정 비용이 없었다.
