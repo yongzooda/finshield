@@ -11,7 +11,7 @@
 // ============================================================
 import { createHash } from "node:crypto";
 
-export const FORMULA_VERSION = "source-snapshot-two-api-cross-check-v5";
+export const FORMULA_VERSION = "source-snapshot-two-api-cross-check-v6";
 export const PRODUCT_NAME = "햇살론15";
 export const FSC_ENDPOINT = "https://apis.data.go.kr/1160100/service/GetSmallLoanFinanceInstituteInfoService/getOrdinaryFinanceInfo";
 export const KINFA_ENDPOINT = "https://apis.data.go.kr/B553701/LoanProductHandlingAgencyInfoService/getLoanProductHandlingAgencyInfo";
@@ -308,7 +308,9 @@ export const runSourceSpike = async ({ apiKey, fetchImpl = globalThis.fetch, now
   const kinfaSnapshots = kinfaRecords.map((item, index) => buildSnapshot({
     authority: "서민금융진흥원",
     sourceType: "INSTITUTION",
-    officialId: `data.go.kr:15074508:${item.idNo ?? index + 1}:${item.corpNo ?? "na"}`,
+    // 법인번호 13자리를 ID 에 그대로 넣으면 주민번호 형태 검사와 구분되지 않는다(run 33980899425).
+    // 레코드 안의 corpNo 는 그대로 두고 ID 에는 그 Hash 앞 12자리만 쓴다.
+    officialId: `data.go.kr:15074508:${item.idNo ?? index + 1}:${item.corpNo ? sha256Hex(String(item.corpNo)).slice(0, 12) : "na"}`,
     officialUrl: PORTAL_PAGES.kinfa,
     record: item,
     fetchedAt,
