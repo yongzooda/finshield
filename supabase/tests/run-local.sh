@@ -60,7 +60,7 @@ done
 echo "== 불변식 시험 =="
 # 시험 출력은 NOTICE 로 보고한다. ERROR 는 그대로 드러내고 실패 시 즉시 멈춘다.
 # 파이프 뒤의 grep 이 psql 의 종료 코드를 가리지 않도록 상태를 따로 검사한다.
-for file in "$ROOT"/supabase/tests/[0-9][1-9]_*.sql; do
+for file in $(ls "$ROOT"/supabase/tests/[0-9][0-9]_*.sql | grep -v "/00_"); do
   # set -e 아래에서 실패한 명령 치환은 스크립트를 조용히 끝낸다. || 로 상태를 잡는다.
   status=0
   output="$(psql_run < "$file" 2>&1)" || status=$?

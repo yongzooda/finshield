@@ -1270,8 +1270,10 @@ Passport Commit과 Outbox INSERT는 같은 Transaction이다. Dispatcher 실패�
 
 | 테이블 | 핵심 컬럼 | 제약·목적 |
 |---|---|---|
-| `private.usage_budget_counters` | `scope_type`, `scope_key`, `provider`, `model`, `period_start`, `period_end`, `limit_microunits`, `reserved_microunits`, `consumed_microunits`, `updated_at` | 호출 전 원자 예약, Cap 초과 0건 |
-| `private.usage_reservations` | `id`, `run_id`, `agent_run_id`, `tool_run_id`, `estimated_microunits`, `actual_microunits`, `status`, `expires_at`, `created_at` | `RESERVED|SETTLED|RELEASED`, 실제 사용 정산 |
+| `private.budget_limits` | `scope_type`, `provider`, `model`, `limit_microunits`, `policy_version`, `updated_at` | 범위별 상한 설정. 정확한 model 행이 없으면 `*` 행, 그것도 없으면 예약 거부(fail-closed) |
+| `private.usage_budget_counters` | `scope_type`, `scope_key`, `provider`, `model`, `period_start`, `period_end`, `limit_microunits`, `reserved_microunits`, `consumed_microunits`, `updated_at` | 호출 전 원자 예약, Cap 초과 0건. `scope_type`은 `GLOBAL_DAY|OWNER_DAY|CASE|RUN` |
+| `private.usage_reservations` | `id`, `run_id`, `agent_run_id`, `tool_run_id`, `provider`, `model`, `pricing_version`, `estimated_microunits`, `actual_microunits`, `status`, `reconcile_required`, token·elapsed·status category·retry·request ref, `expires_at`, `created_at`, `settled_at` | `RESERVED|SETTLED|RELEASED`, 실제 사용 정산. 사용량이 불명확하면 `RESERVED` 유지 + `reconcile_required` |
+| `private.usage_reservation_counters` | `reservation_id`, `counter_id`, `microunits` | 예약이 잡은 Counter 별 금액; 정산·해제가 되돌릴 대상 |
 | `private.rate_limit_buckets` | `scope_type`, `scope_key`, `operation`, `window_start`, `count`, `limit_value`, `updated_at` | 사용자·IP 보조정보·Case·Tool 다층 제한 |
 | `private.audit_events` | `id`, `correlation_id`, `event_code`, `actor_type`, `owner_ref`, `case_id`, `run_id`, `agent_run_id`, `tool_run_id`, `status_code`, `error_code`, `duration_ms`, `created_at` | 원문·PII·Secret 없는 운영 Trace |
 
@@ -1308,7 +1310,7 @@ P0 Migration에서 이 테이블들을 미리 만들 필요는 없다. 만들 �
 | 테이블 | 핵심 컬럼 | 제약·목적 |
 |---|---|---|
 | `private.source_cache_entries` | `source_adapter`, `cache_key`, `source_snapshot_id`, `retrieved_at`, `fresh_until`, `expires_at`, `status`, `last_error_code`, `updated_at` | 가변 Cache pointer와 불변 `kb.source_snapshots` 분리; `STALE` 판단 |
-| `private.provider_circuits` | `provider_code`, `tool_code`, `state`, `failure_count`, `opened_at`, `open_until`, `last_error_code`, `updated_at` | `CLOSED|OPEN|HALF_OPEN`, 제한 Retry·Circuit Breaker 공유 상태 |
+| `private.provider_circuits` | `provider_code`, `tool_code`, `state`, `failure_count`, `opened_at`, `open_until`, `last_error_code`, `min_interval_ms`, `next_allowed_at`, `updated_at` | `CLOSED|OPEN|HALF_OPEN`, 제한 Retry·Circuit Breaker 공유 상태. 마지막 두 열은 Provider 1 TPS 같은 직렬화 시각 |
 
 Cache 본문을 UPDATE하지 않고 새 `source_snapshot_id`를 가리킨다. Cache miss·0건·Provider 오류를 서로 다른 상태와 Error Code로 기록한다.
 
