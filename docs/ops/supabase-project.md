@@ -194,7 +194,8 @@ node supabase/tests/verify-remote.mjs
 | `0005_claims_and_consents.sql` | 적용 완료 | 명세 6.3 Claim·revision·처리 동의, `0004`의 직접 DELETE 구멍 Forward-fix |
 | `0006_execution_registry.sql` | 적용 완료 | 명세 6.8 정책·Agent·Tool·Allowlist Registry 4개 표, `tool_transport` Enum, Worker 읽기 정책 |
 | `0007_source_knowledge_base.sql` | 적용 완료 | 명세 6.5·6.8 Source Snapshot·조회 사건·KB Release·문서·Chunk·`vector(1024)` Embedding·공식 채널 10개 표, `authority_level`·`freshness_status` Enum |
-| `0008_worker_extensions_usage.sql` | 미적용 | `finshield_worker` 에 `extensions` 스키마 USAGE. 0007 검증에서 Worker 의 pgvector 연산자 접근이 거부되는 것을 발견해 Forward-fix |
+| `0008_worker_extensions_usage.sql` | 적용 완료 | `finshield_worker` 에 `extensions` 스키마 USAGE. 0007 검증에서 Worker 의 pgvector 연산자 접근이 거부되는 것을 발견해 Forward-fix |
 | `0009_runs_and_manifests.sql` | 미적용 | 명세 6.8·6.4·6.3 실행 Manifest 와 구성 Join·Event, `verification_runs`, `verification_run_claims`, `financial_cases.latest_successful_run_id` FK 보완. Run 상태 전이 함수는 예산·Outbox 뒤 |
 | `0010_agent_tool_evidence.sql` | 미적용 | 명세 6.4·6.5 Agent·Tool 실행 Trace, Retrieval 단계, Case Source, Evidence, 최종 Claim, Claim·Evidence 관계 9개 표. Manifest·Allowlist·Provenance·Evidence Policy Trigger |
 | `0011_results_and_passports.sql` | 미적용 | 명세 6.4·6.5 축 결과·행동 가이드·채널 Join·Evidence Passport 4개 표, `financial_cases.latest_passport_id` FK 보완. 원시 URL·전화번호·Manifest 불일치·유효기간 밖 채널을 Trigger 로 차단 |
+| `0012_jobs_notifications_aftercare.sql` | 미적용 | 명세 6.6·6.7 재검증 Job·Runtime·Event·Passport Diff·알림·알림 설정·가입 후 점검·답변·Checklist 9개 표, `verification_runs.revalidation_job_id` FK 보완. 종결 Job 의 Diff·Run·Passport 정합성은 Deferred Trigger, 가입 확인 없는 점검 시작과 NO_CHANGE 위험 알림은 Trigger 로 차단. Job Claim·최종화 함수는 Outbox 뒤 |
