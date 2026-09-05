@@ -40,6 +40,44 @@
       "result_sha256": "3ee39ae2c045621e229c35fb409ec3a8621ec8a84de24df59067e7277de42eff",
       "adoption_pr_number": 86,
       "adopted_at": "2026-09-05T09:08:13Z"
+    },
+    "B-SOURCE-03": {
+      "code_under_test_sha": "c4841c8b61d9fa49acef268054e605eb08948d7d",
+      "workflow_head_sha": "c4841c8b61d9fa49acef268054e605eb08948d7d",
+      "run_id": 33981161310,
+      "run_attempt": 1,
+      "workflow_id": 350929191,
+      "workflow_path": ".github/workflows/source-evidence.yml",
+      "workflow_blob_sha": "2c7c7300fb2a8305e72230b9e60d6f790df6fb4f",
+      "harness_blob_sha": "f23b5cfab2beffcf7aad50aa21512bdb89c22a76",
+      "scope_sha256": "656691c261bb6031e19fd1885493e0e8f707de5ff0c5496e1a98840a52930279",
+      "job_name": "source-evidence / B-SOURCE-03",
+      "artifact_id": 9973794051,
+      "artifact_name": "provider-evidence-B-SOURCE-03-c4841c8b61d9fa49acef268054e605eb08948d7d",
+      "artifact_digest": "sha256:f885743b531efd81de3fa1650219f12b1b3553206b926c842947e7a80962fc0f",
+      "result_path": "evidence/results/B-SOURCE-03/33981161310.json",
+      "result_sha256": "b81cb67cfa6923f4ba863d23a8338122aeafbd1223c33083cdb69b9f7f5e4546",
+      "adoption_pr_number": 116,
+      "adopted_at": "2026-09-05T17:34:05Z"
+    },
+    "B-SOURCE-02": {
+      "code_under_test_sha": "c4841c8b61d9fa49acef268054e605eb08948d7d",
+      "workflow_head_sha": "c4841c8b61d9fa49acef268054e605eb08948d7d",
+      "run_id": 33981225371,
+      "run_attempt": 1,
+      "workflow_id": 350929191,
+      "workflow_path": ".github/workflows/source-evidence.yml",
+      "workflow_blob_sha": "2c7c7300fb2a8305e72230b9e60d6f790df6fb4f",
+      "harness_blob_sha": "f23b5cfab2beffcf7aad50aa21512bdb89c22a76",
+      "scope_sha256": "656691c261bb6031e19fd1885493e0e8f707de5ff0c5496e1a98840a52930279",
+      "job_name": "source-evidence / B-SOURCE-02",
+      "artifact_id": 9973809814,
+      "artifact_name": "provider-evidence-B-SOURCE-02-c4841c8b61d9fa49acef268054e605eb08948d7d",
+      "artifact_digest": "sha256:bdd284b94fb9ff36a15fe99c2ec111f536798bf7d47a4d08d419f7872a71ff76",
+      "result_path": "evidence/results/B-SOURCE-02/33981225371.json",
+      "result_sha256": "e9e7c11c1d9ef8f5509ad1fb039ecfb212dfd1c115e8b54e2d67ef89087c993a",
+      "adoption_pr_number": 116,
+      "adopted_at": "2026-09-05T17:34:08Z"
     }
   }
 }
