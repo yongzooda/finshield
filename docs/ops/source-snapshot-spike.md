@@ -46,5 +46,6 @@
 
 ## 채택 뒤
 
-- 채택된 결과의 Snapshot을 `kb.source_snapshots`·`kb.official_channel_registry`(1397)에 적재하는 Seed script는 명세 15절 14번 묶음이다. 적재 시 `content_hash`·`source_fingerprint`는 결과 파일의 값을 그대로 쓴다.
+- 채택된 결과의 Snapshot은 `scripts/kb/load-source-snapshots.mjs` 로 `kb.source_snapshots`·`kb.source_fetch_events`·`kb.official_channel_registry`(1397, 사칭 신고센터)에 적재한다. API를 다시 부르지 않고 결과 파일만 읽으며 `content_hash`·`source_fingerprint`는 결과 파일의 값을 그대로 쓴다. `--emit-sql`은 statement만 출력하고 `--apply`는 `DATABASE_URL`의 `finshield_worker`로 실행한다. 같은 identity는 새 행을 만들지 않고 Fetch Event를 `UNCHANGED`로 남기며, 실행 환경에서 닿지 않은 페이지는 적재하지 않는다.
+- 최신 기준월(`basYm`) 상품 레코드만 현재 상품으로 적재한다. 과거 기준월은 결과 파일에 이력으로만 남는다. JS로 그려지는 상품 페이지는 `is_complete=false`·`is_citable=false`로 적재한다.
 - 갱신 후보 6~24시간(ADR 8.5)의 실제 TTL은 재실행 결과의 `sha256` 변화를 보고 정한다.
