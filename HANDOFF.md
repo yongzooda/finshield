@@ -44,6 +44,9 @@
 - [x] FinShield 전용 Anthropic Workspace 키로 `B-MODEL-01` 재측정과 채택
 - [x] `.env.example`을 PreCase 복사본에서 FinShield 기준으로 재작성
 - [x] FinShield 전용 Supabase 프로젝트 생성과 Migration 기준선 전환
+- [x] 명세 6절 표·7.2 서버 함수·9.3 안전 View를 Migration `0004`~`0017`로 구현, 로컬 불변식 시험 432건
+- [x] `B-SUPABASE-01` 증거 harness (기준 DB digest 대조·교차 소유 거부 행렬)와 main 전용 workflow
+- [x] `B-SOURCE-02`·`B-SOURCE-03` 햇살론15 Snapshot harness와 main 전용 workflow
 
 ## 다음 작업 순서
 
@@ -67,7 +70,7 @@
 - 기존 PreCase의 Stateless 저장 금지 정책은 FinShield 계정·기록 정책과 다르다.
 - 기존 `LIKELY/UNLIKELY`·자체 신뢰도 1~5는 FinShield 최종 결과로 사용할 수 없다.
 - `PRECASE_CI` 등 호환 환경변수는 코드·테스트를 함께 수정하는 PR에서 변경한다.
-- PreCase 기준선 Migration은 `supabase/precase-baseline/`으로 옮겼고 FinShield 프로젝트에 적용하지 않는다. FinShield Forward-only 기준선은 `supabase/migrations/0001_finshield_baseline.sql`이며 업무 테이블은 아직 없다. 절차는 `docs/ops/supabase-project.md`를 따른다.
+- PreCase 기준선 Migration은 `supabase/precase-baseline/`으로 옮겼고 FinShield 프로젝트에 적용하지 않는다. FinShield Forward-only Migration은 `supabase/migrations/0001`~`0017`이며 운영 프로젝트에는 `0008`까지 적용됐다. 절차와 적용 이력은 `docs/ops/supabase-project.md`를 따른다.
 - DB 명세가 확정됐다는 사실은 Migration·RLS·Storage Policy가 구현·적용됐거나 P0 기능이 작동한다는 뜻이 아니다.
 - Provider ADR의 Architecture Decision이 승인됐다는 사실은 Implementation 또는 Product Release Gate 통과를 뜻하지 않는다.
 - 공개 `/api/mcp`는 P0에서 GET·OPTIONS·POST 모두 404 `MCP_DISABLED`로 차단하며, 기존 MCP protocol 구현은 P1 재검증 전까지 외부 route에서 사용하지 않는다.
