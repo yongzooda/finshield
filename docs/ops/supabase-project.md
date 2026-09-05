@@ -176,9 +176,12 @@ node supabase/tests/verify-remote.mjs
 - `finshield_worker` 는 0001 에서 `public`·`private`·`kb`·`demo` 의 USAGE 만 받았다. `extensions` 가 빠져 있어 운영 프로젝트에서 Worker 의 pgvector 연산자 접근이 `permission denied for schema extensions` 로 막혔다. 로컬 시험은 그 질의를 `postgres` 로만 돌려 놓쳤다. `0008` 이 USAGE 를 주고, `04_kb_invariants.sql` 이 Worker 역할로 Exact KNN 을 실행해 재발을 막는다.
 - `pgvector` 연산자(`<=>` 등)는 `extensions` 스키마에 있다. Supabase 가 만든 역할은 `search_path` 에 `extensions` 가 들어 있지만 `finshield_worker` 와 로컬 Stub 역할은 그렇지 않다. 서버 함수와 RPC 는 `operator(extensions.<=>)` 처럼 완전 수식하고 `search_path` 에 기대지 않는다. `04_kb_invariants.sql` 이 이 규칙을 시험한다.
 
+- `0013` 은 `storage.buckets` 에 행을 넣고 `storage.objects` 에 정책을 만든다. Supabase SQL Editor 의 `postgres` 역할로 적용해야 하며 `storage.objects` 의 소유자가 아니므로 `alter table storage.objects` 는 실행하지 않는다. 정책 생성이 `must be owner` 로 거부되면 적용 결과를 그대로 기록하고 Dashboard 의 Storage Policy 화면으로 같은 조건을 만든다.
+- Cleanup 성공·Purge·Sweeper 는 `storage.objects` 부재를 다시 조회한다. 이 조회는 RLS 우회가 가능한 역할(`postgres` 의 `bypassrls`)로 실행돼야 의미가 있어 함수가 `assert_can_see_storage_objects()` 로 먼저 확인하고, 아니면 성공을 기록하지 않고 실패한다. `verify-remote.mjs` 가 같은 사실을 조회한다.
+
 ## 현재 미해결
 
-- `B-SUPABASE-01`은 통과하지 않았다. 남은 업무 테이블은 명세 6.3~6.10 이고, Storage 정책과 main 실행 증거 harness 가 아직 없다. 제약·RLS positive/negative 시험은 `supabase/tests/`에 있고 로컬에서 111건이 통과한다. 운영 프로젝트는 `verify-remote.mjs` Preflight 만 통과한 상태다. 증거로 채택하려면 같은 시험을 실제 프로젝트 DSN 으로 main 에서 실행해야 한다.
+- `B-SUPABASE-01`은 통과하지 않았다. 남은 업무 묶음은 명세 15절의 12(Budget·Rate·Audit)·13(Demo·평가)·14(Seed·KB 적재)·15(Smoke Gate)와 7.2 의 Run·Case 상태 함수, 9.3 의 안전 View 이고 main 실행 증거 harness 가 아직 없다. 제약·RLS·Storage·Cleanup positive/negative 시험은 `supabase/tests/`에 있고 로컬에서 317건이 통과한다. 운영 프로젝트는 `verify-remote.mjs` Preflight 만 통과한 상태다. 증거로 채택하려면 같은 시험을 실제 프로젝트 DSN 으로 main 에서 실행해야 한다.
 - 저장소 Runtime 과 화면은 아직 PreCase 기준선이라 PreCase 코퍼스 테이블을 조회한다. `insight` 5개와 `verification` 화면이 빌드 시 사전 렌더되면서 `relation "cases" does not exist` 로 배포 전체를 실패시켰다. 여섯 화면의 사전 렌더를 끄고 요청 시점 렌더로 바꿔 빌드를 통과시켰다.
 - 이 화면들은 FinShield 전용 DB 에서 요청 시점에 실패한다. 데이터를 지어내지 않고 실패를 감추지 않기 위한 선택이며, FinShield 화면으로 재구현할 때 선언과 함께 제거한다.
 - 그동안 Vercel Production 은 환경변수 변경 이전 배포를 계속 서비스한다. 그 배포는 이전 DB 연결을 유지한다.
@@ -199,3 +202,4 @@ node supabase/tests/verify-remote.mjs
 | `0010_agent_tool_evidence.sql` | 미적용 | 명세 6.4·6.5 Agent·Tool 실행 Trace, Retrieval 단계, Case Source, Evidence, 최종 Claim, Claim·Evidence 관계 9개 표. Manifest·Allowlist·Provenance·Evidence Policy Trigger |
 | `0011_results_and_passports.sql` | 미적용 | 명세 6.4·6.5 축 결과·행동 가이드·채널 Join·Evidence Passport 4개 표, `financial_cases.latest_passport_id` FK 보완. 원시 URL·전화번호·Manifest 불일치·유효기간 밖 채널을 Trigger 로 차단 |
 | `0012_jobs_notifications_aftercare.sql` | 미적용 | 명세 6.6·6.7 재검증 Job·Runtime·Event·Passport Diff·알림·알림 설정·가입 후 점검·답변·Checklist 9개 표, `verification_runs.revalidation_job_id` FK 보완. 종결 Job 의 Diff·Run·Passport 정합성은 Deferred Trigger, 가입 확인 없는 점검 시작과 NO_CHANGE 위험 알림은 Trigger 로 차단. Job Claim·최종화 함수는 Outbox 뒤 |
+| `0013_storage_cleanup_outbox.sql` | 미적용 | 명세 10·12·13·6.9 Private Bucket 두 개, `storage.objects` 본인 slot INSERT 정책, `input_objects` 경로 구성·slot 강제, Cleanup Job·Outbox·Idempotency·삭제 요청·Ledger·Case Embedding 6개 표, Cleanup enqueue·claim·finish·Sweeper·Signed URL 확인·Case 삭제 요청·Purge 함수. 성공 기록은 `storage.objects` 부재를 다시 조회한 뒤에만 남긴다 |
