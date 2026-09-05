@@ -9,8 +9,8 @@ import assert from "node:assert/strict";
 import { validateSourceEvidenceResult } from "./source-evidence-policy.mjs";
 import {
   FSC_ENDPOINT, KINFA_ENDPOINT, OFFICIAL_DECLARE_URL, OFFICIAL_GUIDE_URL, OFFICIAL_PRODUCT_URL, PRODUCT_NAME,
-  buildRequestUrl, canonicalJson, declaredBankCount, isBankLike, normalizeInstitution, parseJsonEnvelope, parseXmlEnvelope,
-  redactUrl, runSourceSpike, serviceKeyParam, sha256Hex, splitInstitutions,
+  CONNECT_ATTEMPTS, buildRequestUrl, canonicalJson, declaredBankCount, fetchWithConnectRetry, isBankLike, isConnectError,
+  normalizeInstitution, parseJsonEnvelope, parseXmlEnvelope, redactUrl, runSourceSpike, serviceKeyParam, sha256Hex, splitInstitutions,
 } from "./source-snapshot-spike.mjs";
 
 const apiKey = "abcDEF0123456789abcDEF0123456789abcDEF0123456789";
@@ -71,9 +71,29 @@ assert.equal(xml.header.resultCode, "00"); assert.equal(xml.body.totalCount, 3);
 assert.deepEqual(parseJsonEnvelope({ response: { header: { resultCode: "00" }, body: { items: { item: fscItem }, totalCount: 1 } } }).body.items, [fscItem]);
 assert.equal(canonicalJson({ b: 1, a: [2, { d: 1, c: 2 }] }), '{"a":[2,{"c":2,"d":1}],"b":1}');
 
+// 연결 계층 오류만 제한 재시도한다. HTTP 오류·본문 오류는 재시도하지 않는다.
+const connectError = () => Object.assign(new TypeError("fetch failed"), { cause: Object.assign(new Error("connect timeout"), { code: "UND_ERR_CONNECT_TIMEOUT", name: "ConnectTimeoutError" }) });
+assert.ok(isConnectError(connectError()) && !isConnectError(new Error("x")) && !isConnectError(new TypeError("other")));
+{
+  let calls = 0;
+  const flaky = async () => { calls += 1; if (calls < 3) throw connectError(); return makeResponse(200, "text/plain", "ok"); };
+  const { response, retries } = await fetchWithConnectRetry(flaky, "https://example.invalid/", {}, async () => {});
+  assert.equal(response.status, 200); assert.equal(retries, 2); assert.equal(calls, 3);
+  let always = 0;
+  await assert.rejects(fetchWithConnectRetry(async () => { always += 1; throw connectError(); }, "https://example.invalid/", {}, async () => {}), /fetch failed/);
+  assert.equal(always, CONNECT_ATTEMPTS);
+  let httpCalls = 0;
+  const httpError = async () => { httpCalls += 1; return makeResponse(503, "text/plain", ""); };
+  await fetchWithConnectRetry(httpError, "https://example.invalid/", {}, async () => {});
+  assert.equal(httpCalls, 1);
+}
+
 // 정상 실행
 const now = () => new Date("2026-09-05T12:00:00Z");
-const observations = await runSourceSpike({ apiKey, fetchImpl: fakeFetch(), now });
+const noSleep = async () => {};
+const observations = await runSourceSpike({ apiKey, fetchImpl: fakeFetch(), now, sleepImpl: noSleep });
+assert.equal(observations.fsc.http.connect_retries, 0);
+assert.equal(observations.official_pages[0].connect_retries, 0);
 assert.equal(observations.fsc.product_matches, 2);
 assert.equal(observations.fsc.current_matches, 1);
 assert.equal(observations.fsc.latest_bas_ym, "202609");
@@ -136,27 +156,38 @@ rejects("라이선스 표기 변경", (o) => { o.registry.license_label = "출�
 rejects("트래픽 상한 변경", (o) => { o.registry.declared_dev_traffic_limit = 100000; });
 rejects("End Point 변경", (o) => { o.contract.fsc_endpoint = "https://example.invalid/api"; });
 rejects("산식 버전 변경", (o) => { o.contract.formula_version = "v0"; });
+rejects("연결 재시도 상한 초과", (o) => { o.fsc.http.connect_retries = 1000; });
+rejects("페이지 연결 재시도 상한 초과", (o) => { o.official_pages[0].connect_retries = CONNECT_ATTEMPTS; });
 rejects("관측 필드 추가", (o) => { o.extra = true; });
 
 // 거부 경로: harness 가 실제로 실패하는 입력
-await assert.rejects(runSourceSpike({ apiKey: "short", fetchImpl: fakeFetch(), now }), /DATA_GO_KR_SERVICE_KEY/);
-await assert.rejects(runSourceSpike({ apiKey, now, fetchImpl: fakeFetch({ fsc: () => makeResponse(200, "application/json", JSON.stringify({
+await assert.rejects(runSourceSpike({ apiKey: "short", fetchImpl: fakeFetch(), now, sleepImpl: noSleep }), /DATA_GO_KR_SERVICE_KEY/);
+await assert.rejects(runSourceSpike({ apiKey, now, sleepImpl: noSleep, fetchImpl: fakeFetch({ fsc: () => makeResponse(200, "application/json", JSON.stringify({
   response: { header: { resultCode: "30", resultMsg: "SERVICE_KEY_IS_NOT_REGISTERED_ERROR" }, body: {} } })) }) }), /result code 30/);
-await assert.rejects(runSourceSpike({ apiKey, now, fetchImpl: fakeFetch({ kinfa: () => makeResponse(429, "text/xml", "") }) }), /HTTP 429/);
-await assert.rejects(runSourceSpike({ apiKey, now, fetchImpl: fakeFetch({ fsc: () => makeResponse(200, "application/json", "not json") }) }), /valid JSON/);
+await assert.rejects(runSourceSpike({ apiKey, now, sleepImpl: noSleep, fetchImpl: fakeFetch({ kinfa: () => makeResponse(429, "text/xml", "") }) }), /HTTP 429/);
+await assert.rejects(runSourceSpike({ apiKey, now, sleepImpl: noSleep, fetchImpl: fakeFetch({ fsc: () => makeResponse(200, "application/json", "not json") }) }), /valid JSON/);
 
 // 실행 환경에서 이용안내 페이지가 기본 틀만 돌려주면 그 사실을 기록하고, 다른 두 페이지로 판정한다.
-const blocked = await runSourceSpike({ apiKey, now, fetchImpl: fakeFetch({ guide: () => makeResponse(200, "text/html", blockedHtml) }) });
+const blocked = await runSourceSpike({ apiKey, now, sleepImpl: noSleep, fetchImpl: fakeFetch({ guide: () => makeResponse(200, "text/html", blockedHtml) }) });
 assert.equal(blocked.official_pages[1].reachable, false);
 assert.equal(blocked.official_pages[1].markers.no_broker_fee, false);
 assert.deepEqual(errorsOf(result("B-SOURCE-03", blocked)), []);
+// 첫 시도가 connect timeout 이어도 재시도로 이어지면 관측에 재시도 수가 남고 정책은 통과한다.
+{
+  let fscCalls = 0;
+  const flakyFetch = fakeFetch();
+  const wrapped = async (url, init) => { if (url.startsWith(FSC_ENDPOINT) && fscCalls++ === 0) throw connectError(); return flakyFetch(url, init); };
+  const retried = await runSourceSpike({ apiKey, now, sleepImpl: noSleep, fetchImpl: wrapped });
+  assert.equal(retried.fsc.http.connect_retries, 1);
+  assert.deepEqual(errorsOf(result("B-SOURCE-03", retried)), []);
+}
 // 진흥원 레코드의 상품명이 다르면 취급기관 0건이 되어 정책이 거부한다.
-const otherProduct = await runSourceSpike({ apiKey, now, fetchImpl: fakeFetch({ kinfa: () => makeResponse(200, "application/xml", kinfaXml(1).replace(/햇살론15/g, "햇살론유스")) }) });
+const otherProduct = await runSourceSpike({ apiKey, now, sleepImpl: noSleep, fetchImpl: fakeFetch({ kinfa: () => makeResponse(200, "application/xml", kinfaXml(1).replace(/햇살론15/g, "햇살론유스")) }) });
 assert.equal(otherProduct.kinfa.institution_matches, 0);
 assert.ok(errorsOf(result("B-SOURCE-03", otherProduct)).length > 0);
 // 상품이 없으면 정책이 거부한다 (harness 는 관측을 만들고 정책이 판정).
-const empty = await runSourceSpike({ apiKey, now, fetchImpl: fakeFetch({ fsc: () => makeResponse(200, "application/json", fscJson([{ ...fscItem, finPrdNm: "햇살론유스" }])) }) });
+const empty = await runSourceSpike({ apiKey, now, sleepImpl: noSleep, fetchImpl: fakeFetch({ fsc: () => makeResponse(200, "application/json", fscJson([{ ...fscItem, finPrdNm: "햇살론유스" }])) }) });
 assert.equal(empty.fsc.product_matches, 0);
 assert.ok(errorsOf(result("B-SOURCE-03", empty)).length > 0);
 
-console.log("B-SOURCE-02·B-SOURCE-03 Snapshot spike 시험 통과: 합격 3건, 결과 거부 32건, 실행 거부 4건.");
+console.log("B-SOURCE-02·B-SOURCE-03 Snapshot spike 시험 통과: 합격 4건, 결과 거부 34건, 실행 거부 4건, 연결 재시도 3건.");
