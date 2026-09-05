@@ -9,15 +9,15 @@ import assert from "node:assert/strict";
 import { validateSourceEvidenceResult } from "./source-evidence-policy.mjs";
 import {
   FSC_ENDPOINT, KINFA_ENDPOINT, OFFICIAL_DECLARE_URL, OFFICIAL_GUIDE_URL, OFFICIAL_PRODUCT_URL, PRODUCT_NAME,
-  buildRequestUrl, canonicalJson, normalizeInstitution, parseJsonEnvelope, parseXmlEnvelope, redactUrl,
-  runSourceSpike, serviceKeyParam, sha256Hex, splitInstitutions,
+  buildRequestUrl, canonicalJson, declaredBankCount, isBankLike, normalizeInstitution, parseJsonEnvelope, parseXmlEnvelope,
+  redactUrl, runSourceSpike, serviceKeyParam, sha256Hex, splitInstitutions,
 } from "./source-snapshot-spike.mjs";
 
 const apiKey = "abcDEF0123456789abcDEF0123456789abcDEF0123456789";
 // 금융위 API 는 hdlInst 에 분류를, hdlInstDtlVw 에 기관 목록을 담는다 (첫 main 실행에서 확인한 필드).
 const fscItem = {
   basYm: "202609", finPrdNm: "햇살론15", usge: "생활안정", trgt: "저신용·저소득", prdCtg: "고금리대안",
-  hdlInst: "대출협약은행 (14개)", hdlInstDtlVw: "KB국민은행, 전북은행/(주)하나은행, SC제일은행 및 카카오뱅크 등",
+  hdlInst: "대출협약은행 (12개)", hdlInstDtlVw: "서민금융통합지원센터 47개 (직접보증), 대출협약은행 12개(위탁보증)",
   prdExisYn: "Y", lnLmt: "2000만원", irt: "연 15.9%",
 };
 const fscOldItem = { ...fscItem, basYm: "202412", hdlInstDtlVw: "옛날은행", prdExisYn: "N" };
@@ -62,6 +62,10 @@ assert.deepEqual(splitInstitutions("KB국민은행, 전북은행/(주)하나은�
 assert.equal(normalizeInstitution("하나은행(주)"), normalizeInstitution("(주) 하나 은행"));
 assert.equal(normalizeInstitution("KB국민은행"), normalizeInstitution("국민은행"));
 assert.equal(normalizeInstitution("SC제일은행"), normalizeInstitution("SC제일은행"));
+assert.equal(declaredBankCount("서민금융통합지원센터 47개 (직접보증), 대출협약은행 12개(위탁보증)"), 12);
+assert.equal(declaredBankCount("대출협약은행 (14개)"), 14);
+assert.equal(declaredBankCount("서민금융통합지원센터"), null);
+assert.ok(isBankLike("카카오뱅크") && isBankLike("SC제일은행") && !isBankLike("서민금융통합지원센터"));
 const xml = parseXmlEnvelope(kinfaXml(1));
 assert.equal(xml.header.resultCode, "00"); assert.equal(xml.body.totalCount, 3); assert.equal(xml.body.items[0].prdNm, "햇살론15");
 assert.deepEqual(parseJsonEnvelope({ response: { header: { resultCode: "00" }, body: { items: { item: fscItem }, totalCount: 1 } } }).body.items, [fscItem]);
@@ -77,8 +81,10 @@ assert.deepEqual(observations.fsc.current_exists_values, ["Y"]);
 assert.equal(observations.fsc.product_name_field, "finPrdNm");
 assert.equal(observations.fsc.institution_field, "hdlInstDtlVw");
 assert.equal(observations.kinfa.institution_matches, 3);
-assert.deepEqual(observations.cross_check.matched, ["KB국민은행", "하나은행", "SC제일은행"].filter((n) => ["하나은행", "SC제일은행"].includes(n)));
-assert.deepEqual(observations.cross_check.unmatched, ["KB국민은행", "전북은행", "카카오뱅크"]);
+assert.deepEqual(observations.cross_check.matched, []);
+assert.deepEqual(observations.cross_check.unmatched, ["서민금융통합지원센터 47개", "대출협약은행 12개"]);
+assert.deepEqual(observations.cross_check.product_join, { fsc_product_names: ["햇살론15"], kinfa_product_names: ["햇살론15"], joined_count: 3 });
+assert.deepEqual(observations.cross_check.category, { fsc_mentions_bank: true, fsc_declared_bank_count: 12, kinfa_bank_count: 3 });
 assert.ok(observations.official_pages[0].title.includes(PRODUCT_NAME));
 assert.equal(observations.official_pages[1].markers.no_broker_fee, true);
 assert.equal(observations.official_pages[2].markers.impersonation, true);
@@ -104,9 +110,12 @@ rejects("pagination 불완전", (o) => { o.fsc.total_count = 3; o.fsc.pagination
 rejects("page 합계 불일치", (o) => { o.fsc.pages[0].rows = 5; });
 rejects("HTTP 200 아님", (o) => { o.kinfa.http.status = 500; });
 rejects("진흥원 기관 없음", (o) => { o.kinfa.institution_matches = 0; o.kinfa.snapshots = []; o.cross_check.kinfa_institutions = []; });
-rejects("교차 확인 불일치", (o) => { o.cross_check.matched = []; o.cross_check.unmatched = [...o.cross_check.fsc_institutions]; });
 rejects("교차 확인 집계 조작", (o) => { o.cross_check.matched = ["가짜은행", ...o.cross_check.matched]; });
-rejects("교차 확인 취급기관 목록 없음", (o) => { o.cross_check.fsc_institutions = []; o.cross_check.matched = []; o.cross_check.unmatched = []; });
+rejects("교차 확인 취급기관 문자열 없음", (o) => { o.cross_check.fsc_institution_texts = []; });
+rejects("상품 join 수와 진흥원 레코드 수 불일치", (o) => { o.cross_check.product_join.joined_count = 2; });
+rejects("진흥원 레코드의 상품명이 다름", (o) => { o.cross_check.product_join.kinfa_product_names = ["햇살론유스"]; });
+rejects("금융위가 은행 취급을 말하지 않음", (o) => { o.cross_check.category.fsc_mentions_bank = false; });
+rejects("진흥원 목록에 은행 없음", (o) => { o.cross_check.category.kinfa_bank_count = 0; });
 rejects("Snapshot Hash 변조", (o) => { o.fsc.snapshots[0].sha256 = "0".repeat(64); });
 rejects("Snapshot 레코드 변조", (o) => { o.fsc.snapshots[0].record.irt = "연 5%"; });
 rejects("Snapshot 상품명 불일치", (o) => {
@@ -141,9 +150,13 @@ const blocked = await runSourceSpike({ apiKey, now, fetchImpl: fakeFetch({ guide
 assert.equal(blocked.official_pages[1].reachable, false);
 assert.equal(blocked.official_pages[1].markers.no_broker_fee, false);
 assert.deepEqual(errorsOf(result("B-SOURCE-03", blocked)), []);
+// 진흥원 레코드의 상품명이 다르면 취급기관 0건이 되어 정책이 거부한다.
+const otherProduct = await runSourceSpike({ apiKey, now, fetchImpl: fakeFetch({ kinfa: () => makeResponse(200, "application/xml", kinfaXml(1).replace(/햇살론15/g, "햇살론유스")) }) });
+assert.equal(otherProduct.kinfa.institution_matches, 0);
+assert.ok(errorsOf(result("B-SOURCE-03", otherProduct)).length > 0);
 // 상품이 없으면 정책이 거부한다 (harness 는 관측을 만들고 정책이 판정).
 const empty = await runSourceSpike({ apiKey, now, fetchImpl: fakeFetch({ fsc: () => makeResponse(200, "application/json", fscJson([{ ...fscItem, finPrdNm: "햇살론유스" }])) }) });
 assert.equal(empty.fsc.product_matches, 0);
 assert.ok(errorsOf(result("B-SOURCE-03", empty)).length > 0);
 
-console.log("B-SOURCE-02·B-SOURCE-03 Snapshot spike 시험 통과: 합격 3건, 결과 거부 29건, 실행 거부 4건.");
+console.log("B-SOURCE-02·B-SOURCE-03 Snapshot spike 시험 통과: 합격 3건, 결과 거부 32건, 실행 거부 4건.");

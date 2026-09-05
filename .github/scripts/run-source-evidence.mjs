@@ -64,12 +64,16 @@ export const SOURCE_SCOPE_PATHS = Object.freeze([
 const scopeInventory = [...SOURCE_SCOPE_PATHS].sort().map((path) => ({ path, blob_sha: gitBlobSha(Buffer.from(readAtCommit(path))) }));
 const scopeSha = sha256(Buffer.from(JSON.stringify(scopeInventory)));
 
+// 원인 종류만 남긴다. 메시지 원문에는 URL·키가 섞일 수 있어 출력하지 않는다.
 const sanitizedFailure = (error) => {
   if (Number.isInteger(error?.status)) return `source-http-${error.status}`;
   if (typeof error?.resultCode === "string") return `source-result-code-${error.resultCode.replace(/[^0-9A-Za-z]/g, "")}`;
   if (["TimeoutError", "AbortError"].includes(error?.name)) return "source-timeout";
   if (error instanceof Error && /^(Source API|DATA_GO_KR_SERVICE_KEY|Source evidence)/.test(error.message)) return redactUrl(error.message);
-  return "source-or-harness-error";
+  const kind = String(error?.name ?? "unknown").replace(/[^A-Za-z0-9_]/g, "");
+  const code = String(error?.cause?.code ?? error?.code ?? "").replace(/[^A-Za-z0-9_]/g, "");
+  const causeName = String(error?.cause?.name ?? "").replace(/[^A-Za-z0-9_]/g, "");
+  return `source-or-harness-error:${kind}${causeName ? `/${causeName}` : ""}${code ? `/${code}` : ""}`;
 };
 
 if (mode === "--run") {
