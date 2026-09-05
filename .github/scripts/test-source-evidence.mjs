@@ -77,8 +77,14 @@ assert.ok(isConnectError(connectError()) && !isConnectError(new Error("x")) && !
 {
   let calls = 0;
   const flaky = async () => { calls += 1; if (calls < 3) throw connectError(); return makeResponse(200, "text/plain", "ok"); };
-  const { response, retries } = await fetchWithConnectRetry(flaky, "https://example.invalid/", {}, async () => {});
-  assert.equal(response.status, 200); assert.equal(retries, 2); assert.equal(calls, 3);
+  let inits = 0;
+  const { response, retries } = await fetchWithConnectRetry(flaky, "https://example.invalid/", () => ({ attempt: ++inits }), async () => {});
+  assert.equal(response.status, 200); assert.equal(retries, 2); assert.equal(calls, 3); assert.equal(inits, 3);
+  const timeoutError = Object.assign(new Error("The operation was aborted due to timeout"), { name: "TimeoutError" });
+  assert.ok(isConnectError(timeoutError));
+  let slow = 0;
+  const slowThenOk = async () => { slow += 1; if (slow === 1) throw timeoutError; return makeResponse(200, "text/plain", "ok"); };
+  assert.equal((await fetchWithConnectRetry(slowThenOk, "https://example.invalid/", () => ({}), async () => {})).retries, 1);
   let always = 0;
   await assert.rejects(fetchWithConnectRetry(async () => { always += 1; throw connectError(); }, "https://example.invalid/", {}, async () => {}), /fetch failed/);
   assert.equal(always, CONNECT_ATTEMPTS);
@@ -190,4 +196,4 @@ const empty = await runSourceSpike({ apiKey, now, sleepImpl: noSleep, fetchImpl:
 assert.equal(empty.fsc.product_matches, 0);
 assert.ok(errorsOf(result("B-SOURCE-03", empty)).length > 0);
 
-console.log("B-SOURCE-02·B-SOURCE-03 Snapshot spike 시험 통과: 합격 4건, 결과 거부 34건, 실행 거부 4건, 연결 재시도 3건.");
+console.log("B-SOURCE-02·B-SOURCE-03 Snapshot spike 시험 통과: 합격 4건, 결과 거부 34건, 실행 거부 4건, 연결 재시도 4건.");

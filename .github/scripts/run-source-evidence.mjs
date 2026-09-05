@@ -158,7 +158,10 @@ if (!exactKeys(result, [
   fail("Evidence top-level metadata가 trusted execution context와 다릅니다.");
 }
 validateSourceEvidenceResult(result, fail);
-const serialized = resultBytes.toString("utf8");
+// 공개 레코드의 법인번호(13자리)·기관 대표 연락처는 직접식별자가 아니다. 그 필드만 빼고 훑는다.
+// run 33970834208 에서 법인번호가 주민번호 형태 검사에 걸렸다.
+const PUBLIC_RECORD_FIELDS = new Set(["corpNo", "cnpl", "rfrcCnpl"]);
+const serialized = JSON.stringify(result, (key, value) => (PUBLIC_RECORD_FIELDS.has(key) ? "[public-record-field]" : value));
 for (const pattern of [
   /serviceKey=(?!REDACTED)[A-Za-z0-9%+/=_-]{12,}/,
   /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i,
