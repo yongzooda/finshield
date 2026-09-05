@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { fileURLToPath } from "node:url";
 import { existsSync, lstatSync, readFileSync, realpathSync } from "node:fs";
 import { relative, resolve, sep } from "node:path";
 import { isDeepStrictEqual } from "node:util";
@@ -6,10 +7,12 @@ import { unzipSync } from "fflate";
 import { adrDecisionDigest, maskNonRenderedMarkdown } from "./provider-adr-digest.mjs";
 import { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
 import { validateModelEvidenceResult } from "./provider-model-policy.mjs";
+import { expectedInventory as supabaseExpectedInventory, validateSupabaseEvidenceResult } from "./supabase-evidence-policy.mjs";
 
 export { adrDecisionDigest } from "./provider-adr-digest.mjs";
 export { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
 export { validateModelEvidenceResult } from "./provider-model-policy.mjs";
+export { validateSupabaseEvidenceResult } from "./supabase-evidence-policy.mjs";
 
 const REPOSITORY = "yongzooda/finshield";
 const EVIDENCE_WORKFLOW_NAME = "Provider Spike Evidence";
@@ -46,6 +49,15 @@ const TRUSTED_EMBED_CANDIDATE_SPIKE_BLOB = "0c8c901886c1fdee6861f8bf3ffe82d6aee8
 const TRUSTED_EMBED_HARNESS_BLOB = "a76381d0792d1f456fa96a9289451c0235396ca2";
 const TRUSTED_EMBED_POLICY_BLOB = "27e399a7b75b042c5fdba691d88722cabe378743";
 const TRUSTED_EMBED_SPIKE_BLOB = "73e0a270b8e04ddd70a1317459e578a7247f8110";
+const SUPABASE_WORKFLOW_PATH = ".github/workflows/supabase-evidence.yml";
+const SUPABASE_HARNESS_PATH = ".github/scripts/run-supabase-evidence.mjs";
+const SUPABASE_POLICY_PATH = ".github/scripts/supabase-evidence-policy.mjs";
+const SUPABASE_VERIFY_REMOTE_PATH = "supabase/tests/verify-remote.mjs";
+const SUPABASE_OPS_PATH = "docs/ops/supabase-evidence.md";
+const TRUSTED_SUPABASE_WORKFLOW_BLOB = "7a4e3bebe8fcacaf4e25d2d2de45c066ff6a7e9f";
+const TRUSTED_SUPABASE_HARNESS_BLOB = "df3dc2a024f7d83b8c203e2b47b6ae06b0b2f4b4";
+const TRUSTED_SUPABASE_POLICY_BLOB = "6af6fc5af1ee7dce25166a6976fc95af92b96a33";
+const TRUSTED_SUPABASE_VERIFY_REMOTE_BLOB = "f591211ef39a6e20d1143bd4add2d322e474d9c8";
 const MAX_ARCHIVE_BYTES = 2 * 1024 * 1024;
 const MAX_RESULT_BYTES = 512 * 1024;
 const MAX_EVIDENCE_AGE_MS = 27 * 24 * 60 * 60 * 1000;
@@ -178,11 +190,52 @@ const embedEvidencePolicy = {
   validate: validateEmbedEvidenceResult,
 };
 
+// Migration·시험 SQL 은 저장소에서 읽는다. 손으로 적은 목록은 Migration 이 늘 때 낡는다.
+// scope 는 Migration·Stub·시험·harness·정책·workflow·운영 문서 전부를 결박한다.
+const supabaseScopePaths = () => {
+  const root = resolve(fileURLToPath(new URL("../../", import.meta.url)));
+  const inventory = supabaseExpectedInventory(root);
+  return Object.freeze([
+    ...inventory.migrations.map((file) => `supabase/migrations/${file}`),
+    "supabase/tests/00_supabase_stub.sql",
+    ...inventory.tests.map((file) => `supabase/tests/${file}`),
+    "supabase/tests/run-local.sh",
+    SUPABASE_VERIFY_REMOTE_PATH,
+    ADR_DIGEST_PATH,
+    SUPABASE_POLICY_PATH,
+    SUPABASE_HARNESS_PATH,
+    ".github/scripts/test-supabase-evidence.mjs",
+    SUPABASE_WORKFLOW_PATH,
+    SUPABASE_OPS_PATH,
+    "docs/ops/supabase-project.md",
+  ]);
+};
+
+const supabaseEvidencePolicy = {
+  gate: "implementation",
+  workflowName: "Supabase Evidence",
+  workflowPath: SUPABASE_WORKFLOW_PATH,
+  workflowBlobSha: TRUSTED_SUPABASE_WORKFLOW_BLOB,
+  harnessPath: SUPABASE_HARNESS_PATH,
+  harnessBlobSha: TRUSTED_SUPABASE_HARNESS_BLOB,
+  trustedExecutionFiles: Object.freeze([
+    Object.freeze({ path: SUPABASE_WORKFLOW_PATH, blobSha: TRUSTED_SUPABASE_WORKFLOW_BLOB }),
+    Object.freeze({ path: SUPABASE_HARNESS_PATH, blobSha: TRUSTED_SUPABASE_HARNESS_BLOB }),
+    Object.freeze({ path: SUPABASE_POLICY_PATH, blobSha: TRUSTED_SUPABASE_POLICY_BLOB }),
+    Object.freeze({ path: SUPABASE_VERIFY_REMOTE_PATH, blobSha: TRUSTED_SUPABASE_VERIFY_REMOTE_BLOB }),
+    Object.freeze({ path: ADR_DIGEST_PATH, blobSha: TRUSTED_ADR_DIGEST_BLOB }),
+  ]),
+  jobName: "supabase-evidence / B-SUPABASE-01",
+  scopePaths: supabaseScopePaths(),
+  validate: validateSupabaseEvidenceResult,
+};
+
 // PASS is fail-closed: each remaining blocker gets a policy only with its real
 // harness. A prose criterion or a hand-authored `result: PASS` is never enough.
 export const evidencePolicies = Object.freeze({
   "B-MODEL-01": modelEvidencePolicy,
   "B-EMBED-01": embedEvidencePolicy,
+  "B-SUPABASE-01": supabaseEvidencePolicy,
 });
 
 export const computeEvidenceScopeDigest = (root, policy, fail) => {

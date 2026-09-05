@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
   copyFileSync,
+  readdirSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -50,6 +51,19 @@ const fixturePaths = [
   ".github/workflows/pr-check.yml",
   ".github/workflows/provider-embed-evidence.yml",
   ".github/workflows/provider-spike-evidence.yml",
+  ".github/workflows/supabase-evidence.yml",
+  ".github/scripts/supabase-evidence-policy.mjs",
+  ".github/scripts/run-supabase-evidence.mjs",
+  ".github/scripts/test-supabase-evidence.mjs",
+  "supabase/tests/00_supabase_stub.sql",
+  "supabase/tests/run-local.sh",
+  "supabase/tests/verify-remote.mjs",
+  "docs/ops/supabase-evidence.md",
+  "docs/ops/supabase-project.md",
+  ...readdirSync(resolve(fileURLToPath(new URL("../../", import.meta.url)), "supabase/migrations"))
+    .filter((file) => /^\d{4}_.*\.sql$/.test(file)).sort().map((file) => `supabase/migrations/${file}`),
+  ...readdirSync(resolve(fileURLToPath(new URL("../../", import.meta.url)), "supabase/tests"))
+    .filter((file) => /^\d{2}_.*\.sql$/.test(file) && !file.startsWith("00_")).sort().map((file) => `supabase/tests/${file}`),
   ".env.example",
   "src/lib/env.ts",
   "src/app/api/mcp/route.ts",
@@ -564,6 +578,10 @@ for (const [name, path] of [
   ["trusted ADR digest helper changes invalidate its policy pin", ".github/scripts/provider-adr-digest.mjs"],
   ["trusted model policy changes invalidate its policy pin", ".github/scripts/provider-model-policy.mjs"],
   ["trusted model spike changes invalidate its policy pin", ".github/scripts/provider-model-spike.mjs"],
+  ["trusted supabase workflow changes invalidate its policy pin", ".github/workflows/supabase-evidence.yml"],
+  ["trusted supabase harness changes invalidate its policy pin", ".github/scripts/run-supabase-evidence.mjs"],
+  ["trusted supabase policy changes invalidate its policy pin", ".github/scripts/supabase-evidence-policy.mjs"],
+  ["trusted supabase preflight changes invalidate its policy pin", "supabase/tests/verify-remote.mjs"],
   ["trusted package manifest changes invalidate its policy pin", "package.json"],
   ["trusted package lock changes invalidate its policy pin", "package-lock.json"],
 ]) {
