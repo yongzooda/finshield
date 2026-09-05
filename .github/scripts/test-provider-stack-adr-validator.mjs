@@ -32,6 +32,7 @@ const fixturePaths = [
   ".github/fixtures/provider-embed-v2.json",
   ".github/fixtures/provider-embed-v3.json",
   ".github/fixtures/provider-embed-v4.json",
+  ".github/fixtures/provider-embed-v5.json",
   ".github/fixtures/provider-model-v1.json",
   ".github/scripts/provider-adr-digest.mjs",
   ".github/scripts/provider-embed-policy.mjs",
@@ -452,9 +453,9 @@ for (const trustedAPathMismatch of [
   const metricErrors = [];
   validateEmbedEvidenceResult({ observations: {
     contract: { model_id: "embed-v4.0", dimension: 1024, metric: "cosine", document_input_type: "search_document", query_input_type: "search_query", embedding_type: "float", knn: "exact", pool_k: 20 },
-    dataset: { formula_version: "filtered-candidate-pool-unit-recall-v4", fixture_set: "finshield-korean-finance-embed-v4", split: "gate", families: 20, documents: 240, queries: 100, hard_negative_documents: 100, hard_negative_queries: 100, risk_queries: 30 },
-    quality: { pool_k: 20, recall_at_pool: 0.99, risk_core_recall_at_pool: 1, queries_fully_covered: 99, queries_total: 100, worst_minimum_k: 5 },
-    retrieval: { rows: [], counts: [], slices: [], filter_rows: [] },
+    dataset: { formula_version: "claim-level-filtered-candidate-pool-unit-recall-v5", fixture_set: "finshield-korean-finance-embed-v5", split: "gate", families: 20, documents: 240, queries: 100, hard_negative_documents: 100, hard_negative_queries: 100, risk_queries: 30, true_claims: 39, false_claims: 58 },
+    quality: { pool_k: 20, recall_at_pool: 0.99, risk_core_recall_at_pool: 1, case_union_recall: 1, queries_fully_covered: 99, queries_total: 100, worst_minimum_k: 5 },
+    retrieval: { rows: [], counts: [], slices: [], filter_rows: [], case_unions: [] },
     samples: { queries: [], documents: [] },
     latency: { query_samples: 100, query_p50_ms: 500, query_p95_ms: 1400, exact_knn_samples: 100, exact_knn_p95_ms: 2 },
     usage: { provider_requests: 103, embedded_inputs: 340, billed_input_tokens: 1000, price_per_million_usd: 0.12, calculated_cost_usd: 0.00012 },
@@ -552,7 +553,7 @@ expectFail(
 
 for (const [name, path] of [
   ["trusted embed workflow changes invalidate its policy pin", ".github/workflows/provider-embed-evidence.yml"],
-  ["trusted embed fixture changes invalidate its policy pin", ".github/fixtures/provider-embed-v4.json"],
+  ["trusted embed fixture changes invalidate its policy pin", ".github/fixtures/provider-embed-v5.json"],
   ["trusted candidate evaluation changes invalidate its policy pin", ".github/scripts/provider-embed-candidate-evaluation.mjs"],
   ["trusted candidate spike changes invalidate its policy pin", ".github/scripts/provider-embed-candidate-spike.mjs"],
   ["trusted embed evaluation changes invalidate its policy pin", ".github/scripts/provider-embed-evaluation.mjs"],

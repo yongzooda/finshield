@@ -51,21 +51,32 @@ export const validateEmbedEvidenceResult = (result, fail) => {
   }
 
   if (!exactKeys(dataset, ["formula_version", "fixture_set", "split", "families", "documents",
-    "queries", "hard_negative_documents", "hard_negative_queries", "risk_queries"])
+    "queries", "hard_negative_documents", "hard_negative_queries", "risk_queries",
+    "true_claims", "false_claims"])
     || dataset.formula_version !== FORMULA_VERSION || dataset.fixture_set !== FIXTURE_SET
     || dataset.split !== "gate" || dataset.families !== 20 || dataset.documents !== 240
     || dataset.queries !== 100 || dataset.hard_negative_documents !== 100
-    || dataset.hard_negative_queries !== 100 || dataset.risk_queries !== 30) {
-    fail("B-EMBED-01 v4 평가 split·산식·표본 계약 불일치.");
+    || dataset.hard_negative_queries !== 100 || dataset.risk_queries !== 30
+    || dataset.true_claims !== queries.filter((query) => query.truth === "TRUE").length
+    || dataset.false_claims !== queries.filter((query) => query.truth === "FALSE").length
+    || dataset.true_claims < 30 || dataset.false_claims < 30) {
+    fail("B-EMBED-01 v5 평가 split·산식·표본·참거짓 계약 불일치.");
   }
 
   try {
-    if (!exactKeys(retrieval, ["rows", "counts", "slices", "filter_rows"])) throw new Error("schema");
+    if (!exactKeys(retrieval, ["rows", "counts", "slices", "filter_rows", "case_unions"])) throw new Error("schema");
     const recalculated = scoreCandidatePools({
       queries, documents: fixtures.documents, rows: retrieval.rows,
     });
     if (!same(quality, recalculated.quality) || !same(retrieval.counts, recalculated.counts)
-      || !same(retrieval.slices, recalculated.slices)) throw new Error("recalculation");
+      || !same(retrieval.slices, recalculated.slices)
+      || !same(retrieval.case_unions, recalculated.unions)) throw new Error("recalculation");
+    // Case 합집합 풀도 전량 회수여야 한다. 한 Claim 이 놓친 근거를 같은 Case 의
+    // 다른 Claim 풀이 우연히 담아도 Claim 별 기준은 별도로 본다.
+    for (const union of recalculated.unions) {
+      if (union.union_recall !== 1) fail(`B-EMBED-01 Case 합집합 회수 미달: ${union.family}`);
+      if (union.union_pool_size > CANDIDATE_POOL_K * 5) throw new Error("union size");
+    }
     // Filter 단계를 실제로 거쳤는지 다시 계산한다. 후보가 Filter 를 통과하지
     // 않은 문서에서 나왔다면 측정한 구성이 사전등록한 구성이 아니다.
     const expectedFilter = queries.map((query) => ({
@@ -98,13 +109,14 @@ export const validateEmbedEvidenceResult = (result, fail) => {
   }
 
   if (!exactKeys(quality, ["pool_k", "recall_at_pool", "risk_core_recall_at_pool",
-    "queries_fully_covered", "queries_total", "worst_minimum_k"])
+    "case_union_recall", "queries_fully_covered", "queries_total", "worst_minimum_k"])
     || quality.pool_k !== CANDIDATE_POOL_K
     || quality.recall_at_pool !== 1 || quality.risk_core_recall_at_pool !== 1
+    || quality.case_union_recall !== 1
     || quality.queries_total !== queries.length
     || quality.queries_fully_covered !== queries.length
     || !positiveInteger(quality.worst_minimum_k) || quality.worst_minimum_k > CANDIDATE_POOL_K) {
-    fail("B-EMBED-01 후보 풀 20 관련 unit Recall 1.00·위험 핵심 Recall 1.00 합격선을 충족하지 못했습니다.");
+    fail("B-EMBED-01 후보 풀 20 Claim 별 Recall 1.00·Case 합집합 Recall 1.00·위험 핵심 Recall 1.00 합격선을 충족하지 못했습니다.");
   }
 
   let billed = 0;
