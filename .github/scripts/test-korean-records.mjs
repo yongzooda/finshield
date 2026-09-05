@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { parse } from "yaml";
-import { SQUASH_WRAP_COLUMNS, validateKoreanRecord, validateCommitMessage, validatePullRequest, wrapSquashBody } from "./validate-korean-records.mjs";
+import { SQUASH_WRAP_COLUMNS, isBranchUpdateMergeCommit, validateKoreanRecord, validateCommitMessage, validatePullRequest, wrapSquashBody } from "./validate-korean-records.mjs";
 
 assert.deepEqual(validateCommitMessage("fix: 한국어 기록 검사 추가\n\nCloses #36\n관련 이슈: #29"), []);
 for (const message of ["test: add evidence harness", "fix: 한국어 제목\n\nRetain sanitized diagnostics.",
@@ -25,6 +25,16 @@ assert.ok((await validatePullRequest(pr, async (path) => path.includes("/commits
   ? [{ commit: { message: "fix: add validation" } }] : api(path))).length);
 assert.ok((await validatePullRequest(pr, async (path) => path.includes("/commits?")
   ? api(path) : { number: 36, title: "English issue", body: "English description" })).length);
+// main 을 따라잡는 GitHub 병합 커밋(부모 2개)은 검사에서 제외하고, 부모 1개인 영어 커밋은 여전히 거부한다.
+const mergeMessage = "Merge branch 'main' into feat/runs-and-manifests";
+assert.ok(isBranchUpdateMergeCommit({ parents: [{}, {}], commit: { message: mergeMessage } }));
+assert.ok(!isBranchUpdateMergeCommit({ parents: [{}], commit: { message: mergeMessage } }));
+assert.ok(!isBranchUpdateMergeCommit({ parents: [{}, {}], commit: { message: "Merge pull request #1 from x/y" } }));
+const merged = { ...pr, commits: 2 };
+assert.deepEqual(await validatePullRequest(merged, async (path) => path.includes("/commits?")
+  ? [{ commit: { message: "fix: 한국어 기록 검사" } }, { parents: [{}, {}], commit: { message: mergeMessage } }] : api(path)), []);
+assert.ok((await validatePullRequest(merged, async (path) => path.includes("/commits?")
+  ? [{ commit: { message: "fix: 한국어 기록 검사" } }, { parents: [{}], commit: { message: mergeMessage } }] : api(path))).length);
 await assert.rejects(validatePullRequest(pr, async () => []), /전체 커밋/);
 await assert.rejects(validatePullRequest(pr, async () => { throw new Error("읽기 권한 없음"); }), /권한/);
 const many = { ...pr, commits: 101, body: "커밋 전체를 검사합니다." };

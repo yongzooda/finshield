@@ -58,6 +58,8 @@ export const validateCommitMessage = (message) => {
 };
 
 const assertContext = (condition, message) => { if (!condition) throw new Error(message); };
+export const isBranchUpdateMergeCommit = (commit) => Array.isArray(commit?.parents) && commit.parents.length >= 2
+  && /^Merge (?:remote-tracking )?branch '[^'\n]+' into [^\n]+$/.test(commit.commit.message.trim());
 const prefix = "/repos/yongzooda/finshield";
 export const validatePullRequest = async (pr, readJson) => {
   assertContext(Number.isSafeInteger(pr.number) && pr.number > 0, "PR 번호가 올바르지 않습니다.");
@@ -74,6 +76,8 @@ export const validatePullRequest = async (pr, readJson) => {
     for (const commit of commits) {
       assertContext(typeof commit?.commit?.message === "string", "PR 커밋 메시지를 검증할 수 없습니다.");
       total++;
+      // main 을 따라잡는 GitHub 병합 커밋은 squash 로 사라지므로 검사하지 않는다.
+      if (isBranchUpdateMergeCommit(commit)) continue;
       errors.push(...validateCommitMessage(commit.commit.message).map((e) => `커밋 ${total}: ${e}`));
     }
     if (commits.length < 100) break;
