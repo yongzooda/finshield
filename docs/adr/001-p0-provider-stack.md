@@ -599,6 +599,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `EVID-DOC-01` | Provider 공개 기술 문서 | DOCUMENTED | Anthropic·Cohere·Supabase·CLOVA·Vercel 공개 문서의 명시된 모델 ID·기술 제한·API 동작을 2026-09-03 확인; DPA·보존·리전·계약 승인이 아님 |
 | `EVID-LAW-01` | Law 등록 IP 위험 | DOCUMENTED | 공식 공지에서 OC 등록 IP와 요청 IP 불일치 오류 가능성 확인 |
 | `EVID-MODEL-01` | Anthropic Sonnet 5 Live Spike | PASS | FinShield 전용 Anthropic Workspace 키로 재측정한 main run `33912191567`, artifact `9951898766`; 합성 50건·100 live request·결정적 fault 20건에서 schema·strict tool·P95·비용 policy 합격. 무효가 된 run `33783765337`·`33883439885`의 결과 파일도 이력으로 보존한다 |
+| `EVID-EMBED-01` | Cohere embed-v4.0 1차 후보 생성 Live Spike | FAIL | 사전등록 구성(Metadata Filter → Exact KNN, 후보 풀 20)으로 v4 평가셋을 main run `33955613801`에서 측정. 관련 unit Recall@20 0.97, 전량 회수 88/100, 위험 핵심 Recall 1.00, Query P95 466ms. 합격선 1.00 미달. Filter 없이 잰 v3 run `33954521524`(Recall 0.902)은 사전등록 구성이 아니라 기준선 관측으로만 보존 |
 
 위 PASS는 제품 Live Vertical Slice PASS가 아니다. GitHub의 Vercel status는 build/deploy 성공을 뜻하며 Provider key·OCR·RLS·Workflow 기능 성공을 증명하지 않는다.
 
@@ -607,7 +608,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | 차단 ID | 실제로 필요한 증거 | 현재 상태 | 해제 조건 |
 |---|---|---|---|
 | `B-MODEL-01` | Anthropic Sonnet 5 auth·quota·structured output·strict tool·P95·cost | PASS | §15.1 Model schema·policy·비용 합격 + sanitized artifact |
-| `B-EMBED-01` | Cohere 1차 후보 생성 Recall@20·P95·cost | NOT-EVALUATED | §15.1 후보 생성 합격 + versioned raw metric artifact |
+| `B-EMBED-01` | Cohere 1차 후보 생성 Recall@20·P95·cost | FAIL | §15.1 후보 생성 합격 + versioned raw metric artifact |
 | `B-RETRIEVAL-01` | Metadata Filter·Keyword FTS·Vector·Rerank 종단 top 5 품질 | NOT-EVALUATED | §15.1 종단 Retrieval 합격 + query별 단계 원장; `B-SUPABASE-01` 선행 |
 | `B-OCR-01` | PDF.js·CLOVA 한국어 숫자·부정어·기관명·URL·표 Fixture | NOT-EVALUATED | §15.1 OCR·Parser 합격 + page별 diff |
 | `B-FILE-SAFETY` | encrypted/active/polyglot/bomb·격리 parser·dependency advisory | NOT-EVALUATED | §15.1 File safety 합격 |
