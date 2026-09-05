@@ -11,12 +11,19 @@
 // ============================================================
 import { createHash } from "node:crypto";
 
-export const FORMULA_VERSION = "source-snapshot-two-api-cross-check-v1";
+export const FORMULA_VERSION = "source-snapshot-two-api-cross-check-v2";
 export const PRODUCT_NAME = "햇살론15";
 export const FSC_ENDPOINT = "https://apis.data.go.kr/1160100/service/GetSmallLoanFinanceInstituteInfoService/getOrdinaryFinanceInfo";
 export const KINFA_ENDPOINT = "https://apis.data.go.kr/B553701/LoanProductHandlingAgencyInfoService/getLoanProductHandlingAgencyInfo";
 export const OFFICIAL_PRODUCT_URL = "https://www.kinfa.or.kr/financialProduct/hessalLoan.do";
 export const OFFICIAL_GUIDE_URL = "https://loan.kinfa.or.kr/tot/setupLoanProductsGuideSupri.ke";
+export const OFFICIAL_DECLARE_URL = "https://www.kinfa.or.kr/cyber/customerServiceCenter/customerDeclareCenter.do";
+// 공식 페이지 요청 헤더. 브라우저 위장이 아니라 한국어 본문을 요청하는 표준 헤더다.
+export const PAGE_REQUEST_HEADERS = Object.freeze({
+  "Accept": "text/html,application/xhtml+xml",
+  "Accept-Language": "ko-KR,ko;q=0.9",
+  "User-Agent": "FinShield-SourceSnapshot/1 (+https://github.com/yongzooda/finshield)",
+});
 export const PORTAL_PAGES = Object.freeze({
   fsc: "https://www.data.go.kr/data/15094787/openapi.do",
   kinfa: "https://www.data.go.kr/data/15074508/openapi.do",
@@ -32,12 +39,18 @@ export const REQUEST_TIMEOUT_MS = 15_000;
 export const GUIDE_MARKERS = Object.freeze({
   hotline: "1397",
   no_broker_fee: "수수료를 요구하지 않",
+  broker_fee: "중개수수료",
+  impersonation: "사칭",
   product: PRODUCT_NAME,
 });
+// 기본 페이지("Basic Sample")는 경로가 없거나 접근이 막힌 요청에 서버가 돌려주는 빈 틀이다.
+export const UNREACHABLE_TITLE = "Basic Sample";
 
 const PRODUCT_NAME_FIELDS = Object.freeze(["finPrdNm", "prdNm", "fnPrdNm", "productNm"]);
-const INSTITUTION_FIELDS = Object.freeze(["hdlInst", "hdlInstNm", "insttNm", "fnnstNm"]);
+// 금융위 API 의 hdlInst 는 "대출협약은행 (12개)" 같은 분류이고 hdlInstDtlVw 가 기관 목록이다.
+const INSTITUTION_FIELDS = Object.freeze(["hdlInstDtlVw", "hdlInst", "hdlInstNm", "insttNm", "fnnstNm"]);
 const EXISTS_FIELDS = Object.freeze(["prdExisYn", "existYn"]);
+const BAS_YM_FIELDS = Object.freeze(["basYm", "baseYm", "stdYm"]);
 
 export const sha256Hex = (text) => createHash("sha256").update(text).digest("hex");
 export const canonicalJson = (value) => {
@@ -101,15 +114,20 @@ export const pickField = (item, candidates) => {
   return null;
 };
 
+// 양쪽 목록에 같은 정규화를 적용한다. "KB국민은행"·"국민은행", "SC제일은행"·"제일은행",
+// "(주)하나은행"·"하나은행" 이 같은 기관으로 잡힌다.
 export const normalizeInstitution = (name) => String(name ?? "")
   .replace(/\(주\)|주식회사|㈜/g, "")
+  .replace(/\([^)]*\)/g, "")
   .replace(/[\s·・,.()\-_/]/g, "")
+  .replace(/^[A-Za-z]+/, "")
   .toLowerCase();
 
 export const splitInstitutions = (text) => String(text ?? "")
-  .split(/[,;/\n·]|\s및\s|\s등/)
-  .map((part) => part.trim())
-  .filter((part) => part.length >= 2);
+  .replace(/\([^)]*개\)/g, "")
+  .split(/[,;/|·、\n]|\s및\s|\s등(?=[\s,]|$)/)
+  .map((part) => part.replace(/\([^)]*\)/g, "").trim())
+  .filter((part) => part.length >= 2 && !/^\d+개?$/.test(part));
 
 export const buildSnapshot = ({ authority, sourceType, officialId, officialUrl, record, fetchedAt }) => {
   const canonical = canonicalJson(record);
@@ -190,16 +208,19 @@ export const fetchAllPages = async ({ fetchImpl, endpoint, params, apiKey, progr
   };
 };
 
-export const fetchOfficialPage = async ({ fetchImpl, url }) => {
+export const fetchOfficialPage = async ({ fetchImpl, url, role }) => {
   const startedAt = performance.now();
-  const response = await fetchImpl(url, { method: "GET", signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS), redirect: "follow" });
+  const response = await fetchImpl(url, { method: "GET", headers: { ...PAGE_REQUEST_HEADERS }, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS), redirect: "follow" });
   const text = await response.text();
   const title = text.match(/<title>([\s\S]*?)<\/title>/i)?.[1]?.replace(/\s+/g, " ").trim() ?? null;
   return {
+    role,
     url,
     status: response.status,
     latency_ms: Math.round(performance.now() - startedAt),
     title,
+    // 실행 환경(GitHub-hosted)에서 기본 틀만 받으면 그 사실을 남긴다. 성공으로 바꾸지 않는다.
+    reachable: response.status === 200 && title !== null && !title.includes(UNREACHABLE_TITLE),
     content_sha256: sha256Hex(text),
     content_length: text.length,
     markers: Object.fromEntries(Object.entries(GUIDE_MARKERS).map(([key, marker]) => [key, text.includes(marker)])),
@@ -216,8 +237,16 @@ export const runSourceSpike = async ({ apiKey, fetchImpl = globalThis.fetch, now
     progress: (count, total) => progress("fsc", count, total),
   });
   const fscRecords = fsc.items
-    .map((item) => ({ item, name: pickField(item, PRODUCT_NAME_FIELDS), institution: pickField(item, INSTITUTION_FIELDS), exists: pickField(item, EXISTS_FIELDS) }))
+    .map((item) => ({
+      item,
+      name: pickField(item, PRODUCT_NAME_FIELDS), institution: pickField(item, INSTITUTION_FIELDS),
+      exists: pickField(item, EXISTS_FIELDS), basYm: pickField(item, BAS_YM_FIELDS),
+    }))
     .filter((row) => row.name && row.name.value.replace(/\s/g, "").includes(PRODUCT_NAME));
+  // 기준년월이 가장 최근인 레코드가 현재 상품이다. 과거 기준월 레코드도 Snapshot 으로 남긴다.
+  const basYms = fscRecords.map((row) => row.basYm?.value ?? "").filter(Boolean).sort();
+  const latestBasYm = basYms.length > 0 ? basYms[basYms.length - 1] : null;
+  const currentRecords = latestBasYm === null ? fscRecords : fscRecords.filter((row) => row.basYm?.value === latestBasYm);
   const fscSnapshots = fscRecords.map((row, index) => buildSnapshot({
     authority: "금융위원회",
     sourceType: "PRODUCT",
@@ -243,17 +272,17 @@ export const runSourceSpike = async ({ apiKey, fetchImpl = globalThis.fetch, now
     fetchedAt,
   }));
 
-  // 교차 확인: 금융위 레코드의 취급기관 문자열과 진흥원 취급기관 목록
+  // 교차 확인: 현재 기준월 금융위 레코드의 취급기관 목록과 진흥원 취급기관 목록
   const kinfaNames = new Map(kinfaRecords.map((item) => [normalizeInstitution(item.insttNm), item.insttNm]));
-  const fscInstitutionTexts = fscRecords.map((row) => row.institution?.value ?? "").filter(Boolean);
+  const fscInstitutionTexts = currentRecords.map((row) => row.institution?.value ?? "").filter(Boolean);
   const fscInstitutions = [...new Set(fscInstitutionTexts.flatMap(splitInstitutions))];
   const matched = fscInstitutions.filter((name) => kinfaNames.has(normalizeInstitution(name)));
   const unmatched = fscInstitutions.filter((name) => !kinfaNames.has(normalizeInstitution(name)));
 
   const officialPages = [];
-  for (const url of [OFFICIAL_PRODUCT_URL, OFFICIAL_GUIDE_URL]) {
+  for (const [role, url] of [["PRODUCT", OFFICIAL_PRODUCT_URL], ["GUIDE", OFFICIAL_GUIDE_URL], ["DECLARE_CENTER", OFFICIAL_DECLARE_URL]]) {
     await sleep(REQUEST_INTERVAL_MS);
-    officialPages.push(await fetchOfficialPage({ fetchImpl, url }));
+    officialPages.push(await fetchOfficialPage({ fetchImpl, url, role }));
   }
 
   return {
@@ -264,6 +293,7 @@ export const runSourceSpike = async ({ apiKey, fetchImpl = globalThis.fetch, now
       kinfa_endpoint: KINFA_ENDPOINT,
       official_product_url: OFFICIAL_PRODUCT_URL,
       official_guide_url: OFFICIAL_GUIDE_URL,
+      official_declare_url: OFFICIAL_DECLARE_URL,
       page_size: PAGE_SIZE,
       max_pages: MAX_PAGES,
       request_interval_ms: REQUEST_INTERVAL_MS,
@@ -273,8 +303,12 @@ export const runSourceSpike = async ({ apiKey, fetchImpl = globalThis.fetch, now
       fetched_count: fsc.fetched_count, pagination_complete: fsc.pagination_complete, pages: fsc.pages, http: fsc.http,
       product_matches: fscRecords.length,
       product_name_field: fscRecords[0]?.name.key ?? null,
-      institution_field: fscRecords[0]?.institution?.key ?? null,
+      institution_field: currentRecords[0]?.institution?.key ?? null,
       exists_field: fscRecords[0]?.exists?.key ?? null,
+      bas_ym_field: fscRecords[0]?.basYm?.key ?? null,
+      latest_bas_ym: latestBasYm,
+      current_matches: currentRecords.length,
+      current_exists_values: [...new Set(currentRecords.map((row) => row.exists?.value ?? null))],
       exists_values: [...new Set(fscRecords.map((row) => row.exists?.value ?? null))],
       field_names: [...new Set(fsc.items.flatMap((item) => Object.keys(item)))].sort(),
       snapshots: fscSnapshots,
@@ -287,6 +321,7 @@ export const runSourceSpike = async ({ apiKey, fetchImpl = globalThis.fetch, now
       snapshots: kinfaSnapshots,
     },
     cross_check: {
+      fsc_institution_texts: fscInstitutionTexts.map((text) => text.slice(0, 500)),
       fsc_institutions: fscInstitutions,
       kinfa_institutions: [...kinfaNames.values()].sort(),
       matched,

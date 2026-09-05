@@ -12,26 +12,30 @@
 
 | 항목 | 고정값 |
 |---|---|
-| 산식 버전 | `source-snapshot-two-api-cross-check-v1` |
+| 산식 버전 | `source-snapshot-two-api-cross-check-v2` |
 | 상품 | `햇살론15` |
 | 금융위원회 API | `https://apis.data.go.kr/1160100/service/GetSmallLoanFinanceInstituteInfoService/getOrdinaryFinanceInfo`, `resultType=json`, `likeFinPrdNm=햇살론15`, `numOfRows=100`, 최대 20 page. 포털 상세 `https://www.data.go.kr/data/15094787/openapi.do` |
 | 서민금융진흥원 API | `https://apis.data.go.kr/B553701/LoanProductHandlingAgencyInfoService/getLoanProductHandlingAgencyInfo`, `type=xml`, `prdNm=햇살론15`, `numOfRows=100`, 최대 20 page. 포털 상세 `https://www.data.go.kr/data/15074508/openapi.do` |
-| 공식 페이지 | 상품 안내 `https://www.kinfa.or.kr/financialProduct/hessalLoan.do`(제목에 `햇살론15`, 본문 `1397`), 이용안내 `https://loan.kinfa.or.kr/tot/setupLoanProductsGuideSupri.ke`(`1397`, "수수료를 요구하지 않" 문구) |
+| 공식 페이지 | 상품 안내 `https://www.kinfa.or.kr/financialProduct/hessalLoan.do`(제목에 `햇살론15`, 본문 `1397`), 사칭 신고센터 `https://www.kinfa.or.kr/cyber/customerServiceCenter/customerDeclareCenter.do`(`1397`·`사칭`·`중개수수료`), 이용안내 `https://loan.kinfa.or.kr/tot/setupLoanProductsGuideSupri.ke`(`1397`, "수수료를 요구하지 않" 문구; 실행 환경에서 닿을 때만 판정) |
 | 라이선스 registry | 두 API 모두 포털 표기 `이용허락범위 제한 없음`, 무료, 개발계정 트래픽 10,000회. 확인일 2026-09-05 |
 | 요청 | 시작 간격 300ms, timeout 15초, 재시도 없음. 개발계정 하루 10,000회 안에서 한 번 실행에 10회 안팎을 쓴다 |
 | Snapshot | `authority`, `source_type`(`PRODUCT`/`INSTITUTION`), `official_id`, `official_url`, `fetched_at`, 공개 레코드 필드, 레코드 canonical JSON SHA-256, `source_fingerprint` |
-| 교차 확인 | 금융위 레코드의 취급기관 문자열을 나눠 정규화한 뒤 진흥원 취급기관 목록과 대조. 금융위 레코드에 취급기관이 있으면 하나 이상 일치해야 한다 |
+| 교차 확인 | 금융위 레코드 중 기준년월(`basYm`)이 가장 최근인 현재 레코드의 취급기관 상세(`hdlInstDtlVw`, 없으면 `hdlInst`)를 나눠 정규화(영문 접두·법인 표기·괄호 제거)한 뒤 진흥원 취급기관 목록과 대조. 하나 이상 일치해야 한다 |
 
 ## 합격선
 
 - 두 API 모두 `resultCode` `00`, `totalCount ≥ 1`, 수집 수가 `totalCount`(최대 2,000)와 같다. HTTP 200, content type, 첫 응답 헤더 이름을 기록한다.
-- 금융위 API에 `햇살론15`를 담은 상품 레코드가 1건 이상이고 종료 표시(`N`)가 없다. 진흥원 API에 `햇살론15` 취급기관이 1건 이상이다.
+- 금융위 API에 `햇살론15`를 담은 상품 레코드가 1건 이상이고, 최신 기준월 레코드에 종료 표시(`N`)가 없다. 과거 기준월 레코드는 이력 Snapshot으로 남긴다. 진흥원 API에 `햇살론15` 취급기관이 1건 이상이다.
 - 교차 확인에서 일치 기관이 1건 이상이다. 기관이 일치하지 않는 상태는 성공 Demo가 아니라 차단 사유다.
-- 공식 상품 페이지가 200이고 제목에 `햇살론15`가 있으며 `1397`이 보인다. 이용안내 페이지가 200이고 `1397`과 중개수수료 미요구 문구가 있다.
+- 공식 상품 페이지가 200이고 제목에 `햇살론15`가 있으며 `1397`이 보인다. 사칭 신고센터 페이지가 200이고 `1397`·`사칭`·`중개수수료`가 보인다. 이용안내 페이지는 실행 환경에서 닿았을 때(`reachable`) `1397`과 중개수수료 미요구 문구가 있어야 한다.
 - 모든 Snapshot의 SHA-256·fingerprint가 레코드에서 다시 계산한 값과 같다.
 - 결과 파일에 `serviceKey`·이메일·전화번호·주민번호 형태의 값이 없다.
 
-응답 필드 이름은 포털이 Swagger로만 보여 줘 실행 전 확정하지 못했다. harness는 상품명은 `finPrdNm`·`prdNm` 계열, 취급기관은 `hdlInst`·`insttNm` 계열에서 찾고 실제로 쓴 필드 이름과 전체 필드 목록을 결과에 남긴다. 채택 뒤 `kb.source_snapshots` 적재 script는 그 필드 이름을 고정한다.
+## 첫 main 실행(run `33969238278`)에서 확인한 사실
+
+- 금융위 API는 `햇살론15` 레코드 19건을 돌려줬다(기준년월별 이력). 응답 필드는 `basYm`, `finPrdNm`, `hdlInst`(분류: "대출협약은행 (14개)"), `hdlInstDtlVw`(기관 목록), `prdExisYn`, `irt`, `lnLmt`, `trgt`, `usge`, `rdptMthd` 등 47개다. v1은 `hdlInst`를 기관 목록으로 읽어 교차 확인에 실패했다. v2는 최신 기준월 레코드의 `hdlInstDtlVw`를 쓴다.
+- 진흥원 API는 취급기관 16개(SC제일·경남·광주·국민·기업·농협·대구·부산·수협·신한·씨티·우리·전북·제주·카카오뱅크·하나)를 돌려줬다.
+- 이용안내 페이지 `loan.kinfa.or.kr`는 GitHub-hosted 실행 환경에서 제목 `Basic Sample`인 기본 틀만 돌려준다(국내에서는 본문이 온다). 수수료 미요구 문구 Snapshot은 실행 환경에서 닿을 때만 판정하고, 닿지 않은 사실을 결과에 남긴다. 사칭 신고센터 페이지(`www.kinfa.or.kr`)는 실행 환경에서도 본문을 돌려주며 `1397`·`사칭`·`중개수수료`를 담는다. 문구 Snapshot을 국내 vantage에서 채택하는 절차는 아직 없다.
 
 ## 실행
 
