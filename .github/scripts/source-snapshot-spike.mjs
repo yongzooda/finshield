@@ -11,7 +11,7 @@
 // ============================================================
 import { createHash } from "node:crypto";
 
-export const FORMULA_VERSION = "source-snapshot-two-api-cross-check-v3";
+export const FORMULA_VERSION = "source-snapshot-two-api-cross-check-v4";
 export const PRODUCT_NAME = "햇살론15";
 export const FSC_ENDPOINT = "https://apis.data.go.kr/1160100/service/GetSmallLoanFinanceInstituteInfoService/getOrdinaryFinanceInfo";
 export const KINFA_ENDPOINT = "https://apis.data.go.kr/B553701/LoanProductHandlingAgencyInfoService/getLoanProductHandlingAgencyInfo";
@@ -36,6 +36,14 @@ export const PAGE_SIZE = 100;
 export const MAX_PAGES = 20;
 export const REQUEST_INTERVAL_MS = 300;
 export const REQUEST_TIMEOUT_MS = 15_000;
+// GitHub-hosted 실행 환경에서 apis.data.go.kr 연결이 간헐적으로 connect timeout 을 낸다
+// (run 33969726695·33970360398·33970408558). 응답을 받기 전의 연결 계층 오류만 제한 재시도한다.
+// HTTP 오류·결과 코드·본문 오류는 재시도하지 않는다. 지연 측정 합격선이 없으므로 측정을 왜곡하지 않는다.
+export const CONNECT_ATTEMPTS = 3;
+export const CONNECT_RETRY_DELAYS_MS = Object.freeze([3_000, 6_000]);
+const CONNECT_ERROR_CODES = new Set(["UND_ERR_CONNECT_TIMEOUT", "UND_ERR_SOCKET", "ECONNRESET", "ECONNREFUSED", "ENOTFOUND", "EAI_AGAIN", "ETIMEDOUT"]);
+export const isConnectError = (error) => error instanceof TypeError
+  && (CONNECT_ERROR_CODES.has(error?.cause?.code) || /Connect|Socket|Timeout/.test(String(error?.cause?.name ?? "")));
 export const GUIDE_MARKERS = Object.freeze({
   hotline: "1397",
   no_broker_fee: "수수료를 요구하지 않",
@@ -156,10 +164,26 @@ export const buildSnapshot = ({ authority, sourceType, officialId, officialUrl, 
 
 const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
 
-export const fetchEnvelope = async ({ fetchImpl, endpoint, params, apiKey }) => {
+// 연결 계층 오류만 재시도한다. 재시도 횟수는 관측값에 남긴다.
+export const fetchWithConnectRetry = async (fetchImpl, url, init, sleepImpl = sleep) => {
+  let retries = 0;
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      const response = await fetchImpl(url, init);
+      return { response, retries };
+    } catch (error) {
+      if (!isConnectError(error) || attempt >= CONNECT_ATTEMPTS) throw error;
+      retries += 1;
+      await sleepImpl(CONNECT_RETRY_DELAYS_MS[attempt - 1] ?? CONNECT_RETRY_DELAYS_MS.at(-1));
+    }
+  }
+};
+
+export const fetchEnvelope = async ({ fetchImpl, endpoint, params, apiKey, sleepImpl = sleep }) => {
   const url = buildRequestUrl(endpoint, params, apiKey);
   const startedAt = performance.now();
-  const response = await fetchImpl(url, { method: "GET", signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS), redirect: "error" });
+  const { response, retries } = await fetchWithConnectRetry(fetchImpl, url,
+    { method: "GET", signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS), redirect: "error" }, sleepImpl);
   const latencyMs = Math.round(performance.now() - startedAt);
   const contentType = (response.headers.get("content-type") ?? "").toLowerCase();
   const text = await response.text();
@@ -180,21 +204,24 @@ export const fetchEnvelope = async ({ fetchImpl, endpoint, params, apiKey }) => 
       status: response.status,
       content_type: contentType.split(";")[0],
       latency_ms: latencyMs,
+      connect_retries: retries,
       header_names: [...response.headers.keys()].map((name) => name.toLowerCase()).sort(),
     },
   };
 };
 
 // 전체 page 를 순회한다. totalCount 와 실제 수집 수가 다르면 pagination 불완전으로 남긴다.
-export const fetchAllPages = async ({ fetchImpl, endpoint, params, apiKey, progress = () => {} }) => {
+export const fetchAllPages = async ({ fetchImpl, endpoint, params, apiKey, progress = () => {}, sleepImpl = sleep }) => {
   const items = [];
   const pages = [];
   let totalCount = null;
   let header = null;
   let httpFirst = null;
+  let connectRetries = 0;
   for (let pageNo = 1; pageNo <= MAX_PAGES; pageNo += 1) {
-    if (pageNo > 1) await sleep(REQUEST_INTERVAL_MS);
-    const envelope = await fetchEnvelope({ fetchImpl, endpoint, params: { ...params, pageNo, numOfRows: PAGE_SIZE }, apiKey });
+    if (pageNo > 1) await sleepImpl(REQUEST_INTERVAL_MS);
+    const envelope = await fetchEnvelope({ fetchImpl, endpoint, params: { ...params, pageNo, numOfRows: PAGE_SIZE }, apiKey, sleepImpl });
+    connectRetries += envelope.http.connect_retries;
     if (envelope.header.resultCode !== "00") {
       throw Object.assign(new Error(`Source API result code ${envelope.header.resultCode ?? "missing"}.`), { resultCode: envelope.header.resultCode });
     }
@@ -213,14 +240,15 @@ export const fetchAllPages = async ({ fetchImpl, endpoint, params, apiKey, progr
     fetched_count: items.length,
     pagination_complete: totalCount !== null && items.length === Math.min(totalCount, MAX_PAGES * PAGE_SIZE),
     pages,
-    http: httpFirst,
+    http: { ...httpFirst, connect_retries: connectRetries },
     items,
   };
 };
 
-export const fetchOfficialPage = async ({ fetchImpl, url, role }) => {
+export const fetchOfficialPage = async ({ fetchImpl, url, role, sleepImpl = sleep }) => {
   const startedAt = performance.now();
-  const response = await fetchImpl(url, { method: "GET", headers: { ...PAGE_REQUEST_HEADERS }, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS), redirect: "follow" });
+  const { response, retries } = await fetchWithConnectRetry(fetchImpl, url,
+    { method: "GET", headers: { ...PAGE_REQUEST_HEADERS }, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS), redirect: "follow" }, sleepImpl);
   const text = await response.text();
   const title = text.match(/<title>([\s\S]*?)<\/title>/i)?.[1]?.replace(/\s+/g, " ").trim() ?? null;
   return {
@@ -228,6 +256,7 @@ export const fetchOfficialPage = async ({ fetchImpl, url, role }) => {
     url,
     status: response.status,
     latency_ms: Math.round(performance.now() - startedAt),
+    connect_retries: retries,
     title,
     // 실행 환경(GitHub-hosted)에서 기본 틀만 받으면 그 사실을 남긴다. 성공으로 바꾸지 않는다.
     reachable: response.status === 200 && title !== null && !title.includes(UNREACHABLE_TITLE),
@@ -237,12 +266,12 @@ export const fetchOfficialPage = async ({ fetchImpl, url, role }) => {
   };
 };
 
-export const runSourceSpike = async ({ apiKey, fetchImpl = globalThis.fetch, now = () => new Date(), progress = () => {} }) => {
+export const runSourceSpike = async ({ apiKey, fetchImpl = globalThis.fetch, now = () => new Date(), progress = () => {}, sleepImpl = sleep }) => {
   if (typeof apiKey !== "string" || apiKey.length < 20) throw new Error("DATA_GO_KR_SERVICE_KEY is not configured for the spike environment.");
   const fetchedAt = now().toISOString();
 
   const fsc = await fetchAllPages({
-    fetchImpl, endpoint: FSC_ENDPOINT, apiKey,
+    fetchImpl, endpoint: FSC_ENDPOINT, apiKey, sleepImpl,
     params: { resultType: "json", likeFinPrdNm: PRODUCT_NAME },
     progress: (count, total) => progress("fsc", count, total),
   });
@@ -266,9 +295,9 @@ export const runSourceSpike = async ({ apiKey, fetchImpl = globalThis.fetch, now
     fetchedAt,
   }));
 
-  await sleep(REQUEST_INTERVAL_MS);
+  await sleepImpl(REQUEST_INTERVAL_MS);
   const kinfa = await fetchAllPages({
-    fetchImpl, endpoint: KINFA_ENDPOINT, apiKey,
+    fetchImpl, endpoint: KINFA_ENDPOINT, apiKey, sleepImpl,
     params: { type: "xml", prdNm: PRODUCT_NAME },
     progress: (count, total) => progress("kinfa", count, total),
   });
@@ -291,8 +320,8 @@ export const runSourceSpike = async ({ apiKey, fetchImpl = globalThis.fetch, now
 
   const officialPages = [];
   for (const [role, url] of [["PRODUCT", OFFICIAL_PRODUCT_URL], ["GUIDE", OFFICIAL_GUIDE_URL], ["DECLARE_CENTER", OFFICIAL_DECLARE_URL]]) {
-    await sleep(REQUEST_INTERVAL_MS);
-    officialPages.push(await fetchOfficialPage({ fetchImpl, url, role }));
+    await sleepImpl(REQUEST_INTERVAL_MS);
+    officialPages.push(await fetchOfficialPage({ fetchImpl, url, role, sleepImpl }));
   }
 
   return {
@@ -307,6 +336,7 @@ export const runSourceSpike = async ({ apiKey, fetchImpl = globalThis.fetch, now
       page_size: PAGE_SIZE,
       max_pages: MAX_PAGES,
       request_interval_ms: REQUEST_INTERVAL_MS,
+      connect_attempts: CONNECT_ATTEMPTS,
     },
     fsc: {
       result_code: fsc.result_code, result_msg: fsc.result_msg, total_count: fsc.total_count,

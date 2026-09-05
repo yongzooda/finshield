@@ -8,7 +8,7 @@
 //    공식 상품 페이지·이용안내 페이지가 200 으로 표지(제목·1397·수수료 문구)를 보인다.
 //  - 모든 Snapshot 은 official_id·fetched_at·sha256·fingerprint 를 가진다.
 import {
-  DECLARED_DEV_TRAFFIC_LIMIT, FORMULA_VERSION, FSC_ENDPOINT, KINFA_ENDPOINT, LICENSE_CHECKED_AT, LICENSE_LABEL,
+  CONNECT_ATTEMPTS, DECLARED_DEV_TRAFFIC_LIMIT, FORMULA_VERSION, FSC_ENDPOINT, KINFA_ENDPOINT, LICENSE_CHECKED_AT, LICENSE_LABEL,
   MAX_PAGES, OFFICIAL_DECLARE_URL, OFFICIAL_GUIDE_URL, OFFICIAL_PRODUCT_URL, PAGE_SIZE, PORTAL_PAGES, PRODUCT_NAME,
   REQUEST_INTERVAL_MS, canonicalJson, sha256Hex,
 } from "./source-snapshot-spike.mjs";
@@ -36,7 +36,9 @@ const validApi = (api, fail, label) => {
     || api.pages.some((p, i) => !isRecord(p) || p.page_no !== i + 1 || !Number.isInteger(p.rows) || p.rows < 0 || !Number.isInteger(p.latency_ms) || p.latency_ms < 0)
     || api.pages.reduce((sum, p) => sum + p.rows, 0) !== api.fetched_count
     || !isRecord(api.http) || api.http.status !== 200 || typeof api.http.content_type !== "string"
-    || !Number.isInteger(api.http.latency_ms) || api.http.latency_ms < 0 || !Array.isArray(api.http.header_names)) {
+    || !Number.isInteger(api.http.latency_ms) || api.http.latency_ms < 0 || !Array.isArray(api.http.header_names)
+    || !Number.isInteger(api.http.connect_retries) || api.http.connect_retries < 0
+    || api.http.connect_retries > (CONNECT_ATTEMPTS - 1) * MAX_PAGES) {
     fail(`${label} API 응답 코드·pagination·HTTP metadata 가 합격 조건과 다릅니다.`);
     return false;
   }
@@ -79,12 +81,13 @@ export const validateSourceEvidenceResult = (result, fail) => {
   }
   const { contract, fsc, kinfa, cross_check: cross, official_pages: pages, registry } = result.observations;
   if (!exactKeys(contract, ["formula_version", "product_name", "fsc_endpoint", "kinfa_endpoint", "official_product_url",
-    "official_guide_url", "official_declare_url", "page_size", "max_pages", "request_interval_ms"])
+    "official_guide_url", "official_declare_url", "page_size", "max_pages", "request_interval_ms", "connect_attempts"])
     || contract.formula_version !== FORMULA_VERSION || contract.product_name !== PRODUCT_NAME
     || contract.fsc_endpoint !== FSC_ENDPOINT || contract.kinfa_endpoint !== KINFA_ENDPOINT
     || contract.official_product_url !== OFFICIAL_PRODUCT_URL || contract.official_guide_url !== OFFICIAL_GUIDE_URL
     || contract.official_declare_url !== OFFICIAL_DECLARE_URL
-    || contract.page_size !== PAGE_SIZE || contract.max_pages !== MAX_PAGES || contract.request_interval_ms !== REQUEST_INTERVAL_MS) {
+    || contract.page_size !== PAGE_SIZE || contract.max_pages !== MAX_PAGES || contract.request_interval_ms !== REQUEST_INTERVAL_MS
+    || contract.connect_attempts !== CONNECT_ATTEMPTS) {
     fail("Source 계약(산식·상품명·End Point·공식 URL·pagination)이 고정값과 다릅니다.");
   }
   const fscOk = validApi(fsc, fail, "fsc");
@@ -148,11 +151,12 @@ export const validateSourceEvidenceResult = (result, fail) => {
     || !Number.isInteger(category.kinfa_bank_count) || category.kinfa_bank_count < 1 || category.kinfa_bank_count > join.joined_count) {
     fail("두 API 의 상품·취급기관 교차 확인이 일치하지 않습니다. 기관이 일치하지 않는 상태는 성공 Demo 가 아닙니다.");
   }
-  const pageKeys = ["role", "url", "status", "latency_ms", "title", "reachable", "content_sha256", "content_length", "markers"];
+  const pageKeys = ["role", "url", "status", "latency_ms", "connect_retries", "title", "reachable", "content_sha256", "content_length", "markers"];
   const markerKeys = ["hotline", "no_broker_fee", "broker_fee", "impersonation", "product"];
   if (!Array.isArray(pages) || pages.length !== 3
     || pages.some((p) => !exactKeys(p, pageKeys) || !isHex64(p.content_sha256) || !Number.isInteger(p.content_length)
-      || !Number.isInteger(p.latency_ms) || typeof p.reachable !== "boolean" || !exactKeys(p.markers, markerKeys))) {
+      || !Number.isInteger(p.latency_ms) || !Number.isInteger(p.connect_retries) || p.connect_retries < 0 || p.connect_retries >= CONNECT_ATTEMPTS
+      || typeof p.reachable !== "boolean" || !exactKeys(p.markers, markerKeys))) {
     fail("공식 페이지 관측이 고정 형식(역할·상태·Hash·표지)을 갖추지 않았습니다.");
   } else {
     const product = pages.find((p) => p.role === "PRODUCT" && p.url === OFFICIAL_PRODUCT_URL);
