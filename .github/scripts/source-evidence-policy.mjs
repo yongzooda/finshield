@@ -124,14 +124,29 @@ export const validateSourceEvidenceResult = (result, fail) => {
       fail("진흥원 Snapshot 레코드에 기관명·상품명이 없습니다.");
     }
   }
-  // 현재 기준월 레코드의 취급기관 목록 중 하나 이상이 진흥원 목록과 일치해야 한다.
-  if (!exactKeys(cross, ["fsc_institution_texts", "fsc_institutions", "kinfa_institutions", "matched", "unmatched"])
-    || !Array.isArray(cross.fsc_institution_texts) || !Array.isArray(cross.fsc_institutions)
-    || !Array.isArray(cross.kinfa_institutions) || !Array.isArray(cross.matched) || !Array.isArray(cross.unmatched)
-    || cross.kinfa_institutions.length < 1 || cross.fsc_institutions.length < 1
+  // 교차 확인: 진흥원 취급기관 레코드 전부가 같은 상품명이고, 금융위 현재 레코드가 은행 취급을 말하며
+  // 진흥원 목록에 은행이 있어야 한다. 금융위는 기관 이름을 나열하지 않으므로 이름 일치는 참고값이다.
+  const join = isRecord(cross?.product_join) ? cross.product_join : null;
+  const category = isRecord(cross?.category) ? cross.category : null;
+  if (!exactKeys(cross, ["fsc_institution_texts", "fsc_institutions", "kinfa_institutions", "matched", "unmatched", "product_join", "category"])
+    || !Array.isArray(cross.fsc_institution_texts) || cross.fsc_institution_texts.length < 1
+    || !Array.isArray(cross.fsc_institutions) || !Array.isArray(cross.kinfa_institutions)
+    || !Array.isArray(cross.matched) || !Array.isArray(cross.unmatched)
+    || cross.kinfa_institutions.length < 1
     || cross.matched.length + cross.unmatched.length !== cross.fsc_institutions.length
-    || cross.matched.length < 1 || cross.matched.some((name) => !cross.fsc_institutions.includes(name))) {
-    fail("두 API 의 취급기관 교차 확인이 일치하지 않습니다. 기관이 일치하지 않는 상태는 성공 Demo 가 아닙니다.");
+    || cross.matched.some((name) => !cross.fsc_institutions.includes(name))
+    || !join || !exactKeys(join, ["fsc_product_names", "kinfa_product_names", "joined_count"])
+    || !Array.isArray(join.fsc_product_names) || join.fsc_product_names.length < 1
+    || join.fsc_product_names.some((n) => !String(n).replace(/\s/g, "").includes(PRODUCT_NAME))
+    || !Array.isArray(join.kinfa_product_names) || join.kinfa_product_names.length < 1
+    || join.kinfa_product_names.some((n) => !String(n).replace(/\s/g, "").includes(PRODUCT_NAME))
+    || !Number.isInteger(join.joined_count) || join.joined_count < 1 || join.joined_count !== (kinfaOk ? kinfa.institution_matches : join.joined_count)
+    || join.joined_count !== cross.kinfa_institutions.length
+    || !category || !exactKeys(category, ["fsc_mentions_bank", "fsc_declared_bank_count", "kinfa_bank_count"])
+    || category.fsc_mentions_bank !== true
+    || !(category.fsc_declared_bank_count === null || (Number.isInteger(category.fsc_declared_bank_count) && category.fsc_declared_bank_count > 0))
+    || !Number.isInteger(category.kinfa_bank_count) || category.kinfa_bank_count < 1 || category.kinfa_bank_count > join.joined_count) {
+    fail("두 API 의 상품·취급기관 교차 확인이 일치하지 않습니다. 기관이 일치하지 않는 상태는 성공 Demo 가 아닙니다.");
   }
   const pageKeys = ["role", "url", "status", "latency_ms", "title", "reachable", "content_sha256", "content_length", "markers"];
   const markerKeys = ["hotline", "no_broker_fee", "broker_fee", "impersonation", "product"];

@@ -11,7 +11,7 @@
 // ============================================================
 import { createHash } from "node:crypto";
 
-export const FORMULA_VERSION = "source-snapshot-two-api-cross-check-v2";
+export const FORMULA_VERSION = "source-snapshot-two-api-cross-check-v3";
 export const PRODUCT_NAME = "햇살론15";
 export const FSC_ENDPOINT = "https://apis.data.go.kr/1160100/service/GetSmallLoanFinanceInstituteInfoService/getOrdinaryFinanceInfo";
 export const KINFA_ENDPOINT = "https://apis.data.go.kr/B553701/LoanProductHandlingAgencyInfoService/getLoanProductHandlingAgencyInfo";
@@ -128,6 +128,16 @@ export const splitInstitutions = (text) => String(text ?? "")
   .split(/[,;/|·、\n]|\s및\s|\s등(?=[\s,]|$)/)
   .map((part) => part.replace(/\([^)]*\)/g, "").trim())
   .filter((part) => part.length >= 2 && !/^\d+개?$/.test(part));
+
+// 금융위 레코드의 취급기관 상세는 "서민금융통합지원센터 47개 (직접보증), 대출협약은행 12개(위탁보증)"
+// 처럼 분류와 수만 적는다. 은행 이름 목록은 진흥원 API 가 상품명으로 준다. 따라서 교차 확인은
+// (1) 진흥원 레코드 전부가 같은 상품명인지, (2) 금융위가 은행 취급을 말하고 진흥원 목록에 은행이
+// 있는지, (3) 금융위가 적은 협약은행 수와 진흥원 은행 수를 기록해 비교한다. 이름 일치는 참고값이다.
+export const isBankLike = (name) => /은행|뱅크|bank/i.test(String(name ?? ""));
+export const declaredBankCount = (text) => {
+  const match = String(text ?? "").match(/대출협약은행\s*\(?\s*(\d+)\s*개/);
+  return match ? Number(match[1]) : null;
+};
 
 export const buildSnapshot = ({ authority, sourceType, officialId, officialUrl, record, fetchedAt }) => {
   const canonical = canonicalJson(record);
@@ -326,6 +336,16 @@ export const runSourceSpike = async ({ apiKey, fetchImpl = globalThis.fetch, now
       kinfa_institutions: [...kinfaNames.values()].sort(),
       matched,
       unmatched,
+      product_join: {
+        fsc_product_names: [...new Set(currentRecords.map((row) => row.name.value))],
+        kinfa_product_names: [...new Set(kinfaRecords.map((item) => String(item.prdNm ?? "").trim()))],
+        joined_count: kinfaRecords.length,
+      },
+      category: {
+        fsc_mentions_bank: fscInstitutionTexts.some((text) => /은행/.test(text)),
+        fsc_declared_bank_count: fscInstitutionTexts.map(declaredBankCount).find((n) => n !== null) ?? null,
+        kinfa_bank_count: kinfaRecords.filter((item) => isBankLike(item.insttNm)).length,
+      },
     },
     official_pages: officialPages,
     registry: {
