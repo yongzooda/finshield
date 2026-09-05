@@ -1,0 +1,13 @@
+-- ============================================================
+-- 0008 Worker 의 extensions 스키마 USAGE (ADR 5.2, 명세 2.2)
+--
+-- pgvector 의 vector 타입과 <=> 등 연산자, pg_trgm 의 연산자 클래스는
+-- Supabase 관례대로 extensions 스키마에 있다. 0001 은 finshield_worker 에
+-- public·private·kb·demo 의 USAGE 만 주었다. 그래서 운영 프로젝트에서
+-- Worker 의 Vector 검색이 permission denied for schema extensions 로
+-- 막혔다. 0007 검증 중 실제로 확인했다.
+--
+-- USAGE 는 이름을 해석할 권한이다. 함수 실행은 각 함수의 EXECUTE 로,
+-- 표 접근은 각 표의 GRANT 와 RLS 로 따로 통제된다.
+-- ============================================================
+grant usage on schema extensions to finshield_worker;

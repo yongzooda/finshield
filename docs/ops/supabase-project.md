@@ -167,12 +167,13 @@ node supabase/tests/verify-remote.mjs
 
 로컬 기준 digest 는 `supabase/tests/run-local.sh` 를 돌린 뒤 같은 질의로 얻는다. 두 값이 다르면 대시보드에서 손으로 바꾼 객체가 있거나 Migration 이 부분 적용된 것이다.
 
-2026-09-05 `0005` 까지 적용한 뒤 확인한 결과는 13개 테이블 제약 157건, digest `96f78b68dbbfc063` 으로 로컬 기준과 완전히 일치했다. RLS 는 13개 테이블 모두 enable+force 이고, `anon` 권한 잔존과 `private`·`kb`·`demo` 노출은 0건이며, `finshield_worker` 는 회원 테이블 세 곳 모두에서 `42501` 로 거부됐다.
+2026-09-05 `0005` 까지 적용한 뒤 확인한 결과는 13개 테이블 제약 157건, digest `96f78b68dbbfc063` 으로 로컬 기준과 완전히 일치했다. `0006` 까지는 17개 테이블 제약 185건 `627fd0ead651cfa8`, `0007` 까지는 27개 테이블 제약 261건 `610f0532a4886f03` 으로 각각 로컬 기준과 일치했다. 인덱스 85개 정의도 집합으로는 동일했으나 서버 `ORDER BY` 가 locale 을 타서 digest 가 달랐고, 그 뒤로는 클라이언트에서 정렬해 잰다. RLS 는 13개 테이블 모두 enable+force 이고, `anon` 권한 잔존과 `private`·`kb`·`demo` 노출은 0건이며, `finshield_worker` 는 회원 테이블 세 곳 모두에서 `42501` 로 거부됐다.
 
 추적 범위는 손으로 나열하지 않고 `public`·`private`·`kb`·`demo` 네 스키마의 모든 일반 테이블로 잡는다. `0005` 적용 직후 목록이 낡아 세 테이블을 빼고 재는 일이 실제로 있었다.
 
 ## 주의할 점
 
+- `finshield_worker` 는 0001 에서 `public`·`private`·`kb`·`demo` 의 USAGE 만 받았다. `extensions` 가 빠져 있어 운영 프로젝트에서 Worker 의 pgvector 연산자 접근이 `permission denied for schema extensions` 로 막혔다. 로컬 시험은 그 질의를 `postgres` 로만 돌려 놓쳤다. `0008` 이 USAGE 를 주고, `04_kb_invariants.sql` 이 Worker 역할로 Exact KNN 을 실행해 재발을 막는다.
 - `pgvector` 연산자(`<=>` 등)는 `extensions` 스키마에 있다. Supabase 가 만든 역할은 `search_path` 에 `extensions` 가 들어 있지만 `finshield_worker` 와 로컬 Stub 역할은 그렇지 않다. 서버 함수와 RPC 는 `operator(extensions.<=>)` 처럼 완전 수식하고 `search_path` 에 기대지 않는다. `04_kb_invariants.sql` 이 이 규칙을 시험한다.
 
 ## 현재 미해결
@@ -191,5 +192,6 @@ node supabase/tests/verify-remote.mjs
 | `0003_profiles.sql` | 적용 완료 | 명세 6.1 계정·금융 프로필 3개 테이블과 RLS |
 | `0004_financial_cases.sql` | 적용 완료 | 명세 6.2 FinancialCase·입력 7개 테이블, Enum 9종, RLS |
 | `0005_claims_and_consents.sql` | 적용 완료 | 명세 6.3 Claim·revision·처리 동의, `0004`의 직접 DELETE 구멍 Forward-fix |
-| `0006_execution_registry.sql` | 미적용 | 명세 6.8 정책·Agent·Tool·Allowlist Registry 4개 표, `tool_transport` Enum, Worker 읽기 정책 |
-| `0007_source_knowledge_base.sql` | 미적용 | 명세 6.5·6.8 Source Snapshot·조회 사건·KB Release·문서·Chunk·`vector(1024)` Embedding·공식 채널 10개 표, `authority_level`·`freshness_status` Enum |
+| `0006_execution_registry.sql` | 적용 완료 | 명세 6.8 정책·Agent·Tool·Allowlist Registry 4개 표, `tool_transport` Enum, Worker 읽기 정책 |
+| `0007_source_knowledge_base.sql` | 적용 완료 | 명세 6.5·6.8 Source Snapshot·조회 사건·KB Release·문서·Chunk·`vector(1024)` Embedding·공식 채널 10개 표, `authority_level`·`freshness_status` Enum |
+| `0008_worker_extensions_usage.sql` | 미적용 | `finshield_worker` 에 `extensions` 스키마 USAGE. 0007 검증에서 Worker 의 pgvector 연산자 접근이 거부되는 것을 발견해 Forward-fix |
