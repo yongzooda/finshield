@@ -11,7 +11,7 @@
 // ============================================================
 import { createHash } from "node:crypto";
 
-export const FORMULA_VERSION = "source-snapshot-two-api-cross-check-v4";
+export const FORMULA_VERSION = "source-snapshot-two-api-cross-check-v5";
 export const PRODUCT_NAME = "햇살론15";
 export const FSC_ENDPOINT = "https://apis.data.go.kr/1160100/service/GetSmallLoanFinanceInstituteInfoService/getOrdinaryFinanceInfo";
 export const KINFA_ENDPOINT = "https://apis.data.go.kr/B553701/LoanProductHandlingAgencyInfoService/getLoanProductHandlingAgencyInfo";
@@ -35,15 +35,17 @@ export const DECLARED_DEV_TRAFFIC_LIMIT = 10000;
 export const PAGE_SIZE = 100;
 export const MAX_PAGES = 20;
 export const REQUEST_INTERVAL_MS = 300;
-export const REQUEST_TIMEOUT_MS = 15_000;
+export const REQUEST_TIMEOUT_MS = 30_000;
 // GitHub-hosted 실행 환경에서 apis.data.go.kr 연결이 간헐적으로 connect timeout 을 낸다
 // (run 33969726695·33970360398·33970408558). 응답을 받기 전의 연결 계층 오류만 제한 재시도한다.
 // HTTP 오류·결과 코드·본문 오류는 재시도하지 않는다. 지연 측정 합격선이 없으므로 측정을 왜곡하지 않는다.
 export const CONNECT_ATTEMPTS = 3;
 export const CONNECT_RETRY_DELAYS_MS = Object.freeze([3_000, 6_000]);
 const CONNECT_ERROR_CODES = new Set(["UND_ERR_CONNECT_TIMEOUT", "UND_ERR_SOCKET", "ECONNRESET", "ECONNREFUSED", "ENOTFOUND", "EAI_AGAIN", "ETIMEDOUT"]);
-export const isConnectError = (error) => error instanceof TypeError
-  && (CONNECT_ERROR_CODES.has(error?.cause?.code) || /Connect|Socket|Timeout/.test(String(error?.cause?.name ?? "")));
+// 응답을 받기 전의 요청 전체 timeout(AbortSignal, name TimeoutError)도 같은 부류로 본다 (run 33970777514).
+export const isConnectError = (error) => (error instanceof TypeError
+  && (CONNECT_ERROR_CODES.has(error?.cause?.code) || /Connect|Socket|Timeout/.test(String(error?.cause?.name ?? ""))))
+  || error?.name === "TimeoutError";
 export const GUIDE_MARKERS = Object.freeze({
   hotline: "1397",
   no_broker_fee: "수수료를 요구하지 않",
@@ -164,12 +166,13 @@ export const buildSnapshot = ({ authority, sourceType, officialId, officialUrl, 
 
 const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
 
-// 연결 계층 오류만 재시도한다. 재시도 횟수는 관측값에 남긴다.
-export const fetchWithConnectRetry = async (fetchImpl, url, init, sleepImpl = sleep) => {
+// 연결 계층 오류만 재시도한다. 재시도 횟수는 관측값에 남긴다. AbortSignal 은 한 번 울리면
+// 다시 쓸 수 없으므로 시도마다 init 을 새로 만든다.
+export const fetchWithConnectRetry = async (fetchImpl, url, makeInit, sleepImpl = sleep) => {
   let retries = 0;
   for (let attempt = 1; ; attempt += 1) {
     try {
-      const response = await fetchImpl(url, init);
+      const response = await fetchImpl(url, typeof makeInit === "function" ? makeInit() : makeInit);
       return { response, retries };
     } catch (error) {
       if (!isConnectError(error) || attempt >= CONNECT_ATTEMPTS) throw error;
@@ -183,7 +186,7 @@ export const fetchEnvelope = async ({ fetchImpl, endpoint, params, apiKey, sleep
   const url = buildRequestUrl(endpoint, params, apiKey);
   const startedAt = performance.now();
   const { response, retries } = await fetchWithConnectRetry(fetchImpl, url,
-    { method: "GET", signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS), redirect: "error" }, sleepImpl);
+    () => ({ method: "GET", signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS), redirect: "error" }), sleepImpl);
   const latencyMs = Math.round(performance.now() - startedAt);
   const contentType = (response.headers.get("content-type") ?? "").toLowerCase();
   const text = await response.text();
@@ -248,7 +251,7 @@ export const fetchAllPages = async ({ fetchImpl, endpoint, params, apiKey, progr
 export const fetchOfficialPage = async ({ fetchImpl, url, role, sleepImpl = sleep }) => {
   const startedAt = performance.now();
   const { response, retries } = await fetchWithConnectRetry(fetchImpl, url,
-    { method: "GET", headers: { ...PAGE_REQUEST_HEADERS }, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS), redirect: "follow" }, sleepImpl);
+    () => ({ method: "GET", headers: { ...PAGE_REQUEST_HEADERS }, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS), redirect: "follow" }), sleepImpl);
   const text = await response.text();
   const title = text.match(/<title>([\s\S]*?)<\/title>/i)?.[1]?.replace(/\s+/g, " ").trim() ?? null;
   return {
