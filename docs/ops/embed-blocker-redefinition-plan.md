@@ -62,7 +62,7 @@ v3는 시나리오 가족 24개(gate 20, development 4), 문서 168개, 질의 1
 ### 3단계 — 재측정과 채택
 
 5. `B-MODEL-01` 재실행과 별도 채택 PR. run `33883439885`을 PR #52로 채택해 완료했다.
-6. 재정의된 `B-EMBED-01` 새 평가셋 실행과 채택.
+6. 재정의된 `B-EMBED-01` 새 평가셋 실행과 채택. v3 실행(run `33954521524`)은 Metadata Filter를 거치지 않아 사전등록한 구성을 재지 못했고 홀드아웃이 소모됐다. 결과와 원인은 [실패 분석](provider-embed-failure-analysis.md)에 남겼다. v4로 다시 만든다.
 7. component blocker 실행과 채택.
 
 ## 4. 수용식 초안

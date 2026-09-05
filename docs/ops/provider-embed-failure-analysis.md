@@ -180,3 +180,49 @@ main `2ec62abcb32322e6956e53efdfee62f1f712bb7c`에서 run `33877345188`, job `10
 - Provider·차원·검색 계약을 바꾸려면 ADR 변경과 Evidence 영향 검토를 먼저 한다.
 - 새 성능 선택은 새 시나리오 가족의 미측정 평가셋과 수용식을 사전등록한 뒤에만 측정한다.
 - 이 분석은 `B-EMBED-01`을 `NOT-EVALUATED`로, Implementation Gate를 `NO-GO`로 유지한다.
+
+## v3 실행 (2026-09-05, run `33954521524`)
+
+재정의한 `B-EMBED-01`을 v3 평가셋으로 측정했고 미달했다. 결과를 먼저 적는다.
+
+| 항목 | 기준 | 실측 |
+|---|---|---|
+| 관련 unit Recall@20 | `= 1.00` | `0.902` |
+| 위험 핵심 unit Recall@20 | `= 1.00` | `1.00` |
+| 전량 회수 질문 | 100 | 69 |
+| Query Provider P95 | `≤ 1,500ms` | `113ms` |
+| 비용 | — | USD 0.0012 |
+
+slice로 나누면 원인이 분명하다. 단일 근거 질문 20개는 Recall 1.00이고 모든 정답을
+담는 데 필요한 최대 k가 4였다. 다중 항목 질문 80개가 0.877이다. 후보 풀 2,000칸 중
+같은 가족 문서는 564칸(28%)이고 나머지는 다른 가족의 비슷한 한국어 금융 문장이
+차지했다. 놓친 49칸은 `송금 후 회수`, `이자 절감`, `정책금융 가점`, `공식 확인 경로`
+처럼 질문의 중심 주제에서 먼 주변부 facet에 몰렸다.
+
+### 이 실행은 사전등록한 구성이 아니다
+
+`retrieval-blocker-preregistration.md` 3절은 Vector 단계의 입력을 `Filter를 통과한
+문서`로 정하고, 5.2·5.3은 문서에 `institution_code`·`product_code`·`effective_from`·
+`effective_to`·`authority_level`·`source_fingerprint`·`channel_type`을, 질문에
+`target_institution_code`·`target_product_code`·`as_of_date`를 두도록 정했다.
+
+v3 fixture에는 이 필드가 하나도 없었다. v2 스키마를 그대로 따랐기 때문이다. 그래서
+harness가 Metadata Filter 없이 전체 168 unit에 대고 벡터 검색을 돌렸다. 제품이 쓰지
+않을 구성이다.
+
+따라서 `B-EMBED-01`은 `FAIL`이 아니라 `NOT-EVALUATED`를 유지한다. 사전등록한 구성을
+재지 않았으므로 Provider의 실패로 귀속할 수 없다.
+
+### 그래도 남는 관측
+
+이 측정은 `필터 없는 전체 corpus 벡터 검색` 기준선으로는 유효하다. `AI-006`이
+`Vector 유사도만으로 사실을 확정하지 않는다`고 정한 이유를 숫자로 뒷받침한다.
+주제가 균질한 corpus에서 다중 항목 질문의 1차 회수는 임베딩 단독으로 보장되지
+않는다.
+
+### 대가와 후속
+
+`assertUnmeasuredGate`가 fixture blob SHA로 재사용을 차단하므로 v3 홀드아웃은
+소모됐다. 합격선을 낮추지 않고 v4를 새로 만든다. v4는 사전등록 5.2·5.3 필드를
+갖추고 harness가 Filter 단계를 실제로 거친다. v3 fixture와 이 결과는 지우지 않고
+이력으로 보존한다.

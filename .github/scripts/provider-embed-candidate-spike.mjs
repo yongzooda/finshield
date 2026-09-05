@@ -10,7 +10,8 @@
 // ============================================================
 import { createHash } from "node:crypto";
 import {
-  CANDIDATE_POOL_K, FORMULA_VERSION, loadCandidateFixtures, scoreCandidatePools,
+  CANDIDATE_POOL_K, FORMULA_VERSION, loadCandidateFixtures, passesMetadataFilter,
+  scoreCandidatePools,
 } from "./provider-embed-candidate-evaluation.mjs";
 import {
   createEmbedPacer, cosineSimilarity, percentile, requestEmbeddings, MODEL_ID, DIMENSION,
@@ -18,7 +19,7 @@ import {
 
 export { FIXTURE_PATH, loadCandidateFixtures } from "./provider-embed-candidate-evaluation.mjs";
 
-export const FIXTURE_SET = "finshield-korean-finance-embed-v3";
+export const FIXTURE_SET = "finshield-korean-finance-embed-v4";
 export const DOCUMENT_BATCH_SIZE = 96;
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
 
@@ -41,19 +42,26 @@ export const exactKnnPool = (queryVector, documents, poolK = CANDIDATE_POOL_K) =
   }).slice(0, poolK);
 };
 
+// AI-007 은 단계별 후보 수를 Trace 에 남기도록 요구한다. Filter 통과 문서 수를
+// query 별로 기록해 후보 공간이 실제로 좁혀졌는지 감사할 수 있게 한다.
 export const evaluateCandidateGeneration = ({ queries, documentVectors, queryVectors }) => {
   if (queries.length !== queryVectors.length) throw new Error("Query fixtures and vectors must align.");
   const knnLatencies = [];
+  const filterRows = [];
   const rows = queries.map((query, index) => {
     const startedAt = performance.now();
-    const ranking = exactKnnPool(queryVectors[index], documentVectors)
+    const filtered = documentVectors.filter((document) => passesMetadataFilter(document, query));
+    if (filtered.length === 0) throw new Error("Metadata filter produced an empty candidate space.");
+    const ranking = exactKnnPool(queryVectors[index], filtered)
       .map(({ id, unit_id, score }) => ({ document_id: id, unit_id, score }));
     knnLatencies.push(Math.round((performance.now() - startedAt) * 1000) / 1000);
+    filterRows.push({ query_id: query.id, filtered_candidates: filtered.length });
     return { query_id: query.id, ranking };
   });
   return {
     ...scoreCandidatePools({ queries, documents: documentVectors, rows }),
     rows,
+    filterRows,
     knnLatencies,
     exactKnnP95Ms: percentile(knnLatencies, 0.95),
   };
@@ -84,7 +92,7 @@ export const runCandidateSpike = async ({
       fetchImpl, apiKey, texts: batch.map((item) => item.text), inputType: "search_document", pacer,
     });
     response.vectors.forEach((vector, index) => documentVectors.push({
-      id: batch[index].id, unit_id: batch[index].unit_id, vector,
+      ...batch[index], vector, text: undefined,
     }));
     documentBatches.push({ input_count: batch.length, billed_input_tokens: response.billedInputTokens });
     requestIds.push(response.requestId);
@@ -140,7 +148,10 @@ export const runCandidateSpike = async ({
         risk_queries: queries.filter((query) => query.risk_critical).length,
       },
       quality: evaluation.quality,
-      retrieval: { rows: evaluation.rows, counts: evaluation.counts, slices: evaluation.slices },
+      retrieval: {
+        rows: evaluation.rows, counts: evaluation.counts,
+        slices: evaluation.slices, filter_rows: evaluation.filterRows,
+      },
       samples: { queries: querySamples, documents: documentBatches },
       latency: {
         query_samples: queryLatencies.length,
