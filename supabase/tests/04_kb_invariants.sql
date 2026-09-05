@@ -257,6 +257,14 @@ begin
   select count(*) into n from kb.knowledge_chunks where search_vector @@ to_tsquery('simple', '설명의무를');
   if n <> 1 then raise exception 'Worker 가 KB 를 검색하지 못했습니다 (%)', n; end if;
   raise notice '  허용 확인: Worker 가 KB 를 검색한다';
+  -- pgvector 연산자·타입은 extensions 스키마에 있다. Worker 에게 USAGE 가 없으면
+  -- 운영에서 Vector 검색이 통째로 막힌다. 운영 프로젝트에서 실제로 겪었다.
+  select count(*) into n from kb.knowledge_embeddings
+   -- 영벡터는 cosine 거리가 NaN 이라 비교가 항상 거짓이다. 0 이 아닌 벡터로 묻는다.
+   where embedding operator(extensions.<=>)
+         (select ('[' || string_agg('0.01', ',') || ']')::extensions.vector from generate_series(1, 1024)) < 2;
+  if n <> 1 then raise exception 'Worker 가 Vector 검색을 하지 못했습니다 (%)', n; end if;
+  raise notice '  허용 확인: Worker 가 pgvector Exact KNN 을 실행한다';
   perform fstest.expect_ok($sql$
     insert into kb.source_fetch_events (source_snapshot_id, source_adapter, request_key, outcome, freshness_status, retrieved_at)
     values ('00000000-0000-4000-8000-00000000c001', 'law_api', 'LAW-001/worker', 'UNCHANGED', 'FRESH', now())

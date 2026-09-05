@@ -56,12 +56,24 @@ const run = async () => {
          and c.relnamespace::regnamespace::text = any(${TRACKED_SCHEMAS})`;
     console.log(`테이블 ${tables[0].total}개, 제약 ${constraints.length}건, digest ${constraintDigest(constraints.map((r) => r.definition)).slice(0, 16)}`);
 
+    // 인덱스 정의도 같은 방식으로 잰다. 정렬은 서버가 아니라 여기서 한다.
+    // 서버 ORDER BY 는 locale 을 타서 같은 집합도 digest 가 달라진다.
+    // pg_get_indexdef 는 search_path 에 있는 이름을 생략하므로 고정한다.
+    const indexes = await sql.begin(async (tx) => {
+      await tx.unsafe("set local search_path = pg_catalog");
+      return tx`
+        select indexdef
+          from pg_indexes
+         where schemaname = any(${TRACKED_SCHEMAS})`;
+    });
+    console.log(`인덱스 ${indexes.length}개, digest ${constraintDigest(indexes.map((r) => r.indexdef)).slice(0, 16)}`);
+
     const rls = await sql`
       select c.relnamespace::regnamespace || '.' || c.relname as name,
              c.relrowsecurity as enabled, c.relforcerowsecurity as forced
         from pg_class c
        where c.relkind = 'r'
-         and c.relnamespace::regnamespace::text in ('public', 'private')`;
+         and c.relnamespace::regnamespace::text = any(${TRACKED_SCHEMAS})`;
     for (const row of rls) {
       if (!row.enabled || !row.forced) failures.push(`RLS 미적용: ${row.name}`);
     }
