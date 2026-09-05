@@ -460,7 +460,8 @@ Check는 Image/PDF의 `size_bytes`, Image `page_count=1`, PDF `page_count<=10`, 
 | `id` | `uuid PK` | 임시 Storage 객체 ID |
 | `owner_id`, `case_id`, `case_input_id` | `uuid NN`, 복합 FK | 소유 입력 |
 | `bucket_id` | `text NN check = 'finshield-quarantine'` | Private Bucket |
-| `object_path` | `text NN UQ` | `<owner>/<case>/<input>/<random>.<safe_ext>` |
+| `object_path` | `text NN UQ` | `<owner>/<case>/<input>/<random>.<safe_ext>`, CHECK로 강제 |
+| `slot_state`, `uploaded_at` | `text NN check in (OPEN,UPLOADED,CLOSED)`, `timestamptz` | one-use upload slot. `OPEN`인 본인 slot 경로에만 `storage.objects` INSERT 정책이 허용하고 서버가 객체를 확인하면 `UPLOADED`, 업로드 없이 닫히면 `CLOSED` |
 | `safe_extension` | `text NN check in (jpg,jpeg,png,pdf)` | 서버 검증 확장자 |
 | `encryption_state` | `text NN check in (UNKNOWN,VERIFIED,FAILED)` | Provider at-rest 암호화 확인 상태 |
 | `access_blocked_at` | `timestamptz` | 삭제 요청 즉시 Signed URL 발급 차단 |
@@ -1208,7 +1209,7 @@ Release를 Publish하면 Release, Release Source, Document, Chunk, Embedding과 
 | `case_input_id` | `uuid` | 입력 범위, 해당 시 복합 FK |
 | `target_type` | `text NN` | `INPUT_OBJECT|OCR_ARTIFACT|CASE_EMBEDDING` |
 | `target_id` | `uuid NN` | 삭제 뒤에도 Job이 살아 있도록 의도적으로 FK를 두지 않는 대상 ID |
-| `reason_code` | `text NN` | `CLAIM_CONFIRMED|USER_STOPPED|CASE_DELETED|TTL_EXPIRED` |
+| `reason_code` | `text NN` | `CLAIM_CONFIRMED|USER_STOPPED|CASE_DELETED|TTL_EXPIRED|OBJECT_MISSING` (마지막은 Sweeper가 메타데이터만 남은 경우 부재를 기록) |
 | `status` | `text NN` | `QUEUED|RUNNING|SUCCEEDED|FAILED` |
 | `idempotency_key` | `text NN UQ` | 동일 객체·이유 중복 방지 |
 | `lease_token`, `leased_until`, `heartbeat_at` | `uuid`/`timestamptz` | Worker fencing |
@@ -1497,7 +1498,7 @@ Public Bucket은 만들지 않는다. PreCase Production Bucket을 참조하지 
 
 ## 10.2 객체 Key와 업로드
 
-- Key는 `<owner_uuid>/<case_uuid>/<random_uuid>.<server_validated_ext>`다.
+- Key는 `<owner_uuid>/<case_uuid>/<input_uuid>/<random_uuid>.<server_validated_ext>`다. `private.input_objects`의 CHECK가 이 구성을 강제한다.
 - 사용자 파일명·이메일·전화·상품명·원본 Hash를 Key나 Metadata에 넣지 않는다.
 - Upsert·Overwrite를 허용하지 않는다. 재업로드는 새 Random ID다.
 - 서버가 Auth·Case Owner·삭제 상태·파일 제한을 확인한 뒤 단일 객체용 Signed upload를 발급한다.

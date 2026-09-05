@@ -105,6 +105,26 @@ const run = async () => {
       }
     }
     console.log("finshield_worker 회원 테이블 접근 거부 확인");
+
+    // Storage: Private Bucket 두 개, 회원 정책은 본인 slot INSERT 하나뿐, postgres 는 bypassrls.
+    const buckets = await sql`select * from private.storage_preflight()`;
+    for (const b of buckets) if (b.is_public) failures.push(`Bucket 이 public 이다: ${b.bucket_id}`);
+    if (!buckets.some((b) => b.bucket_id === "finshield-quarantine" && Number(b.file_size_limit) === 10485760)) {
+      failures.push("finshield-quarantine Bucket 이 없거나 10 MiB 상한이 아니다");
+    }
+    if (buckets.some((b) => b.bucket_id === "finshield-exports")) failures.push("P0 에 finshield-exports Bucket 이 있다");
+    const storagePolicies = await sql`
+      select policyname, cmd, roles::text[] as roles
+        from pg_policies where schemaname = 'storage' and tablename = 'objects'`;
+    const memberPolicies = storagePolicies.filter((p) => p.roles.some((r) => r === "anon" || r === "authenticated"));
+    for (const p of memberPolicies) {
+      if (!(p.policyname === "finshield_quarantine__insert_open_slot" && p.cmd === "INSERT" && !p.roles.includes("anon"))) {
+        failures.push(`회원에게 열린 storage.objects 정책: ${p.policyname} (${p.cmd})`);
+      }
+    }
+    const bypass = await sql`select rolbypassrls or rolsuper as ok from pg_roles where rolname = 'postgres'`;
+    if (!bypass[0]?.ok) failures.push("postgres 역할이 storage.objects 부재 확인에 필요한 bypassrls 가 없다");
+    console.log(`Storage Bucket ${buckets.length}개, 회원 objects 정책 ${memberPolicies.length}건, postgres bypassrls ${bypass[0]?.ok}`);
   } finally {
     await sql.end({ timeout: 5 });
   }
