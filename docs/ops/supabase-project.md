@@ -184,3 +184,4 @@ node supabase/tests/verify-remote.mjs
 | `0002_revoke_default_function_grants.sql` | 적용 완료 | `0001`이 빠뜨린 함수 기본 권한을 회수했다 |
 | `0003_profiles.sql` | 적용 완료 | 명세 6.1 계정·금융 프로필 3개 테이블과 RLS |
 | `0004_financial_cases.sql` | 적용 완료 | 명세 6.2 FinancialCase·입력 7개 테이블, Enum 9종, RLS |
+| `0005_claims_and_consents.sql` | 미적용 | 명세 6.3 Claim·revision·처리 동의, `0004`의 직접 DELETE 구멍 Forward-fix |
