@@ -13,7 +13,8 @@
 // ============================================================
 import { fileURLToPath } from "node:url";
 import {
-  CANDIDATE_POOL_K, FORMULA_VERSION, loadCandidateFixtures, scoreCandidatePools,
+  CANDIDATE_POOL_K, FORMULA_VERSION, loadCandidateFixtures, passesMetadataFilter,
+  scoreCandidatePools,
 } from "./provider-embed-candidate-evaluation.mjs";
 import { DOCUMENT_BATCH_SIZE, FIXTURE_SET } from "./provider-embed-candidate-spike.mjs";
 import { percentile } from "./provider-embed-spike.mjs";
@@ -52,19 +53,36 @@ export const validateEmbedEvidenceResult = (result, fail) => {
   if (!exactKeys(dataset, ["formula_version", "fixture_set", "split", "families", "documents",
     "queries", "hard_negative_documents", "hard_negative_queries", "risk_queries"])
     || dataset.formula_version !== FORMULA_VERSION || dataset.fixture_set !== FIXTURE_SET
-    || dataset.split !== "gate" || dataset.families !== 20 || dataset.documents !== 168
-    || dataset.queries !== 100 || dataset.hard_negative_documents !== 40
+    || dataset.split !== "gate" || dataset.families !== 20 || dataset.documents !== 240
+    || dataset.queries !== 100 || dataset.hard_negative_documents !== 100
     || dataset.hard_negative_queries !== 100 || dataset.risk_queries !== 30) {
-    fail("B-EMBED-01 v3 평가 split·산식·표본 계약 불일치.");
+    fail("B-EMBED-01 v4 평가 split·산식·표본 계약 불일치.");
   }
 
   try {
-    if (!exactKeys(retrieval, ["rows", "counts", "slices"])) throw new Error("schema");
+    if (!exactKeys(retrieval, ["rows", "counts", "slices", "filter_rows"])) throw new Error("schema");
     const recalculated = scoreCandidatePools({
       queries, documents: fixtures.documents, rows: retrieval.rows,
     });
     if (!same(quality, recalculated.quality) || !same(retrieval.counts, recalculated.counts)
       || !same(retrieval.slices, recalculated.slices)) throw new Error("recalculation");
+    // Filter 단계를 실제로 거쳤는지 다시 계산한다. 후보가 Filter 를 통과하지
+    // 않은 문서에서 나왔다면 측정한 구성이 사전등록한 구성이 아니다.
+    const expectedFilter = queries.map((query) => ({
+      query_id: query.id,
+      filtered_candidates: fixtures.documents.filter((document) =>
+        passesMetadataFilter(document, query)).length,
+    }));
+    if (!same(retrieval.filter_rows, expectedFilter)) throw new Error("filter recalculation");
+    const unitToDocument = new Map(fixtures.documents.map((document) => [document.unit_id, document]));
+    for (const row of retrieval.rows) {
+      const query = queries.find((item) => item.id === row.query_id);
+      for (const hit of row.ranking) {
+        if (!passesMetadataFilter(unitToDocument.get(hit.unit_id), query)) {
+          throw new Error("unfiltered candidate");
+        }
+      }
+    }
     // 전체 평균이 1.00 이어도 slice 를 따로 확인한다. 나중에 산식이 바뀌어
     // 평균만 보게 되는 회귀를 막는다.
     for (const slice of recalculated.slices) {
