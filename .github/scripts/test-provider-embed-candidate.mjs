@@ -13,9 +13,11 @@ import { fileURLToPath } from "node:url";
 import {
   CANDIDATE_POOL_K, COVERAGE_TAGS, DOCUMENTS_PER_FAMILY, FIXTURE_PATH, FORMULA_VERSION,
   expandCandidateFixtures, loadCandidateFixtures, passesMetadataFilter, scoreCandidatePools,
+  summarizeCaseUnions,
 } from "./provider-embed-candidate-evaluation.mjs";
 import { FIXTURE_PATH as V2_FIXTURE_PATH } from "./provider-embed-evaluation.mjs";
 const V3_FIXTURE_PATH = ".github/fixtures/provider-embed-v3.json";
+const V4_FIXTURE_PATH = ".github/fixtures/provider-embed-v4.json";
 import { runCandidateSpike } from "./provider-embed-candidate-spike.mjs";
 import { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
 
@@ -33,14 +35,16 @@ const fixtures = loadCandidateFixtures(root);
 const gate = fixtures.queries.filter((query) => query.split === "gate");
 const development = fixtures.queries.filter((query) => query.split === "development");
 
-assert.equal(FORMULA_VERSION, "filtered-candidate-pool-unit-recall-v4");
+assert.equal(FORMULA_VERSION, "claim-level-filtered-candidate-pool-unit-recall-v5");
 assert.equal(CANDIDATE_POOL_K, 20);
 assert.equal(fixtures.documents.length, 24 * DOCUMENTS_PER_FAMILY);
 assert.equal(gate.length, 100);
 assert.equal(development.length, 20);
 assert.equal(gate.filter((query) => query.risk_critical).length, 30);
-assert.equal(gate.filter((query) => query.relevant_unit_ids.length === 1).length, 20);
-assert.equal(gate.filter((query) => query.relevant_unit_ids.length === 5).length, 80);
+// 모든 Claim 은 단일 사실 질의다. 참·거짓 각 30 이상이 사전등록 7절의 표본이다.
+assert.ok(gate.every((query) => query.relevant_unit_ids.length >= 1));
+assert.ok(gate.filter((query) => query.truth === "TRUE").length >= 30);
+assert.ok(gate.filter((query) => query.truth === "FALSE").length >= 30);
 assert.ok(new Set(gate.flatMap((query) => query.hard_negative_unit_ids)).size >= 40);
 for (const tag of COVERAGE_TAGS) assert.ok(gate.some((query) => query.coverage.includes(tag)), tag);
 
@@ -56,34 +60,33 @@ assert.ok(gate.every((query) => !devFamilies.has(query.family)));
 // 재사용하지 않는다는 약속을 코드로 확인한다.
 const previousFamilies = new Set();
 const previousTexts = new Set();
-for (const path of [V2_FIXTURE_PATH, V3_FIXTURE_PATH]) {
+for (const path of [V2_FIXTURE_PATH, V3_FIXTURE_PATH, V4_FIXTURE_PATH]) {
   const previous = JSON.parse(readFileSync(resolve(root, path), "utf8"));
   for (const item of previous.cases) {
     previousFamilies.add(item.id);
     for (const doc of item.documents) previousTexts.add(doc.text.normalize("NFKC"));
-    for (const query of item.queries) previousTexts.add(query.text.normalize("NFKC"));
+    for (const query of item.queries ?? item.claims ?? []) previousTexts.add(query.text.normalize("NFKC"));
   }
 }
 assert.ok(raw.cases.every((item) => !previousFamilies.has(item.id)), "이미 측정한 가족 재사용");
-const v4Texts = raw.cases.flatMap((item) => [
+const v5Texts = raw.cases.flatMap((item) => [
   ...item.documents.map((doc) => doc.text.normalize("NFKC")),
-  ...item.queries.map((query) => query.text.normalize("NFKC")),
+  ...item.claims.map((claim) => claim.text.normalize("NFKC")),
 ]);
-assert.ok(v4Texts.every((value) => !previousTexts.has(value)), "이미 측정한 문장 재사용");
+assert.ok(v5Texts.every((value) => !previousTexts.has(value)), "이미 측정한 문장 재사용");
 
 // Filter 는 정답을 제외하지 않고, 다중 항목 질의의 후보 공간은 풀보다 크다.
 for (const query of gate) {
   const kept = fixtures.documents.filter((document) => passesMetadataFilter(document, query));
   const keptUnits = new Set(kept.map((document) => document.unit_id));
   assert.ok(query.relevant_unit_ids.every((id) => keptUnits.has(id)), "Filter 가 정답을 제외");
-  if (query.relevant_unit_ids.length > 1) {
-    assert.ok(kept.length > CANDIDATE_POOL_K, "Filter 뒤 후보 공간이 풀 이하");
-  }
+  assert.ok(kept.length > CANDIDATE_POOL_K, "Filter 뒤 후보 공간이 풀 이하");
 }
 
 // ---- 2. fixture 변형 거부 ----
-rejects((f) => { f.schema_version = 3; }, /preregistration schema/);
-rejects((f) => { f.fixture_set = "finshield-korean-finance-embed-v3"; }, /preregistration schema/);
+rejects((f) => { f.schema_version = 4; }, /preregistration schema/);
+rejects((f) => { f.fixture_set = "finshield-korean-finance-embed-v4"; }, /preregistration schema/);
+rejects((f) => { delete f.query_policy; }, /preregistration schema/);
 rejects((f) => { delete f.filter_policy; }, /preregistration schema/);
 // Filter 를 무력화하는 변형. 대상 제약을 지우면 후보 공간이 전체 corpus 가 된다.
 rejects((f) => {
@@ -101,12 +104,17 @@ rejects((f) => {
   gateCase.documents[0].effective_to = "2025-01-01";
 }, /invalid document/);
 rejects((f) => {
-  for (const item of f.cases) for (const query of item.queries) query.target_product_code = item.documents[0].product_code;
+  for (const item of f.cases) for (const claim of item.claims) claim.target_product_code = item.documents[0].product_code;
 }, /filtered candidate space must exceed the pool/);
+// 거짓 Claim 을 전부 참으로 바꾸면 핵심 시험이 사라진다.
+rejects((f) => {
+  for (const item of f.cases) for (const claim of item.claims) if (claim.truth === "FALSE") claim.truth = "TRUE";
+}, /truth mix/);
+rejects((f) => { f.cases[0].claims[0].truth = "MAYBE"; }, /claim schema/);
 rejects((f) => { f.status = "measured"; }, /preregistration schema/);
 rejects((f) => { f.cases.pop(); }, /preregistration schema/);
 rejects((f) => { f.cases[0].documents.pop(); }, /scenario schema/);
-rejects((f) => { f.cases[0].queries.pop(); }, /scenario schema/);
+rejects((f) => { f.cases[0].claims.pop(); }, /scenario schema/);
 rejects((f) => { f.cases[1].id = f.cases[0].id; }, /family overlap/);
 rejects((f) => { f.cases[0].coverage = ["not_a_tag"]; }, /scenario schema/);
 rejects((f) => { f.cases[0].documents[1].text = f.cases[0].documents[0].text; }, /duplicate text/);
@@ -117,17 +125,17 @@ rejects((f) => { f.cases[0].documents[0].evidence_unit = "other-1"; }, /invalid 
 // 가장 쉬운 방법이므로 반드시 거부해야 한다.
 rejects((f) => {
   const risky = f.cases.find((item) => item.risk_critical);
-  risky.queries[0].critical_units = [];
+  risky.claims[0].critical_units = [];
 }, /critical subset violation/);
 
 // 관련 unit 을 hard negative 로도 표시하면 채점이 무의미해진다.
 rejects((f) => {
   const item = f.cases[0];
-  item.queries[0].hard_negative_units = [item.queries[0].relevant_units[0], "u7"];
+  item.claims[0].hard_negative_units = [item.claims[0].relevant_units[0], "u7"];
 }, /qrel contradiction/);
 
 // hard negative 를 지우면 어려운 오답이 사라져 합격이 쉬워진다.
-rejects((f) => { f.cases[0].queries[0].hard_negative_units = ["u6"]; }, /qrel contradiction/);
+rejects((f) => { f.cases[0].claims[0].hard_negative_units = ["u6"]; }, /qrel contradiction/);
 
 // 표본 수를 줄이는 변형.
 rejects((f) => {
@@ -137,14 +145,10 @@ rejects((f) => {
 rejects((f) => {
   const risky = f.cases.find((item) => item.risk_critical);
   risky.risk_critical = false;
-  for (const query of risky.queries) query.critical_units = [];
+  for (const claim of risky.claims) claim.critical_units = [];
 }, /gate sample counts/);
 
-// focused/multi 구성 변형.
-rejects((f) => {
-  const gateCase = f.cases.find((item) => item.split === "gate");
-  gateCase.queries[0].relevant_units = ["u1"];
-}, /focused\/multi-facet split/);
+
 
 // 합성 데이터 경계.
 rejects((f) => { f.cases[0].documents[0].text = "문의는 test.user@example.com 으로 보낸다."; },
@@ -176,6 +180,11 @@ const oversizedPool = (query) => {
 };
 
 // 모든 관련 unit 을 담은 완전 회수.
+// Case 합집합 요약이 가족 20개를 다룬다.
+const unionRows = summarizeCaseUnions(gate, gate.map((query) => ({ query_id: query.id, ranking: poolFor(query) })));
+assert.equal(unionRows.length, 20);
+assert.ok(unionRows.every((row) => row.union_recall === 1 && row.union_pool_size <= CANDIDATE_POOL_K * 5));
+
 const perfect = scoreCandidatePools({
   queries: gate, documents: docs,
   rows: gate.map((query) => ({ query_id: query.id, ranking: poolFor(query) })),
@@ -183,6 +192,7 @@ const perfect = scoreCandidatePools({
 assert.equal(perfect.quality.recall_at_pool, 1);
 assert.equal(perfect.quality.risk_core_recall_at_pool, 1);
 assert.equal(perfect.quality.queries_fully_covered, 100);
+assert.equal(perfect.quality.case_union_recall, 1);
 assert.equal(perfect.quality.pool_k, 20);
 assert.ok(perfect.quality.worst_minimum_k <= 5);
 
@@ -259,7 +269,7 @@ assert.ok(withNegatives.counts.every((row, index) =>
 
 // slice 는 focused/multi, 가족, coverage 를 모두 나눠 보여준다.
 const sliceNames = new Set(perfect.slices.map((slice) => slice.slice));
-assert.ok(sliceNames.has("focused") && sliceNames.has("multi_facet"));
+assert.ok(sliceNames.has("truth:TRUE") && sliceNames.has("truth:FALSE"));
 assert.ok(COVERAGE_TAGS.every((tag) => sliceNames.has(`coverage:${tag}`)));
 assert.equal(perfect.slices.filter((slice) => slice.slice.startsWith("family:")).length, 20);
 
@@ -311,7 +321,10 @@ assert.ok(spike.observations.retrieval.filter_rows.every((row) => row.filtered_c
 assert.equal(spike.observations.quality.recall_at_pool, 1);
 assert.equal(spike.observations.quality.risk_core_recall_at_pool, 1);
 assert.equal(spike.observations.quality.queries_fully_covered, 100);
-assert.equal(spike.observations.dataset.fixture_set, "finshield-korean-finance-embed-v4");
+assert.equal(spike.observations.dataset.fixture_set, "finshield-korean-finance-embed-v5");
+assert.equal(spike.observations.retrieval.case_unions.length, 20);
+assert.equal(spike.observations.quality.case_union_recall, 1);
+assert.ok(spike.observations.dataset.true_claims >= 30 && spike.observations.dataset.false_claims >= 30);
 assert.equal(spike.observations.usage.provider_requests, 103);
 assert.equal(spike.observations.usage.embedded_inputs, 340);
 
@@ -353,7 +366,11 @@ for (const mutate of [
   (r) => { r.observations.usage.calculated_cost_usd += 1; },
   (r) => { r.environment.fixture_set_hash = "0".repeat(64); },
   (r) => { r.observations.dataset.split = "development"; },
-  (r) => { r.observations.dataset.fixture_set = "finshield-korean-finance-embed-v3"; },
+  (r) => { r.observations.dataset.fixture_set = "finshield-korean-finance-embed-v4"; },
+  (r) => { r.observations.quality.case_union_recall = 0.99; },
+  (r) => { r.observations.retrieval.case_unions[0].union_recall = 0; },
+  (r) => { r.observations.retrieval.case_unions.pop(); },
+  (r) => { r.observations.dataset.false_claims = 29; },
   (r) => { r.observations.retrieval.filter_rows[0].filtered_candidates += 1; },
   (r) => { r.observations.retrieval.filter_rows.pop(); },
 ]) {

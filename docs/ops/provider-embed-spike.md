@@ -7,7 +7,7 @@
 - 이 문서는 검토된 harness의 실행 계약이다. workflow 성공만으로 `PASS`가 되지 않는다.
 - 실제 개인정보·운영 문서·사용자 입력은 사용하지 않는다. 버전 고정 합성 한국어 금융 Fixture만 외부 Provider로 전송한다.
 - 기존 `B-MODEL-01` Evidence scope를 보존하기 위해 SDK와 `.env.example`을 변경하지 않고 Node 24 native `fetch`로 Cohere v2 API를 호출한다.
-- v1은 평가 의미 결함으로 폐기했다. v2는 gate를 측정해 결과를 봤고 그 뒤 blocker를 재정의했으므로 재사용하지 않는다. v3은 Metadata Filter 없이 측정해 사전등록한 구성을 재지 못했고 홀드아웃이 소모됐다. 새 실행은 v4만 허용하며 v2·v3 결과와 harness는 이력으로 보존한다. [정답 검토·산식·서비스 품질 평가 경계](quality-evaluation-plan.md)를 함께 따른다. ADR의 수치 합격선과 Gate 상태는 변경하지 않는다.
+- v1은 평가 의미 결함으로 폐기했다. v2는 gate를 측정해 결과를 봤고 그 뒤 blocker를 재정의했으므로 재사용하지 않는다. v3은 Metadata Filter 없이 측정해 사전등록한 구성을 재지 못했다. v4는 사전등록 구성에서 Recall@20 0.970으로 미달했다. ADR 15.1에 따라 질의 단위를 Claim으로 바꿨고 새 실행은 v5만 허용한다. v2·v3·v4 결과와 harness는 이력으로 보존한다. [정답 검토·산식·서비스 품질 평가 경계](quality-evaluation-plan.md)를 함께 따른다. ADR의 수치 합격선과 Gate 상태는 변경하지 않는다.
 
 ## 사전 고정 계약
 
@@ -18,9 +18,10 @@
 | Embedding | `float`, 1024차원 |
 | 거리 / 검색 | cosine / Metadata Filter 통과 문서에 대한 Exact KNN, unit 중복 제거 후 후보 풀 20, 의미 라벨을 담지 않은 unit ID tie-break |
 | Filter | 대상 기관 일치, 대상 상품이 지정되면 일치, `as_of_date`가 문서 유효 구간 안. 제약 없는 축은 거르지 않는다 |
-| Fixture | v4: 24가족·240문서·120질문. Gate 20가족 100질문, 개발용 4가족 20질문. Gate hard-negative unit 100개. v1·v2·v3과 가족 이름·문장이 겹치지 않는다 |
-| 후보 공간 | 다중 항목 질문은 Filter 뒤 42개 문서가 남는다. 후보 풀 20보다 커야 계약이 성립하며 계약 검사가 이를 강제한다 |
-| 합격선 | 후보 풀 20 안의 관련 unit Recall = 1.00, 위험 핵심 unit Recall = 1.00, Query Provider P95 ≤ 1,500ms |
+| Fixture | v5: 24가족·240문서·120 Claim. Gate 20가족 100 Claim(참 ≥30·거짓 ≥30), 개발용 4가족 20 Claim. Gate hard-negative unit 100개. v1~v4와 가족 이름·문장이 겹치지 않는다 |
+| 질의 단위 | Claim 하나. 거짓 Claim의 관련 unit은 그것을 반박하는 문서다. Case 풀은 Claim 5개 풀의 합집합이며 크기를 원장에 남긴다 |
+| 후보 공간 | 모든 Claim에서 Filter 뒤 42개 문서가 남는다. 후보 풀 20보다 커야 계약이 성립하며 계약 검사가 이를 강제한다 |
+| 합격선 | Claim별 후보 풀 20 관련 unit Recall = 1.00, Case 합집합 Recall = 1.00, 위험 핵심 unit Recall = 1.00, Query Provider P95 ≤ 1,500ms |
 | 범위 | 1차 후보 생성만 평가한다. 대상·시점 판별과 최종 top 5 품질은 `B-RETRIEVAL-01`이 종단으로 측정한다 |
 | 위험 핵심 Query | 선입금·원격제어·기관사칭·인증정보·공식채널·중개수수료 30개 |
 | Recall@5 | 질문별 `(top 5 관련 unit 수 / 전체 관련 unit 수)`의 평균, `>= 0.90` |

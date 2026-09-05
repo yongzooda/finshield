@@ -62,7 +62,7 @@ if (!/^[0-9a-f]{40}$/.test(codeSha ?? "") || codeSha !== workflowSha || !reposit
 const requirements = readAtCommit("docs/02-integrated-requirements.md");
 const adr = readAtCommit("docs/adr/001-p0-provider-stack.md");
 const scopePaths = [
-  ".github/fixtures/provider-embed-v4.json",
+  ".github/fixtures/provider-embed-v5.json",
   ".github/scripts/provider-embed-candidate-evaluation.mjs",
   ".github/scripts/provider-embed-candidate-spike.mjs",
   ".github/scripts/provider-embed-evaluation.mjs",

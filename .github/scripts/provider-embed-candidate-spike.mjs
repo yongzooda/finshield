@@ -19,7 +19,7 @@ import {
 
 export { FIXTURE_PATH, loadCandidateFixtures } from "./provider-embed-candidate-evaluation.mjs";
 
-export const FIXTURE_SET = "finshield-korean-finance-embed-v4";
+export const FIXTURE_SET = "finshield-korean-finance-embed-v5";
 export const DOCUMENT_BATCH_SIZE = 96;
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
 
@@ -146,11 +146,14 @@ export const runCandidateSpike = async ({
         hard_negative_documents: new Set(queries.flatMap((query) => query.hard_negative_unit_ids)).size,
         hard_negative_queries: queries.filter((query) => query.hard_negative_unit_ids.length > 0).length,
         risk_queries: queries.filter((query) => query.risk_critical).length,
+        true_claims: queries.filter((query) => query.truth === "TRUE").length,
+        false_claims: queries.filter((query) => query.truth === "FALSE").length,
       },
       quality: evaluation.quality,
       retrieval: {
         rows: evaluation.rows, counts: evaluation.counts,
         slices: evaluation.slices, filter_rows: evaluation.filterRows,
+        case_unions: evaluation.unions,
       },
       samples: { queries: querySamples, documents: documentBatches },
       latency: {
