@@ -37,6 +37,7 @@
 - [x] `B-EMBED-01` v2 실패 원인 분해와 개발용 split 전체 순위 측정
 - [x] 검색 blocker를 `AI-007` 파이프라인에 맞춰 1차 후보 생성과 종단 Retrieval로 재정의
 - [x] 재정의 뒤 `B-MODEL-01` main Live Evidence 재측정과 재채택
+- [x] 재정의된 `B-EMBED-01` 을 v4 평가셋으로 main 에서 측정. `FAIL`(Recall@20 0.97). ADR 15.1 에 따라 최적화·범위 변경·Provider 변경 중 하나를 ADR 변경으로 결정해야 한다
 - [x] FinShield 전용 Anthropic Workspace 키로 `B-MODEL-01` 재측정과 채택
 - [x] `.env.example`을 PreCase 복사본에서 FinShield 기준으로 재작성
 - [x] FinShield 전용 Supabase 프로젝트 생성과 Migration 기준선 전환
