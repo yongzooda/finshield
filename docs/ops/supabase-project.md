@@ -197,3 +197,4 @@ node supabase/tests/verify-remote.mjs
 | `0008_worker_extensions_usage.sql` | 미적용 | `finshield_worker` 에 `extensions` 스키마 USAGE. 0007 검증에서 Worker 의 pgvector 연산자 접근이 거부되는 것을 발견해 Forward-fix |
 | `0009_runs_and_manifests.sql` | 미적용 | 명세 6.8·6.4·6.3 실행 Manifest 와 구성 Join·Event, `verification_runs`, `verification_run_claims`, `financial_cases.latest_successful_run_id` FK 보완. Run 상태 전이 함수는 예산·Outbox 뒤 |
 | `0010_agent_tool_evidence.sql` | 미적용 | 명세 6.4·6.5 Agent·Tool 실행 Trace, Retrieval 단계, Case Source, Evidence, 최종 Claim, Claim·Evidence 관계 9개 표. Manifest·Allowlist·Provenance·Evidence Policy Trigger |
+| `0011_results_and_passports.sql` | 미적용 | 명세 6.4·6.5 축 결과·행동 가이드·채널 Join·Evidence Passport 4개 표, `financial_cases.latest_passport_id` FK 보완. 원시 URL·전화번호·Manifest 불일치·유효기간 밖 채널을 Trigger 로 차단 |
