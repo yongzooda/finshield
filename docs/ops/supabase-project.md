@@ -171,6 +171,10 @@ node supabase/tests/verify-remote.mjs
 
 추적 범위는 손으로 나열하지 않고 `public`·`private`·`kb`·`demo` 네 스키마의 모든 일반 테이블로 잡는다. `0005` 적용 직후 목록이 낡아 세 테이블을 빼고 재는 일이 실제로 있었다.
 
+## 주의할 점
+
+- `pgvector` 연산자(`<=>` 등)는 `extensions` 스키마에 있다. Supabase 가 만든 역할은 `search_path` 에 `extensions` 가 들어 있지만 `finshield_worker` 와 로컬 Stub 역할은 그렇지 않다. 서버 함수와 RPC 는 `operator(extensions.<=>)` 처럼 완전 수식하고 `search_path` 에 기대지 않는다. `04_kb_invariants.sql` 이 이 규칙을 시험한다.
+
 ## 현재 미해결
 
 - `B-SUPABASE-01`은 통과하지 않았다. 남은 업무 테이블은 명세 6.3~6.10 이고, Storage 정책과 main 실행 증거 harness 가 아직 없다. 제약·RLS positive/negative 시험은 `supabase/tests/`에 있고 로컬에서 111건이 통과한다. 운영 프로젝트는 `verify-remote.mjs` Preflight 만 통과한 상태다. 증거로 채택하려면 같은 시험을 실제 프로젝트 DSN 으로 main 에서 실행해야 한다.
@@ -188,3 +192,4 @@ node supabase/tests/verify-remote.mjs
 | `0004_financial_cases.sql` | 적용 완료 | 명세 6.2 FinancialCase·입력 7개 테이블, Enum 9종, RLS |
 | `0005_claims_and_consents.sql` | 적용 완료 | 명세 6.3 Claim·revision·처리 동의, `0004`의 직접 DELETE 구멍 Forward-fix |
 | `0006_execution_registry.sql` | 미적용 | 명세 6.8 정책·Agent·Tool·Allowlist Registry 4개 표, `tool_transport` Enum, Worker 읽기 정책 |
+| `0007_source_knowledge_base.sql` | 미적용 | 명세 6.5·6.8 Source Snapshot·조회 사건·KB Release·문서·Chunk·`vector(1024)` Embedding·공식 채널 10개 표, `authority_level`·`freshness_status` Enum |
