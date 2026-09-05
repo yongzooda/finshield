@@ -45,8 +45,15 @@ docker exec "$CONTAINER" psql -U postgres -c "create database $DB" >/dev/null
 echo "== Migration 적용 =="
 psql_apply < "$ROOT/supabase/tests/00_supabase_stub.sql" >/dev/null
 echo "  ✓ 00_supabase_stub.sql"
+# Migration 적용도 실패를 삼키지 않는다. 시험 단계와 같은 이유다.
 for file in "$ROOT"/supabase/migrations/*.sql; do
-  psql_apply < "$file" >/dev/null
+  status=0
+  output="$(psql_apply < "$file" 2>&1)" || status=$?
+  if [ "$status" -ne 0 ]; then
+    echo "  ✗ $(basename "$file") 적용 실패"
+    printf '%s\n' "$output" | grep -vE "^ *$" | tail -8
+    exit 1
+  fi
   echo "  ✓ $(basename "$file")"
 done
 

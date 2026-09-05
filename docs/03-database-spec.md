@@ -638,7 +638,7 @@ PK는 `(verification_run_id, claim_id)`다. 선택한 Material Claim은 `claim_r
 | `error_code`, `reason_code` | `text` | 실패·보류 이유 |
 | `created_at` | `timestamptz NN` | 생성 시각 |
 
-`UQ(verification_run_id, logical_agent_key, attempt_no)`를 둔다. Orchestrator, Domain Agent, CoVe, Red Team, Evidence Judge, Action Guide를 서로 다른 `logical_agent_key`로 기록한다. Terminal 상태가 된 행은 수정하지 않는다.
+`UQ(verification_run_id, logical_agent_key, attempt_no)`를 둔다. Orchestrator, Domain Agent, CoVe, Red Team, Evidence Judge, Action Guide를 서로 다른 `logical_agent_key`로 기록한다. Terminal 상태가 된 행은 수정하지 않는다. `(agent_code, agent_version)`은 `private.agent_definitions`를 복합 FK로 참조하고, INSERT 시 Trigger가 그 Agent가 Run의 Manifest에 같은 `logical_agent_key`로 고정돼 있는지 확인한다. `tool_runs`도 같은 방식으로 Registry FK와 Manifest·Allowlist Trigger를 둔다. `VERIFIED|CONTRADICTED`의 Evidence 관계 검증은 Deferred Constraint Trigger가 Commit 시점에 수행한다.
 
 ### `public.agent_run_claims`
 
