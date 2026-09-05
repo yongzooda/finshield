@@ -1122,7 +1122,7 @@ Release를 Publish하면 Release, Release Source, Document, Chunk, Embedding과 
 | `content_hash` | `text NN check 64 hex` | 불변 Hash |
 | `created_at` | `timestamptz NN` | 생성 시각 |
 
-`UQ(knowledge_document_id, chunk_no)`와 `UQ(id, kb_release_id)`를 둔다. `(knowledge_document_id, kb_release_id)` 복합 FK로 다른 Release의 Document·Chunk 조합을 거부한다. 문서 개정은 Chunk UPDATE가 아니라 새 Document version과 새 Chunk를 만든다.
+`UQ(knowledge_document_id, chunk_no)`와 `UQ(id, kb_release_id)`를 둔다. `(knowledge_document_id, kb_release_id)` 복합 FK로 다른 Release의 Document·Chunk 조합을 거부한다. 문서 개정은 Chunk UPDATE가 아니라 새 Document version과 새 Chunk를 만든다. `search_vector`는 `chunk_text`에서 `simple` 구성으로 생성하는 Stored 컬럼이다. 한국어 형태소 사전이 없는 Postgres에서 결정적으로 재현되는 구성이며, 형태소 품질 보완은 제목·기관명 Trigram과 Vector 단계가 맡는다.
 
 ### `kb.knowledge_embeddings`
 
@@ -1133,7 +1133,7 @@ Release를 Publish하면 Release, Release Source, Document, Chunk, Embedding과 
 | `model_id`, `model_version` | `text NN` | 정확한 Embedding 모델 |
 | `dimensions` | `integer NN check >0` | 차원 검증 |
 | `distance_metric` | `text NN` | Index Metric |
-| `embedding` | `vector(N) NN` | N은 Spike에서 승인한 정수와 동일 |
+| `embedding` | `vector(N) NN` | N은 Spike에서 승인한 정수와 동일. P0는 `vector(1024)`이며 `(kb_release_id, model_id, model_version, dimensions)` 복합 FK로 Release 선언과 일치시킨다 |
 | `content_hash` | `text NN check 64 hex` | 입력 Chunk Hash |
 | `created_at` | `timestamptz NN` | 생성 시각 |
 
