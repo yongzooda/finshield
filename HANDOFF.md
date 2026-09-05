@@ -8,7 +8,7 @@
 - 상위 기획: `docs/01-product-plan.md`
 - DB 구현 기준: `docs/03-database-spec.md`
 - Provider Stack ADR: `docs/adr/001-p0-provider-stack.md`
-- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — 20개 blocker가 모두 미해제다. `B-MODEL-01`은 세 번 합격했으나 Claim 단위 검색 ADR 변경으로 채택이 무효가 되어 재측정 대기다. `GO` 전환에는 Claim 판정 품질 평가셋 사전등록도 필요하다.
+- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`만 `PASS`이고 나머지 19개가 미해제다. `GO` 전환에는 Claim 판정 품질 평가셋 사전등록도 필요하다.
 - Product Release Gate (`N-QLT-009`): `NOT-EVALUATED` — P0 기능 구현 뒤 평가한다. Claim 판정 품질 `B-CLAIM-01`을 포함해 4개다.
 - 배포: Vercel `finshield` Production 연결 완료 (`https://finshield-gamma.vercel.app`)
 - 기존 PreCase 저장소·배포: 유지
@@ -40,7 +40,7 @@
 - [x] 재정의된 `B-EMBED-01` 을 v4 평가셋으로 main 에서 측정. `FAIL`(Recall@20 0.97)
 - [x] ADR 15.1 미달 규칙에 따라 최적화를 선택. 검색 단위를 사용자 문단에서 Claim 하나로 바꿨다. 합격선·풀 크기·Filter 계약은 그대로다. 측정 뒤 재구성이라는 사실을 제출 문서에 명시한다
 - [ ] Claim 단위 v5 평가셋과 harness, `B-EMBED-01` 재측정
-- [ ] `B-MODEL-01` 재측정과 재채택
+- [x] `B-MODEL-01` 재측정과 재채택 (run `33956322908`)
 - [x] FinShield 전용 Anthropic Workspace 키로 `B-MODEL-01` 재측정과 채택
 - [x] `.env.example`을 PreCase 복사본에서 FinShield 기준으로 재작성
 - [x] FinShield 전용 Supabase 프로젝트 생성과 Migration 기준선 전환
@@ -71,7 +71,7 @@
 - DB 명세가 확정됐다는 사실은 Migration·RLS·Storage Policy가 구현·적용됐거나 P0 기능이 작동한다는 뜻이 아니다.
 - Provider ADR의 Architecture Decision이 승인됐다는 사실은 Implementation 또는 Product Release Gate 통과를 뜻하지 않는다.
 - 공개 `/api/mcp`는 P0에서 GET·OPTIONS·POST 모두 404 `MCP_DISABLED`로 차단하며, 기존 MCP protocol 구현은 P1 재검증 전까지 외부 route에서 사용하지 않는다.
-- Anthropic Sonnet 5의 auth·quota·schema·strict tool·지연·비용은 FinShield 전용 Workspace 키로 `B-MODEL-01` 범위에서 세 번 Live 검증됐으나 ADR 변경으로 채택이 무효라 재측정한다. 무효가 된 이전 run `33783765337`·`33883439885`의 결과 파일도 이력으로 보존한다. Cohere `embed-v4.0`, CLOVA OCR, 공공데이터·법제처 API는 아직 Live 검증되지 않았다.
+- Anthropic Sonnet 5의 auth·quota·schema·strict tool·지연·비용은 FinShield 전용 Workspace 키로 `B-MODEL-01` 범위에서 Live 검증됐다. 무효가 된 이전 run 세 건의 결과 파일도 이력으로 보존한다. 무효가 된 이전 run `33783765337`·`33883439885`의 결과 파일도 이력으로 보존한다. Cohere `embed-v4.0`, CLOVA OCR, 공공데이터·법제처 API는 아직 Live 검증되지 않았다.
 - 전용 FinShield Supabase Project·RLS·authenticated TUS one-use slot·24시간 물리 삭제와 Vercel Workflow Replay·Fencing은 아직 검증되지 않았다.
 - 법제처는 등록 도메인 `Referer`를 대조한다. 동적 egress IP는 차단 사유가 아니지만 배포 도메인이 바뀌면 재등록이 필요하므로 request-time Live 조회를 기본값으로 두지 않고 공식 Snapshot 수집 경로를 검증한다.
 - Vercel Function region은 `vercel.json`의 `regions`로 `icn1`(서울)에 고정한다. Supabase 프로젝트가 `ap-northeast-2`라 기본값 `iad1`이면 DB 왕복마다 태평양을 건넌다. Hobby는 단일 region까지 허용한다.
