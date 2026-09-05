@@ -30,10 +30,14 @@ const validatorPath = ".github/scripts/validate-provider-stack-adr.mjs";
 const fixturePaths = [
   validatorPath,
   ".github/fixtures/provider-embed-v2.json",
+  ".github/fixtures/provider-embed-v3.json",
   ".github/fixtures/provider-model-v1.json",
   ".github/scripts/provider-adr-digest.mjs",
   ".github/scripts/provider-embed-policy.mjs",
   ".github/scripts/provider-embed-evaluation.mjs",
+  ".github/scripts/provider-embed-candidate-evaluation.mjs",
+  ".github/scripts/provider-embed-candidate-spike.mjs",
+  ".github/scripts/test-provider-embed-candidate.mjs",
   ".github/scripts/test-provider-embed-spike.mjs",
   ".github/scripts/provider-embed-spike.mjs",
   ".github/scripts/provider-evidence.mjs",
@@ -446,9 +450,9 @@ for (const trustedAPathMismatch of [
 {
   const metricErrors = [];
   validateEmbedEvidenceResult({ observations: {
-    contract: { model_id: "embed-v4.0", dimension: 1024, metric: "cosine", document_input_type: "search_document", query_input_type: "search_query", embedding_type: "float", knn: "exact" },
-    dataset: { formula_version: "query-macro-unit-recall-v2", fixture_set: "finshield-korean-finance-embed-v2", split: "gate", families: 20, documents: 168, queries: 100, hard_negative_documents: 40, hard_negative_queries: 100, risk_queries: 30 },
-    quality: { top_k: 5, recall_at_5: 0.89, risk_core_recall_at_5: 1, precision_at_5: 0.8 },
+    contract: { model_id: "embed-v4.0", dimension: 1024, metric: "cosine", document_input_type: "search_document", query_input_type: "search_query", embedding_type: "float", knn: "exact", pool_k: 20 },
+    dataset: { formula_version: "candidate-pool-unit-recall-v3", fixture_set: "finshield-korean-finance-embed-v3", split: "gate", families: 20, documents: 168, queries: 100, hard_negative_documents: 40, hard_negative_queries: 100, risk_queries: 30 },
+    quality: { pool_k: 20, recall_at_pool: 0.99, risk_core_recall_at_pool: 1, queries_fully_covered: 99, queries_total: 100, worst_minimum_k: 5 },
     retrieval: { rows: [], counts: [], slices: [] },
     samples: { queries: [], documents: [] },
     latency: { query_samples: 100, query_p50_ms: 500, query_p95_ms: 1400, exact_knn_samples: 100, exact_knn_p95_ms: 2 },
@@ -466,8 +470,8 @@ for (const trustedAPathMismatch of [
     official_text_input_limit_per_minute: 2000,
     request_interval_ms: 1100,
   } }, (message) => metricErrors.push(message));
-  if (!metricErrors.some((message) => message.includes("Recall@5"))) {
-    throw new Error("embedding recall below 0.90 must be rejected");
+  if (!metricErrors.some((message) => message.includes("후보 풀 20"))) {
+    throw new Error("후보 풀 회수 1.00 미만은 거부돼야 한다");
   }
 }
 
@@ -547,7 +551,9 @@ expectFail(
 
 for (const [name, path] of [
   ["trusted embed workflow changes invalidate its policy pin", ".github/workflows/provider-embed-evidence.yml"],
-  ["trusted embed fixture changes invalidate its policy pin", ".github/fixtures/provider-embed-v2.json"],
+  ["trusted embed fixture changes invalidate its policy pin", ".github/fixtures/provider-embed-v3.json"],
+  ["trusted candidate evaluation changes invalidate its policy pin", ".github/scripts/provider-embed-candidate-evaluation.mjs"],
+  ["trusted candidate spike changes invalidate its policy pin", ".github/scripts/provider-embed-candidate-spike.mjs"],
   ["trusted embed evaluation changes invalidate its policy pin", ".github/scripts/provider-embed-evaluation.mjs"],
   ["trusted embed harness changes invalidate its policy pin", ".github/scripts/run-provider-embed-evidence.mjs"],
   ["trusted embed policy changes invalidate its policy pin", ".github/scripts/provider-embed-policy.mjs"],

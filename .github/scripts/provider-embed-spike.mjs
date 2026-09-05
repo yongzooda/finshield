@@ -102,7 +102,7 @@ export const buildEmbedRequest = (texts, inputType) => {
   };
 };
 
-const parseEmbedResponse = async (response, expectedCount) => {
+export const parseEmbedResponse = async (response, expectedCount) => {
   if (response.status !== 200 || !(response.headers.get("content-type") ?? "").toLowerCase().includes("application/json")) {
     throw Object.assign(new Error("Provider embed request did not return JSON HTTP 200."), {
       status: response.status,
@@ -123,7 +123,7 @@ const parseEmbedResponse = async (response, expectedCount) => {
   return { vectors, billedInputTokens, requestId };
 };
 
-const requestEmbeddings = async ({ fetchImpl, apiKey, texts, inputType, pacer }) => {
+export const requestEmbeddings = async ({ fetchImpl, apiKey, texts, inputType, pacer }) => {
   // Workload pacing is not Provider response latency; never retry a failed sample.
   await pacer.wait();
   const startedAt = performance.now();

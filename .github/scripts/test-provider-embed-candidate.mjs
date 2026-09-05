@@ -15,6 +15,8 @@ import {
   expandCandidateFixtures, loadCandidateFixtures, scoreCandidatePools,
 } from "./provider-embed-candidate-evaluation.mjs";
 import { FIXTURE_PATH as V2_FIXTURE_PATH } from "./provider-embed-evaluation.mjs";
+import { runCandidateSpike } from "./provider-embed-candidate-spike.mjs";
+import { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const clone = (value) => JSON.parse(JSON.stringify(value));
@@ -227,3 +229,132 @@ assert.ok(COVERAGE_TAGS.every((tag) => sliceNames.has(`coverage:${tag}`)));
 assert.equal(perfect.slices.filter((slice) => slice.slice.startsWith("family:")).length, 20);
 
 console.log("B-EMBED-01 재정의 평가 계약 시험을 통과했습니다.");
+
+// ---- 4. harness 와 정책 (Live 호출 없음) ----
+// 결정적 가짜 벡터로 Provider 를 대신한다. 관련 unit 은 질의와 가깝게, hard
+// negative 는 그 다음, 나머지는 멀게 배치해 후보 풀 동작만 검사한다.
+const DIMENSION = 1024;
+const unitAxis = new Map([...new Set(docs.map((doc) => doc.unit_id))].map((unitId, index) => [unitId, index]));
+const unitVector = (unitId) => {
+  const vector = new Array(DIMENSION).fill(0.001);
+  vector[unitAxis.get(unitId) % DIMENSION] = 1;
+  return vector;
+};
+const queryVector = (query) => {
+  const vector = new Array(DIMENSION).fill(0.001);
+  for (const unitId of query.relevant_unit_ids) vector[unitAxis.get(unitId) % DIMENSION] = 1;
+  for (const unitId of query.hard_negative_unit_ids) vector[unitAxis.get(unitId) % DIMENSION] = 0.6;
+  return vector;
+};
+const vectorFor = new Map([
+  ...docs.map((doc) => [doc.text, unitVector(doc.unit_id)]),
+  ...gate.map((query) => [query.text, queryVector(query)]),
+]);
+
+let requests = 0;
+let virtualClock = 0;
+const pacer = { async wait() { virtualClock += 1100; requests += 0; } };
+const fakeFetch = async (url, options) => {
+  requests += 1;
+  assert.equal(url, "https://api.cohere.com/v2/embed");
+  assert.match(options.headers.Authorization, /^Bearer sk-test-not-real/);
+  const request = JSON.parse(options.body);
+  assert.equal(request.model, "embed-v4.0");
+  assert.equal(request.output_dimension, DIMENSION);
+  return new Response(JSON.stringify({
+    id: `synthetic-request-${requests}`,
+    embeddings: { float: request.texts.map((text) => vectorFor.get(text)) },
+    meta: { billed_units: { input_tokens: request.texts.length * 10 } },
+  }), { status: 200, headers: { "content-type": "application/json" } });
+};
+
+const spike = await runCandidateSpike({ root, apiKey: "sk-test-not-real-key", fetchImpl: fakeFetch, pacer });
+assert.equal(requests, 102);
+assert.equal(spike.observations.contract.pool_k, CANDIDATE_POOL_K);
+assert.equal(spike.observations.quality.recall_at_pool, 1);
+assert.equal(spike.observations.quality.risk_core_recall_at_pool, 1);
+assert.equal(spike.observations.quality.queries_fully_covered, 100);
+assert.equal(spike.observations.dataset.fixture_set, "finshield-korean-finance-embed-v3");
+assert.equal(spike.observations.usage.provider_requests, 102);
+assert.equal(spike.observations.usage.embedded_inputs, 268);
+
+const result = {
+  observations: spike.observations,
+  environment: {
+    node_version: "v24.4.1", region: "github-hosted", fixture_set_hash: fixtures.fixtureSetHash,
+    pricing_snapshot_date: "2026-09-04", pricing_source: "https://cohere.com/pricing",
+    transport: "native-fetch", provider_request_ids_hash: spike.providerRequestIdsHash,
+    api_version: "v2", official_text_input_limit_per_minute: 2000, request_interval_ms: 1100,
+  },
+};
+const errorsFor = (candidate) => {
+  const errors = [];
+  validateEmbedEvidenceResult(candidate, (message) => errors.push(message));
+  return errors;
+};
+assert.deepEqual(errorsFor(result), []);
+
+for (const mutate of [
+  (r) => { r.observations.quality.recall_at_pool = 0.99; },
+  (r) => { r.observations.quality.risk_core_recall_at_pool = 0.99; },
+  (r) => { r.observations.quality.queries_fully_covered = 99; },
+  (r) => { r.observations.quality.worst_minimum_k = CANDIDATE_POOL_K + 1; },
+  (r) => { r.observations.contract.pool_k = 50; },
+  (r) => { r.observations.retrieval.rows.pop(); },
+  (r) => { r.observations.retrieval.rows[1] = r.observations.retrieval.rows[0]; },
+  (r) => { r.observations.retrieval.rows[0].ranking[0].document_id = "unknown"; },
+  (r) => { r.observations.retrieval.rows[0].ranking[1] = r.observations.retrieval.rows[0].ranking[0]; },
+  (r) => { r.observations.retrieval.rows[0].ranking[0].score = Number.NaN; },
+  (r) => { r.observations.retrieval.rows[0].ranking[0].prompt = "must reject extra data"; },
+  (r) => { r.observations.retrieval.counts[0].relevant_hits = 999; },
+  (r) => { r.observations.retrieval.slices[0].recall_at_pool = 0; },
+  (r) => { r.observations.samples.queries[0].billed_input_tokens += 1; },
+  (r) => { r.observations.samples.queries[1].query_id = r.observations.samples.queries[0].query_id; },
+  (r) => { r.observations.samples.documents[0].input_count += 1; },
+  (r) => { r.observations.latency.query_p95_ms = 1501; },
+  (r) => { r.observations.contract.dimension = 768; },
+  (r) => { r.observations.usage.calculated_cost_usd += 1; },
+  (r) => { r.environment.fixture_set_hash = "0".repeat(64); },
+  (r) => { r.observations.dataset.split = "development"; },
+  (r) => { r.observations.dataset.fixture_set = "finshield-korean-finance-embed-v2"; },
+]) {
+  const broken = structuredClone(result);
+  mutate(broken);
+  assert.ok(errorsFor(broken).length > 0, "정책이 변형을 통과시켰습니다");
+}
+
+// 원장을 올바르게 다시 계산해도 합격선을 못 넘으면 실패해야 한다. 집계값이나
+// ID 정렬 순서를 실제 회수 대신 믿지 않는다.
+const missing = structuredClone(result);
+missing.observations.retrieval.rows = gate.map((query) => ({
+  query_id: query.id,
+  ranking: docs.filter((doc) => !query.relevant_unit_ids.includes(doc.unit_id))
+    .slice(0, CANDIDATE_POOL_K)
+    .map((doc, index) => ({ document_id: doc.id, unit_id: doc.unit_id, score: 0.9 - index * 0.01 })),
+}));
+const recomputed = scoreCandidatePools({
+  queries: gate, documents: docs, rows: missing.observations.retrieval.rows,
+});
+missing.observations.quality = recomputed.quality;
+missing.observations.retrieval.counts = recomputed.counts;
+missing.observations.retrieval.slices = recomputed.slices;
+assert.ok(errorsFor(missing).some((message) => message.includes("후보 풀")));
+
+// harness 오류 경로. 실패한 표본을 재시도하지 않는다.
+const noWait = { wait: async () => {} };
+await assert.rejects(runCandidateSpike({ root, apiKey: "", fetchImpl: fakeFetch, pacer: noWait }),
+  /COHERE_API_KEY/);
+let limited = 0;
+await assert.rejects(runCandidateSpike({
+  root, apiKey: "sk-test-not-real-key", pacer: noWait,
+  fetchImpl: async () => { limited += 1; return new Response("secret untrusted body", { status: 429, headers: { "retry-after": "60" } }); },
+}), (error) => error.status === 429 && error.retryAfterSeconds === 60);
+assert.equal(limited, 1);
+await assert.rejects(runCandidateSpike({
+  root, apiKey: "sk-test-not-real-key", pacer: noWait,
+  fetchImpl: async () => new Response(JSON.stringify({
+    id: "synthetic-id", embeddings: { float: [[1, 0]] }, meta: { billed_units: { input_tokens: 1 } },
+  }), { status: 200, headers: { "content-type": "application/json" } }),
+}), /dimension/);
+
+console.log("B-EMBED-01 재정의 harness·정책 시험을 통과했습니다.");

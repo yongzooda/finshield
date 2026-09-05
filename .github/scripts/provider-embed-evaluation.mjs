@@ -84,9 +84,12 @@ export const loadEmbedFixtures = (root) => {
 
 // Repository-controlled exposure guard, not an external attestation. A previous
 // dispatch consumes this byte-identical holdout even if it failed before scoring.
-export const assertUnmeasuredGate = async ({ repository, runId, attempt, fixtureBlob, readJson }) => {
+// fixturePath 기본값은 v2 다. 재정의된 blocker 는 v3 경로를 넘겨 같은 감시
+// 논리를 재사용한다. 감시 대상 파일이 하나뿐이라는 전제를 깨지 않는다.
+export const assertUnmeasuredGate = async ({ repository, runId, attempt, fixtureBlob, readJson, fixturePath = FIXTURE_PATH }) => {
   requireValue(repository === "yongzooda/finshield" && Number.isSafeInteger(runId) && runId > 0
-    && attempt === 1 && /^[0-9a-f]{40}$/.test(fixtureBlob), "holdout context or rerun");
+    && attempt === 1 && /^[0-9a-f]{40}$/.test(fixtureBlob)
+    && /^\.github\/fixtures\/provider-embed-v[0-9]+\.json$/.test(fixturePath), "holdout context or rerun");
   let checked = 0, total;
   const seenRuns = new Set();
   for (let page = 1; page <= 10; page++) {
@@ -101,7 +104,7 @@ export const assertUnmeasuredGate = async ({ repository, runId, attempt, fixture
         && /^[0-9a-f]{40}$/.test(run.head_sha), "invalid holdout history row");
       seenRuns.add(run.id);
       if (run.id >= runId) continue;
-      const previous = await readJson(`/repos/${repository}/contents/${FIXTURE_PATH}?ref=${run.head_sha}`, true);
+      const previous = await readJson(`/repos/${repository}/contents/${fixturePath}?ref=${run.head_sha}`, true);
       if (previous === null) continue; // Explicit HTTP 404: pre-v2 commits have no v2 fixture.
       requireValue(/^[0-9a-f]{40}$/.test(previous?.sha ?? ""), "invalid previous fixture provenance");
       requireValue(previous.sha !== fixtureBlob, "holdout already dispatched; new reviewed unmeasured set required");
