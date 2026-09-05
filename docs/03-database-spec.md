@@ -1028,7 +1028,7 @@ Worker는 `FOR UPDATE SKIP LOCKED`로 Job을 Claim한다. 최종화는 현재 `l
 | `config_hash` | `text NN check 64 hex` | Canonical Manifest Hash |
 | `created_at` | `timestamptz NN` | 생성 시각 |
 
-Manifest는 UPDATE하지 않고 새 버전을 추가한다. 운영 활성·폐기는 Manifest 밖의 배포 설정과 Append-only 활성화 Event로 기록해 과거 내용을 바꾸지 않는다. Run·Passport·PreCase assessment는 정확히 한 Manifest를 참조한다.
+Manifest는 UPDATE하지 않고 새 버전을 추가한다. 운영 활성·폐기는 Manifest 밖의 배포 설정과 Append-only 활성화 Event로 기록해 과거 내용을 바꾸지 않는다. Run·Passport·PreCase assessment는 정확히 한 Manifest를 참조한다. 정책 버전 다섯 개는 `private.policy_versions`의 `(policy_type, version)`을 복합 FK로 참조하고, `embedding_model`·`embedding_dimension`은 `kb_releases`의 선언과 복합 FK로 일치시킨다. 등록되지 않은 정책 버전이나 Release와 다른 Embedding 설정을 Manifest가 적을 수 없다.
 
 ### `private.policy_versions`
 
