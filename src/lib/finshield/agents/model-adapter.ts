@@ -16,6 +16,7 @@ import type { AgentModel } from "./runner";
 import type { JudgeModel } from "../orchestrator";
 import { JUDGE_SYSTEM } from "./prompts";
 import type { ToolEvidence } from "../schemas";
+import type { ClaimExtractor } from "../intake";
 
 const MAX_EXCERPT = 400;
 
@@ -118,3 +119,39 @@ export const createJudgeModel = (): JudgeModel => ({
     });
   },
 });
+
+/**
+ * Claim 추출. 마스킹된 문장에서 확인할 사실 주장을 뽑는다.
+ *
+ * 여기서 판단하지 않는다. 「무엇을 확인해야 하는가」만 남기고, 그것이 사실인지는
+ * Domain Agent 가 근거를 찾아 정한다. 사용자가 목록을 보고 고치고 확정한 뒤에야
+ * 검증이 시작된다 (CLM-003).
+ */
+export const createClaimExtractor = (): ClaimExtractor => async (maskedText) => {
+  const result = await callStructured({
+    system: `당신은 상담 내용에서 확인할 사실 주장을 뽑는다. 한국어로 답한다.
+
+지켜야 할 규칙이다.
+
+1. 문장에 실제로 있는 내용만 뽑는다. 없는 조건을 만들어 넣지 않는다.
+2. 판단하지 않는다. 사실인지 아닌지는 다른 단계가 정한다.
+3. 금리·한도·자격·기관·상품명·연락 경로처럼 확인할 수 있는 것만 뽑는다.
+4. 거래 성립에 영향이 큰 것을 MATERIAL 로 둔다. 판단이 서지 않으면 UNDETERMINED 로 둔다.
+5. 하나의 주장에 하나의 사실만 담는다. 여러 개를 한 문장에 묶지 않는다.
+6. 최대 여덟 개까지 뽑는다.`,
+    user: maskedText,
+    schema: z.object({
+      claims: z.array(z.object({
+        claim_type: z.enum(["PRODUCT_TERM", "INSTITUTION", "CHANNEL", "ELIGIBILITY", "CONDUCT", "OTHER"]),
+        statement_masked: z.string().min(1).max(400),
+        materiality: z.enum(["MATERIAL", "NON_MATERIAL", "UNDETERMINED"]),
+      })).max(8),
+    }),
+    maxTokens: 3000,
+  });
+  return result.claims.map((claim) => ({
+    claimType: claim.claim_type,
+    statementMasked: claim.statement_masked,
+    materiality: claim.materiality,
+  }));
+};
