@@ -47,6 +47,9 @@ jobs:
           fi
           test "$(git -C trusted rev-parse HEAD)" = "${WORKFLOW_HEAD_SHA}"
 
+      - name: Install trusted validator dependencies
+        run: npm --prefix trusted ci --ignore-scripts
+
       - name: Install pinned parser
         run: npm --prefix trusted/.github/fixtures/file-safety-parser ci --ignore-scripts
 
