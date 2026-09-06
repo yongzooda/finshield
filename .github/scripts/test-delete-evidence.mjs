@@ -197,7 +197,6 @@ const fakeSql = (strings, ...values) => {
       ocr_job_done: unit.ocrDeleted ? 1 : 0,
       embedding_job_done: unit.embeddingPresent ? 0 : 1,
       finished_at: unit.rawDeletedAt,
-      purged_requests: unit.caseDeleted ? 1 : 0,
     }]);
   }
   return Promise.resolve([]);
@@ -277,6 +276,7 @@ rejects("경계 이전 대상 선삭제", (o) => { o.totals.boundary_early_enque
 rejects("경계 이전 대상 소멸", (o) => { o.totals.boundary_early_objects_present = 0; });
 rejects("경계 이후 대상 잔존", (o) => { o.totals.boundary_due_deleted = 4; });
 rejects("Purge 미완료", (o) => { o.totals.purged_cases = 9; });
+rejects("Case 삭제 미확인", (o) => { const r = o.cases.find((x) => x.family === "case_deleted"); r.purge_verified = false; o.totals.unverified_purges = 1; });
 rejects("시험 흔적 잔존", (o) => { o.totals.leftover_objects_after_teardown = 1; });
 rejects("만료 경계를 시각 조작으로 만듦", (o) => { o.contract.boundary_made_by = "expires-at-update"; });
 rejects("만료 수명 변경", (o) => { o.contract.due_ttl_seconds = 1; });

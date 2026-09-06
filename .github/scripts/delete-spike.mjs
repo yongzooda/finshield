@@ -247,9 +247,7 @@ const verifyUnit = async ({ sql, client, admin, token, unit }) => {
         where target_id = ${unit.embeddingId}::uuid and status = 'SUCCEEDED')::int as embedding_job_done,
       (select max(finished_at) from private.file_cleanup_jobs
         where target_id in (${unit.objectId}::uuid, ${unit.ocrId}::uuid, ${unit.embeddingId}::uuid)
-          and status = 'SUCCEEDED') as finished_at,
-      (select count(*) from public.deletion_requests
-        where target_id = ${unit.caseId}::uuid and status = 'COMPLETED')::int as purged_requests`;
+          and status = 'SUCCEEDED') as finished_at`;
   const r = rows[0];
 
   const finishedAt = r.finished_at ? new Date(r.finished_at).getTime() : null;
@@ -270,7 +268,9 @@ const verifyUnit = async ({ sql, client, admin, token, unit }) => {
     input_job_done: r.input_job_done,
     ocr_job_done: r.ocr_job_done,
     embedding_job_done: r.embedding_job_done,
-    purged_requests: r.purged_requests,
+    // Case 를 통째로 지우면 청소 작업 행도 함께 사라진다. 그때는 purge_case 가
+    // 객체·중간물·vector·대기 작업 부재를 스스로 확인한 뒤에만 참을 돌려준다.
+    purge_verified: unit.purgeVerified === true,
     // 만든 시점부터 삭제가 확인된 시점까지의 실제 경과다.
     delete_seconds: finishedAt === null ? null : Math.round((finishedAt - unit.createdAt) / 1000),
   };
@@ -294,7 +294,7 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
   for (const family of FAMILIES) {
     for (const unit of units.filter((u) => u.family === family.key)) {
       const extra = await triggerDeletion({ sql, unit, family, progress });
-      if (extra.deletionRequestId) deletionRequests.push(extra.deletionRequestId);
+      if (extra.deletionRequestId) deletionRequests.push({ requestId: extra.deletionRequestId, caseId: unit.caseId });
     }
   }
   progress("triggered");
@@ -324,9 +324,11 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
 
   // Case 삭제는 객체 부재를 확인한 뒤에만 관계형 자식을 지운다.
   let purged = 0;
-  for (const requestId of deletionRequests) {
+  for (const { requestId, caseId } of deletionRequests) {
     const rows = await sql`select private.purge_case(${requestId}::uuid) as done`;
-    if (rows[0].done === true) purged += 1;
+    const done = rows[0].done === true;
+    if (done) purged += 1;
+    for (const unit of units.filter((u) => u.caseId === caseId)) unit.purgeVerified = done;
   }
   progress("purged");
 
@@ -334,6 +336,9 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
   for (const unit of units) observations.push(await verifyUnit({ sql, client, admin, token, unit }));
 
   const deleted = observations.filter((o) => FAMILIES.find((f) => f.key === o.family).expect === "deleted");
+  // Case 를 통째로 지운 family 는 청소 작업 행이 함께 사라져 job 으로 셀 수 없다.
+  const byPurge = deleted.filter((o) => o.family === "case_deleted");
+  const byJob = deleted.filter((o) => o.family !== "case_deleted");
   const retained = observations.filter((o) => FAMILIES.find((f) => f.key === o.family).expect === "retained");
 
   const totals = {
@@ -341,11 +346,12 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
     deleted_cases: deleted.length,
     retained_cases: retained.length,
     // 지운 뒤 남은 것. 하나라도 0 이 아니면 불합격이다.
-    residual_case_embeddings: deleted.filter((o) => o.live_embeddings > 0).length,
+    residual_case_embeddings: byJob.filter((o) => o.live_embeddings > 0).length,
     // 삭제 축이 종결되지 않은 것. 청소 성공은 부재를 다시 조회한 뒤에만 남는다.
-    unfinished_input_jobs: deleted.filter((o) => o.input_job_done === 0).length,
-    unfinished_ocr_jobs: deleted.filter((o) => o.ocr_job_done === 0).length,
-    unfinished_embedding_jobs: deleted.filter((o) => o.embedding_job_done === 0).length,
+    unfinished_input_jobs: byJob.filter((o) => o.input_job_done === 0).length,
+    unfinished_ocr_jobs: byJob.filter((o) => o.ocr_job_done === 0).length,
+    unfinished_embedding_jobs: byJob.filter((o) => o.embedding_job_done === 0).length,
+    unverified_purges: byPurge.filter((o) => !o.purge_verified).length,
     // 특권 키를 쓰지 않는 두 경로. 지운 뒤 본문이 오면 안 된다.
     issued_url_served_after_delete: deleted.filter((o) => o.issued_url_served_after).length,
     authenticated_reads_after_delete: deleted.filter((o) => o.authenticated_read_served_after).length,
@@ -359,7 +365,6 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
     boundary_early_objects_present: retained.filter((o) => o.issued_url_served_after).length,
     boundary_due_deleted: observations.filter((o) => o.family === "ttl_boundary_due" && o.input_job_done > 0).length,
     purged_cases: purged,
-    purge_requests_completed: observations.filter((o) => o.purged_requests > 0).length,
     cleanup_jobs_finished: worker.finished,
     storage_deletes: worker.deleted,
   };

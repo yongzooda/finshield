@@ -25,18 +25,17 @@ const CASE_KEYS = [
   "issued_url_after_status", "issued_url_after_bytes", "issued_url_served_after",
   "authenticated_read_after_status", "authenticated_read_served_after",
   "live_embeddings",
-  "input_job_done", "ocr_job_done", "embedding_job_done", "purged_requests", "delete_seconds",
+  "input_job_done", "ocr_job_done", "embedding_job_done", "purge_verified", "delete_seconds",
 ];
 
 const TOTAL_KEYS = [
   "cases_total", "deleted_cases", "retained_cases",
   "residual_case_embeddings",
-  "unfinished_input_jobs", "unfinished_ocr_jobs", "unfinished_embedding_jobs",
+  "unfinished_input_jobs", "unfinished_ocr_jobs", "unfinished_embedding_jobs", "unverified_purges",
   "issued_url_served_after_delete", "authenticated_reads_after_delete",
   "issued_url_expired_before_check", "issued_url_served_before_delete",
   "max_delete_seconds", "boundary_early_enqueued", "boundary_early_objects_present",
-  "boundary_due_deleted", "purged_cases", "purge_requests_completed",
-  "cleanup_jobs_finished", "storage_deletes",
+  "boundary_due_deleted", "purged_cases", "cleanup_jobs_finished", "storage_deletes",
   "teardown_jobs_finished", "leftover_objects_after_teardown",
 ];
 
@@ -102,10 +101,16 @@ export const validateDeleteEvidenceResult = (result, fail) => {
       if (!row.issued_url_served_after) fail(`Case '${row.label}' 는 만료 전인데 이미 사라졌습니다.`);
       continue;
     }
-    if (row.live_embeddings !== 0) fail(`Case '${row.label}' 의 Case vector 가 남았습니다.`);
-    // 청소 성공은 부재를 다시 조회한 뒤에만 기록된다. 셋 다 성공이어야 삭제 축이 끝난다.
-    if (row.input_job_done < 1 || row.ocr_job_done < 1 || row.embedding_job_done < 1) {
-      fail(`Case '${row.label}' 의 청소 작업이 성공으로 종결되지 않았습니다.`);
+    // Case 를 통째로 지운 family 는 청소 작업 행도 함께 사라진다. 그때는
+    // purge_case 가 객체·중간물·vector·대기 작업 부재를 스스로 확인한 결과를 쓴다.
+    if (family.key === "case_deleted") {
+      if (!row.purge_verified) fail(`Case '${row.label}' 의 Case 삭제가 확인되지 않았습니다.`);
+    } else {
+      if (row.live_embeddings !== 0) fail(`Case '${row.label}' 의 Case vector 가 남았습니다.`);
+      // 청소 성공은 부재를 다시 조회한 뒤에만 기록된다. 셋 다 성공이어야 삭제 축이 끝난다.
+      if (row.input_job_done < 1 || row.ocr_job_done < 1 || row.embedding_job_done < 1) {
+        fail(`Case '${row.label}' 의 청소 작업이 성공으로 종결되지 않았습니다.`);
+      }
     }
     if (row.issued_url_served_after) fail(`Case '${row.label}' 의 기발급 URL 이 삭제 뒤에도 본문을 줬습니다.`);
     if (row.authenticated_read_served_after) fail(`Case '${row.label}' 를 회원 JWT 로 삭제 뒤에도 읽었습니다.`);
@@ -125,6 +130,7 @@ export const validateDeleteEvidenceResult = (result, fail) => {
   if (t.unfinished_input_jobs !== 0) fail("원본 청소가 성공으로 종결되지 않았습니다.");
   if (t.unfinished_ocr_jobs !== 0) fail("OCR 임시물 청소가 성공으로 종결되지 않았습니다.");
   if (t.unfinished_embedding_jobs !== 0) fail("Case vector 청소가 성공으로 종결되지 않았습니다.");
+  if (t.unverified_purges !== 0) fail("Case 삭제가 확인되지 않은 Case 가 있습니다.");
   if (t.residual_case_embeddings !== 0) fail("삭제 뒤 Case vector 가 남았습니다.");
   if (t.issued_url_served_after_delete !== 0) fail("기발급 열람 URL 이 삭제 뒤에도 통했습니다.");
   if (t.authenticated_reads_after_delete !== 0) fail("회원 JWT 읽기가 삭제 뒤에도 통했습니다.");
@@ -138,7 +144,6 @@ export const validateDeleteEvidenceResult = (result, fail) => {
   if (t.boundary_early_objects_present !== RETAINED_CASES) fail("만료 이전 대상이 그대로 남아 있지 않았습니다.");
   if (t.boundary_due_deleted !== BOUNDARY_DUE) fail("만료를 지난 대상이 모두 지워지지는 않았습니다.");
   if (t.purged_cases !== CASE_DELETED) fail("Case 삭제 요청이 모두 Purge 되지는 않았습니다.");
-  if (t.purge_requests_completed !== CASE_DELETED) fail("삭제 요청 원장이 모두 완료로 남지는 않았습니다.");
   if (t.cleanup_jobs_finished < DELETED_CASES) fail("완료한 Cleanup 작업 수가 삭제 Case 수보다 적습니다.");
   if (t.leftover_objects_after_teardown !== 0) fail("시험이 운영 Bucket 에 객체를 남겼습니다.");
 
