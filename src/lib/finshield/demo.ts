@@ -51,11 +51,20 @@ export const allowDemo = async (sql: Sql, visitorKey: string): Promise<boolean> 
 };
 
 export const createSession = async (sql: Sql): Promise<DemoSession> => {
-  const rows = await sql`
-    select session_id, capability_token, expires_at, seed_version_id
-      from private.create_demo_session(${DEMO_SEED_CODE}, 'LIVE', interval '2 hours')`;
+  let rows;
+  try {
+    rows = await sql`
+      select session_id, capability_token, expires_at, seed_version_id
+        from private.create_demo_session(${DEMO_SEED_CODE}, 'LIVE', interval '2 hours')`;
+  } catch (error) {
+    // 승인된 Seed 가 없으면 함수가 no_data_found 로 멈춘다. 그때는 그 사실을 적는다.
+    if (String((error as { code?: string })?.code ?? "") === "P0002") {
+      throw new DemoUnavailableError("공개 Demo 자료가 아직 올라가지 않았습니다");
+    }
+    throw error;
+  }
   const row = rows[0];
-  if (!row) throw new DemoUnavailableError("Demo Seed 가 아직 올라가지 않았습니다");
+  if (!row) throw new DemoUnavailableError("공개 Demo 자료가 아직 올라가지 않았습니다");
   return {
     sessionId: row.session_id as string,
     capabilityToken: row.capability_token as string,
