@@ -15,7 +15,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { FsCard, FsChip } from "../../../fs-shell";
 import { FsLoginCard, useFsToken } from "../../../fs-session";
-import { AGENT_LABEL, CLAIM_STATE_LABEL } from "../../../fs-labels";
+import { AGENT_LABEL, AXIS_LABEL, CLAIM_STATE_LABEL, axisResultOf, overallResultOf } from "../../../fs-labels";
 
 type AgentLine = { agentCode: string; status: string; toolCalls?: number };
 type Diff = {
@@ -154,9 +154,12 @@ export function RevalidateFlow({ caseId }: { caseId: string }) {
                   <div>
                     <p className="font-bold">전체·축별 결과</p>
                     <ul className="fs-body mt-2 list-disc space-y-1 pl-5">
-                      {diff.result_changes.map((row) => (
-                        <li key={row.field}>{row.field}: {row.before} → {row.after}</li>
-                      ))}
+                      {diff.result_changes.map((row) => {
+                        const axis = row.field.startsWith("axis:") ? row.field.slice(5) : null;
+                        const label = row.field === "overall_result" ? "종합 결과" : AXIS_LABEL[axis ?? ""] ?? row.field;
+                        const value = row.field === "overall_result" ? overallResultOf : axisResultOf;
+                        return <li key={row.field}>{label}: {value(row.before).label} → {value(row.after).label}</li>;
+                      })}
                     </ul>
                   </div>
                 ) : null}
@@ -184,7 +187,8 @@ export function RevalidateFlow({ caseId }: { caseId: string }) {
                     <ul className="fs-meta mt-2 list-disc space-y-1 pl-5">
                       {diff.evidence_changes.map((row) => (
                         <li key={row.independence_key}>
-                          {row.independence_key} · {row.change === "ADDED" ? "새로 인용" : "이번에는 빠짐"}
+                          <span>{row.change === "ADDED" ? "새로 인용한 출처" : "이번에는 인용하지 않은 출처"}</span>
+                          <details className="mt-1"><summary>출처 식별 정보</summary><span className="break-all">{row.independence_key}</span></details>
                         </li>
                       ))}
                     </ul>
