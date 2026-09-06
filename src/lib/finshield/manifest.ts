@@ -19,7 +19,7 @@ export const MANIFEST_VERSION = "finshield-p0-loan-v1";
 export const SCENARIO = "LOAN" as const;
 export const SCENARIO_VERSION = "sunshine15-v1";
 
-export type AgentRole = "DOMAIN" | "EVIDENCE_JUDGE";
+export type AgentRole = "DOMAIN" | "COVE" | "RED_TEAM" | "EVIDENCE_JUDGE";
 
 export type AgentSpec = {
   agentCode: string;
@@ -65,7 +65,7 @@ export const TOOLS: readonly ToolSpec[] = Object.freeze([
 export const AGENTS: readonly AgentSpec[] = Object.freeze([
   {
     agentCode: "PRODUCT_INSTITUTION", logicalKey: "PRODUCT_INSTITUTION", role: "DOMAIN",
-    version: "p0-v1", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "product-institution-v1",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "product-institution-v1",
     required: true,
     tools: [
       { toolCode: "search_financial_product", purposeCode: "VERIFY_PRODUCT" },
@@ -75,7 +75,7 @@ export const AGENTS: readonly AgentSpec[] = Object.freeze([
   },
   {
     agentCode: "FRAUD_CHANNEL", logicalKey: "FRAUD_CHANNEL", role: "DOMAIN",
-    version: "p0-v1", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "fraud-channel-v1",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "fraud-channel-v1",
     required: true,
     tools: [
       { toolCode: "parse_url_host", purposeCode: "PARSE_URL" },
@@ -85,7 +85,7 @@ export const AGENTS: readonly AgentSpec[] = Object.freeze([
   },
   {
     agentCode: "SALES_CONDUCT", logicalKey: "SALES_CONDUCT", role: "DOMAIN",
-    version: "p0-v1", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "sales-conduct-v1",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "sales-conduct-v1",
     required: true,
     tools: [
       { toolCode: "analyze_risk_pattern", purposeCode: "ASSESS_CONDUCT" },
@@ -94,7 +94,7 @@ export const AGENTS: readonly AgentSpec[] = Object.freeze([
   },
   {
     agentCode: "REGULATION_DISPUTE", logicalKey: "REGULATION_DISPUTE", role: "DOMAIN",
-    version: "p0-v1", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "regulation-dispute-v1",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "regulation-dispute-v1",
     required: true,
     tools: [
       { toolCode: "lookup_statute", purposeCode: "LOOKUP_STATUTE" },
@@ -103,15 +103,42 @@ export const AGENTS: readonly AgentSpec[] = Object.freeze([
     ],
   },
   {
+    // 규칙 3: CoVe 는 초기 결론을 다시 읽는 self-review 가 아니다. 초기 Query 와
+    // 결론에서 분리된 검색으로 Material Claim 을 다시 확인한다. 그래서 이 Agent 는
+    // Domain Agent 의 판단을 보지 못하고 Claim 만 받는다.
+    agentCode: "COVE", logicalKey: "COVE", role: "COVE",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "cove-v1",
+    required: true,
+    tools: [
+      { toolCode: "lookup_statute", purposeCode: "RECHECK_STATUTE" },
+      { toolCode: "search_financial_product", purposeCode: "RECHECK_PRODUCT" },
+      { toolCode: "lookup_official_channel", purposeCode: "RECHECK_CHANNEL" },
+    ],
+  },
+  {
+    // 규칙 3: Red Team 은 초기 결론을 뒤집을 공식 반대 근거를 찾는다.
+    // 못 찾았다는 사실이 확인이 되지 않는다 (AI-011).
+    agentCode: "RED_TEAM", logicalKey: "RED_TEAM", role: "RED_TEAM",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "red-team-v1",
+    required: true,
+    tools: [
+      { toolCode: "lookup_statute", purposeCode: "FIND_COUNTER_STATUTE" },
+      { toolCode: "search_consumer_warning", purposeCode: "FIND_COUNTER_WARNING" },
+      { toolCode: "search_dispute_case", purposeCode: "FIND_COUNTER_DISPUTE" },
+    ],
+  },
+  {
     // AI-013: Judge 는 원문이 아니라 확인된 Claim·Evidence 구조만 본다. 그래서 Tool 이 없다.
     agentCode: "EVIDENCE_JUDGE", logicalKey: "EVIDENCE_JUDGE", role: "EVIDENCE_JUDGE",
-    version: "p0-v1", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "evidence-judge-v1",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "evidence-judge-v1",
     required: true,
     tools: [],
   },
 ]);
 
 export const DOMAIN_AGENTS = AGENTS.filter((agent) => agent.role === "DOMAIN");
+export const COVE_AGENT = AGENTS.find((agent) => agent.role === "COVE");
+export const RED_TEAM_AGENT = AGENTS.find((agent) => agent.role === "RED_TEAM");
 
 export const POLICY_VERSIONS = Object.freeze({
   promptBundleVersion: "p0-loan-prompts-v1",
