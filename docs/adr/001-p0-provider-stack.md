@@ -607,6 +607,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `EVID-SOURCE-02` | 공공데이터포털 금융위·진흥원 API key·quota·license Live Snapshot | PASS | main run `33981225371`, artifact `9973809814`. 두 API 결과 코드 `00`, serviceKey 인증 성공, 금융위 총건수 19를 1 page 로 전량 수신, 개발계정 트래픽 10,000회, 라이선스 `이용허락범위 제한 없음`(2026-09-05 확인)을 source registry 관측으로 보존. serviceKey 는 결과·로그·URL 기록에서 지움 |
 | `EVID-SOURCE-03` | Demo `햇살론15` 상품·취급기관 Snapshot | PASS | main run `33981161310`, artifact `9973794051`. 금융위 `햇살론15` 레코드 19건(기준년월 이력, 현재 기준월 `202602` 1건, 47 필드), 진흥원 취급기관 16개(상품명 join 16/16, 은행 16 대 금융위 표기 "대출협약은행 12개"), 공식 상품 페이지 200·제목·1397, 사칭 신고센터 200·1397·사칭·중개수수료 표지. 이용안내 페이지는 실행 환경에서 기본 틀만 돌려줘 수수료 미요구 문구 Snapshot 은 아직 없음 |
 | `EVID-SUPABASE-01` | 전용 Supabase Project Migration·RLS·교차 소유 거부 행렬 | STALE | main run `34024408248`, artifact `9986588536`. 격리 기준 Postgres에 Migration 17개를 적용하고 시험 14개 429건이 실패 없이 통과했다. 운영 프로젝트는 pooler 6543·`finshield_worker` 접속으로 표 81개·제약 738건·인덱스 253개의 digest 세 값이 기준 DB와 같고, RLS enable+force 81/81, `anon` 권한 잔존 0건, `private`·`kb`·`demo` 노출 0건, Worker 회원 본문 표 거부 13건, Private Bucket 2개(quarantine 10 MiB)다. 행렬은 교차 소유 거부 237건, 익명 거부 81건, 닫힌 slot 재업로드 거부 20건, 차단 객체 읽기 거부 20건, 허용되어서는 안 되는 접근 0건, 판정 불가 0건이다. scope 문서 갱신으로 무효가 된 run `34023678131` 의 결과 파일도 이력으로 보존한다 0018 이 Keyword 단계를 고치면서 증거 scope 인 Migration 이 바뀌어 무효가 됐고, 갱신된 commit 에서 재측정한다 |
+| `EVID-FILE-SAFETY-01` | Parser 이전 검사와 격리 실행 Fixture 행렬 | PASS | main run `34027891135`, artifact `9987651168`. 합성 Fixture 103건 중 위험 입력 82건이 모두 거부되고 정상 15건이 모두 통과했다. 판정 어긋남 0건, Parser 단계까지 간 실행 12건, 최장 8.3초다. 격리는 network namespace 와 Node 권한 모델을 함께 쓰며 worker 가 본 secret 형태 환경변수 0개, canary 유출 0건, network 시도 0건이다. 주입한 fault 6종이 모두 worker 안에서 끝났고 Parser 는 `pdfjs-dist` 6.3.289 를 lockfile 로 고정했다 |
 
 위 PASS는 제품 Live Vertical Slice PASS가 아니다. GitHub의 Vercel status는 build/deploy 성공을 뜻하며 Provider key·OCR·RLS·Workflow 기능 성공을 증명하지 않는다.
 
@@ -618,7 +619,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `B-EMBED-01` | Cohere Claim 단위 1차 후보 생성 Recall@20·P95·cost | PASS | §15.1 후보 생성 합격 + versioned raw metric artifact |
 | `B-RETRIEVAL-01` | Metadata Filter·Keyword FTS·Vector·Rerank 종단 top 5 품질 | NOT-EVALUATED | §15.1 종단 Retrieval 합격 + query별 단계 원장; `B-SUPABASE-01` 선행 |
 | `B-OCR-01` | PDF.js·CLOVA 한국어 숫자·부정어·기관명·URL·표 Fixture | NOT-EVALUATED | §15.1 OCR·Parser 합격 + page별 diff |
-| `B-FILE-SAFETY` | encrypted/active/polyglot/bomb·격리 parser·dependency advisory | NOT-EVALUATED | §15.1 File safety 합격 |
+| `B-FILE-SAFETY` | encrypted/active/polyglot/bomb·격리 parser·dependency advisory | PASS | §15.1 File safety 합격 |
 | `B-CONSENT-01` | OCR 동의/거절·외부 전송·삭제 격리 prototype | NOT-EVALUATED | §15.1 동의 거절 전송 0건 + 감사 row |
 | `B-STORAGE-01` | authenticated TUS·one-use slot·10 MiB·MIME/Magic Byte·cross-user/worker RLS | NOT-EVALUATED | positive/negative test와 발급 URL/token 재사용 거부 |
 | `B-DELETE-01` | 확인·중단·Case 삭제·기발급 URL·24시간 cleanup | NOT-EVALUATED | §15.1 물리 삭제 합격 + deletion ledger |
