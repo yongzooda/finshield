@@ -14,7 +14,12 @@
  */
 
 import { useRef, useState } from "react";
+import Link from "next/link";
 import { CLAIM_STATE_VIEW, FsCard, FsChip } from "../fs-shell";
+import { FsLoginCard, useFsToken } from "../fs-session";
+import {
+  AGENT_LABEL, DIRECTNESS_LABEL, FRESHNESS_LABEL, coveLabel, nextAction,
+} from "../fs-labels";
 
 type Claim = {
   claim_id: string; claim_ref: string; claim_type: string;
@@ -34,50 +39,9 @@ type ClaimResult = {
 };
 type AgentLine = { agentCode: string; status: string; findings?: number; toolCalls?: number };
 
-const AGENT_LABEL: Record<string, string> = {
-  PRODUCT_INSTITUTION: "상품·기관 확인",
-  FRAUD_CHANNEL: "사칭·접근 경로 확인",
-  SALES_CONDUCT: "설명·권유 방식 확인",
-  REGULATION_DISPUTE: "법령·분쟁 선례 확인",
-  COVE: "독립 재확인",
-  RED_TEAM: "반대 근거 찾기",
-};
-
-const FRESHNESS_LABEL: Record<string, string> = {
-  FRESH: "현행", STALE: "오래됨", UNKNOWN: "현행 여부 불명",
-};
-const DIRECTNESS_LABEL: Record<string, string> = {
-  DIRECT: "본문 직접", INDIRECT: "간접", CONTEXT_ONLY: "맥락 참고",
-};
-
-/** 결과에서 사용자가 지금 할 수 있는 일을 먼저 정한다 (RES-005). */
-function nextAction(results: ClaimResult[]): { title: string; detail: string } {
-  if (results.some((r) => r.state === "CONTRADICTED")) {
-    return {
-      title: "송금하거나 가입하기 전에 멈추세요",
-      detail: "들으신 내용과 공식 자료가 다른 항목이 있습니다. 아래에서 어떤 자료가 다르게 적고 있는지 확인하시고, 상대에게 그 근거를 요구하세요.",
-    };
-  }
-  if (results.some((r) => r.state === "CONFLICT")) {
-    return {
-      title: "공식 자료가 엇갈립니다. 공식 창구로 확인하세요",
-      detail: "자료마다 다르게 적고 있어 한쪽으로 정하지 않았습니다. 아래 근거를 들고 해당 기관의 공식 번호로 직접 확인하시는 편이 안전합니다.",
-    };
-  }
-  if (results.every((r) => r.state === "VERIFIED")) {
-    return {
-      title: "고르신 항목은 공식 자료와 맞습니다",
-      detail: "다만 확인한 것은 고르신 항목뿐입니다. 확인하지 않은 조건이 남아 있을 수 있으니 계약서를 함께 보세요.",
-    };
-  }
-  return {
-    title: "확인하지 못한 항목이 있습니다",
-    detail: "근거를 찾지 못한 항목은 안전하다는 뜻이 아닙니다. 아래에서 무엇을 확인하지 못했는지 보시고 공식 창구로 확인하세요.",
-  };
-}
-
 export function VerifyFlow() {
-  const [step, setStep] = useState<"login" | "input" | "claims" | "running" | "result">("login");
+  const [token, setToken, ready] = useFsToken();
+  const [step, setStep] = useState<"input" | "claims" | "running" | "result">("input");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [text, setText] = useState("");
@@ -89,28 +53,14 @@ export function VerifyFlow() {
   const [partial, setPartial] = useState(false);
   const [saved, setSaved] = useState(true);
   const [opened, setOpened] = useState<Set<string>>(new Set());
-  const token = useRef<string | null>(null);
+  const [caseId, setCaseId] = useState<string | null>(null);
+  // 마스킹한 문장은 이 화면 안에서만 들고 있는다. 저장소에 남기지 않는다.
+  const masked = useRef("");
 
   const authed = () => ({
     "Content-Type": "application/json",
-    ...(token.current ? { Authorization: `Bearer ${token.current}` } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   });
-
-  const login = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    setBusy(true); setNotice(null);
-    try {
-      const response = await fetch("/api/finshield/session", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.get("email"), password: form.get("password") }),
-      });
-      const body = await response.json();
-      if (!response.ok) { setNotice(body.error ?? "로그인에 실패했습니다"); return; }
-      token.current = body.access_token;
-      setStep("input");
-    } finally { setBusy(false); }
-  };
 
   const submitText = async () => {
     setBusy(true); setNotice(null);
@@ -123,8 +73,8 @@ export function VerifyFlow() {
       if (body.blocked) { setNotice(body.ask); return; }
       setClaims(body.claims);
       setPicked(new Set(body.claims.filter((c: Claim) => c.materiality === "MATERIAL").map((c: Claim) => c.claim_id)));
-      sessionStorage.setItem("finshield_case", body.case_id);
-      sessionStorage.setItem("finshield_masked", body.masked_text ?? "");
+      setCaseId(body.case_id as string);
+      masked.current = body.masked_text ?? "";
       setStep("claims");
     } finally { setBusy(false); }
   };
@@ -135,8 +85,8 @@ export function VerifyFlow() {
       const response = await fetch("/api/finshield/verify", {
         method: "POST", headers: authed(),
         body: JSON.stringify({
-          case_id: sessionStorage.getItem("finshield_case"),
-          masked_text: sessionStorage.getItem("finshield_masked") ?? "",
+          case_id: caseId,
+          masked_text: masked.current,
           journey_stage: "PRE_TRANSACTION",
           claims: claims.filter((claim) => picked.has(claim.claim_id)),
         }),
@@ -181,29 +131,16 @@ export function VerifyFlow() {
   };
 
   const evidenceOf = (refs: string[]) => evidence.filter((item) => refs.includes(item.ref));
-  const action = claimResults.length > 0 ? nextAction(claimResults) : null;
+  const action = claimResults.length > 0 ? nextAction(claimResults.map((row) => row.state)) : null;
+
+  if (!ready) return null;
+  if (!token) return <FsLoginCard onToken={setToken} />;
 
   return (
     <div className="mt-8">
       {notice ? (
         <FsCard className="mb-4">
           <p className="fs-body">{notice}</p>
-        </FsCard>
-      ) : null}
-
-      {step === "login" ? (
-        <FsCard>
-          <h2 className="fs-h2">로그인</h2>
-          <p className="fs-body mt-2">검증 기록은 본인만 볼 수 있어 로그인이 필요합니다.</p>
-          <form className="mt-5 max-w-sm" onSubmit={login}>
-            <label className="fs-label" htmlFor="email">이메일</label>
-            <input id="email" name="email" type="email" required autoComplete="username" className="fs-field" />
-            <label className="fs-label mt-4" htmlFor="password">비밀번호</label>
-            <input id="password" name="password" type="password" required autoComplete="current-password" className="fs-field" />
-            <button type="submit" disabled={busy} className="fs-btn fs-btn--primary mt-5">
-              {busy ? "확인하는 중" : "로그인"}
-            </button>
-          </form>
         </FsCard>
       ) : null}
 
@@ -315,8 +252,7 @@ export function VerifyFlow() {
                     <p className="fs-meta mt-1">{view.help}</p>
                     {result.cove_status && result.cove_status !== "NOT_REQUIRED" ? (
                       <p className="fs-meta mt-1">
-                        독립 재확인 {result.cove_status === "CONFIRMED" ? "같은 결론"
-                          : result.cove_status === "REFUTED" ? "다른 결론" : "판단 못 함"}
+                        독립 재확인 {coveLabel(result.cove_status)}
                         {result.red_team_status === "COUNTER_EVIDENCE" ? " · 반대 근거 있음" : ""}
                       </p>
                     ) : null}
@@ -371,6 +307,19 @@ export function VerifyFlow() {
               })}
             </ul>
           </FsCard>
+
+          {saved && caseId ? (
+            <FsCard>
+              <h2 className="fs-h2">이 결과는 기록으로 남았습니다</h2>
+              <p className="fs-body mt-2">
+                판단과 근거는 덮어쓰지 않고 판을 쌓습니다. 나중에 다시 열어 무엇을 보고 그렇게 판단했는지 확인하실 수 있습니다.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Link href={`/cases/${caseId}`} className="fs-btn fs-btn--primary">기록 열기</Link>
+                <Link href={`/cases/${caseId}/passport`} className="fs-btn fs-btn--quiet">Evidence Passport</Link>
+              </div>
+            </FsCard>
+          ) : null}
         </div>
       ) : null}
     </div>
