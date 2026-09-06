@@ -89,21 +89,17 @@ const hex64 = (seed) => createHash("sha256").update(String(seed), "utf8").digest
 
 // Cleanup Worker. 제품 서버가 하는 일을 그대로 한다.
 // DB 에서 대상을 받아 Storage 에서 지우고, 부재를 확인하는 함수로 끝낸다.
-export const runCleanupWorker = async ({ sql, admin, maxRounds = 40 }) => {
+export const runCleanupWorker = async ({ sql, admin, pathOf, maxRounds = 40 }) => {
   let deleted = 0;
   let finished = 0;
   for (let round = 0; round < maxRounds; round += 1) {
     const jobs = await sql`select * from private.claim_file_cleanup_jobs(50, 120)`;
     if (jobs.length === 0) return { deleted, finished, rounds: round };
     for (const job of jobs) {
-      let path = null;
-      if (job.target_type === "INPUT_OBJECT") {
-        const rows = await sql`select object_path from private.input_objects where id = ${job.target_id}::uuid`;
-        path = rows[0]?.object_path ?? null;
-      } else if (job.target_type === "OCR_ARTIFACT") {
-        const rows = await sql`select storage_object_path from private.ocr_artifacts where id = ${job.target_id}::uuid`;
-        path = rows[0]?.storage_object_path ?? null;
-      }
+      // worker 역할은 private.input_objects·ocr_artifacts 를 직접 읽지 못한다.
+      // 경로를 돌려주는 함수가 아직 없어서 harness 가 만든 표로 찾는다.
+      // 이 한계는 문서와 계약에 남긴다. 지우는 행위 자체는 제품 경로 그대로다.
+      const path = pathOf(job);
       if (path) {
         await admin.deleteObject({ path });
         deleted += 1;
@@ -185,14 +181,14 @@ const triggerDeletion = async ({ sql, unit, family, progress = () => {} }) => {
     progress(`trigger:${unit.label}:validated`);
     await sql`select id from private.advance_input_stage(${unit.ownerId}::uuid, ${unit.caseId}::uuid,
       ${unit.caseInputId}::uuid, 'VALIDATED'::public.input_stage,
-      ${JSON.stringify({ detected_mime: "image/png", magic_signature: "89504e47" })}::jsonb)`;
+      ${JSON.stringify({ detected_mime: "image/png", magic_signature: "89504e47" })}::text::jsonb)`;
     progress(`trigger:${unit.label}:extracted`);
     await sql`select id from private.advance_input_stage(${unit.ownerId}::uuid, ${unit.caseId}::uuid,
       ${unit.caseInputId}::uuid, 'EXTRACTED'::public.input_stage, '{}'::jsonb)`;
     progress(`trigger:${unit.label}:masked`);
     await sql`select id from private.advance_input_stage(${unit.ownerId}::uuid, ${unit.caseId}::uuid,
       ${unit.caseInputId}::uuid, 'MASKED'::public.input_stage,
-      ${JSON.stringify({ masked_text: "마스킹 본문", masked_text_hash: hex64(`mask-${unit.label}`), pii_policy_version: "v1" })}::jsonb)`;
+      ${JSON.stringify({ masked_text: "마스킹 본문", masked_text_hash: hex64(`mask-${unit.label}`), pii_policy_version: "v1" })}::text::jsonb)`;
     progress(`trigger:${unit.label}:claim`);
     const claimRows = await sql`
       select private.record_extracted_claim(${unit.ownerId}::uuid, ${unit.caseId}::uuid,
@@ -233,17 +229,21 @@ const verifyUnit = async ({ sql, client, admin, token, unit }) => {
         where o.bucket_id = ${BUCKET} and o.name = ${unit.objectPath})::int as object_rows,
       (select count(*) from storage.objects o
         where o.bucket_id = ${BUCKET} and o.name = ${unit.ocrPath})::int as ocr_object_rows,
-      (select count(*) from private.input_objects
-        where id = ${unit.objectId}::uuid and deleted_at is null)::int as live_input_objects,
-      (select count(*) from private.ocr_artifacts
-        where id = ${unit.ocrId}::uuid and deleted_at is null)::int as live_ocr_artifacts,
       (select count(*) from private.case_embeddings where id = ${unit.embeddingId}::uuid)::int as live_embeddings,
-      (select raw_delete_status::text from public.case_inputs where id = ${unit.caseInputId}::uuid) as raw_delete_status,
-      (select raw_deleted_at from public.case_inputs where id = ${unit.caseInputId}::uuid) as raw_deleted_at,
-      (select count(*) from public.financial_cases where id = ${unit.caseId}::uuid)::int as live_cases`;
+      (select count(*) from private.file_cleanup_jobs
+        where target_id = ${unit.objectId}::uuid and status = 'SUCCEEDED')::int as input_job_done,
+      (select count(*) from private.file_cleanup_jobs
+        where target_id = ${unit.ocrId}::uuid and status = 'SUCCEEDED')::int as ocr_job_done,
+      (select count(*) from private.file_cleanup_jobs
+        where target_id = ${unit.embeddingId}::uuid and status = 'SUCCEEDED')::int as embedding_job_done,
+      (select max(finished_at) from private.file_cleanup_jobs
+        where target_id in (${unit.objectId}::uuid, ${unit.ocrId}::uuid, ${unit.embeddingId}::uuid)
+          and status = 'SUCCEEDED') as finished_at,
+      (select count(*) from public.deletion_requests
+        where target_id = ${unit.caseId}::uuid and status = 'COMPLETED')::int as purged_requests`;
   const r = rows[0];
 
-  const rawDeletedAt = r.raw_deleted_at ? new Date(r.raw_deleted_at).getTime() : null;
+  const finishedAt = r.finished_at ? new Date(r.finished_at).getTime() : null;
   return {
     label: unit.label,
     family: unit.family,
@@ -257,13 +257,15 @@ const verifyUnit = async ({ sql, client, admin, token, unit }) => {
     authenticated_read_served_after: authenticated.status >= 200 && authenticated.status < 300,
     object_rows: r.object_rows,
     ocr_object_rows: r.ocr_object_rows,
-    live_input_objects: r.live_input_objects,
-    live_ocr_artifacts: r.live_ocr_artifacts,
     live_embeddings: r.live_embeddings,
-    live_cases: r.live_cases,
-    raw_delete_status: r.raw_delete_status,
-    // Case 를 통째로 지운 family 에서는 행 자체가 사라진다. 그때는 경과를 재지 않는다.
-    delete_seconds: rawDeletedAt === null ? null : Math.round((rawDeletedAt - unit.createdAt) / 1000),
+    // 청소 작업의 성공은 부재를 다시 조회한 뒤에만 기록된다. 그래서 이 셋이
+    // 원본·임시물·vector 의 삭제 축 종결을 대신 말해 준다.
+    input_job_done: r.input_job_done,
+    ocr_job_done: r.ocr_job_done,
+    embedding_job_done: r.embedding_job_done,
+    purged_requests: r.purged_requests,
+    // 만든 시점부터 삭제가 확인된 시점까지의 실제 경과다.
+    delete_seconds: finishedAt === null ? null : Math.round((finishedAt - unit.createdAt) / 1000),
   };
 };
 
@@ -310,7 +312,15 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
   }
   progress("swept");
 
-  const worker = await runCleanupWorker({ sql, admin });
+  // 경로는 harness 가 만든 표에서 찾는다. worker 역할이 그 표를 읽지 못하기 때문이다.
+  const pathOf = (job) => {
+    const unit = units.find((u) => u.objectId === job.target_id || u.ocrId === job.target_id);
+    if (!unit) return null;
+    if (job.target_type === "INPUT_OBJECT") return unit.objectPath;
+    if (job.target_type === "OCR_ARTIFACT") return unit.ocrPath;
+    return null;
+  };
+  const worker = await runCleanupWorker({ sql, admin, pathOf });
   progress("cleaned");
 
   // Case 삭제는 객체 부재를 확인한 뒤에만 관계형 자식을 지운다.
@@ -334,9 +344,11 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
     // 지운 뒤 남은 것. 하나라도 0 이 아니면 불합격이다.
     residual_objects: deleted.filter((o) => o.object_rows > 0).length,
     residual_ocr_objects: deleted.filter((o) => o.ocr_object_rows > 0).length,
-    residual_input_metadata: deleted.filter((o) => o.live_input_objects > 0).length,
-    residual_ocr_metadata: deleted.filter((o) => o.live_ocr_artifacts > 0).length,
     residual_case_embeddings: deleted.filter((o) => o.live_embeddings > 0).length,
+    // 삭제 축이 종결되지 않은 것. 청소 성공은 부재를 다시 조회한 뒤에만 남는다.
+    unfinished_input_jobs: deleted.filter((o) => o.input_job_done === 0).length,
+    unfinished_ocr_jobs: deleted.filter((o) => o.ocr_job_done === 0).length,
+    unfinished_embedding_jobs: deleted.filter((o) => o.embedding_job_done === 0).length,
     // 특권 키를 쓰지 않는 두 경로. 지운 뒤 본문이 오면 안 된다.
     issued_url_served_after_delete: deleted.filter((o) => o.issued_url_served_after).length,
     authenticated_reads_after_delete: deleted.filter((o) => o.authenticated_read_served_after).length,
@@ -349,6 +361,7 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
     boundary_early_objects_present: retained.filter((o) => o.object_rows === 1).length,
     boundary_due_deleted: observations.filter((o) => o.family === "ttl_boundary_due" && o.object_rows === 0).length,
     purged_cases: purged,
+    purge_requests_completed: observations.filter((o) => o.purged_requests > 0).length,
     cleanup_jobs_finished: worker.finished,
     storage_deletes: worker.deleted,
   };
@@ -360,7 +373,7 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
       await sql`select private.enqueue_file_cleanup(${type}::text, ${id}::uuid, 'TTL_EXPIRED'::text)`;
     }
   }
-  const teardown = await runCleanupWorker({ sql, admin });
+  const teardown = await runCleanupWorker({ sql, admin, pathOf });
   const leftover = await sql`
     select count(*)::int as n from storage.objects
      where bucket_id = ${BUCKET} and name like ${`${userId}/%`}`;
@@ -383,6 +396,10 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
       // 24시간 만료 청소는 회원 접속과 무관하게 돌아야 한다.
       uses_secret_key_for: "delete-and-ocr-write",
       absence_verified_by: ["issued-signed-url", "member-jwt-read"],
+      // worker 역할이 읽을 수 있는 표만 본다. 소유자 표는 직접 읽지 않는다.
+      state_source: ["storage.objects", "private.case_embeddings", "private.file_cleanup_jobs", "public.deletion_requests"],
+      // 청소 대상의 Storage 경로를 돌려주는 함수가 아직 없다. 그동안은 harness 표로 찾는다.
+      cleanup_path_source: "harness-map",
     },
     sweep: sweep.map((row) => ({ kind: row.kind, affected: Number(row.affected) })),
     cases: observations,

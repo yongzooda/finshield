@@ -82,7 +82,17 @@ const sanitizedFailure = (error) => {
   const where = [error?.constraint_name, error?.table_name, error?.routine]
     .filter((part) => typeof part === "string" && part.length > 0)
     .map((part) => part.replace(/[^A-Za-z0-9_.]/g, "")).join("/");
-  return `delete-or-harness-error:${kind}${code ? `/${code}` : ""}${where ? `@${where}` : ""}`;
+  // 우리가 쓴 오류 문장은 원인을 바로 말해 준다. 다만 식별자·경로·자료는 지운다.
+  // Postgres 는 행 내용을 message 가 아니라 DETAIL 에 넣으므로 message 만 쓴다.
+  const said = String(message)
+    .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, "<id>")
+    .replace(/[0-9a-f]{16,}/gi, "<hex>")
+    .replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, "<mail>")
+    .replace(/https?:\/\/\S+/g, "<url>")
+    .replace(/\S*\/\S*\/\S*/g, "<path>")
+    .replace(/\d{6,}/g, "<num>")
+    .replace(/\s+/g, " ").trim().slice(0, 200);
+  return `delete-or-harness-error:${kind}${code ? `/${code}` : ""}${where ? `@${where}` : ""} said="${said}"`;
 };
 
 if (mode === "--run") {
