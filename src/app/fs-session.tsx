@@ -64,9 +64,18 @@ export function useFsToken(): [string | null, (value: string | null) => void, bo
   return [token, update, ready];
 }
 
+/**
+ * 로그인·회원가입 (S-002).
+ *
+ * 두 가지를 한 카드에서 한다. 계정이 없는 분이 화면을 옮겨 다니지 않아도 되게
+ * 하려는 것이다. 비밀번호는 서버가 보관하지 않고 발급처로 그대로 넘긴다.
+ *
+ * 실패해도 계정이 있는지 없는지는 알려 주지 않는다.
+ */
 export function FsLoginCard({ onToken, title = "로그인" }: {
   onToken: (token: string) => void; title?: string;
 }) {
+  const [mode, setMode] = useState<"login" | "signup">("login");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -75,29 +84,53 @@ export function FsLoginCard({ onToken, title = "로그인" }: {
     const form = new FormData(event.currentTarget);
     setBusy(true); setNotice(null);
     try {
-      const response = await fetch("/api/finshield/session", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.get("email"), password: form.get("password") }),
-      });
+      const response = await fetch(
+        mode === "login" ? "/api/finshield/session" : "/api/finshield/signup",
+        {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: form.get("email"), password: form.get("password") }),
+        },
+      );
       const body = await response.json();
-      if (!response.ok) { setNotice(body.error ?? "로그인에 실패했습니다"); return; }
+      if (!response.ok) {
+        setNotice(body.error ?? (mode === "login" ? "로그인에 실패했습니다" : "가입하지 못했습니다"));
+        return;
+      }
+      if (mode === "signup" && body.needs_confirmation) {
+        // 메일 확인이 켜져 있으면 token 이 오지 않는다. 그 사실을 그대로 알린다.
+        setNotice("가입 확인 메일을 보냈습니다. 확인한 뒤 로그인해 주세요.");
+        setMode("login");
+        return;
+      }
       onToken(body.access_token as string);
     } finally { setBusy(false); }
   };
 
   return (
     <FsCard className="mt-8">
-      <h2 className="fs-h2">{title}</h2>
-      <p className="fs-body mt-2">검증 기록은 본인만 볼 수 있어 로그인이 필요합니다.</p>
+      <h2 className="fs-h2">{mode === "login" ? title : "회원가입"}</h2>
+      <p className="fs-body mt-2">
+        {mode === "login"
+          ? "검증 기록은 본인만 볼 수 있어 로그인이 필요합니다."
+          : "이메일과 비밀번호만 받습니다. 이름도 연락처도 묻지 않습니다."}
+      </p>
       {notice ? <p className="fs-body mt-2">{notice}</p> : null}
       <form className="mt-5 max-w-sm" onSubmit={submit}>
         <label className="fs-label" htmlFor="email">이메일</label>
         <input id="email" name="email" type="email" required autoComplete="username" className="fs-field" />
         <label className="fs-label mt-4" htmlFor="password">비밀번호</label>
-        <input id="password" name="password" type="password" required autoComplete="current-password" className="fs-field" />
-        <button type="submit" disabled={busy} className="fs-btn fs-btn--primary mt-5">
-          {busy ? "확인하는 중" : "로그인"}
-        </button>
+        <input id="password" name="password" type="password" required minLength={mode === "signup" ? 10 : undefined}
+          autoComplete={mode === "login" ? "current-password" : "new-password"} className="fs-field" />
+        {mode === "signup" ? <p className="fs-meta mt-1">10자 이상으로 정해 주세요.</p> : null}
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <button type="submit" disabled={busy} className="fs-btn fs-btn--primary">
+            {busy ? "확인하는 중" : mode === "login" ? "로그인" : "가입하기"}
+          </button>
+          <button type="button" className="fs-body underline"
+            onClick={() => { setMode(mode === "login" ? "signup" : "login"); setNotice(null); }}>
+            {mode === "login" ? "계정이 없으신가요" : "이미 계정이 있으신가요"}
+          </button>
+        </div>
       </form>
     </FsCard>
   );

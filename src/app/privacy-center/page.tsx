@@ -7,6 +7,7 @@
 
 import type { Metadata } from "next";
 import { FsCard, FsChip, FsShell } from "../fs-shell";
+import { PrivacyActions } from "./privacy-actions";
 
 export const metadata: Metadata = { title: "개인정보 처리 | FinShield" };
 
@@ -57,6 +58,8 @@ export default function PrivacyCenterPage() {
           ))}
         </ul>
       </FsCard>
+
+      <PrivacyActions />
 
       <FsCard>
         <h2 className="fs-h2">어디에서 강제되는가</h2>

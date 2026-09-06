@@ -19,7 +19,7 @@ export async function GET(request: Request): Promise<Response> {
       token,
       path: "financial_cases",
       query: {
-        select: "id,scenario,lifecycle,title_masked,created_at,updated_at",
+        select: "id,scenario,lifecycle,title_masked,created_at,updated_at,deletion_status,deleted_at",
         order: "created_at.desc",
         limit: "50",
       },
