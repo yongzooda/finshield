@@ -54,7 +54,7 @@ export const validateDeleteEvidenceResult = (result, fail) => {
   if (!exactKeys(c, ["formula_version", "bucket", "families", "total_cases", "max_delete_seconds",
     "signed_url_ttl_seconds", "due_ttl_seconds", "live_ttl_seconds", "boundary_made_by",
     "uses_secret_key_for", "absence_verified_by", "state_source", "object_absence_source",
-    "cleanup_path_source"])
+    "cleanup_path_source", "idempotency_scope"])
     || c.formula_version !== FORMULA_VERSION || c.bucket !== BUCKET
     || c.total_cases !== TOTAL_CASES || c.max_delete_seconds !== MAX_DELETE_SECONDS
     || c.signed_url_ttl_seconds !== SIGNED_URL_TTL_SECONDS
@@ -81,6 +81,8 @@ export const validateDeleteEvidenceResult = (result, fail) => {
     fail("객체 부재 판정 경로 선언이 계약과 다릅니다.");
   }
   if (c.cleanup_path_source !== "storage-api-prefix-listing") fail("청소 경로 출처 선언이 계약과 다릅니다.");
+  // 실행마다 다른 멱등 key 를 써야 이전 실행의 요청을 되받지 않는다.
+  if (c.idempotency_scope !== "per-run") fail("멱등 key 범위 선언이 계약과 다릅니다.");
 
   const rows = Array.isArray(o.cases) ? o.cases : [];
   if (rows.length !== TOTAL_CASES) fail("Case 기록 수가 계약과 다릅니다.");

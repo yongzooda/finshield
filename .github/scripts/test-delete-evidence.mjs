@@ -206,7 +206,7 @@ const fakeSql = (strings, ...values) => {
 const client = createStorageClient({ baseUrl: "https://demo.supabase.co/", anonKey: "anon", fetchImpl: fakeFetch });
 const admin = createAdminStorageClient({ baseUrl: "https://demo.supabase.co/", secretKey: "sb_secret_x", fetchImpl: fakeFetch });
 const observations = await runDeleteSpike({
-  client, admin, sql: fakeSql, credentials: { email: "a@b.c", password: "x" }, progress: () => {},
+  client, admin, sql: fakeSql, runToken: "run-1", credentials: { email: "a@b.c", password: "x" }, progress: () => {},
 });
 
 ok(observations.cases.length === TOTAL_CASES, "Case 기록이 40건이어야 한다");
@@ -255,6 +255,7 @@ rejects("상태 판정 표 변경", (o) => { o.contract.state_source = ["public.
 rejects("부재 판정을 특권 목록으로", (o) => { o.contract.object_absence_source = ["service-role-list"]; });
 rejects("보존 대상이 이미 사라짐", (o) => { const r = o.cases.find((x) => x.family === "ttl_boundary_early"); r.issued_url_served_after = false; o.totals.boundary_early_objects_present = 4; });
 rejects("경로 출처 변경", (o) => { o.contract.cleanup_path_source = "harness-map"; });
+rejects("멱등 key 범위 변경", (o) => { o.contract.idempotency_scope = "fixed"; });
 rejects("Case vector 잔존", (o) => { deletedRow(o).live_embeddings = 1; o.totals.residual_case_embeddings = 1; });
 rejects("기발급 URL 이 삭제 뒤 통함", (o) => {
   const row = deletedRow(o); row.issued_url_after_status = 200; row.issued_url_after_bytes = 12;

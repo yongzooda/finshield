@@ -113,6 +113,7 @@ if (mode === "--run") {
     const admin = createAdminStorageClient({ baseUrl: process.env.SUPABASE_URL, secretKey: process.env.SUPABASE_SECRET_KEY });
     const observations = await runDeleteSpike({
       client, admin, sql,
+      runToken: `${process.env.GITHUB_RUN_ID}-${process.env.GITHUB_RUN_ATTEMPT}`,
       credentials: { email: process.env.SUPABASE_TEST_EMAIL, password: process.env.SUPABASE_TEST_PASSWORD },
       progress: (stage) => console.log(`${blockerId} stage: ${stage}`),
     });
