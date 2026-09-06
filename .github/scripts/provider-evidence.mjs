@@ -59,9 +59,9 @@ const SUPABASE_POLICY_PATH = ".github/scripts/supabase-evidence-policy.mjs";
 const SUPABASE_VERIFY_REMOTE_PATH = "supabase/tests/verify-remote.mjs";
 const SUPABASE_OPS_PATH = "docs/ops/supabase-evidence.md";
 const TRUSTED_SUPABASE_WORKFLOW_BLOB = "7a4e3bebe8fcacaf4e25d2d2de45c066ff6a7e9f";
-const TRUSTED_SUPABASE_HARNESS_BLOB = "df3dc2a024f7d83b8c203e2b47b6ae06b0b2f4b4";
-const TRUSTED_SUPABASE_POLICY_BLOB = "6af6fc5af1ee7dce25166a6976fc95af92b96a33";
-const TRUSTED_SUPABASE_VERIFY_REMOTE_BLOB = "f591211ef39a6e20d1143bd4add2d322e474d9c8";
+const TRUSTED_SUPABASE_HARNESS_BLOB = "6b9c70c4277279262ce86af99936f86aa6fd8432";
+const TRUSTED_SUPABASE_POLICY_BLOB = "3499fdb7eb8737d7a208b2ac580ee2df62ab57c9";
+const TRUSTED_SUPABASE_VERIFY_REMOTE_BLOB = "7232ba0783d22a821b055e915d0075aac3d7a3eb";
 const SOURCE_WORKFLOW_PATH = ".github/workflows/source-evidence.yml";
 const SOURCE_HARNESS_PATH = ".github/scripts/run-source-evidence.mjs";
 const SOURCE_POLICY_PATH = ".github/scripts/source-evidence-policy.mjs";
@@ -98,10 +98,10 @@ const RETRIEVAL_CORPUS_PATH = ".github/scripts/retrieval-corpus.mjs";
 const RETRIEVAL_OPS_PATH = "docs/ops/retrieval-spike.md";
 const RETRIEVAL_PREREG_PATH = "docs/ops/retrieval-blocker-preregistration.md";
 const TRUSTED_RETRIEVAL_WORKFLOW_BLOB = "425fe1d69129bdd324d02bd5bd9c00157cf01eef";
-const TRUSTED_RETRIEVAL_HARNESS_BLOB = "5c73462bf5ae7795fb97db9c4168f9847274b56e";
+const TRUSTED_RETRIEVAL_HARNESS_BLOB = "15b8a31e720f01846e91ed65c3c58452b27c9495";
 const TRUSTED_RETRIEVAL_POLICY_BLOB = "37979e5efc8f193320a6b7c3f1a2558f324af5f2";
 const TRUSTED_RETRIEVAL_PIPELINE_BLOB = "8f2f47695b0c4226925c4b2d167efa96ad13eb5b";
-const TRUSTED_RETRIEVAL_CORPUS_BLOB = "5f0c69a855444862aa21b07180c816d70dc6748e";
+const TRUSTED_RETRIEVAL_CORPUS_BLOB = "9523430cc41073758d3e37f48c532a1ff9db1f02";
 const MAX_ARCHIVE_BYTES = 2 * 1024 * 1024;
 const MAX_RESULT_BYTES = 512 * 1024;
 const MAX_EVIDENCE_AGE_MS = 27 * 24 * 60 * 60 * 1000;
@@ -361,6 +361,8 @@ const retrievalEvidencePolicy = {
   ]),
   jobName: "retrieval-evidence / B-RETRIEVAL-01",
   scopePaths: Object.freeze([
+    ...supabaseExpectedInventory(resolve(fileURLToPath(new URL("../../", import.meta.url)))).migrations.map((file) => `supabase/migrations/${file}`),
+    "supabase/tests/00_supabase_stub.sql",
     EMBED_FIXTURE_PATH,
     EMBED_SPIKE_PATH,
     ADR_DIGEST_PATH,

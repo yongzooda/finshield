@@ -66,9 +66,23 @@ export const collectSchemaDigests = async (sql) => {
         from pg_indexes
        where schemaname = any(${TRACKED_SCHEMAS})`;
   });
+  // 함수 본문까지 본다. 표를 바꾸지 않는 Migration(예: 0018 의 Keyword 수정)이
+  // 운영에 빠져 있어도 표·제약·인덱스 digest 는 같기 때문이다.
+  const routines = await sql.begin(async (tx) => {
+    await tx.unsafe("set local search_path = pg_catalog");
+    return tx`
+      select n.nspname || '.' || p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ') '
+             || md5(pg_get_functiondef(p.oid)) as definition
+        from pg_proc p
+        join pg_namespace n on n.oid = p.pronamespace
+       where n.nspname = any(${TRACKED_SCHEMAS})
+         and p.prokind in ('f', 'p')`;
+  });
   const names = tables.map((r) => r.name).sort();
   return {
     tracked_schemas: [...TRACKED_SCHEMAS],
+    routines: routines.length,
+    routine_digest: constraintDigest(routines.map((r) => r.definition)),
     tables: names.length,
     tables_digest: constraintDigest(names),
     constraints: constraints.length,

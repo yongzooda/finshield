@@ -175,6 +175,7 @@ if (mode === "--run") {
           tables: localSchema.tables_digest === remote.schema.tables_digest,
           constraints: localSchema.constraint_digest === remote.schema.constraint_digest,
           indexes: localSchema.index_digest === remote.schema.index_digest,
+          routines: localSchema.routine_digest === remote.schema.routine_digest,
         },
       },
       environment: {
