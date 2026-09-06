@@ -78,6 +78,12 @@ export default function HomePage() {
         </ul>
       </FsCard>
 
+      <nav className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
+        <Link href="/cases" className="fs-body underline">내 검증 기록</Link>
+        <Link href="/trust" className="fs-body underline">무엇이 검증됐는지</Link>
+        <Link href="/privacy-center" className="fs-body underline">개인정보 처리</Link>
+      </nav>
+
       <p className="fs-meta mt-6">
         시험 단계이고 아직 출시 전입니다. 실제 개인정보와 실제 금융 서류를 넣지 마세요.
         넣으셔도 저장 전에 가려지지만, 애초에 받지 않는 것이 안전합니다.
