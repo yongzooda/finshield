@@ -89,20 +89,26 @@ const hex64 = (seed) => createHash("sha256").update(String(seed), "utf8").digest
 
 // Cleanup Worker. 제품 서버가 하는 일을 그대로 한다.
 // DB 에서 대상을 받아 Storage 에서 지우고, 부재를 확인하는 함수로 끝낸다.
-export const runCleanupWorker = async ({ sql, admin, pathOf, maxRounds = 40 }) => {
+export const runCleanupWorker = async ({ sql, admin, maxRounds = 40 }) => {
   let deleted = 0;
   let finished = 0;
   for (let round = 0; round < maxRounds; round += 1) {
     const jobs = await sql`select * from private.claim_file_cleanup_jobs(50, 120)`;
     if (jobs.length === 0) return { deleted, finished, rounds: round };
     for (const job of jobs) {
-      // worker 역할은 private.input_objects·ocr_artifacts 를 직접 읽지 못한다.
-      // 경로를 돌려주는 함수가 아직 없어서 harness 가 만든 표로 찾는다.
-      // 이 한계는 문서와 계약에 남긴다. 지우는 행위 자체는 제품 경로 그대로다.
-      const path = pathOf(job);
-      if (path) {
-        await admin.deleteObject({ path });
-        deleted += 1;
+      // worker 역할은 private.input_objects·ocr_artifacts 를 직접 읽지 못하고
+      // 경로를 돌려주는 함수도 아직 없다. 그래서 job 이 들고 있는 소유자·Case·입력
+      // 으로 접두사를 만들어 storage.objects 에서 대상을 찾는다.
+      // 이전 실행이 남긴 객체도 같은 방법으로 지워진다.
+      if (job.target_type !== "CASE_EMBEDDING" && job.case_input_id) {
+        const prefix = `${job.owner_id}/${job.case_id}/${job.case_input_id}/`;
+        const rows = await sql`
+          select name from storage.objects
+           where bucket_id = ${BUCKET} and name like ${`${prefix}%`}`;
+        for (const row of rows) {
+          await admin.deleteObject({ path: row.name });
+          deleted += 1;
+        }
       }
       // 객체가 남아 있으면 이 함수가 성공 기록을 거부한다. 그것이 재조회 확인이다.
       await sql`select id from private.finish_file_cleanup_job(${job.id}::uuid, ${job.lease_token}::uuid, null)`;
@@ -312,15 +318,7 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
   }
   progress("swept");
 
-  // 경로는 harness 가 만든 표에서 찾는다. worker 역할이 그 표를 읽지 못하기 때문이다.
-  const pathOf = (job) => {
-    const unit = units.find((u) => u.objectId === job.target_id || u.ocrId === job.target_id);
-    if (!unit) return null;
-    if (job.target_type === "INPUT_OBJECT") return unit.objectPath;
-    if (job.target_type === "OCR_ARTIFACT") return unit.ocrPath;
-    return null;
-  };
-  const worker = await runCleanupWorker({ sql, admin, pathOf });
+  const worker = await runCleanupWorker({ sql, admin });
   progress("cleaned");
 
   // Case 삭제는 객체 부재를 확인한 뒤에만 관계형 자식을 지운다.
@@ -373,7 +371,7 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
       await sql`select private.enqueue_file_cleanup(${type}::text, ${id}::uuid, 'TTL_EXPIRED'::text)`;
     }
   }
-  const teardown = await runCleanupWorker({ sql, admin, pathOf });
+  const teardown = await runCleanupWorker({ sql, admin });
   const leftover = await sql`
     select count(*)::int as n from storage.objects
      where bucket_id = ${BUCKET} and name like ${`${userId}/%`}`;
@@ -398,8 +396,9 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
       absence_verified_by: ["issued-signed-url", "member-jwt-read"],
       // worker 역할이 읽을 수 있는 표만 본다. 소유자 표는 직접 읽지 않는다.
       state_source: ["storage.objects", "private.case_embeddings", "private.file_cleanup_jobs", "public.deletion_requests"],
-      // 청소 대상의 Storage 경로를 돌려주는 함수가 아직 없다. 그동안은 harness 표로 찾는다.
-      cleanup_path_source: "harness-map",
+      // 청소 대상의 Storage 경로를 돌려주는 함수가 아직 없다. 그동안은 job 이 들고 있는
+      // 소유자·Case·입력으로 접두사를 만들어 storage.objects 에서 찾는다.
+      cleanup_path_source: "job-prefix-listing",
     },
     sweep: sweep.map((row) => ({ kind: row.kind, affected: Number(row.affected) })),
     cases: observations,

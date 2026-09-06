@@ -64,9 +64,12 @@ const fakeFetch = async (url, init) => {
 };
 
 const enqueue = (type, id) => {
-  if (!jobs.some((j) => j.target_type === type && j.target_id === id && j.status === "QUEUED")) {
-    jobs.push({ id: uuid("55555555", jobs.length + 1), target_type: type, target_id: id, status: "QUEUED", lease_token: null });
-  }
+  if (jobs.some((j) => j.target_type === type && j.target_id === id && j.status === "QUEUED")) return;
+  const unit = unitByAny(id);
+  jobs.push({
+    id: uuid("55555555", jobs.length + 1), target_type: type, target_id: id, status: "QUEUED", lease_token: null,
+    owner_id: "owner", case_id: unit.caseId, case_input_id: unit.caseInputId,
+  });
 };
 const unitByAny = (id) => [...units.values()].find((u) => u.objectId === id || u.ocrId === id || u.embeddingId === id);
 
@@ -79,7 +82,7 @@ const fakeSql = (strings, ...values) => {
     const unit = {
       caseId, caseInputId: uuid("33333333", unitNo), objectId: uuid("44444444", unitNo),
       pageId: uuid("88888888", unitNo), ocrId: uuid("66666666", unitNo), embeddingId: uuid("77777777", unitNo),
-      objectPath: `owner/${caseId}/input/${unitNo}.png`, ocrPath: null,
+      objectPath: `owner/${caseId}/${uuid("33333333", unitNo)}/${unitNo}.png`, ocrPath: null,
       inputDeleted: false, ocrDeleted: false, embeddingPresent: true, caseDeleted: false,
       rawDeleteStatus: "PENDING", rawDeletedAt: null,
       // 만든 수명이 곧 경계다. 시각을 나중에 고치지 않는다.
@@ -192,6 +195,10 @@ const fakeSql = (strings, ...values) => {
       purged_requests: unit.caseDeleted ? 1 : 0,
     }]);
   }
+  if (text.includes("select name from storage.objects")) {
+    const prefix = String(arg(1)).replace(/%$/, "");
+    return Promise.resolve([...objects].filter((name) => name.startsWith(prefix)).map((name) => ({ name })));
+  }
   if (text.includes("from storage.objects")) {
     return Promise.resolve([{ n: [...units.values()].filter((u) => objects.has(u.objectPath) || objects.has(u.ocrPath)).length }]);
   }
@@ -249,7 +256,7 @@ rejects("Case 수 부족", (o) => { o.cases.pop(); });
 rejects("원본 객체 잔존", (o) => { deletedRow(o).object_rows = 1; o.totals.residual_objects = 1; });
 rejects("청소 미종결", (o) => { deletedRow(o).input_job_done = 0; o.totals.unfinished_input_jobs = 1; });
 rejects("상태 판정 표 변경", (o) => { o.contract.state_source = ["public.case_inputs"]; });
-rejects("경로 출처 변경", (o) => { o.contract.cleanup_path_source = "database"; });
+rejects("경로 출처 변경", (o) => { o.contract.cleanup_path_source = "harness-map"; });
 rejects("OCR 임시 객체 잔존", (o) => { deletedRow(o).ocr_object_rows = 1; o.totals.residual_ocr_objects = 1; });
 rejects("Case vector 잔존", (o) => { deletedRow(o).live_embeddings = 1; o.totals.residual_case_embeddings = 1; });
 rejects("기발급 URL 이 삭제 뒤 통함", (o) => {
