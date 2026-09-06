@@ -48,6 +48,7 @@
 - [x] `B-SUPABASE-01` 증거 harness와 main 전용 workflow, 운영 프로젝트 `0009`~`0017` 적용·측정·채택 (run `34024408248`)
 - [x] `B-SOURCE-02`·`B-SOURCE-03` 햇살론15 Snapshot harness와 main 전용 workflow, 측정·채택 (run `33981161310`·`33981225371`)
 - [x] `B-FILE-SAFETY` 합성 Fixture 103건과 격리 Parser 증거 harness, main 전용 workflow
+- [x] `B-RETRIEVAL-01` 종단 측정 단위 확정과 Case 단위 증거 harness, main 전용 workflow
 
 ## 다음 작업 순서
 
