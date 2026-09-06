@@ -614,6 +614,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `EVID-STORAGE-01` | 인증 사용자 Storage 권한과 발급 token 재사용 | PASS | main run `34038701736`, artifact `9990990846`. 시험 전용 계정으로 실제 로그인해 받은 사용자 JWT 로만 쟀고 RLS 우회 키를 쓰지 않았다. slot 은 서버 함수가 만들어 경로를 호출자가 고르지 못한다. 정상 업로드 1건이 통과하고 거부 8건이 모두 막혔다. 허용되지 않은 쓰기 0건, 읽기 0건, 덮어쓰기 통과 0건, 닫힌 slot 의 발급 token 재사용 통과 0건이다. 목록 조회는 RLS 가 거르면 200 에 빈 배열이 오므로 상태가 아니라 항목 수로 판단한다 Migration `0020` 반영 뒤 같은 정책으로 다시 쟀다. |
 | `EVID-DELETE-01` | 원본·OCR 임시물·Case vector 물리 삭제와 기발급 URL 차단 | PASS | main run `34042449137`, artifact `9992188939`. 확인·중단·Case 삭제·만료 경계 네 경로에서 Case 40건을 만들어 35건을 지우고 5건을 남겼다. Case 마다 원본 객체와 OCR 임시 객체와 Case vector 를 하나씩 만들었다. 지운 35건에서 남은 vector 0건, 청소 미종결 0건이다. Case 삭제 10건은 purge_case 가 객체 부재를 확인한 뒤 참을 돌려줬다. 지우기 전에 발급한 열람 URL 이 삭제 뒤에 통한 것 0건, 회원 token 으로 읽힌 것 0건이다. 그 판정이 뜻을 가지도록 삭제 전 35건 모두에서 본문이 온 것을 먼저 확인했다. 삭제 확인까지 가장 오래 걸린 것이 196초로 상한 86,400초 안이다. 만료 이전 5건은 청소에 들어가지 않고 남았고 만료를 지난 5건은 모두 지워졌다. 시험이 Bucket 에 남긴 객체 0건이다 |
 | `EVID-RUNTIME-01` | Preview·Production 실제 Node·region·deployment | PASS | main run `34044111706`, artifact `9992567920`. 배포 안에 둔 관측 endpoint 를 Preview 와 Production 배포 3개씩에서 불렀다. 여섯 배포 모두 Node 판과 region 과 deployment ID 를 돌려줘 기록률이 100% 다. 배포가 스스로 적은 deployment ID 가 Vercel API 의 값과 여섯 건 모두 같아 응답의 출처가 고정된다. 실제 Node 는 v24.18.0 이고 region 은 icn1 이다. major 24 는 8.2 와 맞고 minor·patch 는 로컬과 달라 고정 Snapshot 으로 적지 않는다는 판단이 근거를 얻었다. 배포 보호는 Vercel 자동화 우회 비밀로 열었고 그 값은 결과에 남기지 않았다 |
+| `EVID-LAW-01` | 법제처 OC·등록 도메인 Referer·응답 원장과 Snapshot 해시 | PASS | main run `34045798279`, artifact `9993055183`. Preview 와 Production 배포 안의 관측 endpoint 로 법제처를 15회 두드렸다. 등록 도메인을 Referer 로 보내면 양쪽에서 통했고, 헤더를 빼거나 배포 고유 주소나 미등록 도메인을 보내면 여섯 건 모두 막혔다. 요청이 어디서 나갔는지가 아니라 무엇을 보냈는지가 기준이므로 Preview 배포도 등록 도메인을 보내면 통한다. 고정 질의의 본문 해시는 세 번 모두 같았다. 일자별 조문 개정 조회는 어제와 사흘 전 모두 답했고 어제 자는 목록이 비어 와 D+1 반영과 어긋나지 않는다. 429 와 5xx 와 시간 초과는 0건이고 가장 느린 응답이 1,166ms 다. 결과에는 요청 주소와 OC 와 본문 원문을 담지 않았다 |
 
 위 PASS는 제품 Live Vertical Slice PASS가 아니다. GitHub의 Vercel status는 build/deploy 성공을 뜻하며 Provider key·OCR·RLS·Workflow 기능 성공을 증명하지 않는다.
 
@@ -632,7 +633,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `B-SUPABASE-01` | 전용 Project·최소권한 role·pooler 6543·pgvector·Migration/RLS | PASS | §15.1 cross-user/worker 시험과 preflight 합격 |
 | `B-PROCESSOR-PRIVACY` | Anthropic·Cohere·CLOVA·Supabase 학습/보존/DPA/region/하위처리자·PII fail-closed | NOT-EVALUATED | §15.1 Processor privacy + 계약 inventory |
 | `B-PRIVACY-VERCEL` | Hobby plan·고객 콘텐츠 조건·region·Log 보존·Workflow RBAC과 실개인정보 미처리 강제 | NOT-EVALUATED | plan 조건 기록 + §15.1 Processor privacy 합격; 실데이터 운영 시 DPA plan 재평가 |
-| `B-LAW-01` | OC·등록 도메인 `Referer`·Preview/Production 403/429/5xx·D+1 | NOT-EVALUATED | sanitized response ledger와 snapshot hash |
+| `B-LAW-01` | OC·등록 도메인 `Referer`·Preview/Production 403/429/5xx·D+1 | PASS | sanitized response ledger와 snapshot hash |
 | `B-SOURCE-02` | 공공데이터/FSS key·quota·pagination·license label | PASS | API response metadata와 source registry |
 | `B-SOURCE-03` | Demo `햇살론15` 정확 product/institution record | PASS | 두 API의 immutable snapshot과 official product URL |
 | `B-JOB-01` | Workflow deploy·replay·retry·orphan·fencing·cancel·ambiguous Provider | NOT-EVALUATED | §15.1 Workflow 합격 + fault run/DB state |
