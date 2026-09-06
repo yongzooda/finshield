@@ -20,19 +20,20 @@ ok(MANIFEST_FIELDS.includes("vercel_region"), "manifest 에 region 이 있어야
 ok(FORMULA_VERSION === "runtime-deployment-manifest-v1", "산식 버전이 고정돼 있어야 한다");
 
 // ---------- 2. 가짜 Vercel 과 가짜 배포 ----------
+const BYPASS_SECRET = "s".repeat(32);
 const makeFetch = ({ oldDeployments = 2, nodeVersions = ["v24.5.0", "v24.5.1"], mismatch = false } = {}) => {
   const deployment = (target, i) => ({ uid: `dpl_${target}_${i}`, url: `${target}-${i}.vercel.app` });
   const listFor = (target) => [
     ...Array.from({ length: oldDeployments }, (_, i) => deployment(`${target}-old`, i)),
     ...Array.from({ length: 4 }, (_, i) => deployment(target, i)),
   ];
-  return async (url) => {
+  return async (url, init) => {
     const text = String(url);
     if (text.includes("/v2/teams")) return new Response(JSON.stringify({ teams: [{ id: "team_1" }] }), { status: 200 });
     if (text.includes("/v9/projects/")) {
       // 개인 scope 로는 404, 팀 scope 로만 통과한다. 후보 시도 경로를 확인한다.
       return text.includes("teamId=team_1")
-        ? new Response(JSON.stringify({ id: "prj_1" }), { status: 200 })
+        ? new Response(JSON.stringify({ id: "prj_1", protectionBypass: { [BYPASS_SECRET]: { scope: "automation-bypass" } } }), { status: 200 })
         : new Response(null, { status: 404 });
     }
     if (text.includes("/v6/deployments")) {
@@ -41,6 +42,8 @@ const makeFetch = ({ oldDeployments = 2, nodeVersions = ["v24.5.0", "v24.5.1"], 
     }
     if (text.endsWith(PROBE_PATH)) {
       const host = new URL(text).host;
+      // 우회 비밀이 없으면 배포 고유 주소는 401 이다.
+      if (!init?.headers?.["x-vercel-protection-bypass"]) return new Response(null, { status: 401 });
       // endpoint 가 없던 시절의 배포는 404 다.
       if (host.includes("-old-")) return new Response(null, { status: 404 });
       const index = Number(host.split("-").pop().split(".")[0]);
@@ -73,6 +76,7 @@ ok(observations.totals.deployment_id_mismatches === 0, "deployment ID 가 모두
 ok(observations.totals.unexpected_node_major === 0, "Node major 가 모두 24 여야 한다");
 ok(observations.totals.distinct_node_versions >= 1, "Node 판을 받아야 한다");
 ok(observations.contract.measured_inside_deployment === true, "배포 안에서 읽었다는 사실이 남아야 한다");
+ok(observations.contract.protection_bypass === "automation-secret", "보호를 연 방법이 계약에 남아야 한다");
 // endpoint 가 없던 배포를 건너뛰지 않으면 표본이 오래된 배포로 채워진다.
 ok(!observations.deployments.some((d) => d.probe_status === 404), "404 배포는 표본에 들어가면 안 된다");
 
@@ -107,6 +111,7 @@ rejects("대상 축소", (o) => { o.contract.targets = ["production"]; });
 rejects("표본 수 완화", (o) => { o.contract.required_per_target = 1; });
 rejects("Probe 경로 변경", (o) => { o.contract.probe_path = "/elsewhere"; });
 rejects("배포 밖에서 측정", (o) => { o.contract.measured_inside_deployment = false; });
+rejects("보호 우회 방법 변경", (o) => { o.contract.protection_bypass = "disabled"; });
 rejects("Production 표본 부족", (o) => {
   const i = o.deployments.findIndex((d) => d.target === "production");
   o.deployments.splice(i, 1); o.totals.production_probed = 2; o.totals.probed = 5; o.totals.complete_records = 5;
