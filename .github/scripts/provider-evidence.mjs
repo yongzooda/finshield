@@ -16,6 +16,7 @@ import { validateConsentEvidenceResult } from "./consent-evidence-policy.mjs";
 import { validateStorageEvidenceResult } from "./storage-evidence-policy.mjs";
 import { validateDeleteEvidenceResult } from "./delete-evidence-policy.mjs";
 import { validateRuntimeEvidenceResult } from "./runtime-evidence-policy.mjs";
+import { validateLawEvidenceResult } from "./law-evidence-policy.mjs";
 
 export { adrDecisionDigest } from "./provider-adr-digest.mjs";
 export { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
@@ -159,6 +160,16 @@ const TRUSTED_RUNTIME_WORKFLOW_BLOB = "0c9568727900234787e76365589f9a4d3fcd8869"
 const TRUSTED_RUNTIME_HARNESS_BLOB = "57c7772125cb23bf614644e26af36b5b19faed5f";
 const TRUSTED_RUNTIME_POLICY_BLOB = "363d320fcee10547feae80a1b44136dc3cc5700d";
 const TRUSTED_RUNTIME_SPIKE_BLOB = "23803b29d62471480992dc22431e892775ebbc06";
+const LAW_WORKFLOW_PATH = ".github/workflows/law-evidence.yml";
+const LAW_HARNESS_PATH = ".github/scripts/run-law-evidence.mjs";
+const LAW_POLICY_PATH = ".github/scripts/law-evidence-policy.mjs";
+const LAW_SPIKE_PATH = ".github/scripts/law-spike.mjs";
+const LAW_ROUTE_PATH = "src/app/api/law-probe/route.ts";
+const LAW_OPS_PATH = "docs/ops/law-spike.md";
+const TRUSTED_LAW_WORKFLOW_BLOB = "98b3b40523a16999e125e482ad4b4bf7d9e1f3bf";
+const TRUSTED_LAW_HARNESS_BLOB = "cd256e741bfcd55bb08cf0d385db8ebc45e499a2";
+const TRUSTED_LAW_POLICY_BLOB = "b0e37dcc3ad6124c3baeeba67c4fd6c528d91ce2";
+const TRUSTED_LAW_SPIKE_BLOB = "0f54794675d137be3906f6f434f2abeaf209a9e2";
 const MAX_ARCHIVE_BYTES = 2 * 1024 * 1024;
 const MAX_RESULT_BYTES = 512 * 1024;
 const MAX_EVIDENCE_AGE_MS = 27 * 24 * 60 * 60 * 1000;
@@ -592,6 +603,40 @@ const runtimeEvidencePolicy = {
   validate: validateRuntimeEvidenceResult,
 };
 
+// B-LAW-01 은 배포 안의 관측 endpoint 로 법제처를 두드린다. Referer 대조가
+// 실제로 걸리는지 보는 것이 목적이라 endpoint 와 env 모듈이 scope 에 들어간다.
+const lawEvidencePolicy = {
+  gate: "implementation",
+  workflowName: "Law Evidence",
+  workflowPath: LAW_WORKFLOW_PATH,
+  workflowBlobSha: TRUSTED_LAW_WORKFLOW_BLOB,
+  harnessPath: LAW_HARNESS_PATH,
+  harnessBlobSha: TRUSTED_LAW_HARNESS_BLOB,
+  trustedExecutionFiles: Object.freeze([
+    Object.freeze({ path: LAW_WORKFLOW_PATH, blobSha: TRUSTED_LAW_WORKFLOW_BLOB }),
+    Object.freeze({ path: LAW_HARNESS_PATH, blobSha: TRUSTED_LAW_HARNESS_BLOB }),
+    Object.freeze({ path: LAW_POLICY_PATH, blobSha: TRUSTED_LAW_POLICY_BLOB }),
+    Object.freeze({ path: LAW_SPIKE_PATH, blobSha: TRUSTED_LAW_SPIKE_BLOB }),
+    Object.freeze({ path: RUNTIME_SPIKE_PATH, blobSha: TRUSTED_RUNTIME_SPIKE_BLOB }),
+    Object.freeze({ path: ADR_DIGEST_PATH, blobSha: TRUSTED_ADR_DIGEST_BLOB }),
+  ]),
+  jobName: "law-evidence / B-LAW-01",
+  scopePaths: Object.freeze([
+    ADR_DIGEST_PATH,
+    RUNTIME_SPIKE_PATH,
+    LAW_SPIKE_PATH,
+    LAW_POLICY_PATH,
+    LAW_HARNESS_PATH,
+    ".github/scripts/test-law-evidence.mjs",
+    LAW_WORKFLOW_PATH,
+    LAW_OPS_PATH,
+    LAW_ROUTE_PATH,
+    "src/lib/ops/http.ts",
+    "src/lib/env.ts",
+  ]),
+  validate: validateLawEvidenceResult,
+};
+
 export const evidencePolicies = Object.freeze({
   "B-MODEL-01": modelEvidencePolicy,
   "B-EMBED-01": embedEvidencePolicy,
@@ -605,6 +650,7 @@ export const evidencePolicies = Object.freeze({
   "B-STORAGE-01": storageEvidencePolicy,
   "B-DELETE-01": deleteEvidencePolicy,
   "B-RUNTIME-01": runtimeEvidencePolicy,
+  "B-LAW-01": lawEvidencePolicy,
 });
 
 export const computeEvidenceScopeDigest = (root, policy, fail) => {
