@@ -181,7 +181,10 @@ const buildCase = async ({ sql, client, admin, token, userId, family, index, run
     issuedUrl,
     issuedUrlBefore: { status: before.status, bytes: before.bytes },
     issuedAt,
-    expiresAt: new Date(slot.expires_at).getTime(),
+    // slot 은 먼저 열리고 OCR 임시물과 vector 는 그 뒤에 등록된다. 셋의 수명이
+    // 같아도 만료 시각은 등록 순서만큼 벌어진다. 그래서 가장 늦은 쪽을 기준으로
+    // 잡는다. 원본 만료만 보고 기다리면 아직 살아 있는 vector 를 청소가 지나친다.
+    expiresAt: Math.max(new Date(slot.expires_at).getTime(), Date.now() + family.ttl * 1000),
     createdAt: Date.now(),
   };
 };
