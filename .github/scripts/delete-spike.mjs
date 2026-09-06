@@ -57,6 +57,16 @@ export const createAdminStorageClient = ({ baseUrl, secretKey, fetchImpl = globa
         method: "POST", headers: { "Content-Type": contentType, "x-upsert": "false" }, body: bytes,
       });
     },
+    // 지울 대상을 찾는 용도다. 부재 판정에는 쓰지 않는다.
+    async listObjects({ prefix, limit = 100 }) {
+      const response = await call(`/storage/v1/object/list/${BUCKET}`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prefix, limit }),
+      });
+      if (!response.ok) return [];
+      const body = await response.json().catch(() => []);
+      return Array.isArray(body) ? body.filter((row) => row?.id).map((row) => `${prefix}${row.name}`) : [];
+    },
     async deleteObject({ path }) {
       return call(`/storage/v1/object/${BUCKET}/${path}`, { method: "DELETE" });
     },
@@ -96,17 +106,14 @@ export const runCleanupWorker = async ({ sql, admin, maxRounds = 40 }) => {
     const jobs = await sql`select * from private.claim_file_cleanup_jobs(50, 120)`;
     if (jobs.length === 0) return { deleted, finished, rounds: round };
     for (const job of jobs) {
-      // worker 역할은 private.input_objects·ocr_artifacts 를 직접 읽지 못하고
-      // 경로를 돌려주는 함수도 아직 없다. 그래서 job 이 들고 있는 소유자·Case·입력
-      // 으로 접두사를 만들어 storage.objects 에서 대상을 찾는다.
+      // worker 역할은 storage schema 를 쓰지 못하고 경로를 돌려주는 함수도 없다.
+      // 그래서 job 이 들고 있는 소유자·Case·입력으로 접두사를 만들어 Storage API 로
+      // 대상을 찾는다. 지울 것을 찾는 용도이지 부재를 판정하는 경로가 아니다.
       // 이전 실행이 남긴 객체도 같은 방법으로 지워진다.
       if (job.target_type !== "CASE_EMBEDDING" && job.case_input_id) {
         const prefix = `${job.owner_id}/${job.case_id}/${job.case_input_id}/`;
-        const rows = await sql`
-          select name from storage.objects
-           where bucket_id = ${BUCKET} and name like ${`${prefix}%`}`;
-        for (const row of rows) {
-          await admin.deleteObject({ path: row.name });
+        for (const path of await admin.listObjects({ prefix })) {
+          await admin.deleteObject({ path });
           deleted += 1;
         }
       }
@@ -231,10 +238,6 @@ const verifyUnit = async ({ sql, client, admin, token, unit }) => {
 
   const rows = await sql`
     select
-      (select count(*) from storage.objects o
-        where o.bucket_id = ${BUCKET} and o.name = ${unit.objectPath})::int as object_rows,
-      (select count(*) from storage.objects o
-        where o.bucket_id = ${BUCKET} and o.name = ${unit.ocrPath})::int as ocr_object_rows,
       (select count(*) from private.case_embeddings where id = ${unit.embeddingId}::uuid)::int as live_embeddings,
       (select count(*) from private.file_cleanup_jobs
         where target_id = ${unit.objectId}::uuid and status = 'SUCCEEDED')::int as input_job_done,
@@ -261,8 +264,6 @@ const verifyUnit = async ({ sql, client, admin, token, unit }) => {
     issued_url_served_after: servedContent(issued.status, issued.bytes),
     authenticated_read_after_status: authenticated.status,
     authenticated_read_served_after: authenticated.status >= 200 && authenticated.status < 300,
-    object_rows: r.object_rows,
-    ocr_object_rows: r.ocr_object_rows,
     live_embeddings: r.live_embeddings,
     // 청소 작업의 성공은 부재를 다시 조회한 뒤에만 기록된다. 그래서 이 셋이
     // 원본·임시물·vector 의 삭제 축 종결을 대신 말해 준다.
@@ -340,8 +341,6 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
     deleted_cases: deleted.length,
     retained_cases: retained.length,
     // 지운 뒤 남은 것. 하나라도 0 이 아니면 불합격이다.
-    residual_objects: deleted.filter((o) => o.object_rows > 0).length,
-    residual_ocr_objects: deleted.filter((o) => o.ocr_object_rows > 0).length,
     residual_case_embeddings: deleted.filter((o) => o.live_embeddings > 0).length,
     // 삭제 축이 종결되지 않은 것. 청소 성공은 부재를 다시 조회한 뒤에만 남는다.
     unfinished_input_jobs: deleted.filter((o) => o.input_job_done === 0).length,
@@ -356,8 +355,9 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
     max_delete_seconds: deleted.reduce((max, o) => Math.max(max, o.delete_seconds ?? 0), 0),
     // 경계 이전 대상은 청소가 집어가면 안 된다.
     boundary_early_enqueued: units.filter((u) => u.family === "ttl_boundary_early" && u.enqueued > 0).length,
-    boundary_early_objects_present: retained.filter((o) => o.object_rows === 1).length,
-    boundary_due_deleted: observations.filter((o) => o.family === "ttl_boundary_due" && o.object_rows === 0).length,
+    // 보존 대상은 발급 URL 이 아직 본문을 준다. 특권 없는 경로로 존재를 확인한다.
+    boundary_early_objects_present: retained.filter((o) => o.issued_url_served_after).length,
+    boundary_due_deleted: observations.filter((o) => o.family === "ttl_boundary_due" && o.input_job_done > 0).length,
     purged_cases: purged,
     purge_requests_completed: observations.filter((o) => o.purged_requests > 0).length,
     cleanup_jobs_finished: worker.finished,
@@ -372,11 +372,10 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
     }
   }
   const teardown = await runCleanupWorker({ sql, admin });
-  const leftover = await sql`
-    select count(*)::int as n from storage.objects
-     where bucket_id = ${BUCKET} and name like ${`${userId}/%`}`;
+  // 뒷정리 확인은 Storage API 로 한다. 위생 점검이지 부재 판정 경로가 아니다.
+  const leftover = await admin.listObjects({ prefix: `${userId}/`, limit: 100 });
   totals.teardown_jobs_finished = teardown.finished;
-  totals.leftover_objects_after_teardown = leftover[0].n;
+  totals.leftover_objects_after_teardown = leftover.length;
   progress("teardown");
 
   return {
@@ -395,10 +394,13 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
       uses_secret_key_for: "delete-and-ocr-write",
       absence_verified_by: ["issued-signed-url", "member-jwt-read"],
       // worker 역할이 읽을 수 있는 표만 본다. 소유자 표는 직접 읽지 않는다.
-      state_source: ["storage.objects", "private.case_embeddings", "private.file_cleanup_jobs", "public.deletion_requests"],
+      state_source: ["private.case_embeddings", "private.file_cleanup_jobs", "public.deletion_requests"],
+      // 객체가 사라졌다는 판정은 이 셋으로만 한다. 특권 키로 목록을 조회해 판정하지 않는다.
+      // finish_file_cleanup_job 은 객체가 남아 있으면 성공 기록 자체를 거부한다.
+      object_absence_source: ["issued-signed-url", "member-jwt-read", "finish_file_cleanup_job"],
       // 청소 대상의 Storage 경로를 돌려주는 함수가 아직 없다. 그동안은 job 이 들고 있는
-      // 소유자·Case·입력으로 접두사를 만들어 storage.objects 에서 찾는다.
-      cleanup_path_source: "job-prefix-listing",
+      // 소유자·Case·입력으로 접두사를 만들어 Storage API 로 찾는다.
+      cleanup_path_source: "storage-api-prefix-listing",
     },
     sweep: sweep.map((row) => ({ kind: row.kind, affected: Number(row.affected) })),
     cases: observations,
