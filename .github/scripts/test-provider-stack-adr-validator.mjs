@@ -78,6 +78,14 @@ const fixturePaths = [
   ".github/scripts/test-file-safety-evidence.mjs",
   ".github/workflows/file-safety-evidence.yml",
   "docs/ops/file-safety-spike.md",
+  ".github/scripts/retrieval-corpus.mjs",
+  ".github/scripts/retrieval-evidence-policy.mjs",
+  ".github/scripts/retrieval-pipeline.mjs",
+  ".github/scripts/run-retrieval-evidence.mjs",
+  ".github/scripts/test-retrieval-evidence.mjs",
+  ".github/workflows/retrieval-evidence.yml",
+  "docs/ops/retrieval-spike.md",
+  "docs/ops/retrieval-blocker-preregistration.md",
   ...readdirSync(resolve(fileURLToPath(new URL("../../", import.meta.url)), "supabase/migrations"))
     .filter((file) => /^\d{4}_.*\.sql$/.test(file)).sort().map((file) => `supabase/migrations/${file}`),
   ...readdirSync(resolve(fileURLToPath(new URL("../../", import.meta.url)), "supabase/tests"))
@@ -613,6 +621,11 @@ for (const [name, path] of [
   ["trusted file safety guard changes invalidate its policy pin", ".github/scripts/file-safety-guard.mjs"],
   ["trusted file safety worker changes invalidate its policy pin", ".github/scripts/file-safety-worker.mjs"],
   ["trusted file safety parser lock changes invalidate its policy pin", ".github/fixtures/file-safety-parser/package-lock.json"],
+  ["trusted retrieval workflow changes invalidate its policy pin", ".github/workflows/retrieval-evidence.yml"],
+  ["trusted retrieval harness changes invalidate its policy pin", ".github/scripts/run-retrieval-evidence.mjs"],
+  ["trusted retrieval policy changes invalidate its policy pin", ".github/scripts/retrieval-evidence-policy.mjs"],
+  ["trusted retrieval pipeline changes invalidate its policy pin", ".github/scripts/retrieval-pipeline.mjs"],
+  ["trusted retrieval corpus loader changes invalidate its policy pin", ".github/scripts/retrieval-corpus.mjs"],
   ["trusted package manifest changes invalidate its policy pin", "package.json"],
   ["trusted package lock changes invalidate its policy pin", "package-lock.json"],
 ]) {

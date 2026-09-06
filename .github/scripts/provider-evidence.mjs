@@ -10,6 +10,7 @@ import { validateModelEvidenceResult } from "./provider-model-policy.mjs";
 import { expectedInventory as supabaseExpectedInventory, validateSupabaseEvidenceResult } from "./supabase-evidence-policy.mjs";
 import { validateSourceEvidenceResult } from "./source-evidence-policy.mjs";
 import { validateFileSafetyEvidenceResult } from "./file-safety-policy.mjs";
+import { validateRetrievalEvidenceResult } from "./retrieval-evidence-policy.mjs";
 
 export { adrDecisionDigest } from "./provider-adr-digest.mjs";
 export { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
@@ -89,6 +90,18 @@ const TRUSTED_FILE_SAFETY_FIXTURES_BLOB = "52f9dd3d111c765a59945e08cfbaff947a9f1
 const TRUSTED_FILE_SAFETY_GUARD_BLOB = "061bc295edd244b1fe4c9e11b1ea85a821e12937";
 const TRUSTED_FILE_SAFETY_WORKER_BLOB = "1b871d93d6d12d91e7815143dd18bf01498a47b3";
 const TRUSTED_FILE_SAFETY_PARSER_LOCK_BLOB = "05fe45d6507aef416eeacbe678532eb26666da7d";
+const RETRIEVAL_WORKFLOW_PATH = ".github/workflows/retrieval-evidence.yml";
+const RETRIEVAL_HARNESS_PATH = ".github/scripts/run-retrieval-evidence.mjs";
+const RETRIEVAL_POLICY_PATH = ".github/scripts/retrieval-evidence-policy.mjs";
+const RETRIEVAL_PIPELINE_PATH = ".github/scripts/retrieval-pipeline.mjs";
+const RETRIEVAL_CORPUS_PATH = ".github/scripts/retrieval-corpus.mjs";
+const RETRIEVAL_OPS_PATH = "docs/ops/retrieval-spike.md";
+const RETRIEVAL_PREREG_PATH = "docs/ops/retrieval-blocker-preregistration.md";
+const TRUSTED_RETRIEVAL_WORKFLOW_BLOB = "425fe1d69129bdd324d02bd5bd9c00157cf01eef";
+const TRUSTED_RETRIEVAL_HARNESS_BLOB = "5c73462bf5ae7795fb97db9c4168f9847274b56e";
+const TRUSTED_RETRIEVAL_POLICY_BLOB = "37979e5efc8f193320a6b7c3f1a2558f324af5f2";
+const TRUSTED_RETRIEVAL_PIPELINE_BLOB = "8f2f47695b0c4226925c4b2d167efa96ad13eb5b";
+const TRUSTED_RETRIEVAL_CORPUS_BLOB = "5f0c69a855444862aa21b07180c816d70dc6748e";
 const MAX_ARCHIVE_BYTES = 2 * 1024 * 1024;
 const MAX_RESULT_BYTES = 512 * 1024;
 const MAX_EVIDENCE_AGE_MS = 27 * 24 * 60 * 60 * 1000;
@@ -329,6 +342,40 @@ const fileSafetyEvidencePolicy = {
   validate: validateFileSafetyEvidenceResult,
 };
 
+const retrievalEvidencePolicy = {
+  gate: "implementation",
+  workflowName: "Retrieval Evidence",
+  workflowPath: RETRIEVAL_WORKFLOW_PATH,
+  workflowBlobSha: TRUSTED_RETRIEVAL_WORKFLOW_BLOB,
+  harnessPath: RETRIEVAL_HARNESS_PATH,
+  harnessBlobSha: TRUSTED_RETRIEVAL_HARNESS_BLOB,
+  trustedExecutionFiles: Object.freeze([
+    Object.freeze({ path: RETRIEVAL_WORKFLOW_PATH, blobSha: TRUSTED_RETRIEVAL_WORKFLOW_BLOB }),
+    Object.freeze({ path: RETRIEVAL_HARNESS_PATH, blobSha: TRUSTED_RETRIEVAL_HARNESS_BLOB }),
+    Object.freeze({ path: RETRIEVAL_POLICY_PATH, blobSha: TRUSTED_RETRIEVAL_POLICY_BLOB }),
+    Object.freeze({ path: RETRIEVAL_PIPELINE_PATH, blobSha: TRUSTED_RETRIEVAL_PIPELINE_BLOB }),
+    Object.freeze({ path: RETRIEVAL_CORPUS_PATH, blobSha: TRUSTED_RETRIEVAL_CORPUS_BLOB }),
+    Object.freeze({ path: EMBED_FIXTURE_PATH, blobSha: TRUSTED_EMBED_FIXTURE_BLOB }),
+    Object.freeze({ path: EMBED_SPIKE_PATH, blobSha: TRUSTED_EMBED_SPIKE_BLOB }),
+    Object.freeze({ path: ADR_DIGEST_PATH, blobSha: TRUSTED_ADR_DIGEST_BLOB }),
+  ]),
+  jobName: "retrieval-evidence / B-RETRIEVAL-01",
+  scopePaths: Object.freeze([
+    EMBED_FIXTURE_PATH,
+    EMBED_SPIKE_PATH,
+    ADR_DIGEST_PATH,
+    RETRIEVAL_CORPUS_PATH,
+    RETRIEVAL_POLICY_PATH,
+    RETRIEVAL_PIPELINE_PATH,
+    RETRIEVAL_HARNESS_PATH,
+    ".github/scripts/test-retrieval-evidence.mjs",
+    RETRIEVAL_WORKFLOW_PATH,
+    RETRIEVAL_PREREG_PATH,
+    RETRIEVAL_OPS_PATH,
+  ]),
+  validate: validateRetrievalEvidenceResult,
+};
+
 export const evidencePolicies = Object.freeze({
   "B-MODEL-01": modelEvidencePolicy,
   "B-EMBED-01": embedEvidencePolicy,
@@ -336,6 +383,7 @@ export const evidencePolicies = Object.freeze({
   "B-SOURCE-02": sourceEvidencePolicy("B-SOURCE-02"),
   "B-SOURCE-03": sourceEvidencePolicy("B-SOURCE-03"),
   "B-FILE-SAFETY": fileSafetyEvidencePolicy,
+  "B-RETRIEVAL-01": retrievalEvidencePolicy,
 });
 
 export const computeEvidenceScopeDigest = (root, policy, fail) => {
