@@ -135,6 +135,25 @@
       "result_sha256": "74b6482c6e177954b989d3691653c57d16a73eca632c8e17d2ecf7fa86eecc16",
       "adoption_pr_number": 144,
       "adopted_at": "2026-09-06T12:26:47Z"
+    },
+    "B-STORAGE-01": {
+      "code_under_test_sha": "fb48e3a18a960b7f425bff6fbd767164906d6d0d",
+      "workflow_head_sha": "fb48e3a18a960b7f425bff6fbd767164906d6d0d",
+      "run_id": 34034102812,
+      "run_attempt": 1,
+      "workflow_id": 351546800,
+      "workflow_path": ".github/workflows/storage-evidence.yml",
+      "workflow_blob_sha": "9893957251fd0446eacc9b3dddbe69c902b1c0c8",
+      "harness_blob_sha": "3d3ec4d6d444d0b9e11bc7897fad7652c02cb070",
+      "scope_sha256": "da55e207571c2119e21f689bcfd9621bbf75aae0e56de33fa4cc917454ddf7e7",
+      "job_name": "storage-evidence / B-STORAGE-01",
+      "artifact_id": 9989589690,
+      "artifact_name": "provider-evidence-B-STORAGE-01-fb48e3a18a960b7f425bff6fbd767164906d6d0d",
+      "artifact_digest": "sha256:6cbe4c8cb115524abfc7360352665ea53589036175803874a486865a6b173f4c",
+      "result_path": "evidence/results/B-STORAGE-01/34034102812.json",
+      "result_sha256": "aa74700b74e5e7060714188fc0abb0f8574e69abff0e9e95db021a52250a574c",
+      "adoption_pr_number": 147,
+      "adopted_at": "2026-09-06T12:47:21Z"
     }
   }
 }
