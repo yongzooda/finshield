@@ -9,7 +9,7 @@
  */
 
 import { jsonNoStore, readJson, str } from "@/lib/ops/http";
-import { authConfigured, finshieldEnv } from "@/lib/finshield/env";
+import { finshieldEnv } from "@/lib/finshield/env";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
