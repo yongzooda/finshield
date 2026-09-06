@@ -152,7 +152,7 @@
       "artifact_digest": "sha256:a465d4df22fe0a313a5adfce8efaff13c5b3aeac3ec05f3f492807b5c1884562",
       "result_path": "evidence/results/B-CONSENT-01/34031574803.json",
       "result_sha256": "2702bfb93b0df3b2066ed4bfff4ba55988a0bf002d820cea0a60d5e76c8212ea",
-      "adoption_pr_number": 0,
+      "adoption_pr_number": 140,
       "adopted_at": "2026-09-06T11:55:55Z"
     }
   }
