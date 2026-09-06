@@ -48,6 +48,7 @@ begin
     raise exception '페이지 상한을 넘겼는데 통과했습니다';
   exception when check_violation then null;
   end;
+  raise notice '  허용 확인: 페이지는 함수로만 만들어지고 재등록·상한 초과는 막힌다';
   insert into actx values ('page', (select id from public.case_input_pages where case_input_id = inp and page_no = 1));
 end
 $$;
@@ -75,6 +76,7 @@ begin
     raise exception '없는 입력에 vector 를 등록했습니다';
   exception when insufficient_privilege then null;
   end;
+  raise notice '  거부 확인: 남의 소유자·긴 수명·없는 입력의 산출물 등록';
 end
 $$;
 
@@ -123,6 +125,7 @@ begin
     raise exception 'Case vector 가 청소에 들어가지 않았습니다';
   end if;
   if art is null then raise exception 'OCR 임시물 식별자가 없습니다'; end if;
+  raise notice '  허용 확인: Claim 확인이 원본·OCR 임시물·Case vector 를 모두 청소에 넣는다';
 end
 $$;
 
@@ -149,6 +152,7 @@ begin
   -- 두 번 불러도 새 작업을 만들지 않는다.
   select private.stop_case_input(owner, kase, inp, 'USER_STOPPED') into n;
   if n <> 0 then raise exception '중단이 멱등하지 않습니다: %', n; end if;
+  raise notice '  허용 확인: 중단은 결과 축만 바꾸고 세 대상을 청소에 넣으며 멱등하다';
 end
 $$;
 
@@ -173,8 +177,9 @@ begin
     n := n + 1;
   end loop;
   if n <> 6 then raise exception '등록 함수가 여섯 개가 아닙니다: %', n; end if;
+  raise notice '  거부 확인: 회원·익명은 산출물 등록 함수를 부르지 못한다';
 end
 $$;
 
 rollback;
-\echo '== 17 통과'
+\echo '17. 입력 산출물·중단 불변식 5건을 통과했습니다.'
