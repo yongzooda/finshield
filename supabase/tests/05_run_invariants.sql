@@ -257,7 +257,9 @@ do $$
 declare n int;
 begin
   set local role finshield_worker;
-  select count(*) into n from private.execution_manifests;
+  -- 0021 이 제품 Manifest 를 심으므로 총수는 고정값이 아니다. 이 시험이 만든 것만 센다.
+  select count(*) into n from private.execution_manifests
+   where id = '00000000-0000-4000-8000-00000000aa01';
   if n <> 1 then raise exception 'Worker 가 Manifest 를 읽지 못했습니다 (%)', n; end if;
   select count(*) into n from public.verification_runs;
   if n <> 2 then raise exception 'Worker 가 Run 을 읽지 못했습니다 (%)', n; end if;
