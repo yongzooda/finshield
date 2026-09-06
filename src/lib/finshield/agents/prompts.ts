@@ -62,6 +62,52 @@ export const domainSystemPrompt = (agentCode: string): string => {
   return `${COMMON}\n\n${scope}`;
 };
 
+/** Agent 마다 자기 지시문을 쓴다. 하나를 돌려 쓰지 않는다. */
+export const systemPromptFor = (agentCode: string): string => {
+  if (agentCode === "COVE") return COVE_SYSTEM;
+  if (agentCode === "RED_TEAM") return RED_TEAM_SYSTEM;
+  if (agentCode === "EVIDENCE_JUDGE") return JUDGE_SYSTEM;
+  return domainSystemPrompt(agentCode);
+};
+
+/**
+ * CoVe 지시문.
+ *
+ * 규칙 3: 초기 결론을 다시 읽는 self-review 로 만들지 않는다. 그래서 이 Agent 는
+ * Domain Agent 의 판단도 그때 쓴 근거도 받지 않는다. Claim 문장만 받고 자기
+ * 검색으로 다시 확인한다. 두 경로가 같은 결론에 이르렀을 때만 확인으로 센다.
+ */
+export const COVE_SYSTEM = `${COMMON}
+
+당신은 독립 재확인을 맡는다. 앞선 판단을 보지 못하고 앞선 검색도 모른다.
+주어진 Claim 만 보고 처음부터 다시 확인한다.
+
+각 Claim 에 대해 다음 중 하나를 적는다.
+
+- CONFIRMED: 스스로 찾은 근거로 그 Claim 이 사실이라고 확인했다.
+- REFUTED: 스스로 찾은 근거로 그 Claim 이 사실이 아니라고 확인했다.
+- INCONCLUSIVE: 어느 쪽도 확인하지 못했다.
+
+근거를 찾지 못했으면 INCONCLUSIVE 다. 못 찾았다는 사실을 확인으로 바꾸지 않는다.`;
+
+/**
+ * Red Team 지시문.
+ *
+ * 규칙 3: 초기 결론을 뒤집을 공식 반대 근거를 찾는다. 못 찾았다는 사실이
+ * 확인이 되지 않는다 (AI-011). 그래서 «반대 근거 없음»은 결론이 아니라 관측이다.
+ */
+export const RED_TEAM_SYSTEM = `${COMMON}
+
+당신은 반대 근거를 찾는다. 주어진 Claim 이 사실이 아닐 수 있다는 공식 근거를
+적극적으로 찾는다. 찾지 못하면 그 사실만 적는다.
+
+각 Claim 에 대해 다음 중 하나를 적는다.
+
+- COUNTER_EVIDENCE: 그 Claim 을 뒤집는 공식 근거를 찾았다.
+- NONE_FOUND: 찾지 못했다.
+
+NONE_FOUND 는 그 Claim 이 사실이라는 뜻이 아니다. 반대 근거를 못 찾았다는 뜻일 뿐이다.`;
+
 export const JUDGE_SYSTEM = `${COMMON}
 
 당신은 Evidence Judge 다. 원문을 보지 않는다. Domain Agent 들이 만든 구조와 근거만 본다.

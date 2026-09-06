@@ -17,11 +17,30 @@ import {
   type ToolEvidence,
 } from "../schemas";
 import { executeTool, persistToolRuns, type PendingToolRun, type RunSession, type ToolImpl } from "../tools/runtime";
-import { domainSystemPrompt } from "./prompts";
+import { systemPromptFor } from "./prompts";
 
 const digest = (value: unknown) => createHash("sha256").update(JSON.stringify(value), "utf8").digest("hex");
 
 export const MAX_TOOL_TURNS = 6;
+
+export type Decoded = { ok: true; value: unknown } | { ok: false; reason: string };
+
+/**
+ * Domain Agent 출력 해독.
+ *
+ * Schema 를 통과해도 인용이 틀리면 받지 않는다. 지어낸 근거 이름과 근거 없는
+ * 확정을 여기서 버린다. 규칙 1 의 마지막 관문이다.
+ */
+const decodeDomainOutput = (raw: unknown, session: RunSession): Decoded => {
+  const parsed = domainAgentOutput.safeParse(raw);
+  if (!parsed.success) return { ok: false, reason: "OUTPUT_SCHEMA_INVALID" };
+  const problems: string[] = [];
+  for (const finding of parsed.data.findings) {
+    problems.push(...citationProblems(finding.evidence_refs, finding.state, session.evidence));
+  }
+  if (problems.length > 0) return { ok: false, reason: "CITATION_INVALID" };
+  return { ok: true, value: parsed.data };
+};
 
 export type ToolChoice = { toolCode: string; input: unknown };
 
@@ -62,11 +81,13 @@ export const runDomainAgent = async (args: {
   model: AgentModel;
   impls: Record<string, ToolImpl>;
   usage?: { inputTokens: number; outputTokens: number; costMicrounits: number };
+  /** 다른 Schema 로 받는 Agent 를 위한 자리. 없으면 Domain Schema 로 받는다. */
+  decodeOutput?: (raw: unknown) => Decoded;
 }): Promise<AgentRunResult> => {
   const { session, agentCode, input, model, impls } = args;
   const spec = AGENTS.find((agent) => agent.agentCode === agentCode);
   if (!spec) throw new Error(`Manifest 에 없는 Agent 다: ${agentCode}`);
-  const system = domainSystemPrompt(agentCode);
+  const system = systemPromptFor(agentCode);
   const { sql, ownerId, caseId, runId } = session;
   const startedAt = Date.now();
 
@@ -106,22 +127,15 @@ export const runDomainAgent = async (args: {
   let status: AgentRunResult["status"] = "SUCCEEDED";
   try {
     const raw = await model.decide({ system, input, evidence, observations });
-    const parsed = domainAgentOutput.safeParse(raw);
-    if (!parsed.success) {
+    // 다른 Schema 로 받는 Agent 는 자기 해독기를 준다. 없으면 Domain Schema 로 받는다.
+    const decoded = args.decodeOutput
+      ? args.decodeOutput(raw)
+      : decodeDomainOutput(raw, session);
+    if (!decoded.ok) {
       status = "FAILED";
-      reasonCode = "OUTPUT_SCHEMA_INVALID";
+      reasonCode = decoded.reason;
     } else {
-      // 규칙 1: 지어낸 근거를 인용했거나 근거 없이 확정했으면 그 판단을 버린다.
-      const problems: string[] = [];
-      for (const finding of parsed.data.findings) {
-        problems.push(...citationProblems(finding.evidence_refs, finding.state, session.evidence));
-      }
-      if (problems.length > 0) {
-        status = "FAILED";
-        reasonCode = "CITATION_INVALID";
-      } else {
-        output = parsed.data;
-      }
+      output = decoded.value as DomainAgentOutput;
     }
   } catch {
     status = "FAILED";
@@ -156,4 +170,54 @@ export const runDomainAgent = async (args: {
   await persistToolRuns(session, agentRunId, pendings);
 
   return { agentRunId, output, evidence, status, reasonCode, toolCalls };
+};
+
+/**
+ * 독립 검증 Agent 실행 (CoVe·Red Team).
+ *
+ * 규칙 3 이 요구하는 분리가 여기 있다. 이 Agent 들은 Domain Agent 의 판단도
+ * 그때 쓴 근거도 받지 않는다. Claim 문장만 받고 자기 도구로 처음부터 다시
+ * 찾는다. 그래서 같은 결론이 나오면 두 경로가 독립적으로 이른 것이다.
+ */
+export const runReviewAgent = async <T>(args: {
+  session: RunSession;
+  agentCode: string;
+  claims: DomainAgentInput["claims"];
+  journeyStage: DomainAgentInput["journey_stage"];
+  model: AgentModel;
+  impls: Record<string, ToolImpl>;
+  parse: (raw: unknown) => { ok: true; value: T } | { ok: false };
+  refsOf: (value: T) => { refs: string[]; confirmed: boolean }[];
+}): Promise<{ agentRunId: string; output: T | null; status: AgentRunResult["status"]; reasonCode: string | null; toolCalls: number }> => {
+  const result = await runDomainAgent({
+    session: args.session,
+    agentCode: args.agentCode,
+    input: {
+      schema_version: "in-v1",
+      agent_code: args.agentCode,
+      scenario: "LOAN",
+      journey_stage: args.journeyStage,
+      claims: args.claims,
+      // 초기 결론도 초기 검색도 넘기지 않는다. 그것이 분리의 실체다.
+      masked_intake: "",
+    },
+    model: args.model,
+    impls: args.impls,
+    // Domain 출력 Schema 대신 이 Agent 의 Schema 로 받는다.
+    decodeOutput: (raw) => {
+      const parsed = args.parse(raw);
+      if (!parsed.ok) return { ok: false, reason: "OUTPUT_SCHEMA_INVALID" };
+      const problems: string[] = [];
+      for (const entry of args.refsOf(parsed.value)) {
+        problems.push(...citationProblems(entry.refs, entry.confirmed ? "VERIFIED" : "UNKNOWN", args.session.evidence));
+      }
+      return problems.length > 0
+        ? { ok: false, reason: "CITATION_INVALID" }
+        : { ok: true, value: parsed.value as unknown };
+    },
+  }) as unknown as AgentRunResult & { output: T | null };
+  return {
+    agentRunId: result.agentRunId, output: result.output,
+    status: result.status, reasonCode: result.reasonCode, toolCalls: result.toolCalls,
+  };
 };

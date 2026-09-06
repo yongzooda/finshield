@@ -146,3 +146,29 @@ export const independentCount = (refs: string[], pool: Map<string, ToolEvidence>
   }
   return keys.size;
 };
+
+/** CoVe 결과. 확인·반증·판단 불가 셋뿐이다. */
+export const coveStatus = z.enum(["CONFIRMED", "REFUTED", "INCONCLUSIVE"]);
+export const coveOutput = z.object({
+  schema_version: z.literal("out-v1"),
+  results: z.array(z.object({
+    claim_ref: z.string(),
+    status: coveStatus,
+    evidence_refs: z.array(z.string()),
+    note_masked: z.string().max(400),
+  })),
+});
+export type CoveOutput = z.infer<typeof coveOutput>;
+
+/** Red Team 결과. 반대 근거를 찾았는지만 말한다. */
+export const redTeamStatus = z.enum(["COUNTER_EVIDENCE", "NONE_FOUND"]);
+export const redTeamOutput = z.object({
+  schema_version: z.literal("out-v1"),
+  results: z.array(z.object({
+    claim_ref: z.string(),
+    status: redTeamStatus,
+    evidence_refs: z.array(z.string()),
+    note_masked: z.string().max(400),
+  })),
+});
+export type RedTeamOutput = z.infer<typeof redTeamOutput>;
