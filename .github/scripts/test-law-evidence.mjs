@@ -17,7 +17,7 @@ ok(TARGETS.length === 2, "Preview 와 Production 을 모두 봐야 한다");
 ok(SCENARIOS.includes("registered") && SCENARIOS.includes("unregistered"), "등록·미등록 Referer 를 모두 봐야 한다");
 ok(SCENARIOS.includes("absent"), "Referer 없는 요청도 봐야 한다");
 ok(SCENARIOS.includes("snapshot"), "고정 질의가 있어야 한다");
-ok(SCENARIOS.includes("change_recent"), "변경 조문 조회가 있어야 한다");
+ok(SCENARIOS.includes("change_d1") && SCENARIOS.includes("change_d3"), "변경 조문을 두 날짜로 봐야 한다");
 ok(SNAPSHOT_REPEATS >= 2, "고정 질의는 두 번 이상 불러야 흔들림을 본다");
 ok(OUTCOMES.includes("rate_limited") && OUTCOMES.includes("server_error"), "429·5xx 를 구분해 남겨야 한다");
 // 같은 시각이면 같은 표식이고 OC 원문은 표식에 드러나지 않는다.
@@ -114,6 +114,8 @@ rejects("등록 도메인이 한쪽만 통함", (o) => { o.totals.registered_ok 
 rejects("고정 질의 실패", (o) => { o.totals.snapshot_ok = 0; });
 rejects("고정 질의 해시 흔들림", (o) => { o.totals.snapshot_hash_stable = false; o.totals.distinct_snapshot_hashes = 2; });
 rejects("본문 해시 없음", (o) => { const r = o.records.find((x) => x.outcome === "ok"); r.body_sha256 = null; });
+rejects("어제 자 변경 조문 미응답", (o) => { o.totals.change_d1_ok = 1; });
+rejects("사흘 전 변경 조문 미응답", (o) => { o.totals.change_d3_ok = 0; });
 rejects("시간 초과", (o) => { o.totals.timeouts = 1; });
 rejects("서버 오류", (o) => { o.totals.server_errors = 1; });
 rejects("observations 키 추가", (o) => { o.extra = 1; });

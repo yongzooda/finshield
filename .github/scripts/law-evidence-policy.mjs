@@ -26,7 +26,7 @@ const ROW_KEYS = [
 
 const TOTAL_KEYS = [
   "records", "malformed_records", "deployment_id_mismatches", "registered_ok", "absent_ok",
-  "deployment_url_ok", "unregistered_ok", "snapshot_ok", "change_recent_ok", "auth_rejected",
+  "deployment_url_ok", "unregistered_ok", "snapshot_ok", "change_d1_ok", "change_d3_ok", "auth_rejected",
   "rate_limited", "server_errors", "http_errors", "timeouts", "distinct_snapshot_hashes",
   "snapshot_hash_stable", "max_ms",
 ];
@@ -82,6 +82,9 @@ export const validateLawEvidenceResult = (result, fail) => {
   }
   // 등록하지 않은 도메인이 통하면 ADR 5.2 의 전제가 틀린 것이다.
   if (t.unregistered_ok !== 0) fail("등록하지 않은 도메인으로도 통했습니다. ADR 5.2 의 전제를 다시 봐야 합니다.");
+  // 일자별 조문 개정 조회는 어제와 사흘 전 모두 답해야 원장이 D+1 을 말할 수 있다.
+  if (t.change_d1_ok !== TARGETS.length) fail("어제 자 변경 조문 조회가 양쪽에서 통하지는 않았습니다.");
+  if (t.change_d3_ok !== TARGETS.length) fail("사흘 전 변경 조문 조회가 양쪽에서 통하지는 않았습니다.");
   if (t.timeouts !== 0) fail("시간 초과가 있었습니다.");
   if (t.server_errors !== 0) fail("서버 오류가 있었습니다.");
 };
