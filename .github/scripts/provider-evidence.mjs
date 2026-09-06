@@ -11,6 +11,7 @@ import { expectedInventory as supabaseExpectedInventory, validateSupabaseEvidenc
 import { validateSourceEvidenceResult } from "./source-evidence-policy.mjs";
 import { validateFileSafetyEvidenceResult } from "./file-safety-policy.mjs";
 import { validateRetrievalEvidenceResult } from "./retrieval-evidence-policy.mjs";
+import { validateRateEvidenceResult } from "./rate-evidence-policy.mjs";
 
 export { adrDecisionDigest } from "./provider-adr-digest.mjs";
 export { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
@@ -102,6 +103,15 @@ const TRUSTED_RETRIEVAL_HARNESS_BLOB = "91905cfc636dd8c4570277d17093fb644021288b
 const TRUSTED_RETRIEVAL_POLICY_BLOB = "69245a8ba32dbd7611a8de27f77bc865e99ead59";
 const TRUSTED_RETRIEVAL_PIPELINE_BLOB = "3b160aa495615a7644914653f7e75c7a59f6eb99";
 const TRUSTED_RETRIEVAL_CORPUS_BLOB = "9523430cc41073758d3e37f48c532a1ff9db1f02";
+const RATE_WORKFLOW_PATH = ".github/workflows/rate-evidence.yml";
+const RATE_HARNESS_PATH = ".github/scripts/run-rate-evidence.mjs";
+const RATE_POLICY_PATH = ".github/scripts/rate-evidence-policy.mjs";
+const RATE_SPIKE_PATH = ".github/scripts/rate-budget-spike.mjs";
+const RATE_OPS_PATH = "docs/ops/rate-budget-spike.md";
+const TRUSTED_RATE_WORKFLOW_BLOB = "ffc408ce953baea16837d81134117719989f8c72";
+const TRUSTED_RATE_HARNESS_BLOB = "ba2e0d403f4cd337216c33dfa4dd97d783cb1d08";
+const TRUSTED_RATE_POLICY_BLOB = "0fc5c68023bccdeae4dac562ed19f992ce0d1405";
+const TRUSTED_RATE_SPIKE_BLOB = "17f0b31ad4db5bc52013e4e6201678a3408a9221";
 const MAX_ARCHIVE_BYTES = 2 * 1024 * 1024;
 const MAX_RESULT_BYTES = 512 * 1024;
 const MAX_EVIDENCE_AGE_MS = 27 * 24 * 60 * 60 * 1000;
@@ -378,6 +388,35 @@ const retrievalEvidencePolicy = {
   validate: validateRetrievalEvidenceResult,
 };
 
+const rateEvidencePolicy = {
+  gate: "implementation",
+  workflowName: "Rate Budget Evidence",
+  workflowPath: RATE_WORKFLOW_PATH,
+  workflowBlobSha: TRUSTED_RATE_WORKFLOW_BLOB,
+  harnessPath: RATE_HARNESS_PATH,
+  harnessBlobSha: TRUSTED_RATE_HARNESS_BLOB,
+  trustedExecutionFiles: Object.freeze([
+    Object.freeze({ path: RATE_WORKFLOW_PATH, blobSha: TRUSTED_RATE_WORKFLOW_BLOB }),
+    Object.freeze({ path: RATE_HARNESS_PATH, blobSha: TRUSTED_RATE_HARNESS_BLOB }),
+    Object.freeze({ path: RATE_POLICY_PATH, blobSha: TRUSTED_RATE_POLICY_BLOB }),
+    Object.freeze({ path: RATE_SPIKE_PATH, blobSha: TRUSTED_RATE_SPIKE_BLOB }),
+    Object.freeze({ path: ADR_DIGEST_PATH, blobSha: TRUSTED_ADR_DIGEST_BLOB }),
+  ]),
+  jobName: "rate-evidence / B-RATE-01",
+  scopePaths: Object.freeze([
+    ...supabaseExpectedInventory(resolve(fileURLToPath(new URL("../../", import.meta.url)))).migrations.map((file) => `supabase/migrations/${file}`),
+    "supabase/tests/00_supabase_stub.sql",
+    ADR_DIGEST_PATH,
+    RATE_SPIKE_PATH,
+    RATE_POLICY_PATH,
+    RATE_HARNESS_PATH,
+    ".github/scripts/test-rate-evidence.mjs",
+    RATE_WORKFLOW_PATH,
+    RATE_OPS_PATH,
+  ]),
+  validate: validateRateEvidenceResult,
+};
+
 export const evidencePolicies = Object.freeze({
   "B-MODEL-01": modelEvidencePolicy,
   "B-EMBED-01": embedEvidencePolicy,
@@ -386,6 +425,7 @@ export const evidencePolicies = Object.freeze({
   "B-SOURCE-03": sourceEvidencePolicy("B-SOURCE-03"),
   "B-FILE-SAFETY": fileSafetyEvidencePolicy,
   "B-RETRIEVAL-01": retrievalEvidencePolicy,
+  "B-RATE-01": rateEvidencePolicy,
 });
 
 export const computeEvidenceScopeDigest = (root, policy, fail) => {
