@@ -99,6 +99,12 @@ const fixturePaths = [
   ".github/scripts/test-consent-evidence.mjs",
   ".github/workflows/consent-evidence.yml",
   "docs/ops/consent-isolation-spike.md",
+  ".github/scripts/storage-spike.mjs",
+  ".github/scripts/storage-evidence-policy.mjs",
+  ".github/scripts/run-storage-evidence.mjs",
+  ".github/scripts/test-storage-evidence.mjs",
+  ".github/workflows/storage-evidence.yml",
+  "docs/ops/storage-spike.md",
   "src/lib/agents/pii.ts",
   "src/lib/agents/__tests__/pii-synthetic.ts",
   ...readdirSync(resolve(fileURLToPath(new URL("../../", import.meta.url)), "supabase/migrations"))
@@ -650,6 +656,10 @@ for (const [name, path] of [
   ["trusted consent policy changes invalidate its policy pin", ".github/scripts/consent-evidence-policy.mjs"],
   ["trusted consent gate changes invalidate its policy pin", ".github/scripts/consent-gate.mjs"],
   ["trusted PII module changes invalidate its policy pin", "src/lib/agents/pii.ts"],
+  ["trusted storage workflow changes invalidate its policy pin", ".github/workflows/storage-evidence.yml"],
+  ["trusted storage harness changes invalidate its policy pin", ".github/scripts/run-storage-evidence.mjs"],
+  ["trusted storage policy changes invalidate its policy pin", ".github/scripts/storage-evidence-policy.mjs"],
+  ["trusted storage spike changes invalidate its policy pin", ".github/scripts/storage-spike.mjs"],
   ["trusted package manifest changes invalidate its policy pin", "package.json"],
   ["trusted package lock changes invalidate its policy pin", "package-lock.json"],
 ]) {
