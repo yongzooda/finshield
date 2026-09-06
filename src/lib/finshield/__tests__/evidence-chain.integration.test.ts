@@ -8,8 +8,10 @@
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import postgres from "postgres";
-import { createRunSession, runTool, sha256, type ToolOutcome } from "../tools/runtime";
+import { createRunSession, executeTool, persistToolRuns, sha256, type ToolOutcome } from "../tools/runtime";
 import { parseUrlHost } from "../tools/url";
+import { runDomainAgent, type AgentModel } from "../agents/runner";
+import type { DomainAgentInput } from "../schemas";
 import { DEFINITION_VERSION } from "../manifest";
 import { loadManifest, resetManifestCache } from "../registry";
 
@@ -84,11 +86,13 @@ maybe("근거 사슬", () => {
 
   it("Tool 결과가 근거가 되고 인용 이름이 붙는다", async () => {
     const s = session();
+    const pendings = [];
     // 사용자가 낸 주소는 공식 출처가 아니므로 근거가 되지 않는다. 맥락으로만 남는다.
-    const urlResult = await runTool(s, agentRunId, "FRAUD_CHANNEL", "parse_url_host", "PARSE_URL",
+    const urlResult = await executeTool(s, "FRAUD_CHANNEL", "parse_url_host", "PARSE_URL",
       { urls: ["https://apply.example.co.kr/loan"] }, parseUrlHost);
+    pendings.push(urlResult.pending);
     expect(urlResult.evidence).toEqual([]);
-    expect(urlResult.observations).toMatchObject({ kind: "url_facts" });
+    expect(urlResult.pending.observations).toMatchObject({ kind: "url_facts" });
 
     // 공식 출처를 돌려주는 도구는 근거가 되고 인용 이름이 붙는다.
     const official = async (): Promise<ToolOutcome> => ({
@@ -103,18 +107,22 @@ maybe("근거 사슬", () => {
       }],
       provenanceComplete: true, candidateCount: 1,
     });
-    const result = await runTool(s, agentRunId, "FRAUD_CHANNEL", "lookup_official_channel", "VERIFY_CHANNEL",
+    const result = await executeTool(s, "FRAUD_CHANNEL", "lookup_official_channel", "VERIFY_CHANNEL",
       {}, official);
+    pendings.push(result.pending);
     expect(result.evidence).toHaveLength(1);
     expect(result.evidence[0].evidence_ref).toBe("E1");
     expect(s.evidence.get("E1")?.tool_code).toBe("lookup_official_channel");
+
+    // 기록은 실행이 끝난 뒤 한 번에 남긴다.
+    await persistToolRuns(s, agentRunId, pendings);
     const rows = await sql`
       select count(*)::int as n from public.evidences where verification_run_id = ${runId}::uuid`;
     expect(rows[0].n).toBeGreaterThan(0);
   }, 30_000);
 
   it("Allowlist 밖 목적으로는 부를 수 없다", async () => {
-    await expect(runTool(session(), agentRunId, "FRAUD_CHANNEL", "lookup_statute", "LOOKUP_STATUTE",
+    await expect(executeTool(session(), "FRAUD_CHANNEL", "lookup_statute", "LOOKUP_STATUTE",
       {}, parseUrlHost)).rejects.toThrow();
   });
 
@@ -130,19 +138,127 @@ maybe("근거 사슬", () => {
       }],
       provenanceComplete: false, candidateCount: 1,
     });
-    const produced = await runTool(session(), agentRunId, "FRAUD_CHANNEL", "parse_url_host", "PARSE_URL", {}, incomplete);
+    const s = session();
+    const produced = await executeTool(s, "FRAUD_CHANNEL", "parse_url_host", "PARSE_URL", {}, incomplete);
     expect(produced.evidence).toEqual([]);
+    await persistToolRuns(s, agentRunId, [produced.pending]);
     const after = await sql`select count(*)::int as n from public.evidences where verification_run_id = ${runId}::uuid`;
     expect(after[0].n).toBe(before[0].n);
   }, 30_000);
 
   it("Tool 이 실패해도 실행 기록은 남고 근거는 비어 있다", async () => {
     const boom = async (): Promise<ToolOutcome> => { throw new Error("boom"); };
-    const produced = await runTool(session(), agentRunId, "FRAUD_CHANNEL", "parse_url_host", "PARSE_URL", {}, boom);
+    const s = session();
+    const produced = await executeTool(s, "FRAUD_CHANNEL", "parse_url_host", "PARSE_URL", {}, boom);
     expect(produced.evidence).toEqual([]);
+    await persistToolRuns(s, agentRunId, [produced.pending]);
     const rows = await sql`
       select count(*)::int as n from public.tool_runs
        where verification_run_id = ${runId}::uuid and status = 'FAILED'::public.execution_status`;
     expect(rows[0].n).toBeGreaterThan(0);
   }, 30_000);
+
+  const agentInput = (): DomainAgentInput => ({
+    schema_version: "in-v1",
+    agent_code: "FRAUD_CHANNEL",
+    scenario: "LOAN",
+    journey_stage: "PRE_TRANSACTION",
+    claims: [{ claim_ref: "C1", claim_type: "CHANNEL", statement_masked: "문자로 받은 주소로 신청하라고 했다", materiality: "MATERIAL" }],
+    masked_intake: "마스킹된 상담 내용",
+  });
+
+  const officialTool = async () => ({
+    items: [{
+      sourceType: "GUIDE", authorityGrade: "B" as const, publisher: "서민금융진흥원",
+      title: "공식 신청 채널 안내", officialId: "kinfa:guide:agent", canonicalUrl: null,
+      publishedAt: null, sourceVersion: "v1", contentHash: sha256("agent-guide"),
+      fingerprint: sha256("kinfa:guide:agent"), freshness: "FRESH" as const, licenseCode: null,
+      isComplete: true, isCitable: true, locator: { kind: "guide" },
+      excerptMasked: "공식 신청은 안내된 경로로만 받는다", directness: "DIRECT" as const,
+      referenceOnly: false, selectionReasonCode: "OFFICIAL_CHANNEL",
+    }],
+    provenanceComplete: true, candidateCount: 1,
+  });
+
+  it("Agent 는 허용된 Tool 만 부르고 근거를 인용해 판단한다", async () => {
+    let asked = 0;
+    const model: AgentModel = {
+      chooseTools: async () => (asked++ === 0
+        ? [{ toolCode: "lookup_official_channel", input: {} }]
+        : []),
+      decide: async ({ evidence }) => ({
+        schema_version: "out-v1",
+        findings: [{
+          claim_ref: "C1", state: "VERIFIED", relation: "SUPPORT",
+          evidence_refs: [evidence[0].evidence_ref],
+          summary_masked: "안내된 공식 경로가 확인됩니다", limits: [],
+        }],
+        out_of_scope_claim_refs: [],
+      }),
+    };
+    const result = await runDomainAgent({
+      session: session(), agentCode: "FRAUD_CHANNEL", input: agentInput(), model,
+      impls: { lookup_official_channel: officialTool },
+    });
+    expect(result.status).toBe("SUCCEEDED");
+    expect(result.output?.findings[0].state).toBe("VERIFIED");
+    expect(result.toolCalls).toBe(1);
+    const rows = await sql`
+      select status::text as status from public.agent_runs where id = ${result.agentRunId}::uuid`;
+    expect(rows[0].status).toBe("SUCCEEDED");
+  }, 30_000);
+
+  it("허용 목록 밖 Tool 을 고르면 부르지 않고 그 사실을 남긴다", async () => {
+    const model: AgentModel = {
+      chooseTools: async () => [{ toolCode: "lookup_statute", input: {} }],
+      decide: async () => ({ schema_version: "out-v1", findings: [], out_of_scope_claim_refs: ["C1"] }),
+    };
+    const result = await runDomainAgent({
+      session: session(), agentCode: "FRAUD_CHANNEL", input: agentInput(), model,
+      impls: { lookup_statute: officialTool },
+    });
+    expect(result.toolCalls).toBe(0);
+    expect(result.reasonCode).toBe("TOOL_NOT_ALLOWED");
+  }, 30_000);
+
+  it("지어낸 근거를 인용하면 판단을 버린다", async () => {
+    const model: AgentModel = {
+      chooseTools: async () => [],
+      decide: async () => ({
+        schema_version: "out-v1",
+        findings: [{
+          claim_ref: "C1", state: "VERIFIED", relation: "SUPPORT", evidence_refs: ["E99"],
+          summary_masked: "확인했습니다", limits: [],
+        }],
+        out_of_scope_claim_refs: [],
+      }),
+    };
+    const result = await runDomainAgent({
+      session: session(), agentCode: "FRAUD_CHANNEL", input: agentInput(), model,
+      impls: {},
+    });
+    expect(result.status).toBe("FAILED");
+    expect(result.reasonCode).toBe("CITATION_INVALID");
+    expect(result.output).toBeNull();
+  }, 30_000);
+
+  it("근거 없이 확정하면 판단을 버린다", async () => {
+    const model: AgentModel = {
+      chooseTools: async () => [],
+      decide: async () => ({
+        schema_version: "out-v1",
+        findings: [{
+          claim_ref: "C1", state: "CONTRADICTED", relation: "CONTRADICT", evidence_refs: [],
+          summary_masked: "사실이 아닙니다", limits: [],
+        }],
+        out_of_scope_claim_refs: [],
+      }),
+    };
+    const result = await runDomainAgent({
+      session: session(), agentCode: "FRAUD_CHANNEL", input: agentInput(), model, impls: {},
+    });
+    expect(result.status).toBe("FAILED");
+    expect(result.reasonCode).toBe("CITATION_INVALID");
+  }, 30_000);
+
 });

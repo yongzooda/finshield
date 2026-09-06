@@ -114,7 +114,9 @@ const assertAllowed = (agentCode: string, toolCode: string, purposeCode: string)
  * 조회한 출처를 Snapshot 으로 남긴다. kb 표는 적재 역할의 것이라 worker 가 직접
  * 쓰지 못하고 함수로만 쓴다. 같은 원문이면 행이 늘지 않고 조회 시각만 갱신된다.
  */
-const recordSnapshot = async (sql: Sql, item: SourceItem, toolCode: string): Promise<string> => {
+const recordSnapshot = async (
+  sql: Sql, item: SourceItem, toolCode: string, runId: string,
+): Promise<string> => {
   const rows = await sql`
     select private.record_source_snapshot(
       ${item.sourceType}, ${item.authorityGrade}::public.authority_level, ${item.publisher},
@@ -122,27 +124,47 @@ const recordSnapshot = async (sql: Sql, item: SourceItem, toolCode: string): Pro
       ${item.articleNo ?? null}, ${item.publishedAt}, ${item.effectiveFrom ?? null},
       ${item.sourceVersion}, ${item.contentHash}, ${item.fingerprint},
       ${item.freshness}::public.freshness_status, ${item.licenseCode}, ${item.isComplete},
-      ${item.isCitable}, ${toolCode}, ${item.officialId ?? item.contentHash}) as id`;
+      ${item.isCitable}, ${toolCode},
+      ${`${runId}:${item.officialId ?? item.contentHash}`}) as id`;
   return rows[0].id as string;
 };
 
-export const runTool = async (
+/** 아직 기록하지 않은 Tool 실행 하나. 끝난 뒤 Agent 기록과 함께 남긴다. */
+export type PendingToolRun = {
+  toolCode: string;
+  purposeCode: string;
+  input: unknown;
+  startedAt: number;
+  finishedAt: number;
+  status: "SUCCEEDED" | "PARTIAL" | "FAILED";
+  provenanceComplete: boolean;
+  candidateCount: number;
+  errorCode: string | null;
+  reasonCode: string | null;
+  observations: Record<string, unknown> | null;
+  /** 근거가 될 자료와 그것에 미리 붙인 인용 이름. */
+  items: { ref: string; item: SourceItem }[];
+};
+
+/**
+ * Tool 을 실행하고 결과를 메모리에 모은다. 여기서는 DB 에 쓰지 않는다.
+ *
+ * `public.tool_runs` 와 `public.evidences` 는 worker 에게 INSERT 만 열려 있다.
+ * 실행 기록은 고쳐 쓰는 값이 아니라 끝난 사실이라는 뜻이다. 그래서 도는 동안에는
+ * 아무것도 남기지 않고, 결과가 정해진 뒤 Agent 기록과 함께 한 번에 남긴다.
+ */
+export const executeTool = async (
   session: RunSession,
-  agentRunId: string,
   agentCode: string,
   toolCode: string,
   purposeCode: string,
   input: unknown,
   impl: ToolImpl,
-): Promise<ToolCallResult> => {
+): Promise<{ pending: PendingToolRun; evidence: ToolEvidence[] }> => {
   assertAllowed(agentCode, toolCode, purposeCode);
-  const spec = toolSpec(toolCode);
-  // logical_tool_key 는 소문자 규칙이라 Tool code 를 쓴다. 목적 코드는 sanitized_scope 에 남긴다.
-  const { sql, ownerId, caseId, runId } = session;
+  toolSpec(toolCode);
   const startedAt = Date.now();
 
-  // 이 표들은 Worker 에게 INSERT 만 열려 있다. 실행 기록은 고쳐 쓰는 값이 아니라
-  // 끝난 사실이라는 뜻이다. 그래서 먼저 돌리고 결과가 정해진 뒤 한 번만 남긴다.
   let outcome: ToolOutcome | null = null;
   let errorCode: string | null = null;
   try {
@@ -152,54 +174,26 @@ export const runTool = async (
       .replace(/[^A-Za-z0-9_]/g, "").slice(0, 64) || "TOOL_ERROR";
   }
 
-  const attempts = await sql`
-    select count(*)::int as n from public.tool_runs
-     where agent_run_id = ${agentRunId}::uuid and logical_tool_key = ${toolCode}`;
-  const attemptNo = (attempts[0].n as number) + 1;
   const status = errorCode ? "FAILED" : outcome?.errorCode ? "PARTIAL" : "SUCCEEDED";
   const provenanceComplete = errorCode ? false : outcome?.provenanceComplete === true;
-
-  const created = await sql`
-    insert into public.tool_runs
-      (owner_id, case_id, verification_run_id, agent_run_id, logical_tool_key, tool_code, tool_version,
-       transport, attempt_no, status, input_schema_version, output_schema_version, request_hash,
-       sanitized_scope, provenance_complete, candidate_count, selected_count, result_digest,
-       started_at, finished_at, latency_ms, error_code, reason_code)
-    values (${ownerId}::uuid, ${caseId}::uuid, ${runId}::uuid, ${agentRunId}::uuid, ${toolCode},
-            ${toolCode}, ${spec.version}, ${spec.transport}::public.tool_transport, ${attemptNo},
-            ${status}::public.execution_status, ${spec.inputSchemaVersion}, ${spec.outputSchemaVersion},
-            ${sha256(JSON.stringify(input ?? null))},
-            ${sql.json(JSON.parse(JSON.stringify({ schema_version: "1", purpose_code: purposeCode, observations: outcome?.observations ?? null })))},
-            ${provenanceComplete}, ${outcome?.candidateCount ?? 0}, ${outcome?.items.length ?? 0},
-            ${sha256(JSON.stringify((outcome?.items ?? []).map((item) => item.contentHash)))},
-            ${new Date(startedAt).toISOString()}, now(), ${Date.now() - startedAt},
-            ${errorCode ?? outcome?.errorCode ?? null}, ${outcome?.reasonCode ?? (errorCode ? 'TOOL_EXECUTION_FAILED' : null)})
-    returning id`;
-  const toolRunId = created[0].id as string;
-
-  // 도구 실패는 안전 판정이 아니다. 부르는 쪽이 UNKNOWN 으로 다뤄야 한다.
-  if (errorCode || !outcome) return { evidence: [], observations: null };
+  const pending: PendingToolRun = {
+    toolCode, purposeCode, input, startedAt, finishedAt: Date.now(), status,
+    provenanceComplete, candidateCount: outcome?.candidateCount ?? 0,
+    errorCode: errorCode ?? outcome?.errorCode ?? null,
+    reasonCode: outcome?.reasonCode ?? (errorCode ? "TOOL_EXECUTION_FAILED" : null),
+    observations: outcome?.observations ?? null,
+    items: [],
+  };
 
   // Provenance 가 불완전하면 근거를 만들지 않는다. 결과가 있었다는 사실만 남는다.
-  if (!outcome.provenanceComplete) return { evidence: [], observations: outcome.observations ?? null };
+  // 도구 실패도 안전 판정이 아니다. 부르는 쪽이 UNKNOWN 으로 다뤄야 한다.
+  if (errorCode || !outcome || !provenanceComplete) return { pending, evidence: [] };
 
-  const produced: ToolEvidence[] = [];
+  const evidence: ToolEvidence[] = [];
   for (const item of outcome.items) {
-    const snapshotId = await recordSnapshot(sql, item, toolCode);
-    const citable = item.isCitable && item.isComplete && !item.referenceOnly;
-    await sql`
-      insert into public.evidences
-        (owner_id, case_id, verification_run_id, kb_snapshot_id, produced_by_tool_run_id, source_locator,
-         excerpt_masked, directness, citable, reference_only, incomplete, freshness_at_use, target_match,
-         independence_key, selection_reason_code, content_hash)
-      values (${ownerId}::uuid, ${caseId}::uuid, ${runId}::uuid, ${snapshotId}::uuid, ${toolRunId}::uuid,
-              ${sql.json({ schema_version: "1", ...item.locator })}, ${item.excerptMasked},
-              ${item.directness}::public.evidence_directness, ${citable}, ${item.referenceOnly},
-              ${!item.isComplete}, ${item.freshness}::public.freshness_status, true,
-              ${item.fingerprint}, ${item.selectionReasonCode}, ${item.contentHash})`;
-
     const ref = session.nextEvidenceNo();
-    const evidence: ToolEvidence = {
+    pending.items.push({ ref, item });
+    const record: ToolEvidence = {
       evidence_ref: ref,
       tool_code: toolCode,
       source_type: item.sourceType,
@@ -217,8 +211,60 @@ export const runTool = async (
       freshness_at_use: item.freshness,
       directness: item.directness,
     };
-    session.evidence.set(ref, evidence);
-    produced.push(evidence);
+    session.evidence.set(ref, record);
+    evidence.push(record);
   }
-  return { evidence: produced, observations: outcome.observations ?? null };
+  return { pending, evidence };
+};
+
+/** Agent 기록에 딸린 Tool 실행과 근거를 한 번에 남긴다. */
+export const persistToolRuns = async (
+  session: RunSession,
+  agentRunId: string,
+  pendings: PendingToolRun[],
+): Promise<void> => {
+  const { sql, ownerId, caseId, runId } = session;
+  // 시도 번호는 이 Agent 실행 안에서 이어진다. 이미 남은 행이 있으면 그 뒤부터 센다.
+  const existing = await sql`
+    select logical_tool_key, count(*)::int as n from public.tool_runs
+     where agent_run_id = ${agentRunId}::uuid group by logical_tool_key`;
+  const attempts = new Map<string, number>(
+    existing.map((row) => [row.logical_tool_key as string, row.n as number]));
+  for (const pending of pendings) {
+    const spec = toolSpec(pending.toolCode);
+    const attemptNo = (attempts.get(pending.toolCode) ?? 0) + 1;
+    attempts.set(pending.toolCode, attemptNo);
+    const created = await sql`
+      insert into public.tool_runs
+        (owner_id, case_id, verification_run_id, agent_run_id, logical_tool_key, tool_code, tool_version,
+         transport, attempt_no, status, input_schema_version, output_schema_version, request_hash,
+         sanitized_scope, provenance_complete, candidate_count, selected_count, result_digest,
+         started_at, finished_at, latency_ms, error_code, reason_code)
+      values (${ownerId}::uuid, ${caseId}::uuid, ${runId}::uuid, ${agentRunId}::uuid, ${pending.toolCode},
+              ${pending.toolCode}, ${spec.version}, ${spec.transport}::public.tool_transport, ${attemptNo},
+              ${pending.status}::public.execution_status, ${spec.inputSchemaVersion}, ${spec.outputSchemaVersion},
+              ${sha256(JSON.stringify(pending.input ?? null))},
+              ${sql.json(JSON.parse(JSON.stringify({ schema_version: "1", purpose_code: pending.purposeCode, observations: pending.observations })))},
+              ${pending.provenanceComplete}, ${pending.candidateCount}, ${pending.items.length},
+              ${sha256(JSON.stringify(pending.items.map((entry) => entry.item.contentHash)))},
+              ${new Date(pending.startedAt).toISOString()}, ${new Date(pending.finishedAt).toISOString()},
+              ${pending.finishedAt - pending.startedAt}, ${pending.errorCode}, ${pending.reasonCode})
+      returning id`;
+    const toolRunId = created[0].id as string;
+
+    for (const { item } of pending.items) {
+      const snapshotId = await recordSnapshot(sql, item, pending.toolCode, runId);
+      const citable = item.isCitable && item.isComplete && !item.referenceOnly;
+      await sql`
+        insert into public.evidences
+          (owner_id, case_id, verification_run_id, kb_snapshot_id, produced_by_tool_run_id, source_locator,
+           excerpt_masked, directness, citable, reference_only, incomplete, freshness_at_use, target_match,
+           independence_key, selection_reason_code, content_hash)
+        values (${ownerId}::uuid, ${caseId}::uuid, ${runId}::uuid, ${snapshotId}::uuid, ${toolRunId}::uuid,
+                ${sql.json(JSON.parse(JSON.stringify({ schema_version: "1", ...item.locator })))}, ${item.excerptMasked},
+                ${item.directness}::public.evidence_directness, ${citable}, ${item.referenceOnly},
+                ${!item.isComplete}, ${item.freshness}::public.freshness_status, true,
+                ${item.fingerprint}, ${item.selectionReasonCode}, ${item.contentHash})`;
+    }
+  }
 };
