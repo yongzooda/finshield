@@ -8,7 +8,7 @@
 | `adr/001-p0-provider-stack.md` | P0 Provider·공식 출처·Storage·Job·실패 계약 | Architecture 승인·Implementation Gate `NO-GO` |
 | `ops/ci-integrity-preflight.md` | `B-CI-INTEGRITY` 외부 통제 준비 상태·강화 절차 | P0 비차단·제출 후 강화 `DEFERRED` |
 | `ops/provider-model-spike.md` | `B-MODEL-01` Sonnet 5 실행·비용·증거 채택 절차 | ADR 변경 뒤 네 번째 측정으로 재채택 완료 |
-| `ops/supabase-project.md` | FinShield 전용 Supabase 프로젝트 사실·Migration 적용·검증 | `0001`~`0018` 작성, 불변식 시험 433건 통과, 운영 적용 `0001`~`0017` |
+| `ops/supabase-project.md` | FinShield 전용 Supabase 프로젝트 사실·Migration 적용·검증 | `0001`~`0019` 작성, 운영 적용 `0001`~`0018`, `0019` 적용 대기 |
 | `ops/supabase-evidence.md` | `B-SUPABASE-01` Migration digest·RLS 행렬 증거 harness 계약 | run `34028092302` 채택 완료 |
 | `ops/source-snapshot-spike.md` | `B-SOURCE-02`·`B-SOURCE-03` 햇살론15 상품·취급기관 Snapshot harness 계약 | run `33981161310`·`33981225371` 채택 완료 |
 | `ops/file-safety-spike.md` | `B-FILE-SAFETY` Parser 이전 검사·격리 실행 증거 harness 계약 | run `34027891135` 채택 완료 |
