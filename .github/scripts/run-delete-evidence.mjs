@@ -78,7 +78,11 @@ const sanitizedFailure = (error) => {
   if (/FINSHIELD_DATABASE_URL/.test(message)) return "delete-missing-credential";
   const code = String(error?.code ?? "").replace(/[^A-Za-z0-9_]/g, "");
   const kind = String(error?.name ?? "unknown").replace(/[^A-Za-z0-9_]/g, "");
-  return `delete-or-harness-error:${kind}${code ? `/${code}` : ""}`;
+  // 제약·표 이름은 저장소에 그대로 있는 식별자다. 사용자 자료가 아니다.
+  const where = [error?.constraint_name, error?.table_name, error?.routine]
+    .filter((part) => typeof part === "string" && part.length > 0)
+    .map((part) => part.replace(/[^A-Za-z0-9_.]/g, "")).join("/");
+  return `delete-or-harness-error:${kind}${code ? `/${code}` : ""}${where ? `@${where}` : ""}`;
 };
 
 if (mode === "--run") {

@@ -179,32 +179,39 @@ const buildCase = async ({ sql, client, admin, token, userId, family, index }) =
 
 // family 별 삭제 유발 경로. 제품이 실제로 부르는 함수만 쓴다.
 // 청소 대기열에 넣는 것도 제품 함수가 한다. harness 가 직접 넣지 않는다.
-const triggerDeletion = async ({ sql, unit, family }) => {
+const triggerDeletion = async ({ sql, unit, family, progress = () => {} }) => {
   if (family.key === "claim_confirmed") {
     // 입력 단계를 한 칸씩 실제로 전진시킨다. 건너뛰면 제품 경로가 아니다.
+    progress(`trigger:${unit.label}:validated`);
     await sql`select id from private.advance_input_stage(${unit.ownerId}::uuid, ${unit.caseId}::uuid,
       ${unit.caseInputId}::uuid, 'VALIDATED'::public.input_stage,
       ${JSON.stringify({ detected_mime: "image/png", magic_signature: "89504e47" })}::jsonb)`;
+    progress(`trigger:${unit.label}:extracted`);
     await sql`select id from private.advance_input_stage(${unit.ownerId}::uuid, ${unit.caseId}::uuid,
       ${unit.caseInputId}::uuid, 'EXTRACTED'::public.input_stage, '{}'::jsonb)`;
+    progress(`trigger:${unit.label}:masked`);
     await sql`select id from private.advance_input_stage(${unit.ownerId}::uuid, ${unit.caseId}::uuid,
       ${unit.caseInputId}::uuid, 'MASKED'::public.input_stage,
       ${JSON.stringify({ masked_text: "마스킹 본문", masked_text_hash: hex64(`mask-${unit.label}`), pii_policy_version: "v1" })}::jsonb)`;
+    progress(`trigger:${unit.label}:claim`);
     const claimRows = await sql`
       select private.record_extracted_claim(${unit.ownerId}::uuid, ${unit.caseId}::uuid,
         ${unit.caseInputId}::uuid, ${unit.pageId}::uuid, 'PRODUCT_TERM', '확인할 Claim') as id`;
     await sql`select private.confirm_claim(${unit.ownerId}::uuid, ${unit.caseId}::uuid, ${claimRows[0].id}::uuid) as n`;
     // 이 전진이 원본·임시물·vector 를 청소에 넣는다.
+    progress(`trigger:${unit.label}:confirmed`);
     await sql`select id from private.advance_input_stage(${unit.ownerId}::uuid, ${unit.caseId}::uuid,
       ${unit.caseInputId}::uuid, 'CLAIM_CONFIRMED'::public.input_stage, '{}'::jsonb)`;
     return {};
   }
   if (family.key === "user_stopped") {
+    progress(`trigger:${unit.label}:stop`);
     await sql`select private.stop_case_input(${unit.ownerId}::uuid, ${unit.caseId}::uuid,
       ${unit.caseInputId}::uuid, 'USER_STOPPED') as n`;
     return {};
   }
   if (family.key === "case_deleted") {
+    progress(`trigger:${unit.label}:request`);
     const rows = await sql`
       select private.request_case_deletion(${unit.ownerId}::uuid, ${unit.caseId}::uuid,
         ${`delete-spike:${unit.label}`}::text, ${hex64(`req-${unit.label}`)}::text,
@@ -277,7 +284,7 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
   const deletionRequests = [];
   for (const family of FAMILIES) {
     for (const unit of units.filter((u) => u.family === family.key)) {
-      const extra = await triggerDeletion({ sql, unit, family });
+      const extra = await triggerDeletion({ sql, unit, family, progress });
       if (extra.deletionRequestId) deletionRequests.push(extra.deletionRequestId);
     }
   }
