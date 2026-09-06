@@ -11,7 +11,7 @@
 
 import "server-only";
 import type postgres from "postgres";
-import { sha256, type SourceItem, type ToolCallContext, type ToolOutcome } from "./runtime";
+import type { SourceItem, ToolCallContext, ToolOutcome } from "./runtime";
 
 type Sql = ReturnType<typeof postgres>;
 
