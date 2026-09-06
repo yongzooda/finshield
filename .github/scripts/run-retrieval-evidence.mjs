@@ -59,8 +59,11 @@ if (blockerId !== "B-RETRIEVAL-01") fail("BLOCKER_ID 는 B-RETRIEVAL-01 이어�
 const requirements = readAtCommit("docs/02-integrated-requirements.md");
 const adr = readAtCommit("docs/adr/001-p0-provider-stack.md");
 
-const migrationFiles = spawnSync("git", ["-C", repository ?? "", "ls-tree", "--name-only", `${codeSha}:supabase/migrations`], { encoding: "utf8" })
-  .stdout.split("\n").filter((name) => /^\d{4}_.*\.sql$/.test(name)).sort();
+const migrationListing = spawnSync("git", ["-C", repository ?? "", "ls-tree", "--name-only", `${codeSha}:supabase/migrations`], { encoding: "utf8" });
+if (migrationListing.status !== 0) fail("시험 commit 의 Migration 목록을 읽을 수 없습니다.");
+const migrationFiles = String(migrationListing.stdout ?? "").split("\n")
+  .filter((name) => /^\d{4}_.*\.sql$/.test(name)).sort();
+if (migrationFiles.length === 0) fail("시험 commit 에 Migration 이 없습니다.");
 export const RETRIEVAL_SCOPE_PATHS = Object.freeze([
   ...migrationFiles.map((file) => `supabase/migrations/${file}`),
   "supabase/tests/00_supabase_stub.sql",
