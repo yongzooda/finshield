@@ -1,0 +1,244 @@
+{
+  "schema_version": 3,
+  "blocker_id": "B-SUPABASE-01",
+  "requirements_blob_sha": "27ce706010344fbcedebe3abd707febff0f1dc26",
+  "adr_decision_sha256": "3c2a5e2dac9d626fdeea0b70eaa16454dd97688b54ad6d101b9b1d8dccdce736",
+  "code_under_test_sha": "4f9bb4136af738fe7930d35c0ed6f570fe3fdbcd",
+  "workflow_head_sha": "4f9bb4136af738fe7930d35c0ed6f570fe3fdbcd",
+  "scope_sha256": "109a8741fc9f68f8c25a23dade1f7885e161d038019c36d327714122d7768bea",
+  "run": {
+    "id": 34034389035,
+    "attempt": 1
+  },
+  "observations": {
+    "contract": {
+      "formula_version": "supabase-migration-digest-rls-matrix-v1",
+      "tracked_schemas": [
+        "public",
+        "private",
+        "kb",
+        "demo"
+      ],
+      "migration_files": [
+        "0001_finshield_baseline.sql",
+        "0002_revoke_default_function_grants.sql",
+        "0003_profiles.sql",
+        "0004_financial_cases.sql",
+        "0005_claims_and_consents.sql",
+        "0006_execution_registry.sql",
+        "0007_source_knowledge_base.sql",
+        "0008_worker_extensions_usage.sql",
+        "0009_runs_and_manifests.sql",
+        "0010_agent_tool_evidence.sql",
+        "0011_results_and_passports.sql",
+        "0012_jobs_notifications_aftercare.sql",
+        "0013_storage_cleanup_outbox.sql",
+        "0014_budget_rate_audit.sql",
+        "0015_case_run_functions.sql",
+        "0016_finalization.sql",
+        "0017_demo_evaluation_views.sql",
+        "0018_keyword_search_or_terms.sql",
+        "0019_upload_slot_functions.sql"
+      ],
+      "test_files": [
+        "01_case_invariants.sql",
+        "02_claim_invariants.sql",
+        "03_registry_invariants.sql",
+        "04_kb_invariants.sql",
+        "05_run_invariants.sql",
+        "06_evidence_invariants.sql",
+        "07_passport_invariants.sql",
+        "08_job_invariants.sql",
+        "09_storage_cleanup_invariants.sql",
+        "10_budget_rate_invariants.sql",
+        "11_case_run_function_invariants.sql",
+        "12_finalization_invariants.sql",
+        "13_demo_evaluation_view_invariants.sql",
+        "14_cross_owner_matrix.sql",
+        "15_keyword_search_invariants.sql",
+        "16_upload_slot_invariants.sql"
+      ],
+      "member_only_tables": [
+        "public.profiles",
+        "public.financial_profiles",
+        "public.financial_profile_versions",
+        "public.financial_cases",
+        "public.case_inputs",
+        "public.case_input_pages",
+        "public.case_input_findings",
+        "public.case_events",
+        "public.claims",
+        "public.claim_revisions",
+        "public.processing_consents",
+        "private.input_objects",
+        "private.ocr_artifacts"
+      ]
+    },
+    "local": {
+      "files_passed": [
+        "01_case_invariants.sql",
+        "02_claim_invariants.sql",
+        "03_registry_invariants.sql",
+        "04_kb_invariants.sql",
+        "05_run_invariants.sql",
+        "06_evidence_invariants.sql",
+        "07_passport_invariants.sql",
+        "08_job_invariants.sql",
+        "09_storage_cleanup_invariants.sql",
+        "10_budget_rate_invariants.sql",
+        "11_case_run_function_invariants.sql",
+        "12_finalization_invariants.sql",
+        "13_demo_evaluation_view_invariants.sql",
+        "14_cross_owner_matrix.sql",
+        "15_keyword_search_invariants.sql",
+        "16_upload_slot_invariants.sql"
+      ],
+      "files_failed": [],
+      "assertions_passed": 446,
+      "assertions_failed": 0,
+      "matrix": {
+        "anon_denials": 81,
+        "inconclusive": 0,
+        "worker_allowed": 68,
+        "worker_denials": 13,
+        "unexpected_allows": 0,
+        "cross_owner_denials": 237,
+        "worker_denied_tables": [
+          "private.input_objects",
+          "private.ocr_artifacts",
+          "public.case_events",
+          "public.case_input_findings",
+          "public.case_input_pages",
+          "public.case_inputs",
+          "public.claim_revisions",
+          "public.claims",
+          "public.financial_cases",
+          "public.financial_profile_versions",
+          "public.financial_profiles",
+          "public.processing_consents",
+          "public.profiles"
+        ],
+        "closed_slot_rejections": 20,
+        "blocked_read_rejections": 20,
+        "access_block_ms": 3.5
+      },
+      "schema": {
+        "tracked_schemas": [
+          "public",
+          "private",
+          "kb",
+          "demo"
+        ],
+        "routines": 78,
+        "routine_digest": "73de76024823a42e136d649ad9be6d622468c0103d285a39b28e75541b3e3043",
+        "tables": 81,
+        "tables_digest": "5ae0f6b22541320c231e6a913e29106c63fef4577cee655863450344a798d520",
+        "constraints": 738,
+        "constraint_digest": "0a6f7ea03b8dce7f6f6030a0c0279eae5823583a32f3cb77645cd24e45f68e6c",
+        "indexes": 253,
+        "index_digest": "fc40f010983fac01c0ca1f5fd83bb89f4cdd0e4d158010928c514d806c07c50f",
+        "rls_total": 81,
+        "rls_enforced": 81,
+        "rls_missing": []
+      }
+    },
+    "remote": {
+      "host_role": "finshield_worker",
+      "pooler_port": 6543,
+      "schema": {
+        "tracked_schemas": [
+          "public",
+          "private",
+          "kb",
+          "demo"
+        ],
+        "routines": 78,
+        "routine_digest": "73de76024823a42e136d649ad9be6d622468c0103d285a39b28e75541b3e3043",
+        "tables": 81,
+        "tables_digest": "5ae0f6b22541320c231e6a913e29106c63fef4577cee655863450344a798d520",
+        "constraints": 738,
+        "constraint_digest": "0a6f7ea03b8dce7f6f6030a0c0279eae5823583a32f3cb77645cd24e45f68e6c",
+        "indexes": 253,
+        "index_digest": "fc40f010983fac01c0ca1f5fd83bb89f4cdd0e4d158010928c514d806c07c50f",
+        "rls_total": 81,
+        "rls_enforced": 81,
+        "rls_missing": []
+      },
+      "anon_leaks": [],
+      "exposed_grants": [],
+      "worker_denied_tables": [
+        "private.input_objects",
+        "private.ocr_artifacts",
+        "public.case_events",
+        "public.case_input_findings",
+        "public.case_input_pages",
+        "public.case_inputs",
+        "public.claim_revisions",
+        "public.claims",
+        "public.financial_cases",
+        "public.financial_profile_versions",
+        "public.financial_profiles",
+        "public.processing_consents",
+        "public.profiles"
+      ],
+      "worker_allowed_tables": [],
+      "storage": {
+        "buckets": [
+          {
+            "id": "finshield-kb",
+            "is_public": false,
+            "file_size_limit": null
+          },
+          {
+            "id": "finshield-quarantine",
+            "is_public": false,
+            "file_size_limit": 10485760
+          }
+        ],
+        "member_policies": [
+          {
+            "name": "finshield_quarantine__insert_open_slot",
+            "cmd": "INSERT",
+            "roles": [
+              "authenticated"
+            ]
+          }
+        ]
+      },
+      "extensions": {
+        "pgcrypto": {
+          "version": "1.3",
+          "schema": "extensions"
+        },
+        "vector": {
+          "version": "0.8.2",
+          "schema": "extensions"
+        },
+        "pg_trgm": {
+          "version": "1.6",
+          "schema": "extensions"
+        }
+      },
+      "roles": {
+        "worker_bypassrls": false,
+        "worker_login": true,
+        "postgres_bypassrls": true,
+        "legacy_roles": []
+      }
+    },
+    "schema_match": {
+      "tables": true,
+      "constraints": true,
+      "indexes": true,
+      "routines": true
+    }
+  },
+  "environment": {
+    "node_version": "v24.20.0",
+    "region": "github-hosted",
+    "local_image": "pgvector/pgvector:pg17",
+    "psql_version": "psql (PostgreSQL) 16.15 (Ubuntu 16.15-1.pgdg24.04+2)",
+    "remote_host_role": "finshield_worker"
+  },
+  "redactions_applied": true
+}
