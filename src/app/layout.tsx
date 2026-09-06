@@ -3,10 +3,12 @@ import Link from "next/link";
 import "./globals.css";
 import { FooterExtraLinks } from "./footer-extra-links";
 
+// 이 배포의 주인은 FinShield 다. 가입 뒤 축은 /precase 에 있고 그쪽 화면이
+// 자기 제목을 따로 붙인다. PreCase 의 성능을 FinShield 의 성능으로 적지 않는다 (OPS-002).
 export const metadata: Metadata = {
-  title: "프리케이스 — 불완전판매 분쟁 예방·판단",
+  title: "FinShield — 거래 전 금융정보 검증",
   description:
-    "공개된 금융분쟁조정 선례와 법령을 근거로, 불완전판매 분쟁을 미리 예방하고 성립 가능성을 알려주는 무료 서비스입니다.",
+    "권유받은 내용을 법령과 공식 상품 자료에 대고 확인하고, 무엇을 근거로 판단했는지 그대로 보여 드립니다.",
 };
 
 /** 브랜드 마크 — 방패 + 확인 표시. 외부 에셋 없이 인라인 SVG 하나로 그린다 */
@@ -40,7 +42,7 @@ function Header() {
           <span className="text-accent">
             <BrandMark />
           </span>
-          프리케이스
+          FinShield
         </Link>
       </div>
     </header>
