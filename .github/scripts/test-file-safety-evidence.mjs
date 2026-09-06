@@ -2,7 +2,8 @@
 // 가짜 spawn 으로 격리 worker 를 흉내내어 spike 의 조립 로직까지 offline 으로 돌린다.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { CATEGORY_RULES, FIXTURE_GENERATOR_VERSION, buildFixtures, fixtureDigests } from "./file-safety-fixtures.mjs";
+import { inflateSync } from "node:zlib";
+import { CATEGORY_RULES, FIXTURE_GENERATOR_VERSION, buildFixtures, fixtureDigests, storedZlib, zerosZlib } from "./file-safety-fixtures.mjs";
 import { LIMITS, REASON_CODES, inspectFile } from "./file-safety-inspector.mjs";
 import { FORMULA_VERSION, MAX_OLD_SPACE_MB, PARSER_INTEGRITY, PARSER_VERSION, validateFileSafetyEvidenceResult } from "./file-safety-policy.mjs";
 import { probeNetworkNamespace, runFileSafetySpike } from "./file-safety-spike.mjs";
@@ -25,6 +26,16 @@ ok(fixtures.every((f) => /^[0-9a-f]{64}$/.test(f.sha256)), "모든 Fixture 에 S
 const digests = fixtureDigests();
 ok(Object.keys(digests).length === fixtures.length, "digest 목록과 Fixture 수가 같아야 한다");
 ok(buildFixtures().every((f) => f.sha256 === digests[f.name]), "Fixture 생성은 결정적이어야 한다");
+
+// zlib 의 deflate 출력은 구현마다 다르다. Fixture 는 규격이 값을 완전히 정하는 두 부호만 쓴다.
+for (const sample of [Buffer.alloc(0), Buffer.from("APR 15.9% NOT 1397"), Buffer.alloc(70000, 7)]) {
+  ok(inflateSync(storedZlib(sample)).equals(sample), `저장 블록 부호가 ${sample.length}바이트를 왕복해야 한다`);
+}
+for (const n of [1, 2, 3, 257, 258, 259, 30_100, 1_048_576]) {
+  const out = inflateSync(zerosZlib(n));
+  ok(out.length === n && out.every((b) => b === 0), `반복 부호가 0 ${n}바이트를 왕복해야 한다`);
+}
+ok(zerosZlib(1_048_576).length * 50 < 1_048_576, "반복 부호는 50배 넘게 압축돼야 한다");
 ok(fixtures.some((f) => f.filename.includes("\0")), "NUL 이 든 파일명 Fixture 가 있어야 한다");
 ok(fixtures.some((f) => f.filename.includes("..")), "경로 상위 이동 파일명 Fixture 가 있어야 한다");
 
