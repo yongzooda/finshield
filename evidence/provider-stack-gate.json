@@ -97,6 +97,25 @@
       "result_sha256": "463092b397ab71aa615b08e5aec44f82b8784ab0723357a20fa4ee7e887f3d5f",
       "adoption_pr_number": 120,
       "adopted_at": "2026-09-06T09:22:45Z"
+    },
+    "B-FILE-SAFETY": {
+      "code_under_test_sha": "943183d18f75762584fac71867d0683b1cff992a",
+      "workflow_head_sha": "943183d18f75762584fac71867d0683b1cff992a",
+      "run_id": 34026419464,
+      "run_attempt": 1,
+      "workflow_id": 351458287,
+      "workflow_path": ".github/workflows/file-safety-evidence.yml",
+      "workflow_blob_sha": "93e19d90423984d1fcdf2830034a50873613b080",
+      "harness_blob_sha": "0aaa683b4b8cf798c684f1c88c06e115bd389e1e",
+      "scope_sha256": "8b017b9106abe82e05e216b4e9a7aa8a9971f73cf7557300f2ce1d9b2d2db2ef",
+      "job_name": "file-safety-evidence / B-FILE-SAFETY",
+      "artifact_id": 9987201350,
+      "artifact_name": "provider-evidence-B-FILE-SAFETY-943183d18f75762584fac71867d0683b1cff992a",
+      "artifact_digest": "sha256:d77e2d616e68ff20490f26893966efda9826f948d793178753719d0108f99bfc",
+      "result_path": "evidence/results/B-FILE-SAFETY/34026419464.json",
+      "result_sha256": "2565e0dfc924c14728e1ba2be9393efe25e8fc26fe917ac12c438f994c18665f",
+      "adoption_pr_number": 0,
+      "adopted_at": "2026-09-06T10:11:22Z"
     }
   }
 }
