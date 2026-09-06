@@ -54,6 +54,25 @@ const toItem = (
   selectionReasonCode: reason,
 });
 
+/**
+ * 등록부의 값과 사용자가 낸 값을 같은 형태로 맞춘다.
+ *
+ * 적재된 값은 정규화돼 있지 않다. URL 은 scheme 와 www 가 붙은 채로 들어 있고
+ * 전화번호는 붙임표가 섞여 있다. 그래서 비교 전에 양쪽을 같은 규칙으로 줄인다.
+ * 규칙을 한 곳에만 두어 화면과 조회가 다른 기준을 쓰지 않게 한다.
+ */
+export const normalizeChannelValue = (raw: string): string => {
+  const trimmed = String(raw ?? "").trim().toLowerCase();
+  if (trimmed.length === 0) return "";
+  const digits = trimmed.replace(/[^0-9]/g, "");
+  // 전화번호처럼 숫자만 남는 값은 숫자로 비교한다.
+  if (digits.length > 0 && /^[0-9+\-\s().]+$/.test(trimmed)) return digits;
+  return trimmed
+    .replace(/^[a-z][a-z0-9+.-]*:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/\/+$/, "");
+};
+
 const SNAPSHOT_FIELDS = `id, source_type, authority_level::text as authority_level, publisher_name,
   source_title, canonical_url, official_id, source_version, content_hash, source_fingerprint,
   to_char(published_at, 'YYYY-MM-DD') as published_at, to_char(effective_from, 'YYYY-MM-DD') as effective_from,
@@ -65,7 +84,7 @@ export const lookupOfficialChannel = async (input: unknown, ctx: ToolCallContext
   const values = Array.isArray((input as { values?: unknown })?.values)
     ? ((input as { values: unknown[] }).values.filter((v) => typeof v === "string") as string[])
     : [];
-  const normalized = values.map((value) => value.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/[-\s]/g, ""));
+  const normalized = values.map(normalizeChannelValue).filter((value) => value.length > 0);
   if (normalized.length === 0) {
     return { items: [], provenanceComplete: true, candidateCount: 0, reasonCode: "EMPTY_INPUT" };
   }
@@ -81,8 +100,13 @@ export const lookupOfficialChannel = async (input: unknown, ctx: ToolCallContext
            s.freshness_status::text as freshness_status
       from kb.official_channel_registry r
       join kb.source_snapshots s on s.id = r.source_snapshot_id
-     where r.normalized_value = any(${normalized})
-       and (r.valid_to is null or r.valid_to >= current_date)`;
+     where (r.valid_to is null or r.valid_to >= current_date)
+       and (
+         -- 등록부 값도 같은 규칙으로 줄여 비교한다.
+         regexp_replace(regexp_replace(regexp_replace(lower(r.normalized_value),
+           '^[a-z][a-z0-9+.-]*://', ''), '^www\.', ''), '/+$', '') = any(${normalized})
+         or regexp_replace(r.normalized_value, '[^0-9]', '', 'g') = any(${normalized})
+       )`;
 
   const items = rows.map((row) => toItem(
     row as unknown as SnapshotRow,
@@ -97,7 +121,9 @@ export const lookupOfficialChannel = async (input: unknown, ctx: ToolCallContext
       schema_version: "1",
       kind: "channel_lookup",
       // 등록부에서 확인되지 않았다는 사실. 이것만으로 사기라고 말하지 않는다.
-      unmatched: normalized.filter((value) => !rows.some((row) => row.normalized_value === value)),
+      unmatched: normalized.filter((value) => !rows.some((row) =>
+        normalizeChannelValue(row.normalized_value as string) === value
+        || String(row.normalized_value).replace(/[^0-9]/g, "") === value)),
     },
     provenanceComplete: true,
     candidateCount: normalized.length,

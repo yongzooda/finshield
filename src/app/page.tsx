@@ -124,6 +124,18 @@ function PointList({
 export default function LandingPage() {
   return (
     <div className="mx-auto max-w-3xl px-5 py-10">
+      {/*
+        이 배포는 FinShield 다. 아래 화면들은 들여온 PreCase Runtime 이고 가입 뒤
+        축을 담당한다. 거래 전 검증은 별도 경로에 있으므로 첫 화면에서 바로 가리킨다.
+        Implementation Gate 가 `GO` 가 되면 이 자리를 FinShield 첫 화면으로 바꾼다.
+      */}
+      <a href="/verify"
+        className="mb-6 block rounded-xl border border-navy/20 bg-navy/5 px-4 py-3 no-underline">
+        <span className="block font-bold text-navy">거래 전 검증 (FinShield)</span>
+        <span className="mt-1 block text-[0.95rem] leading-relaxed text-slate-700">
+          권유받은 내용을 공식 자료에 대고 확인하고 근거를 그대로 보여 드립니다. 아직 시험 단계입니다.
+        </span>
+      </a>
       <header>
         <p className="inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-3 py-1 text-[0.95rem] font-bold text-accent">
           금융감독원 공개 조정례 {CORPUS_SIZE}건 기반 · 무료
