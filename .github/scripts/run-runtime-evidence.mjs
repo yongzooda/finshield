@@ -70,7 +70,17 @@ const sanitizedFailure = (error) => {
   if (/VERCEL_TOKEN/.test(message)) return "runtime-missing-credential";
   const code = String(error?.code ?? "").replace(/[^A-Za-z0-9_]/g, "");
   const kind = String(error?.name ?? "unknown").replace(/[^A-Za-z0-9_]/g, "");
-  return `runtime-or-harness-error:${kind}${code ? `/${code}` : ""}`;
+  // 우리가 쓴 오류 문장은 원인을 바로 말해 준다. 다만 식별자·경로·자료는 지운다.
+  // Postgres 는 행 내용을 message 가 아니라 DETAIL 에 넣으므로 message 만 쓴다.
+  const said = String(message)
+    .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, "<id>")
+    .replace(/[0-9a-f]{16,}/gi, "<hex>")
+    .replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, "<mail>")
+    .replace(/https?:\/\/\S+/g, "<url>")
+    .replace(/\S*\/\S*\/\S*/g, "<path>")
+    .replace(/\d{6,}/g, "<num>")
+    .replace(/\s+/g, " ").trim().slice(0, 200);
+  return `runtime-or-harness-error:${kind}${code ? `/${code}` : ""} said="${said}"`;
 };
 
 if (mode === "--run") {
