@@ -378,8 +378,9 @@ function StoppedView({ view, onRetry }: { view: Stopped; onRetry: () => void }) 
         >
           상담 다시 시작하기
         </Link>
+        {/* 가입 뒤 축의 첫 화면은 /precase 다. 루트는 FinShield 첫 화면이다. */}
         <Link
-          href="/"
+          href="/precase"
           className="flex items-center rounded-lg border-2 border-border px-7 py-3 text-[1.05rem] font-bold text-fg no-underline"
         >
           처음으로
