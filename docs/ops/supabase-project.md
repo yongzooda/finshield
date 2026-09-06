@@ -210,5 +210,6 @@ node supabase/tests/verify-remote.mjs
 | `0014_budget_rate_audit.sql` | 적용 완료 | 명세 6.9·6.11 예산 상한·Counter·예약·Rate·감사·Source Cache·Circuit 8개 표, reserve·settle·release·reconcile, Rate 소비, Provider 1 TPS 직렬화·Circuit Breaker, Cache 갱신·조회, 감사 기록, 90일·24시간·13개월 Retention 함수. 상한 설정이 없는 범위는 예약을 거부한다 |
 | `0015_case_run_functions.sql` | 적용 완료 | 명세 4.2~4.4·7.2·9.3·11.2 의 Case 생성·전이, 입력 단계 전진, Run 생성·시작·실패, 재검증 enqueue·claim·heartbeat·fail·cancel, 공용 KB·Case Vector 검색 함수. 최종화 함수는 다음 Migration |
 | `0016_finalization.sql` | 적용 완료 | 명세 7.3 검증 최종화(`finalize_verification_run`)와 6.6 재검증 최종화(`finalize_revalidation`), 요구사항 2.2 종합 결과 Matrix 순수 함수. 근거 정책 Deferred Trigger 를 함수 끝에서 즉시 검사로 끌어당긴다 |
-| `0018_keyword_search_or_terms.sql` | 미적용 | 명세 9.3 Keyword 단계를 낱말 OR 결합으로 고친다. `plainto_tsquery`의 AND 결합이 조사가 붙는 한국어 문장 질의에서 항상 0건을 냈다. 표를 바꾸지 않는 함수 Migration이다 |
+| `0019_upload_slot_functions.sql` | 미적용 | 명세 4.3·6.1 의 서버가 만드는 one-use upload slot 함수 셋. `B-STORAGE-01` 을 재려다 slot 을 만드는 서버 함수가 없다는 것을 확인해 추가했다. 표를 바꾸지 않는 함수 Migration 이다 |
+| `0018_keyword_search_or_terms.sql` | 적용 완료 | 명세 9.3 Keyword 단계를 낱말 OR 결합으로 고친다. `plainto_tsquery`의 AND 결합이 조사가 붙는 한국어 문장 질의에서 항상 0건을 냈다. 표를 바꾸지 않는 함수 Migration이다 |
 | `0017_demo_evaluation_views.sql` | 적용 완료 | 명세 6.10 Demo 8개 표(Seed·Session·Run·Agent·Tool·Source·결과), 6.8 평가셋·평가 Run·지표·Tool 상태 4개 표, 9.3 회원 안전 View 4개와 신뢰센터·Tool 상태 View. Demo Session 은 Capability Hash 만 저장하고 Live Session 에 사전계산 결과를 넣을 수 없다 |
