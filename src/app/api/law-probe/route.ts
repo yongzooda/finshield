@@ -25,7 +25,7 @@ const TIMEOUT_MS = 20_000;
 const UNREGISTERED_ORIGIN = "https://finshield-unregistered.example/";
 
 export const SCENARIOS = [
-  "registered", "absent", "deployment_url", "unregistered", "snapshot", "change_recent",
+  "registered", "absent", "deployment_url", "unregistered", "snapshot", "change_d1", "change_d3",
 ] as const;
 type Scenario = (typeof SCENARIOS)[number];
 
@@ -63,10 +63,12 @@ function refererFor(scenario: Scenario): { value: string | null; kind: string } 
 }
 
 function queryFor(scenario: Scenario): Record<string, string> {
-  if (scenario === "change_recent") {
-    // 변경 조문은 D+1 에 반영된다. 어제 자를 물어 실제 반영 시점을 기록한다.
-    const day = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10).replace(/-/g, "");
-    return { target: "lsJoRvs", regDt: day, display: "5" };
+  if (scenario === "change_d1" || scenario === "change_d3") {
+    // 일자별 조문 개정 목록은 target=lsJoHstInf 다. 변경은 D+1 에 반영된다고 본다.
+    // 어제와 사흘 전을 함께 물어 어느 시점부터 답하는지 원장에 남긴다.
+    const days = scenario === "change_d1" ? 1 : 3;
+    const day = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10).replace(/-/g, "");
+    return { target: "lsJoHstInf", regDt: day };
   }
   if (scenario === "snapshot") {
     // 고정 질의. 같은 실행 안에서 두 번 불러 본문 해시가 같은지 본다.

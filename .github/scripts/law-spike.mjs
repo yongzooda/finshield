@@ -16,7 +16,7 @@ export const FORMULA_VERSION = "law-referer-and-snapshot-v1";
 export const PROBE_PATH = "/api/law-probe";
 export const TARGETS = Object.freeze(["production", "preview"]);
 export const SCENARIOS = Object.freeze([
-  "registered", "absent", "deployment_url", "unregistered", "snapshot", "change_recent",
+  "registered", "absent", "deployment_url", "unregistered", "snapshot", "change_d1", "change_d3",
 ]);
 // 운영에서 고정 질의를 한 번 더 불러 본문 해시가 흔들리지 않는지 본다.
 export const SNAPSHOT_REPEATS = 2;
@@ -131,7 +131,8 @@ export const runLawSpike = async ({ vercel, projectName, oc, fetchImpl = globalT
       deployment_url_ok: okOf("deployment_url"),
       unregistered_ok: okOf("unregistered"),
       snapshot_ok: okOf("snapshot"),
-      change_recent_ok: okOf("change_recent"),
+      change_d1_ok: okOf("change_d1"),
+      change_d3_ok: okOf("change_d3"),
       auth_rejected: records.filter((r) => r.outcome === "auth_rejected").length,
       rate_limited: records.filter((r) => r.outcome === "rate_limited").length,
       server_errors: records.filter((r) => r.outcome === "server_error").length,
