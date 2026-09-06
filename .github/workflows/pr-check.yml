@@ -99,6 +99,9 @@ jobs:
       - name: Storage Contract Test
         run: node .github/scripts/test-storage-evidence.mjs
 
+      - name: Delete Contract Test
+        run: node .github/scripts/test-delete-evidence.mjs
+
       - name: 한국어 기록 검사 회귀 테스트
         run: node .github/scripts/test-korean-records.mjs
 

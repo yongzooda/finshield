@@ -105,6 +105,12 @@ const fixturePaths = [
   ".github/scripts/test-storage-evidence.mjs",
   ".github/workflows/storage-evidence.yml",
   "docs/ops/storage-spike.md",
+  ".github/scripts/delete-spike.mjs",
+  ".github/scripts/delete-evidence-policy.mjs",
+  ".github/scripts/run-delete-evidence.mjs",
+  ".github/scripts/test-delete-evidence.mjs",
+  ".github/workflows/delete-evidence.yml",
+  "docs/ops/delete-spike.md",
   "src/lib/agents/pii.ts",
   "src/lib/agents/__tests__/pii-synthetic.ts",
   ...readdirSync(resolve(fileURLToPath(new URL("../../", import.meta.url)), "supabase/migrations"))
@@ -660,6 +666,10 @@ for (const [name, path] of [
   ["trusted storage harness changes invalidate its policy pin", ".github/scripts/run-storage-evidence.mjs"],
   ["trusted storage policy changes invalidate its policy pin", ".github/scripts/storage-evidence-policy.mjs"],
   ["trusted storage spike changes invalidate its policy pin", ".github/scripts/storage-spike.mjs"],
+  ["trusted delete workflow changes invalidate its policy pin", ".github/workflows/delete-evidence.yml"],
+  ["trusted delete harness changes invalidate its policy pin", ".github/scripts/run-delete-evidence.mjs"],
+  ["trusted delete policy changes invalidate its policy pin", ".github/scripts/delete-evidence-policy.mjs"],
+  ["trusted delete spike changes invalidate its policy pin", ".github/scripts/delete-spike.mjs"],
   ["trusted package manifest changes invalidate its policy pin", "package.json"],
   ["trusted package lock changes invalidate its policy pin", "package-lock.json"],
 ]) {
