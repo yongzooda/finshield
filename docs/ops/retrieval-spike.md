@@ -29,7 +29,7 @@
   - `keyword` = 그 질의 안 `ts_rank`의 최대값으로 나눈 값. 후보에 없으면 0
   - Claim 여러 개에서 나온 후보는 가장 높은 `relevance`를 쓴다
 - `authority` = `A` 1.0, `B` 0.6, `C` 0.3
-- `freshness` = 적용 범위가 열려 있으면 1.0, 끝이 정해져 있으면 0.5. 기준일 밖은 Filter가 이미 제외했다
+- `freshness` = 같은 Case 후보 집합 안에서 적용 시작일이 가장 이른 것을 0, 가장 늦은 것을 1로 두고 선형으로 환산한다. 날짜나 범위가 없으면 1이다. 기준일 밖은 Filter가 이미 제외했으므로 종료일 유무는 쓰지 않는다
 - 최종 = `0.60 × relevance` + `0.25 × authority` + `0.15 × freshness`
 - 같은 `source_fingerprint`는 하나로 계산하고 점수가 높은 쪽만 남긴다
 - 동점은 권위, 적용 시작일, unit 이름 순으로 결정적으로 끊는다
@@ -57,6 +57,8 @@ Case마다 관련 unit이 5개이므로 `Recall@5`와 `Precision@5`는 같은 �
 
 ## 실행
 
+dispatch 입력 `mode`가 `gate`면 증거를 만들고 `development`면 개발용 4가족 20 Claim만 재고 증거 파일을 만들지 않는다. 개발용 진단은 gate 수치를 바꾸지 않으므로 Rerank 후보안을 비교할 때 쓴다.
+
 1. `Retrieval Evidence` workflow를 main에서 `B-RETRIEVAL-01`로 dispatch한다. `provider-spike` environment의 `COHERE_API_KEY`를 쓴다.
 2. harness가 기준 DB를 만들고 문서 240개와 gate Claim 100개를 임베딩한 뒤 corpus를 적재한다.
 3. Claim마다 DB 함수로 Filter·Keyword·Vector를 돌리고, Case마다 Rerank로 top 5를 만든다.
@@ -69,3 +71,4 @@ Case마다 관련 unit이 5개이므로 `Recall@5`와 `Precision@5`는 같은 �
 - 평가셋은 합성 문서다. 실제 공시·약관의 다양성을 대신하지 않는다.
 - 이 blocker는 검색 단계의 품질만 measure한다. Claim 판정 품질은 `B-CLAIM-01`이 별도로 사전등록한다.
 - Rerank는 이 harness의 결정적 구현이다. 제품이 같은 점수를 쓰도록 구현할 때 이 문서를 기준으로 삼는다.
+- 첫 gate 측정(run `34027686263`)은 미달이었다. 그때의 `freshness` 규칙이 종료일 유무만 보고 현재 유효한 자료를 절반으로 깎는 설계 오류였고 위 규칙으로 고쳤다. 이 수정이 측정 뒤에 이뤄졌다는 사실을 제출 문서에 명시한다.
