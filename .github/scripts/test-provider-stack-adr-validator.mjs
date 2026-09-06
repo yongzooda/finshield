@@ -86,6 +86,12 @@ const fixturePaths = [
   ".github/workflows/retrieval-evidence.yml",
   "docs/ops/retrieval-spike.md",
   "docs/ops/retrieval-blocker-preregistration.md",
+  ".github/scripts/rate-budget-spike.mjs",
+  ".github/scripts/rate-evidence-policy.mjs",
+  ".github/scripts/run-rate-evidence.mjs",
+  ".github/scripts/test-rate-evidence.mjs",
+  ".github/workflows/rate-evidence.yml",
+  "docs/ops/rate-budget-spike.md",
   ...readdirSync(resolve(fileURLToPath(new URL("../../", import.meta.url)), "supabase/migrations"))
     .filter((file) => /^\d{4}_.*\.sql$/.test(file)).sort().map((file) => `supabase/migrations/${file}`),
   ...readdirSync(resolve(fileURLToPath(new URL("../../", import.meta.url)), "supabase/tests"))
@@ -626,6 +632,10 @@ for (const [name, path] of [
   ["trusted retrieval policy changes invalidate its policy pin", ".github/scripts/retrieval-evidence-policy.mjs"],
   ["trusted retrieval pipeline changes invalidate its policy pin", ".github/scripts/retrieval-pipeline.mjs"],
   ["trusted retrieval corpus loader changes invalidate its policy pin", ".github/scripts/retrieval-corpus.mjs"],
+  ["trusted rate workflow changes invalidate its policy pin", ".github/workflows/rate-evidence.yml"],
+  ["trusted rate harness changes invalidate its policy pin", ".github/scripts/run-rate-evidence.mjs"],
+  ["trusted rate policy changes invalidate its policy pin", ".github/scripts/rate-evidence-policy.mjs"],
+  ["trusted rate spike changes invalidate its policy pin", ".github/scripts/rate-budget-spike.mjs"],
   ["trusted package manifest changes invalidate its policy pin", "package.json"],
   ["trusted package lock changes invalidate its policy pin", "package-lock.json"],
 ]) {

@@ -1,0 +1,101 @@
+name: Rate Budget Evidence
+
+on:
+  workflow_dispatch:
+    inputs:
+      blocker_id:
+        description: Blocker proof policy to execute
+        required: true
+        type: choice
+        options:
+          - B-RATE-01
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: rate-evidence-${{ inputs.blocker_id }}-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  evidence:
+    name: rate-evidence / ${{ inputs.blocker_id }}
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_PASSWORD: baseline
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 20
+        ports:
+          - 5432:5432
+    steps:
+      - name: Checkout trusted harness
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: trusted
+          persist-credentials: false
+          ref: ${{ github.sha }}
+
+      - name: Set up Node 24
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+
+      - name: Install trusted validator dependencies
+        run: npm --prefix trusted ci --ignore-scripts
+
+      - name: Validate trusted main commit
+        env:
+          WORKFLOW_HEAD_SHA: ${{ github.sha }}
+        run: |
+          if [[ "${GITHUB_REF}" != "refs/heads/main" || ! "${WORKFLOW_HEAD_SHA}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::evidence must run from an immutable main commit"
+            exit 1
+          fi
+          test "$(git -C trusted rev-parse HEAD)" = "${WORKFLOW_HEAD_SHA}"
+
+      - name: Build baseline database
+        env:
+          PGPASSWORD: baseline
+        run: |
+          psql -h 127.0.0.1 -U postgres -c "create database finshield_rate"
+          psql -h 127.0.0.1 -U postgres -d finshield_rate -v ON_ERROR_STOP=1 -q -f trusted/supabase/tests/00_supabase_stub.sql
+          for file in $(ls trusted/supabase/migrations/[0-9][0-9][0-9][0-9]_*.sql | sort); do
+            psql -h 127.0.0.1 -U postgres -d finshield_rate -v ON_ERROR_STOP=1 -q -f "$file"
+          done
+
+      - name: Run blocker evidence harness
+        env:
+          BLOCKER_ID: ${{ inputs.blocker_id }}
+          CODE_UNDER_TEST_SHA: ${{ github.sha }}
+          EVIDENCE_REGION: github-hosted
+          GITHUB_RUN_ATTEMPT: ${{ github.run_attempt }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          RATE_DATABASE_URL: postgres://postgres:baseline@127.0.0.1:5432/finshield_rate
+          TRUSTED_REPOSITORY: ${{ github.workspace }}/trusted
+          WORKFLOW_HEAD_SHA: ${{ github.sha }}
+        run: node trusted/.github/scripts/run-rate-evidence.mjs --run
+
+      - name: Validate raw evidence
+        env:
+          BLOCKER_ID: ${{ inputs.blocker_id }}
+          CODE_UNDER_TEST_SHA: ${{ github.sha }}
+          GITHUB_RUN_ATTEMPT: ${{ github.run_attempt }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          TRUSTED_REPOSITORY: ${{ github.workspace }}/trusted
+          WORKFLOW_HEAD_SHA: ${{ github.sha }}
+        run: node trusted/.github/scripts/run-rate-evidence.mjs --validate
+
+      - name: Upload evidence artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: provider-evidence-${{ inputs.blocker_id }}-${{ github.sha }}
+          path: evidence-output/result.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 9
