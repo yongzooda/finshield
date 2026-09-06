@@ -77,11 +77,11 @@ export const corpusStatements = ({ fixture, documents, embeddings, embeddingMode
   }
 
   out.push(`insert into kb.kb_releases (id, version, corpus_scope, embedding_model, embedding_model_version, embedding_dimension,
-   distance_metric, document_count, chunk_count, embedding_count, manifest_hash, published_at)
+   distance_metric, document_count, chunk_count, manifest_hash)
  values (${lit(releaseId)}, ${lit(KB_RELEASE_VERSION)},
    ${lit(JSON.stringify({ schema_version: CORPUS_SCHEMA_VERSION, fixture_set: fixture.fixture_set }))}::jsonb,
-   ${lit(embeddingModel)}, ${lit(embeddingVersion)}, ${dimension}, 'cosine',
-   ${documents.length}, ${documents.length}, ${documents.length}, ${lit(sha256(`${KB_RELEASE_VERSION}:${documents.length}`))}, now())
+   ${lit(embeddingModel)}, ${lit(embeddingVersion)}, ${dimension}, 'COSINE',
+   ${documents.length}, ${documents.length}, ${lit(sha256(`${KB_RELEASE_VERSION}:${documents.length}`))})
  on conflict (id) do nothing;`);
 
   for (const doc of documents) {
@@ -89,7 +89,7 @@ export const corpusStatements = ({ fixture, documents, embeddings, embeddingMode
     out.push(`insert into kb.source_snapshots (id, source_type, authority_level, publisher_name, source_title, official_id,
    retrieved_at, content_hash, source_fingerprint, freshness_status, license_code, is_complete, is_citable, effective_from, effective_to)
  values (${lit(doc.snapshot_id)}, 'PRODUCT', ${lit(doc.authority_level)}::public.authority_level, ${lit(doc.source_family)},
-   ${lit(`${doc.facet} (${doc.evidence_unit})`)}, ${lit(doc.evidence_unit)}, now(), ${lit(hash)}, ${lit(doc.source_fingerprint)},
+   ${lit(`${doc.facet} (${doc.evidence_unit})`)}, ${lit(doc.evidence_unit)}, now(), ${lit(hash)}, ${lit(sha256(`fingerprint:${doc.source_fingerprint}`))},
    'FRESH'::public.freshness_status, 'SYNTHETIC_EVAL', true, true, ${lit(doc.effective_from)}::date, ${lit(doc.effective_to)}::date)
  on conflict (id) do nothing;`);
     out.push(`insert into kb.knowledge_documents (id, kb_release_id, source_snapshot_id, document_key, document_version, document_type,
@@ -112,7 +112,7 @@ export const corpusStatements = ({ fixture, documents, embeddings, embeddingMode
     const vector = embeddings.get(doc.evidence_unit);
     if (!Array.isArray(vector) || vector.length !== dimension) throw new Error(`missing embedding for ${doc.evidence_unit}`);
     out.push(`insert into kb.knowledge_embeddings (kb_release_id, knowledge_chunk_id, model_id, model_version, dimensions, distance_metric, embedding, content_hash)
- values (${lit(releaseId)}, ${lit(doc.chunk_id)}, ${lit(embeddingModel)}, ${lit(embeddingVersion)}, ${dimension}, 'cosine',
+ values (${lit(releaseId)}, ${lit(doc.chunk_id)}, ${lit(embeddingModel)}, ${lit(embeddingVersion)}, ${dimension}, 'COSINE',
    '[${vector.join(",")}]'::extensions.vector(${dimension}), ${lit(sha256(vector.join(",")))})
  on conflict (knowledge_chunk_id, model_id, model_version) do nothing;`);
   }

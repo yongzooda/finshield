@@ -163,7 +163,7 @@ order by column_name;
 node supabase/tests/verify-remote.mjs
 ```
 
-이 스크립트는 `.env.local` 의 `DATABASE_URL`(`finshield_worker`)로 접속해 pooler 포트, 제약 정의 digest, RLS enable+force, `anon` 권한 잔존, `private`·`kb`·`demo` 노출, 회원 테이블 접근 거부를 확인한다. DSN 과 비밀번호는 출력하지 않는다.
+이 스크립트는 `.env.local` 의 `DATABASE_URL`(`finshield_worker`)로 접속해 pooler 포트, 제약·인덱스·함수 정의 digest, RLS enable+force, `anon` 권한 잔존, `private`·`kb`·`demo` 노출, 회원 테이블 접근 거부를 확인한다. DSN 과 비밀번호는 출력하지 않는다.
 
 로컬 기준 digest 는 `supabase/tests/run-local.sh` 를 돌린 뒤 같은 질의로 얻는다. 두 값이 다르면 대시보드에서 손으로 바꾼 객체가 있거나 Migration 이 부분 적용된 것이다.
 
@@ -210,4 +210,5 @@ node supabase/tests/verify-remote.mjs
 | `0014_budget_rate_audit.sql` | 적용 완료 | 명세 6.9·6.11 예산 상한·Counter·예약·Rate·감사·Source Cache·Circuit 8개 표, reserve·settle·release·reconcile, Rate 소비, Provider 1 TPS 직렬화·Circuit Breaker, Cache 갱신·조회, 감사 기록, 90일·24시간·13개월 Retention 함수. 상한 설정이 없는 범위는 예약을 거부한다 |
 | `0015_case_run_functions.sql` | 적용 완료 | 명세 4.2~4.4·7.2·9.3·11.2 의 Case 생성·전이, 입력 단계 전진, Run 생성·시작·실패, 재검증 enqueue·claim·heartbeat·fail·cancel, 공용 KB·Case Vector 검색 함수. 최종화 함수는 다음 Migration |
 | `0016_finalization.sql` | 적용 완료 | 명세 7.3 검증 최종화(`finalize_verification_run`)와 6.6 재검증 최종화(`finalize_revalidation`), 요구사항 2.2 종합 결과 Matrix 순수 함수. 근거 정책 Deferred Trigger 를 함수 끝에서 즉시 검사로 끌어당긴다 |
+| `0018_keyword_search_or_terms.sql` | 미적용 | 명세 9.3 Keyword 단계를 낱말 OR 결합으로 고친다. `plainto_tsquery`의 AND 결합이 조사가 붙는 한국어 문장 질의에서 항상 0건을 냈다. 표를 바꾸지 않는 함수 Migration이다 |
 | `0017_demo_evaluation_views.sql` | 적용 완료 | 명세 6.10 Demo 8개 표(Seed·Session·Run·Agent·Tool·Source·결과), 6.8 평가셋·평가 Run·지표·Tool 상태 4개 표, 9.3 회원 안전 View 4개와 신뢰센터·Tool 상태 View. Demo Session 은 Capability Hash 만 저장하고 Live Session 에 사전계산 결과를 넣을 수 없다 |

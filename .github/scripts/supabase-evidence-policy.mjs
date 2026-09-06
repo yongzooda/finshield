@@ -67,12 +67,13 @@ export const validateSupabaseEvidenceResult = (result, fail, root = resolve(impo
     fail("B-SUPABASE-01 교차 소유·익명·Worker 거부 행렬이 ADR 15.1 최소 표본·0건 조건을 만족하지 않습니다.");
   }
 
-  const schemaKeys = ["tracked_schemas", "tables", "tables_digest", "constraints", "constraint_digest", "indexes", "index_digest",
-    "rls_total", "rls_enforced", "rls_missing"];
+  const schemaKeys = ["tracked_schemas", "routines", "routine_digest", "tables", "tables_digest", "constraints", "constraint_digest",
+    "indexes", "index_digest", "rls_total", "rls_enforced", "rls_missing"];
   const validSchema = (schema) => exactKeys(schema, schemaKeys)
     && sameList(schema.tracked_schemas, [...TRACKED_SCHEMAS])
     && Number.isInteger(schema.tables) && schema.tables >= 60
     && isHex64(schema.tables_digest) && isHex64(schema.constraint_digest) && isHex64(schema.index_digest)
+    && isHex64(schema.routine_digest) && Number.isInteger(schema.routines) && schema.routines >= 50
     && Number.isInteger(schema.constraints) && schema.constraints > schema.tables
     && Number.isInteger(schema.indexes) && schema.indexes > schema.tables
     && schema.rls_total === schema.tables && schema.rls_enforced === schema.tables
@@ -82,12 +83,14 @@ export const validateSupabaseEvidenceResult = (result, fail, root = resolve(impo
     fail("B-SUPABASE-01 운영 DB 의 표·제약·인덱스·RLS 관측이 유효하지 않습니다.");
   } else {
     for (const message of evaluateRemoteObservations(remote)) fail(`B-SUPABASE-01 운영 Preflight: ${message}`);
-    if (!exactKeys(match, ["tables", "constraints", "indexes"])
+    // 함수 digest 까지 본다. 표를 바꾸지 않는 Migration 이 운영에서 빠진 경우를 잡는다.
+    if (!exactKeys(match, ["tables", "constraints", "indexes", "routines"])
       || match.tables !== (local.schema.tables_digest === remote.schema.tables_digest)
       || match.constraints !== (local.schema.constraint_digest === remote.schema.constraint_digest)
       || match.indexes !== (local.schema.index_digest === remote.schema.index_digest)
-      || !match.tables || !match.constraints || !match.indexes) {
-      fail("B-SUPABASE-01 운영 DB 가 저장소 Migration 으로 만든 기준 DB 와 표·제약·인덱스 digest 가 다릅니다.");
+      || match.routines !== (local.schema.routine_digest === remote.schema.routine_digest)
+      || !match.tables || !match.constraints || !match.indexes || !match.routines) {
+      fail("B-SUPABASE-01 운영 DB 가 저장소 Migration 으로 만든 기준 DB 와 표·제약·인덱스·함수 digest 가 다릅니다.");
     }
   }
 };

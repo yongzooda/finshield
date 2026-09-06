@@ -7,7 +7,8 @@
 // API key·DSN·질의 원문은 결과와 로그에 남기지 않는다.
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { adrDecisionDigest } from "./provider-adr-digest.mjs";
 import { createEmbedPacer, requestEmbeddings } from "./provider-embed-spike.mjs";
@@ -58,7 +59,11 @@ if (blockerId !== "B-RETRIEVAL-01") fail("BLOCKER_ID 는 B-RETRIEVAL-01 이어�
 const requirements = readAtCommit("docs/02-integrated-requirements.md");
 const adr = readAtCommit("docs/adr/001-p0-provider-stack.md");
 
+const migrationFiles = spawnSync("git", ["-C", repository ?? "", "ls-tree", "--name-only", `${codeSha}:supabase/migrations`], { encoding: "utf8" })
+  .stdout.split("\n").filter((name) => /^\d{4}_.*\.sql$/.test(name)).sort();
 export const RETRIEVAL_SCOPE_PATHS = Object.freeze([
+  ...migrationFiles.map((file) => `supabase/migrations/${file}`),
+  "supabase/tests/00_supabase_stub.sql",
   ".github/fixtures/provider-embed-v5.json",
   ".github/scripts/provider-adr-digest.mjs",
   ".github/scripts/provider-embed-spike.mjs",
@@ -106,11 +111,11 @@ if (mode === "--run") {
     const BATCH = 96;
     for (let index = 0; index < documents.length; index += BATCH) {
       const slice = documents.slice(index, index + BATCH);
-      const { embeddings } = await requestEmbeddings({
+      const { vectors } = await requestEmbeddings({
         fetchImpl: globalThis.fetch, apiKey: process.env.COHERE_API_KEY,
         texts: slice.map((doc) => doc.text), inputType: "search_document", pacer,
       });
-      slice.forEach((doc, offset) => documentVectors.set(doc.evidence_unit, embeddings[offset]));
+      slice.forEach((doc, offset) => documentVectors.set(doc.evidence_unit, vectors[offset]));
       console.log(`${blockerId} documents embedded: ${documentVectors.size}/${documents.length}`);
     }
 
@@ -119,7 +124,19 @@ if (mode === "--run") {
       fixture, documents, embeddings: documentVectors,
       embeddingModel: EMBEDDING_MODEL, embeddingVersion: "1", dimension: DIMENSION,
     });
-    await sql.unsafe(statements.join("\n"));
+    // 다중 문장은 확장 프로토콜이 거부한다. Supabase harness 와 같은 psql 경로를 쓴다.
+    // 서버 메시지 원문에는 값이 섞일 수 있어 종류만 남긴다.
+    const scratch = mkdtempSync(resolve(tmpdir(), "finshield-retrieval-"));
+    const corpusFile = resolve(scratch, "corpus.sql");
+    writeFileSync(corpusFile, statements.join("\n"), { mode: 0o600 });
+    const applied = spawnSync("psql", [process.env.RETRIEVAL_DATABASE_URL, "-v", "ON_ERROR_STOP=1", "-q", "-f", corpusFile], {
+      encoding: "utf8", maxBuffer: 64 * 1024 * 1024,
+    });
+    rmSync(scratch, { recursive: true, force: true });
+    if (applied.status !== 0) {
+      const kind = String(applied.stderr ?? "").match(/ERROR:\s+([a-z_]+)/i)?.[1] ?? `exit-${applied.status}`;
+      throw new Error(`corpus 적재 실패: ${kind}`);
+    }
     const [{ count: loaded }] = await sql`select count(*)::int as count from kb.knowledge_chunks where kb_release_id = ${releaseId}::uuid`;
     console.log(`${blockerId} corpus loaded: ${loaded} chunks, release ${KB_RELEASE_VERSION}, manifest ${MANIFEST_VERSION}`);
     if (loaded !== documents.length) throw new Error("corpus 적재 수가 다르다");
@@ -128,11 +145,11 @@ if (mode === "--run") {
     const claimVectors = new Map();
     for (let index = 0; index < gateClaims.length; index += BATCH) {
       const slice = gateClaims.slice(index, index + BATCH);
-      const { embeddings } = await requestEmbeddings({
+      const { vectors } = await requestEmbeddings({
         fetchImpl: globalThis.fetch, apiKey: process.env.COHERE_API_KEY,
         texts: slice.map((claim) => claim.text), inputType: "search_query", pacer,
       });
-      slice.forEach((claim, offset) => claimVectors.set(claim.key, embeddings[offset]));
+      slice.forEach((claim, offset) => claimVectors.set(claim.key, vectors[offset]));
     }
     const provenance = new Map();
     for (const doc of documents) {

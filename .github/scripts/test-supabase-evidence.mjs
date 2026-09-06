@@ -17,6 +17,7 @@ assert.ok(inventory.tests.includes("14_cross_owner_matrix.sql"));
 
 const schema = () => ({
   tracked_schemas: [...TRACKED_SCHEMAS], tables: 72, tables_digest: "a".repeat(64),
+  routines: 80, routine_digest: "e".repeat(64),
   constraints: 640, constraint_digest: "b".repeat(64), indexes: 260, index_digest: "c".repeat(64),
   rls_total: 72, rls_enforced: 72, rls_missing: [],
 });
@@ -45,7 +46,7 @@ const good = () => ({
       extensions: { vector: { version: "0.8.0", schema: "extensions" }, pgcrypto: { version: "1.3", schema: "extensions" }, pg_trgm: { version: "1.6", schema: "extensions" } },
       roles: { worker_bypassrls: false, worker_login: true, postgres_bypassrls: true, legacy_roles: [] },
     },
-    schema_match: { tables: true, constraints: true, indexes: true },
+    schema_match: { tables: true, constraints: true, indexes: true, routines: true },
   },
 });
 const errorsOf = (result) => {
@@ -56,10 +57,12 @@ const errorsOf = (result) => {
 assert.deepEqual(errorsOf(good()), []);
 assert.deepEqual(evaluateRemoteObservations(good().observations.remote), []);
 
+let rejected = 0;
 const rejects = (name, mutate) => {
   const result = good();
   mutate(result.observations);
   assert.ok(errorsOf(result).length > 0, `거부되어야 할 결과가 통과했습니다: ${name}`);
+  rejected += 1;
 };
 rejects("허용된 교차 접근 1건", (o) => { o.local.matrix.unexpected_allows = 1; });
 rejects("교차 소유 표본 미달", (o) => { o.local.matrix.cross_owner_denials = 199; });
@@ -75,6 +78,9 @@ rejects("단언 수 미달", (o) => { o.local.assertions_passed = 100; });
 rejects("제약 digest 불일치", (o) => { o.remote.schema.constraint_digest = "d".repeat(64); o.schema_match.constraints = false; });
 rejects("digest 불일치를 일치로 표시", (o) => { o.remote.schema.index_digest = "d".repeat(64); });
 rejects("표 digest 불일치", (o) => { o.remote.schema.tables_digest = "d".repeat(64); o.schema_match.tables = false; });
+rejects("함수 digest 불일치", (o) => { o.remote.schema.routine_digest = "d".repeat(64); o.schema_match.routines = false; });
+rejects("함수 digest 불일치를 일치로 표시", (o) => { o.remote.schema.routine_digest = "d".repeat(64); });
+rejects("함수 관측 누락", (o) => { delete o.remote.schema.routine_digest; });
 rejects("운영 RLS 미적용 표", (o) => { o.remote.schema.rls_enforced = 71; o.remote.schema.rls_missing = ["public.notifications"]; });
 rejects("pooler 포트 5432", (o) => { o.remote.pooler_port = 5432; });
 rejects("service_role 접속", (o) => { o.remote.host_role = "postgres"; });
@@ -98,4 +104,4 @@ rejects("회원 본문 표 목록 변경", (o) => { o.contract.member_only_table
 rejects("관측 필드 추가", (o) => { o.local.extra = true; });
 rejects("observations 누락", (o) => { delete o.remote; });
 
-console.log("B-SUPABASE-01 결과 정책 mutation test 통과: 합격 1건, 거부 36건.");
+console.log(`B-SUPABASE-01 결과 정책 mutation test 통과: 합격 1건, 거부 ${rejected}건.`);
