@@ -13,7 +13,7 @@
 | `ops/source-snapshot-spike.md` | `B-SOURCE-02`·`B-SOURCE-03` 햇살론15 상품·취급기관 Snapshot harness 계약 | run `33981161310`·`33981225371` 채택 완료 |
 | `ops/file-safety-spike.md` | `B-FILE-SAFETY` Parser 이전 검사·격리 실행 증거 harness 계약 | run `34027891135` 채택 완료 |
 | `ops/retrieval-spike.md` | `B-RETRIEVAL-01` 종단 Filter·Keyword·Vector·Rerank 증거 harness 계약 | gate 두 번 측정, 두 번 다 미달 |
-| `ops/rate-budget-spike.md` | `B-RATE-01` 예산·Rate·Provider 직렬화 원장 증거 harness 계약 | run `34030770858` 채택 완료 |
+| `ops/rate-budget-spike.md` | `B-RATE-01` 예산·Rate·Provider 직렬화 원장 증거 harness 계약| run `34032669859` 채택 완료 |
 | `ops/consent-isolation-spike.md` | `B-CONSENT-01` 동의 격리·원본 전송 경계 증거 harness 계약 | run `34031574803` 채택 완료 |
 | `ops/adr-correction-backlog.md` | ADR 본문 정정 대기 목록과 재측정 비용 | 대기 1건 |
 | `ops/provider-ocr-spike.md` | CLOVA OCR 도메인·요금·한도와 쪽수 상한 결정 근거 | 사실 기록, 측정 전 |

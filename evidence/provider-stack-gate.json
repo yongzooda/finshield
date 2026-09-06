@@ -97,6 +97,25 @@
       "result_sha256": "5f6078ac54b026d1b432ec1a3ce9606d6eac6bcfba9247da08479da1c448b731",
       "adoption_pr_number": 131,
       "adopted_at": "2026-09-06T10:37:43Z"
+    },
+    "B-RATE-01": {
+      "code_under_test_sha": "f711530a8318013a1a9704ed3b83e22e51f3b91b",
+      "workflow_head_sha": "f711530a8318013a1a9704ed3b83e22e51f3b91b",
+      "run_id": 34032669859,
+      "run_attempt": 1,
+      "workflow_id": 351514609,
+      "workflow_path": ".github/workflows/rate-evidence.yml",
+      "workflow_blob_sha": "ffc408ce953baea16837d81134117719989f8c72",
+      "harness_blob_sha": "ba2e0d403f4cd337216c33dfa4dd97d783cb1d08",
+      "scope_sha256": "36d32689805cea2066781121b3b1c0b1d9d4eb2cd587c40ca3d3df13723e4b8d",
+      "job_name": "rate-evidence / B-RATE-01",
+      "artifact_id": 9989138216,
+      "artifact_name": "provider-evidence-B-RATE-01-f711530a8318013a1a9704ed3b83e22e51f3b91b",
+      "artifact_digest": "sha256:67d39db285ba218bca26eb00bd8e4ac0cb4455bf200ad789f5cb998750db6c0d",
+      "result_path": "evidence/results/B-RATE-01/34032669859.json",
+      "result_sha256": "936b2d8b5c1faff967ce70a5ca52bf291fe98ddf818eec79bb0bf43d8d131214",
+      "adoption_pr_number": 0,
+      "adopted_at": "2026-09-06T12:18:53Z"
     }
   }
 }
