@@ -135,6 +135,25 @@
       "result_sha256": "c002cb21d66ef874583afb48c3afcd12dcbb8856c1fc611eec283fead1a78d5c",
       "adoption_pr_number": 138,
       "adopted_at": "2026-09-06T11:38:31Z"
+    },
+    "B-CONSENT-01": {
+      "code_under_test_sha": "96c51ca0f10c6d7c85ebda7ab833f296e7089fc9",
+      "workflow_head_sha": "96c51ca0f10c6d7c85ebda7ab833f296e7089fc9",
+      "run_id": 34031574803,
+      "run_attempt": 1,
+      "workflow_id": 351524788,
+      "workflow_path": ".github/workflows/consent-evidence.yml",
+      "workflow_blob_sha": "d8f92e1e244949415a602d5da41c51bc48e078ef",
+      "harness_blob_sha": "e861f36dfd2c3fa679bed04f59fe93731b9b0fc1",
+      "scope_sha256": "f6df45449c0570f46868d0ad0f40681747245149b99f5ba19d8068c57bb4c206",
+      "job_name": "consent-evidence / B-CONSENT-01",
+      "artifact_id": 9988790107,
+      "artifact_name": "provider-evidence-B-CONSENT-01-96c51ca0f10c6d7c85ebda7ab833f296e7089fc9",
+      "artifact_digest": "sha256:a465d4df22fe0a313a5adfce8efaff13c5b3aeac3ec05f3f492807b5c1884562",
+      "result_path": "evidence/results/B-CONSENT-01/34031574803.json",
+      "result_sha256": "2702bfb93b0df3b2066ed4bfff4ba55988a0bf002d820cea0a60d5e76c8212ea",
+      "adoption_pr_number": 0,
+      "adopted_at": "2026-09-06T11:55:55Z"
     }
   }
 }
