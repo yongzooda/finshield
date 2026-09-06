@@ -211,6 +211,25 @@
       "result_sha256": "8f5f8b9e77790724462a840ef028cb45a4125e30e528c6a7712d3aaf3ff525e2",
       "adoption_pr_number": 163,
       "adopted_at": "2026-09-06T16:02:43Z"
+    },
+    "B-LAW-01": {
+      "code_under_test_sha": "9b06d48d8d151df64b237588bb86d9098d9655b5",
+      "workflow_head_sha": "9b06d48d8d151df64b237588bb86d9098d9655b5",
+      "run_id": 34045798279,
+      "run_attempt": 1,
+      "workflow_id": 351667561,
+      "workflow_path": ".github/workflows/law-evidence.yml",
+      "workflow_blob_sha": "98b3b40523a16999e125e482ad4b4bf7d9e1f3bf",
+      "harness_blob_sha": "cd256e741bfcd55bb08cf0d385db8ebc45e499a2",
+      "scope_sha256": "4a7b451a1816b98751603128457f6d357b4b839cb3793ee567b55289731a3af9",
+      "job_name": "law-evidence / B-LAW-01",
+      "artifact_id": 9993055183,
+      "artifact_name": "provider-evidence-B-LAW-01-9b06d48d8d151df64b237588bb86d9098d9655b5",
+      "artifact_digest": "sha256:714e79a22708aa71891a7a3036d0478b9d0f0af58f88cc386c3a5f01b448bf45",
+      "result_path": "evidence/results/B-LAW-01/34045798279.json",
+      "result_sha256": "c323e72d2c8d9a829894522fa508ca53ae869aaabb30de04b82d9e6402fc005c",
+      "adoption_pr_number": 166,
+      "adopted_at": "2026-09-06T16:34:05Z"
     }
   }
 }
