@@ -26,10 +26,13 @@ const exitWithFlushedLogs = async (code) => {
   await Promise.all([process.stdout, process.stderr].map((stream) => new Promise((done) => stream.write("", done))));
   process.exit(code);
 };
-if (!["--run", "--validate"].includes(mode)) {
-  console.error("Usage: run-retrieval-evidence.mjs --run|--validate");
+// --dev 는 사전등록이 gate 와 분리해 둔 개발용 4가족 20 Claim 만 잰다. 증거 파일을 만들지 않고
+// 수치를 로그에만 남긴다. gate 를 소모하지 않고 Rerank 후보안을 비교하기 위한 진단 경로다.
+if (!["--run", "--validate", "--dev"].includes(mode)) {
+  console.error("Usage: run-retrieval-evidence.mjs --run|--validate|--dev");
   await exitWithFlushedLogs(2);
 }
+const devMode = mode === "--dev";
 
 const resultPath = resolve(process.cwd(), "evidence-output/result.json");
 const repository = process.env.TRUSTED_REPOSITORY;
@@ -91,7 +94,7 @@ const sanitizedFailure = (error) => {
   return `retrieval-or-harness-error:${kind}${code ? `/${code}` : ""}`;
 };
 
-if (mode === "--run") {
+if (mode === "--run" || devMode) {
   rmSync(resultPath, { force: true });
   if (!process.env.COHERE_API_KEY) fail("COHERE_API_KEY 가 필요합니다.");
   if (!process.env.RETRIEVAL_DATABASE_URL) fail("RETRIEVAL_DATABASE_URL 이 필요합니다.");
@@ -106,7 +109,10 @@ if (mode === "--run") {
     if (fixture.fixture_set !== FIXTURE_SET) throw new Error("평가셋이 계약과 다르다");
     const documents = documentRows(fixture);
     const claims = claimRows(fixture);
-    const gateClaims = claims.filter((claim) => claim.split === "gate");
+    const measuredSplit = devMode ? "development" : "gate";
+    const gateClaims = claims.filter((claim) => claim.split === measuredSplit);
+    if (gateClaims.length === 0) throw new Error(`${measuredSplit} Claim 이 없다`);
+    console.log(`${blockerId} 측정 대상 split: ${measuredSplit}, Claim ${gateClaims.length}건`);
 
     // 1. 문서 임베딩. 계약은 B-EMBED-01 과 같은 Provider 설정을 그대로 쓴다.
     const pacer = createEmbedPacer();
@@ -269,6 +275,15 @@ if (mode === "--run") {
       redactions_applied: true,
     };
     console.log(`${blockerId} totals: ${JSON.stringify(observations.totals)}`);
+    if (devMode) {
+      // 개발용 진단은 합격 판정도 증거 파일도 만들지 않는다. 가족별 수치만 남긴다.
+      for (const row of observations.cases) {
+        console.log(`${blockerId} dev case ${row.case_id}: recall ${row.recall_at_5.toFixed(3)}, precision ${row.precision_at_5.toFixed(3)}, coverage ${row.coverage.join("/")}, top ${row.top_units.join(",")}`);
+      }
+      console.log(`${blockerId} 개발용 진단 완료. 증거 파일을 만들지 않는다.`);
+      await sql.end({ timeout: 5 }).catch(() => {});
+      await exitWithFlushedLogs(0);
+    }
     const resultErrors = [];
     validateRetrievalEvidenceResult(result, (message) => resultErrors.push(message));
     if (resultErrors.length > 0) {

@@ -67,9 +67,16 @@ ok(Math.abs(RERANK_WEIGHTS.relevance + RERANK_WEIGHTS.authority + RERANK_WEIGHTS
 ok(Math.abs(RELEVANCE_WEIGHTS.vector + RELEVANCE_WEIGHTS.keyword - 1) < 1e-9, "Relevance 가중치 합이 1 이어야 한다");
 ok(vectorScore(0) === 1 && vectorScore(2) === 0 && vectorScore(null) === 0, "Vector 점수가 0..1 로 잘려야 한다");
 ok(keywordScore(0.5, 1) === 0.5 && keywordScore(null, 1) === 0 && keywordScore(1, 0) === 0, "Keyword 점수가 질의 안에서 정규화돼야 한다");
-ok(freshnessScore(null) === 1 && freshnessScore("2026-01-01") === 0.5, "적용 범위가 열린 자료를 더 높게 봐야 한다");
-ok(candidateScore({ relevance: 1, authorityLevel: "A", validTo: null }) === 1, "최고 점수가 1 이어야 한다");
-ok(candidateScore({ relevance: 1, authorityLevel: "A", validTo: null }) > candidateScore({ relevance: 1, authorityLevel: "C", validTo: null }), "권위가 낮으면 점수가 낮아야 한다");
+{
+  const range = { oldest: "2024-01-01", newest: "2026-01-01" };
+  ok(freshnessScore("2026-01-01", range) === 1 && freshnessScore("2024-01-01", range) === 0, "같은 후보 집합에서 최근 자료가 더 높아야 한다");
+  ok(Math.abs(freshnessScore("2025-01-01", range) - 0.5) < 0.01, "중간 시점은 중간 점수여야 한다");
+  ok(freshnessScore("2025-01-01", {}) === 1 && freshnessScore(null, range) === 1, "범위나 날짜가 없으면 깎지 않아야 한다");
+  // 종료일 유무는 더 이상 점수에 들어가지 않는다. Filter 가 기준일 밖을 이미 제외한다.
+  ok(candidateScore({ relevance: 1, authorityLevel: "A", effectiveFrom: "2026-01-01", effectiveRange: range }) === 1, "최고 점수가 1 이어야 한다");
+  ok(candidateScore({ relevance: 1, authorityLevel: "A", effectiveFrom: "2026-01-01", effectiveRange: range })
+     > candidateScore({ relevance: 1, authorityLevel: "C", effectiveFrom: "2026-01-01", effectiveRange: range }), "권위가 낮으면 점수가 낮아야 한다");
+}
 
 const makeRows = (units, provenance, { distance = 0.1, rank = 0.5 } = {}) => units.map((unit) => {
   const snapshot = `snap-${unit}`;

@@ -19,13 +19,22 @@ const clamp01 = (value) => Math.min(1, Math.max(0, value));
 export const vectorScore = (distance) => (typeof distance === "number" ? clamp01(1 - distance) : 0);
 // ts_rank 는 절대값에 의미가 없다. 같은 질의 안에서 최대값으로 나눈다.
 export const keywordScore = (rank, maxRank) => (typeof rank === "number" && maxRank > 0 ? clamp01(rank / maxRank) : 0);
-// 적용 범위가 열려 있는 자료를 더 높게 본다. Filter 가 이미 기준일 밖을 제외했다.
-export const freshnessScore = (validTo) => (validTo === null || validTo === undefined ? 1 : 0.5);
+// Filter 가 이미 기준일 밖을 제외했으므로 후보는 모두 현재 유효하다. 종료일이 있다는 사실은
+// 낡음의 근거가 아니다. 같은 후보 집합 안에서 더 최근에 효력이 생긴 자료를 더 높게 본다.
+// 첫 측정(run 34027686263)의 freshness slice 가 가장 낮았고, 종료일만 보고 절반으로 깎던
+// 규칙이 현재 유효한 자료를 부당하게 눌렀다.
+export const freshnessScore = (effectiveFrom, { oldest, newest }) => {
+  if (!effectiveFrom || !oldest || !newest || oldest === newest) return 1;
+  const span = Date.parse(newest) - Date.parse(oldest);
+  if (!Number.isFinite(span) || span <= 0) return 1;
+  const age = Date.parse(effectiveFrom) - Date.parse(oldest);
+  return Number.isFinite(age) ? clamp01(age / span) : 1;
+};
 
-export const candidateScore = ({ relevance, authorityLevel, validTo }) => (
+export const candidateScore = ({ relevance, authorityLevel, effectiveFrom, effectiveRange }) => (
   (RERANK_WEIGHTS.relevance * clamp01(relevance))
   + (RERANK_WEIGHTS.authority * (AUTHORITY_SCORE[authorityLevel] ?? 0))
-  + (RERANK_WEIGHTS.freshness * freshnessScore(validTo))
+  + (RERANK_WEIGHTS.freshness * freshnessScore(effectiveFrom, effectiveRange ?? {}))
 );
 
 // 한 Claim 의 후보를 DB 에서 받는다. Filter 는 기관과 기준일만 건다 (평가셋 filter_policy).
@@ -78,9 +87,14 @@ export const rerankCase = ({ claimResults, provenance }) => {
   }
 
   // 같은 출처 지문은 하나로 계산한다 (사전등록 4.1). 점수가 높은 쪽만 남긴다.
+  const effectiveDates = [...best.values()].map((c) => c.effective_from).filter(Boolean).sort();
+  const effectiveRange = { oldest: effectiveDates[0] ?? null, newest: effectiveDates.at(-1) ?? null };
   const byFingerprint = new Map();
   for (const candidate of best.values()) {
-    candidate.score = candidateScore({ relevance: candidate.relevance, authorityLevel: candidate.authority_level, validTo: candidate.valid_to });
+    candidate.score = candidateScore({
+      relevance: candidate.relevance, authorityLevel: candidate.authority_level,
+      effectiveFrom: candidate.effective_from, effectiveRange,
+    });
     const kept = byFingerprint.get(candidate.fingerprint);
     if (!kept || candidate.score > kept.score) byFingerprint.set(candidate.fingerprint, candidate);
   }
@@ -92,7 +106,7 @@ export const rerankCase = ({ claimResults, provenance }) => {
     || String(right.effective_from ?? "").localeCompare(String(left.effective_from ?? ""))
     || String(left.unit).localeCompare(String(right.unit))
   ));
-  return { top: ordered.slice(0, TOP_K), poolSize: best.size, deduped: byFingerprint.size, collapsed, ordered };
+  return { top: ordered.slice(0, TOP_K), poolSize: best.size, deduped: byFingerprint.size, collapsed, ordered, effectiveRange };
 };
 
 // Case 단위 지표. 관련 unit 은 그 Case 의 Claim 들이 가리키는 unit 합집합이다.
