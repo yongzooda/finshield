@@ -9,7 +9,7 @@
 | `ops/ci-integrity-preflight.md` | `B-CI-INTEGRITY` 외부 통제 준비 상태·강화 절차 | P0 비차단·제출 후 강화 `DEFERRED` |
 | `ops/provider-model-spike.md` | `B-MODEL-01` Sonnet 5 실행·비용·증거 채택 절차 | ADR 변경 뒤 네 번째 측정으로 재채택 완료 |
 | `ops/supabase-project.md` | FinShield 전용 Supabase 프로젝트 사실·Migration 적용·검증 | `0001`~`0017` 작성·운영 적용, 불변식 시험 429건 통과 |
-| `ops/supabase-evidence.md` | `B-SUPABASE-01` Migration digest·RLS 행렬 증거 harness 계약 | run `34023678131` 채택 완료 |
+| `ops/supabase-evidence.md` | `B-SUPABASE-01` Migration digest·RLS 행렬 증거 harness 계약 | scope 문서 갱신 뒤 재측정 대기 |
 | `ops/source-snapshot-spike.md` | `B-SOURCE-02`·`B-SOURCE-03` 햇살론15 상품·취급기관 Snapshot harness 계약 | run `33981161310`·`33981225371` 채택 완료 |
 | `ops/adr-correction-backlog.md` | ADR 본문 정정 대기 목록과 재측정 비용 | 대기 1건 |
 | `ops/provider-ocr-spike.md` | CLOVA OCR 도메인·요금·한도와 쪽수 상한 결정 근거 | 사실 기록, 측정 전 |

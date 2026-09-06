@@ -167,7 +167,7 @@ node supabase/tests/verify-remote.mjs
 
 로컬 기준 digest 는 `supabase/tests/run-local.sh` 를 돌린 뒤 같은 질의로 얻는다. 두 값이 다르면 대시보드에서 손으로 바꾼 객체가 있거나 Migration 이 부분 적용된 것이다.
 
-2026-09-05 `0005` 까지 적용한 뒤 확인한 결과는 13개 테이블 제약 157건, digest `96f78b68dbbfc063` 으로 로컬 기준과 완전히 일치했다. `0006` 까지는 17개 테이블 제약 185건 `627fd0ead651cfa8`, `0007` 까지는 27개 테이블 제약 261건 `610f0532a4886f03` 으로 각각 로컬 기준과 일치했다. 인덱스 85개 정의도 집합으로는 동일했으나 서버 `ORDER BY` 가 locale 을 타서 digest 가 달랐고, 그 뒤로는 클라이언트에서 정렬해 잰다. RLS 는 13개 테이블 모두 enable+force 이고, `anon` 권한 잔존과 `private`·`kb`·`demo` 노출은 0건이며, `finshield_worker` 는 회원 테이블 세 곳 모두에서 `42501` 로 거부됐다.
+2026-09-06 `0017` 까지 적용한 뒤 확인한 결과는 81개 테이블 제약 738건 digest `0a6f7ea03b8dce7f`, 인덱스 253개 digest `fc40f010983fac01` 이며 기준 DB 와 일치했다. 2026-09-05 `0005` 까지 적용한 뒤 확인한 결과는 13개 테이블 제약 157건, digest `96f78b68dbbfc063` 으로 로컬 기준과 완전히 일치했다. `0006` 까지는 17개 테이블 제약 185건 `627fd0ead651cfa8`, `0007` 까지는 27개 테이블 제약 261건 `610f0532a4886f03` 으로 각각 로컬 기준과 일치했다. 인덱스 85개 정의도 집합으로는 동일했으나 서버 `ORDER BY` 가 locale 을 타서 digest 가 달랐고, 그 뒤로는 클라이언트에서 정렬해 잰다. RLS 는 13개 테이블 모두 enable+force 이고, `anon` 권한 잔존과 `private`·`kb`·`demo` 노출은 0건이며, `finshield_worker` 는 회원 테이블 세 곳 모두에서 `42501` 로 거부됐다.
 
 추적 범위는 손으로 나열하지 않고 `public`·`private`·`kb`·`demo` 네 스키마의 모든 일반 테이블로 잡는다. `0005` 적용 직후 목록이 낡아 세 테이블을 빼고 재는 일이 실제로 있었다.
 
@@ -185,7 +185,7 @@ node supabase/tests/verify-remote.mjs
 
 ## 현재 미해결
 
-- `B-SUPABASE-01`은 통과하지 않았다. Migration `0001`~`0017`과 시험 01~14(432건)는 저장소에 있고, 증거 harness(`supabase-evidence.yml`)도 병합됐다. 남은 것은 운영 프로젝트에 `0009`~`0017` 적용, `provider-spike` 환경의 `FINSHIELD_DATABASE_URL` secret, main 실행과 Adoption PR 이다. 명세 15절의 14번 묶음(Seed·KB 적재)은 `B-SOURCE-03` 채택 뒤 적재 script 로 만든다.
+- `B-SUPABASE-01`은 통과했다. Migration `0001`~`0017`을 2026-09-06 운영 프로젝트에 모두 적용했고, main run `34023678131`의 증거를 채택 PR #118 로 채택했다. 기준 DB 시험 01~14 는 429건이며 운영 DB 와 표·제약·인덱스 digest 세 값이 같다.
 - 저장소 Runtime 과 화면은 아직 PreCase 기준선이라 PreCase 코퍼스 테이블을 조회한다. `insight` 5개와 `verification` 화면이 빌드 시 사전 렌더되면서 `relation "cases" does not exist` 로 배포 전체를 실패시켰다. 여섯 화면의 사전 렌더를 끄고 요청 시점 렌더로 바꿔 빌드를 통과시켰다.
 - 이 화면들은 FinShield 전용 DB 에서 요청 시점에 실패한다. 데이터를 지어내지 않고 실패를 감추지 않기 위한 선택이며, FinShield 화면으로 재구현할 때 선언과 함께 제거한다.
 - 그동안 Vercel Production 은 환경변수 변경 이전 배포를 계속 서비스한다. 그 배포는 이전 DB 연결을 유지한다.
@@ -202,12 +202,12 @@ node supabase/tests/verify-remote.mjs
 | `0006_execution_registry.sql` | 적용 완료 | 명세 6.8 정책·Agent·Tool·Allowlist Registry 4개 표, `tool_transport` Enum, Worker 읽기 정책 |
 | `0007_source_knowledge_base.sql` | 적용 완료 | 명세 6.5·6.8 Source Snapshot·조회 사건·KB Release·문서·Chunk·`vector(1024)` Embedding·공식 채널 10개 표, `authority_level`·`freshness_status` Enum |
 | `0008_worker_extensions_usage.sql` | 적용 완료 | `finshield_worker` 에 `extensions` 스키마 USAGE. 0007 검증에서 Worker 의 pgvector 연산자 접근이 거부되는 것을 발견해 Forward-fix |
-| `0009_runs_and_manifests.sql` | 미적용 | 명세 6.8·6.4·6.3 실행 Manifest 와 구성 Join·Event, `verification_runs`, `verification_run_claims`, `financial_cases.latest_successful_run_id` FK 보완. Run 상태 전이 함수는 예산·Outbox 뒤 |
-| `0010_agent_tool_evidence.sql` | 미적용 | 명세 6.4·6.5 Agent·Tool 실행 Trace, Retrieval 단계, Case Source, Evidence, 최종 Claim, Claim·Evidence 관계 9개 표. Manifest·Allowlist·Provenance·Evidence Policy Trigger |
-| `0011_results_and_passports.sql` | 미적용 | 명세 6.4·6.5 축 결과·행동 가이드·채널 Join·Evidence Passport 4개 표, `financial_cases.latest_passport_id` FK 보완. 원시 URL·전화번호·Manifest 불일치·유효기간 밖 채널을 Trigger 로 차단 |
-| `0012_jobs_notifications_aftercare.sql` | 미적용 | 명세 6.6·6.7 재검증 Job·Runtime·Event·Passport Diff·알림·알림 설정·가입 후 점검·답변·Checklist 9개 표, `verification_runs.revalidation_job_id` FK 보완. 종결 Job 의 Diff·Run·Passport 정합성은 Deferred Trigger, 가입 확인 없는 점검 시작과 NO_CHANGE 위험 알림은 Trigger 로 차단. Job Claim·최종화 함수는 Outbox 뒤 |
-| `0013_storage_cleanup_outbox.sql` | 미적용 | 명세 10·12·13·6.9 Private Bucket 두 개, `storage.objects` 본인 slot INSERT 정책, `input_objects` 경로 구성·slot 강제, Cleanup Job·Outbox·Idempotency·삭제 요청·Ledger·Case Embedding 6개 표, Cleanup enqueue·claim·finish·Sweeper·Signed URL 확인·Case 삭제 요청·Purge 함수. 성공 기록은 `storage.objects` 부재를 다시 조회한 뒤에만 남긴다 |
-| `0014_budget_rate_audit.sql` | 미적용 | 명세 6.9·6.11 예산 상한·Counter·예약·Rate·감사·Source Cache·Circuit 8개 표, reserve·settle·release·reconcile, Rate 소비, Provider 1 TPS 직렬화·Circuit Breaker, Cache 갱신·조회, 감사 기록, 90일·24시간·13개월 Retention 함수. 상한 설정이 없는 범위는 예약을 거부한다 |
-| `0015_case_run_functions.sql` | 미적용 | 명세 4.2~4.4·7.2·9.3·11.2 의 Case 생성·전이, 입력 단계 전진, Run 생성·시작·실패, 재검증 enqueue·claim·heartbeat·fail·cancel, 공용 KB·Case Vector 검색 함수. 최종화 함수는 다음 Migration |
-| `0016_finalization.sql` | 미적용 | 명세 7.3 검증 최종화(`finalize_verification_run`)와 6.6 재검증 최종화(`finalize_revalidation`), 요구사항 2.2 종합 결과 Matrix 순수 함수. 근거 정책 Deferred Trigger 를 함수 끝에서 즉시 검사로 끌어당긴다 |
-| `0017_demo_evaluation_views.sql` | 미적용 | 명세 6.10 Demo 8개 표(Seed·Session·Run·Agent·Tool·Source·결과), 6.8 평가셋·평가 Run·지표·Tool 상태 4개 표, 9.3 회원 안전 View 4개와 신뢰센터·Tool 상태 View. Demo Session 은 Capability Hash 만 저장하고 Live Session 에 사전계산 결과를 넣을 수 없다 |
+| `0009_runs_and_manifests.sql` | 적용 완료 | 명세 6.8·6.4·6.3 실행 Manifest 와 구성 Join·Event, `verification_runs`, `verification_run_claims`, `financial_cases.latest_successful_run_id` FK 보완. Run 상태 전이 함수는 예산·Outbox 뒤 |
+| `0010_agent_tool_evidence.sql` | 적용 완료 | 명세 6.4·6.5 Agent·Tool 실행 Trace, Retrieval 단계, Case Source, Evidence, 최종 Claim, Claim·Evidence 관계 9개 표. Manifest·Allowlist·Provenance·Evidence Policy Trigger |
+| `0011_results_and_passports.sql` | 적용 완료 | 명세 6.4·6.5 축 결과·행동 가이드·채널 Join·Evidence Passport 4개 표, `financial_cases.latest_passport_id` FK 보완. 원시 URL·전화번호·Manifest 불일치·유효기간 밖 채널을 Trigger 로 차단 |
+| `0012_jobs_notifications_aftercare.sql` | 적용 완료 | 명세 6.6·6.7 재검증 Job·Runtime·Event·Passport Diff·알림·알림 설정·가입 후 점검·답변·Checklist 9개 표, `verification_runs.revalidation_job_id` FK 보완. 종결 Job 의 Diff·Run·Passport 정합성은 Deferred Trigger, 가입 확인 없는 점검 시작과 NO_CHANGE 위험 알림은 Trigger 로 차단. Job Claim·최종화 함수는 Outbox 뒤 |
+| `0013_storage_cleanup_outbox.sql` | 적용 완료 | 명세 10·12·13·6.9 Private Bucket 두 개, `storage.objects` 본인 slot INSERT 정책, `input_objects` 경로 구성·slot 강제, Cleanup Job·Outbox·Idempotency·삭제 요청·Ledger·Case Embedding 6개 표, Cleanup enqueue·claim·finish·Sweeper·Signed URL 확인·Case 삭제 요청·Purge 함수. 성공 기록은 `storage.objects` 부재를 다시 조회한 뒤에만 남긴다 |
+| `0014_budget_rate_audit.sql` | 적용 완료 | 명세 6.9·6.11 예산 상한·Counter·예약·Rate·감사·Source Cache·Circuit 8개 표, reserve·settle·release·reconcile, Rate 소비, Provider 1 TPS 직렬화·Circuit Breaker, Cache 갱신·조회, 감사 기록, 90일·24시간·13개월 Retention 함수. 상한 설정이 없는 범위는 예약을 거부한다 |
+| `0015_case_run_functions.sql` | 적용 완료 | 명세 4.2~4.4·7.2·9.3·11.2 의 Case 생성·전이, 입력 단계 전진, Run 생성·시작·실패, 재검증 enqueue·claim·heartbeat·fail·cancel, 공용 KB·Case Vector 검색 함수. 최종화 함수는 다음 Migration |
+| `0016_finalization.sql` | 적용 완료 | 명세 7.3 검증 최종화(`finalize_verification_run`)와 6.6 재검증 최종화(`finalize_revalidation`), 요구사항 2.2 종합 결과 Matrix 순수 함수. 근거 정책 Deferred Trigger 를 함수 끝에서 즉시 검사로 끌어당긴다 |
+| `0017_demo_evaluation_views.sql` | 적용 완료 | 명세 6.10 Demo 8개 표(Seed·Session·Run·Agent·Tool·Source·결과), 6.8 평가셋·평가 Run·지표·Tool 상태 4개 표, 9.3 회원 안전 View 4개와 신뢰센터·Tool 상태 View. Demo Session 은 Capability Hash 만 저장하고 Live Session 에 사전계산 결과를 넣을 수 없다 |
