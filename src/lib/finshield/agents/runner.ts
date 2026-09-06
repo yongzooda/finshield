@@ -146,6 +146,17 @@ export const runDomainAgent = async (args: {
 
   if (status === "SUCCEEDED" && reasonCode) status = "PARTIAL";
 
+  // 남기는 자리가 다를 수 있다. 판단은 위에서 이미 끝났고 여기서는 기록만 한다.
+  if (session.recorder) {
+    const agentRunId = await session.recorder.agentRun({
+      agentCode: spec.agentCode, version: spec.version, logicalKey: spec.logicalKey, status,
+      startedAt, finishedAt: Date.now(), reasonCode, toolCalls,
+      evidenceCount: evidence.length, findingCount: output?.findings.length ?? 0,
+    });
+    const evidenceIds = await session.recorder.toolRuns(agentRunId, pendings);
+    return { agentRunId, output, evidence, evidenceIds, status, reasonCode, toolCalls };
+  }
+
   const attempts = await sql`
     select count(*)::int as n from public.agent_runs
      where verification_run_id = ${runId}::uuid and logical_agent_key = ${spec.logicalKey}`;
