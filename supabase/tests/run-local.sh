@@ -30,7 +30,12 @@ psql_apply() {
 
 if ! docker inspect "$CONTAINER" >/dev/null 2>&1; then
   echo "컨테이너 $CONTAINER 를 새로 만든다 ($IMAGE)"
-  docker run -d --name "$CONTAINER" -e POSTGRES_PASSWORD=local "$IMAGE" >/dev/null
+  # FINSHIELD_TEST_PORT 를 주면 host 에 포트를 연다. Runtime 통합 시험이 TCP 로 붙어야 하기 때문이다.
+  if [ -n "${FINSHIELD_TEST_PORT:-}" ]; then
+    docker run -d --name "$CONTAINER" -p "${FINSHIELD_TEST_PORT}:5432" -e POSTGRES_PASSWORD=local "$IMAGE" >/dev/null
+  else
+    docker run -d --name "$CONTAINER" -e POSTGRES_PASSWORD=local "$IMAGE" >/dev/null
+  fi
 fi
 docker start "$CONTAINER" >/dev/null 2>&1 || true
 

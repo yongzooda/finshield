@@ -147,9 +147,12 @@ do $$
 declare n int;
 begin
   set local role finshield_worker;
-  select count(*) into n from private.agent_definitions;
+  -- 0021 이 제품 Agent 를 심으므로 총수는 고정값이 아니다. 이 시험이 만든 것만 센다.
+  select count(*) into n from private.agent_definitions
+   where id in ('00000000-0000-4000-8000-0000000000a0', '00000000-0000-4000-8000-0000000000a9');
   if n <> 2 then raise exception 'Worker 가 Agent 정의를 읽지 못했습니다 (%)', n; end if;
-  select count(*) into n from private.agent_tool_allowlists;
+  select count(*) into n from private.agent_tool_allowlists
+   where agent_definition_id in ('00000000-0000-4000-8000-0000000000a0', '00000000-0000-4000-8000-0000000000a9');
   if n <> 1 then raise exception 'Worker 가 허용 목록을 읽지 못했습니다 (%)', n; end if;
   raise notice '  허용 확인: Worker 가 Registry 를 읽는다';
   perform fstest.expect_fail($sql$
