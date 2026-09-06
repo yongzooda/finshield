@@ -120,12 +120,12 @@ export const buildAxisResults = (finals: FinalClaim[], hasProfile: boolean) => {
       limitation_codes: ["PRE_TRANSACTION_SCOPE"],
     },
     {
-      // AUTH-006·007: 프로필을 건너뛰면 적합성 축만 보류한다.
+      // AUTH-006·007: 프로필을 건너뛰면 적합성 축만 정보 부족으로 남긴다.
       axis: "SUITABILITY",
-      result_code: hasProfile ? "UNCERTAIN" : "SUSPENDED",
+      result_code: hasProfile ? "UNCERTAIN" : "NEED_MORE_INFORMATION",
       summary_masked: hasProfile
         ? "적합성은 프로필과 상품 조건을 함께 봐야 하며 이번 실행에서는 확정하지 않았습니다."
-        : "금융 프로필을 남기지 않으셔서 적합성 축은 보류했습니다.",
+        : "금융 프로필이 없어 적합성은 판단하지 않았습니다. 안전하다는 뜻이 아닙니다.",
       limitation_codes: hasProfile ? [] : ["PROFILE_SKIPPED"],
     },
   ];

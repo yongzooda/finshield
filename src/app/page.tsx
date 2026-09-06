@@ -80,6 +80,7 @@ export default function HomePage() {
 
       <nav className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
         <Link href="/cases" className="fs-body underline">내 검증 기록</Link>
+        <Link href="/profile" className="fs-body underline">금융 프로필</Link>
         <Link href="/trust" className="fs-body underline">무엇이 검증됐는지</Link>
         <Link href="/privacy-center" className="fs-body underline">개인정보 처리</Link>
       </nav>
