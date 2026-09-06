@@ -41,7 +41,7 @@ export const validateRuntimeEvidenceResult = (result, fail) => {
 
   const c = o.contract;
   if (!exactKeys(c, ["formula_version", "targets", "required_per_target", "expected_node_major",
-    "probe_path", "manifest_fields", "measured_inside_deployment"])
+    "probe_path", "manifest_fields", "measured_inside_deployment", "protection_bypass"])
     || c.formula_version !== FORMULA_VERSION
     || JSON.stringify(c.targets) !== JSON.stringify([...TARGETS])
     || c.required_per_target !== REQUIRED_PER_TARGET
@@ -52,6 +52,7 @@ export const validateRuntimeEvidenceResult = (result, fail) => {
   }
   // 배포 밖에서 추정한 값은 이 blocker 의 증거가 아니다.
   if (c.measured_inside_deployment !== true) fail("배포 안에서 읽지 않은 값은 채택할 수 없습니다.");
+  if (c.protection_bypass !== "automation-secret") fail("배포 보호를 연 방법 선언이 계약과 다릅니다.");
 
   const rows = Array.isArray(o.deployments) ? o.deployments : [];
   for (const row of rows) {

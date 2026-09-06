@@ -15,6 +15,10 @@ export const TARGETS = Object.freeze(["production", "preview"]);
 export const REQUIRED_PER_TARGET = 3;
 export const EXPECTED_NODE_MAJOR = 24;
 export const PROBE_PATH = "/api/runtime-manifest";
+// 배포 고유 주소는 Deployment Protection 때문에 401 을 준다. 운영 별칭만 공개다.
+// Vercel 이 자동화용으로 두는 우회 비밀을 project 설정에서 읽어 header 로 보낸다.
+// 사람이 값을 복사해 넣을 필요가 없고, 설정이 없으면 그 사실이 그대로 드러난다.
+export const BYPASS_HEADER = "x-vercel-protection-bypass";
 export const MANIFEST_FIELDS = Object.freeze([
   "schema_version", "node_version", "node_major", "node_minor", "node_patch",
   "vercel_env", "vercel_region", "vercel_deployment_id", "vercel_commit_sha", "observed_at",
@@ -37,6 +41,7 @@ export const createVercelClient = ({ token, fetchImpl = globalThis.fetch }) => {
     // 개인 계정 token 은 scope 인자가 없어도 되고, 팀 token 은 teamId 가 필요하다.
     // 어느 쪽인지 미리 알 수 없으므로 후보를 차례로 시도한다.
     getProject: (name, teamId) => call(`/v9/projects/${encodeURIComponent(name)}${teamId ? `?teamId=${teamId}` : ""}`),
+    getProjectRaw: (name, teamId) => call(`/v9/projects/${encodeURIComponent(name)}${teamId ? `?teamId=${teamId}` : ""}`),
     listDeployments: (projectId, target, teamId) => call(
       `/v6/deployments?projectId=${encodeURIComponent(projectId)}&target=${target}`
       + `&state=READY&limit=40${teamId ? `&teamId=${teamId}` : ""}`),
@@ -48,15 +53,19 @@ export const resolveProject = async ({ vercel, projectName }) => {
   const teamIds = Array.isArray(teams.body?.teams) ? teams.body.teams.map((team) => team.id) : [];
   for (const teamId of [null, ...teamIds]) {
     const project = await vercel.getProject(projectName, teamId);
-    if (project.ok && project.body?.id) return { projectId: project.body.id, teamId };
+    if (project.ok && project.body?.id) {
+      // 우회 비밀은 project 응답의 key 로 온다. 값이 아니라 key 가 비밀이다.
+      const bypass = Object.keys(project.body?.protectionBypass ?? {})[0] ?? null;
+      return { projectId: project.body.id, teamId, bypass };
+    }
   }
   throw new Error("vercel project could not be resolved with the provided token");
 };
 
 // 배포가 스스로 보고한 manifest. 형식이 어긋나면 그대로 기록하고 통과시키지 않는다.
-export const probeDeployment = async ({ url, fetchImpl = globalThis.fetch }) => {
+export const probeDeployment = async ({ url, bypass = null, fetchImpl = globalThis.fetch }) => {
   const response = await fetchImpl(`https://${url}${PROBE_PATH}`, {
-    headers: { Accept: "application/json" },
+    headers: { Accept: "application/json", ...(bypass ? { [BYPASS_HEADER]: bypass } : {}) },
     redirect: "error",
     signal: AbortSignal.timeout(20_000),
   });
@@ -72,7 +81,10 @@ const wellFormed = (manifest) => manifest !== null && typeof manifest === "objec
   && Number.isInteger(manifest.node_patch);
 
 export const runRuntimeSpike = async ({ vercel, projectName, fetchImpl = globalThis.fetch, progress = () => {} }) => {
-  const { projectId, teamId } = await resolveProject({ vercel, projectName });
+  const { projectId, teamId, bypass } = await resolveProject({ vercel, projectName });
+  if (!bypass) {
+    throw new Error("vercel protection bypass for automation is not configured on the project");
+  }
   progress("project");
 
   const deployments = [];
@@ -82,7 +94,7 @@ export const runRuntimeSpike = async ({ vercel, projectName, fetchImpl = globalT
     let taken = 0;
     for (const row of rows) {
       if (taken >= REQUIRED_PER_TARGET) break;
-      const probe = await probeDeployment({ url: row.url, fetchImpl });
+      const probe = await probeDeployment({ url: row.url, bypass, fetchImpl });
       // endpoint 가 없던 시절의 배포는 404 다. 증거 표본이 아니라 건너뛴다.
       if (probe.status === 404) continue;
       const manifest = wellFormed(probe.manifest) ? probe.manifest : null;
@@ -121,6 +133,8 @@ export const runRuntimeSpike = async ({ vercel, projectName, fetchImpl = globalT
       manifest_fields: [...MANIFEST_FIELDS],
       // 밖에서 추정하지 않고 배포 안에서 읽은 값만 쓴다.
       measured_inside_deployment: true,
+      // 배포 고유 주소는 보호돼 있어 자동화 우회 비밀로 연다. 비밀은 결과에 남기지 않는다.
+      protection_bypass: "automation-secret",
     },
     deployments,
     totals: {
