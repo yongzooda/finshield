@@ -9,7 +9,7 @@
 | `ops/ci-integrity-preflight.md` | `B-CI-INTEGRITY` 외부 통제 준비 상태·강화 절차 | P0 비차단·제출 후 강화 `DEFERRED` |
 | `ops/provider-model-spike.md` | `B-MODEL-01` Sonnet 5 실행·비용·증거 채택 절차 | ADR 변경 뒤 네 번째 측정으로 재채택 완료 |
 | `ops/supabase-project.md` | FinShield 전용 Supabase 프로젝트 사실·Migration 적용·검증 | `0001`~`0018` 작성, 불변식 시험 433건 통과, 운영 적용 `0001`~`0017` |
-| `ops/supabase-evidence.md` | `B-SUPABASE-01` Migration digest·RLS 행렬 증거 harness 계약 | `0018` 반영 뒤 재측정 대기 |
+| `ops/supabase-evidence.md` | `B-SUPABASE-01` Migration digest·RLS 행렬 증거 harness 계약 | run `34028092302` 채택 완료 |
 | `ops/source-snapshot-spike.md` | `B-SOURCE-02`·`B-SOURCE-03` 햇살론15 상품·취급기관 Snapshot harness 계약 | run `33981161310`·`33981225371` 채택 완료 |
 | `ops/file-safety-spike.md` | `B-FILE-SAFETY` Parser 이전 검사·격리 실행 증거 harness 계약 | run `34027891135` 채택 완료 |
 | `ops/retrieval-spike.md` | `B-RETRIEVAL-01` 종단 Filter·Keyword·Vector·Rerank 증거 harness 계약 | harness 병합, 첫 main 실행 전 |

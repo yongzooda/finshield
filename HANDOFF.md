@@ -8,7 +8,7 @@
 - 상위 기획: `docs/01-product-plan.md`
 - DB 구현 기준: `docs/03-database-spec.md`
 - Provider Stack ADR: `docs/adr/001-p0-provider-stack.md`
-- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`·`B-FILE-SAFETY`가 `PASS`이고 나머지 15개가 미해제다. `GO` 전환에는 Claim 판정 품질 평가셋 사전등록도 필요하다.
+- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`·`B-FILE-SAFETY`·`B-SUPABASE-01`이 `PASS`이고 나머지 14개가 미해제다. `GO` 전환에는 Claim 판정 품질 평가셋 사전등록도 필요하다.
 - Product Release Gate (`N-QLT-009`): `NOT-EVALUATED` — P0 기능 구현 뒤 평가한다. Claim 판정 품질 `B-CLAIM-01`을 포함해 4개다.
 - 배포: Vercel `finshield` Production 연결 완료 (`https://finshield-gamma.vercel.app`)
 - 기존 PreCase 저장소·배포: 유지
@@ -45,7 +45,7 @@
 - [x] `.env.example`을 PreCase 복사본에서 FinShield 기준으로 재작성
 - [x] FinShield 전용 Supabase 프로젝트 생성과 Migration 기준선 전환
 - [x] 명세 6절 표·7.2 서버 함수·9.3 안전 View를 Migration `0004`~`0018`로 구현, 불변식 시험 433건
-- [x] `B-SUPABASE-01` 증거 harness와 main 전용 workflow, 운영 프로젝트 `0009`~`0017` 적용. `0018` 이 Keyword 단계를 고쳐 재측정 대기다
+- [x] `B-SUPABASE-01` 증거 harness와 main 전용 workflow, 운영 프로젝트 `0009`~`0018` 적용·측정·채택 (run `34028092302`)
 - [x] `B-SOURCE-02`·`B-SOURCE-03` 햇살론15 Snapshot harness와 main 전용 workflow, 측정·채택 (run `33981161310`·`33981225371`)
 - [x] `B-FILE-SAFETY` 합성 Fixture 103건과 격리 Parser 증거 harness, main 전용 workflow, 측정·채택 (run `34027891135`)
 - [x] `B-RETRIEVAL-01` 종단 측정 단위 확정과 Case 단위 증거 harness, main 전용 workflow
