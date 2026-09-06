@@ -211,6 +211,25 @@
       "result_sha256": "2ba1e1a4388735e1ac02f3b6eb894d6247bbc10d8ea34f5289dd764e2adb9441",
       "adoption_pr_number": 171,
       "adopted_at": "2026-09-06T18:24:21Z"
+    },
+    "B-DELETE-01": {
+      "code_under_test_sha": "da227f1dd233a9ee71103cde91627217e2fe06a1",
+      "workflow_head_sha": "da227f1dd233a9ee71103cde91627217e2fe06a1",
+      "run_id": 34052433514,
+      "run_attempt": 1,
+      "workflow_id": 351573335,
+      "workflow_path": ".github/workflows/delete-evidence.yml",
+      "workflow_blob_sha": "e8520c36f49e797082b8b2a601539ac08eef5c13",
+      "harness_blob_sha": "243fd596c8443a21db16417d3689c968234e577c",
+      "scope_sha256": "b40a8aefbba07d1f21ca1901a0b0c54255f311b9298c8d51ea3c9fd62aea9141",
+      "job_name": "delete-evidence / B-DELETE-01",
+      "artifact_id": 9995032136,
+      "artifact_name": "provider-evidence-B-DELETE-01-da227f1dd233a9ee71103cde91627217e2fe06a1",
+      "artifact_digest": "sha256:bcd125c4c29e77213bc74bbd8b037d209965fdf1ea0b41c87951911c41a222d6",
+      "result_path": "evidence/results/B-DELETE-01/34052433514.json",
+      "result_sha256": "809c6434a04ef190f1222a540d672f5ca726da8f0d636bc8398fc046c8a82840",
+      "adoption_pr_number": 174,
+      "adopted_at": "2026-09-06T18:45:54Z"
     }
   }
 }
