@@ -112,7 +112,8 @@ const main = async () => {
   const isolation = observeIsolation();
   if (fault === "crash") process.abort();
   if (fault === "hang") for (;;) { /* wall-time 한도로만 끝난다 */ }
-  if (fault === "oom") { const hold = []; for (;;) hold.push(Buffer.alloc(8 * 1024 * 1024, 1)); }
+  // Buffer 는 외부 메모리라 --max-old-space-size 가 잡지 못한다. old space 를 채워야 heap 한도가 걸린다.
+  if (fault === "oom") { const hold = []; for (;;) hold.push("x".repeat(4 * 1024 * 1024)); }
   if (fault === "exit-nonzero") process.exit(3);
   if (fault === "garbage") { process.stdout.write("this is not json\n"); process.exit(0); }
   if (fault === "network-canary") {

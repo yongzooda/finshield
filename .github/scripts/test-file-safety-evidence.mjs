@@ -72,7 +72,7 @@ const makeFakeSpawn = ({ usernsWorks = true } = {}) => (command, args) => {
   };
   if (fault === "crash") return { status: null, signal: "SIGABRT", stdout: "", stderr: "" };
   if (fault === "hang") return { status: null, signal: "SIGTERM", error: { code: "ETIMEDOUT" }, stdout: "", stderr: "" };
-  if (fault === "oom") return { status: null, signal: "SIGKILL", stdout: "", stderr: "" };
+  if (fault === "oom") return { status: 134, signal: null, stdout: "", stderr: "heap out of memory" };
   if (fault === "exit-nonzero") return { status: 3, signal: null, stdout: "", stderr: "" };
   if (fault === "garbage") return { status: 0, signal: null, stdout: "not json\n", stderr: "" };
   if (fault === "network-canary") {
@@ -175,6 +175,8 @@ mustReject("알 수 없는 namespace mode", (r) => { r.observations.contract.iso
 mustReject("바깥 연결 성공", (r) => { r.observations.isolation.negative_control.network.external = "CONNECTED"; });
 mustReject("fault 전파", (r) => { r.observations.faults[0].contained = false; });
 mustReject("fault 가 정상 종료", (r) => { const f = r.observations.faults.find((x) => x.mode === "crash"); f.exit_status = 0; f.signal = null; });
+mustReject("heap 한도 대신 시간 상한으로 끝남", (r) => { r.observations.faults.find((x) => x.mode === "oom").wall_timeout = true; });
+mustReject("무한 루프가 시간 상한 없이 끝남", (r) => { r.observations.faults.find((x) => x.mode === "hang").wall_timeout = false; });
 mustReject("fault 기록 누락", (r) => { r.observations.faults.pop(); });
 mustReject("network canary 결과 없음", (r) => { r.observations.faults = r.observations.faults.filter((f) => f.mode !== "network-canary"); r.observations.fixtures.by_category.fault -= 1; });
 mustReject("observations 키 추가", (r) => { r.observations.extra = 1; });

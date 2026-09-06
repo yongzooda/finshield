@@ -121,6 +121,7 @@ export const runFileSafetySpike = ({ parserRoot, spawn = spawnSync, platform = p
           name: fixture.name, mode: fixture.fault, contained,
           exit_status: Number.isInteger(outcome.status) ? outcome.status : null,
           signal: outcome.signal ?? (outcome.timedOut ? "TIMEOUT" : null),
+          wall_timeout: outcome.timedOut === true,
           stdout_parsable: outcome.parsed !== null,
         });
         if (fixture.fault === "network-canary" && outcome.parsed?.network_canary) canaryNetwork = outcome.parsed.network_canary;
