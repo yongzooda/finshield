@@ -114,7 +114,7 @@
       "artifact_digest": "sha256:d77e2d616e68ff20490f26893966efda9826f948d793178753719d0108f99bfc",
       "result_path": "evidence/results/B-FILE-SAFETY/34026419464.json",
       "result_sha256": "2565e0dfc924c14728e1ba2be9393efe25e8fc26fe917ac12c438f994c18665f",
-      "adoption_pr_number": 0,
+      "adoption_pr_number": 128,
       "adopted_at": "2026-09-06T10:11:22Z"
     }
   }
