@@ -73,12 +73,30 @@ export type ToolCallResult = {
   observations: Record<string, unknown> | null;
 };
 
+/**
+ * 실행 기록을 어디에 남길지.
+ *
+ * 회원 Run 은 회원 표에 남긴다. 공개 Demo 는 회원 자료를 만들지 않아야 하므로
+ * `demo` 표에만 남긴다 (ROLE-001). 판단하는 코드는 같고 남기는 자리만 다르다.
+ * 없으면 회원 표에 남긴다.
+ */
+export type RunRecorder = {
+  agentRun: (args: {
+    agentCode: string; version: string; logicalKey: string;
+    status: "SUCCEEDED" | "PARTIAL" | "FAILED";
+    startedAt: number; finishedAt: number; reasonCode: string | null;
+    toolCalls: number; evidenceCount: number; findingCount: number;
+  }) => Promise<string>;
+  toolRuns: (agentRunId: string, pendings: PendingToolRun[]) => Promise<Map<string, string>>;
+};
+
 export type ToolCallContext = {
   sql: Sql;
   ownerId: string;
   caseId: string;
   runId: string;
   manifest: ResolvedManifest;
+  recorder?: RunRecorder;
 };
 
 export type RunSession = ToolCallContext & {

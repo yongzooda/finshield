@@ -38,6 +38,7 @@ export default function HomePage() {
         </p>
         <div className="mt-7 flex flex-wrap gap-3">
           <Link href="/verify" className="fs-btn fs-btn--primary">거래 전에 확인하기</Link>
+          <Link href="/live-demo" className="fs-btn fs-btn--quiet">로그인 없이 한 번 보기</Link>
           <Link href="/precase" className="fs-btn fs-btn--quiet">이미 가입했거나 문제가 생겼어요</Link>
         </div>
       </header>
