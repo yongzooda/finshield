@@ -13,6 +13,7 @@ import { validateFileSafetyEvidenceResult } from "./file-safety-policy.mjs";
 import { validateRetrievalEvidenceResult } from "./retrieval-evidence-policy.mjs";
 import { validateRateEvidenceResult } from "./rate-evidence-policy.mjs";
 import { validateConsentEvidenceResult } from "./consent-evidence-policy.mjs";
+import { validateStorageEvidenceResult } from "./storage-evidence-policy.mjs";
 
 export { adrDecisionDigest } from "./provider-adr-digest.mjs";
 export { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
@@ -128,6 +129,15 @@ const TRUSTED_CONSENT_SPIKE_BLOB = "ab4ec20e424b4ec50115c9797ba0a4ed0545d496";
 const TRUSTED_CONSENT_GATE_BLOB = "eae1b967dd6a4c31071ea09e9432e6ef042925c5";
 const TRUSTED_CONSENT_PII_BLOB = "411d6dce5cc0c66b4d18a2a51f4386f52ab07bb0";
 const TRUSTED_CONSENT_FIXTURE_BLOB = "4be85c448a9dcfb1311e6739d29f19628b87b939";
+const STORAGE_WORKFLOW_PATH = ".github/workflows/storage-evidence.yml";
+const STORAGE_HARNESS_PATH = ".github/scripts/run-storage-evidence.mjs";
+const STORAGE_POLICY_PATH = ".github/scripts/storage-evidence-policy.mjs";
+const STORAGE_SPIKE_PATH = ".github/scripts/storage-spike.mjs";
+const STORAGE_OPS_PATH = "docs/ops/storage-spike.md";
+const TRUSTED_STORAGE_WORKFLOW_BLOB = "9893957251fd0446eacc9b3dddbe69c902b1c0c8";
+const TRUSTED_STORAGE_HARNESS_BLOB = "830f20fd5af6ae96864e25bcc6b2bf0920363476";
+const TRUSTED_STORAGE_POLICY_BLOB = "d2d8c75a5573b45713a3770d6bba3d11b6f92041";
+const TRUSTED_STORAGE_SPIKE_BLOB = "1238a31900c6d979a7e2f9d40848fefc05b21bcc";
 const MAX_ARCHIVE_BYTES = 2 * 1024 * 1024;
 const MAX_RESULT_BYTES = 512 * 1024;
 const MAX_EVIDENCE_AGE_MS = 27 * 24 * 60 * 60 * 1000;
@@ -468,6 +478,35 @@ const consentEvidencePolicy = {
   validate: validateConsentEvidenceResult,
 };
 
+const storageEvidencePolicy = {
+  gate: "implementation",
+  workflowName: "Storage Evidence",
+  workflowPath: STORAGE_WORKFLOW_PATH,
+  workflowBlobSha: TRUSTED_STORAGE_WORKFLOW_BLOB,
+  harnessPath: STORAGE_HARNESS_PATH,
+  harnessBlobSha: TRUSTED_STORAGE_HARNESS_BLOB,
+  trustedExecutionFiles: Object.freeze([
+    Object.freeze({ path: STORAGE_WORKFLOW_PATH, blobSha: TRUSTED_STORAGE_WORKFLOW_BLOB }),
+    Object.freeze({ path: STORAGE_HARNESS_PATH, blobSha: TRUSTED_STORAGE_HARNESS_BLOB }),
+    Object.freeze({ path: STORAGE_POLICY_PATH, blobSha: TRUSTED_STORAGE_POLICY_BLOB }),
+    Object.freeze({ path: STORAGE_SPIKE_PATH, blobSha: TRUSTED_STORAGE_SPIKE_BLOB }),
+    Object.freeze({ path: ADR_DIGEST_PATH, blobSha: TRUSTED_ADR_DIGEST_BLOB }),
+  ]),
+  jobName: "storage-evidence / B-STORAGE-01",
+  scopePaths: Object.freeze([
+    ...supabaseExpectedInventory(resolve(fileURLToPath(new URL("../../", import.meta.url)))).migrations.map((file) => `supabase/migrations/${file}`),
+    "supabase/tests/00_supabase_stub.sql",
+    ADR_DIGEST_PATH,
+    STORAGE_SPIKE_PATH,
+    STORAGE_POLICY_PATH,
+    STORAGE_HARNESS_PATH,
+    ".github/scripts/test-storage-evidence.mjs",
+    STORAGE_WORKFLOW_PATH,
+    STORAGE_OPS_PATH,
+  ]),
+  validate: validateStorageEvidenceResult,
+};
+
 export const evidencePolicies = Object.freeze({
   "B-MODEL-01": modelEvidencePolicy,
   "B-EMBED-01": embedEvidencePolicy,
@@ -478,6 +517,7 @@ export const evidencePolicies = Object.freeze({
   "B-RETRIEVAL-01": retrievalEvidencePolicy,
   "B-RATE-01": rateEvidencePolicy,
   "B-CONSENT-01": consentEvidencePolicy,
+  "B-STORAGE-01": storageEvidencePolicy,
 });
 
 export const computeEvidenceScopeDigest = (root, policy, fail) => {
