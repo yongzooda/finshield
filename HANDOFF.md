@@ -8,7 +8,7 @@
 - 상위 기획: `docs/01-product-plan.md`
 - DB 구현 기준: `docs/03-database-spec.md`
 - Provider Stack ADR: `docs/adr/001-p0-provider-stack.md`
-- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`이 `PASS`이고 나머지 16개가 미해제다. `GO` 전환에는 Claim 판정 품질 평가셋 사전등록도 필요하다.
+- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`·`B-SUPABASE-01`이 `PASS`이고 나머지 15개가 미해제다. `GO` 전환에는 Claim 판정 품질 평가셋 사전등록도 필요하다.
 - Product Release Gate (`N-QLT-009`): `NOT-EVALUATED` — P0 기능 구현 뒤 평가한다. Claim 판정 품질 `B-CLAIM-01`을 포함해 4개다.
 - 배포: Vercel `finshield` Production 연결 완료 (`https://finshield-gamma.vercel.app`)
 - 기존 PreCase 저장소·배포: 유지
@@ -44,15 +44,14 @@
 - [x] FinShield 전용 Anthropic Workspace 키로 `B-MODEL-01` 재측정과 채택
 - [x] `.env.example`을 PreCase 복사본에서 FinShield 기준으로 재작성
 - [x] FinShield 전용 Supabase 프로젝트 생성과 Migration 기준선 전환
-- [x] 명세 6절 표·7.2 서버 함수·9.3 안전 View를 Migration `0004`~`0017`로 구현, 로컬 불변식 시험 432건
-- [x] `B-SUPABASE-01` 증거 harness (기준 DB digest 대조·교차 소유 거부 행렬)와 main 전용 workflow
+- [x] 명세 6절 표·7.2 서버 함수·9.3 안전 View를 Migration `0004`~`0017`로 구현, 불변식 시험 429건
+- [x] `B-SUPABASE-01` 증거 harness와 main 전용 workflow, 운영 프로젝트 `0009`~`0017` 적용·측정·채택 (run `34023678131`)
 - [x] `B-SOURCE-02`·`B-SOURCE-03` 햇살론15 Snapshot harness와 main 전용 workflow, 측정·채택 (run `33981161310`·`33981225371`)
 
 ## 다음 작업 순서
 
 1. `N-QLT-010` Live Spike 증거 확보와 Implementation `NO-GO` 차단 해제
    - `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`은 채택됐다. `B-EMBED-01` v1·v2 실패 이력(run `33861971976`·`33870910880`, issue #29)은 회귀셋으로 보존하고 재실행하지 않는다.
-   - `B-SUPABASE-01`: harness는 병합됐고 운영 프로젝트에 `0009`~`0017` 적용과 `provider-spike` 환경 secret `FINSHIELD_DATABASE_URL` 등록이 남았다. 절차는 `docs/ops/supabase-project.md`를 따른다.
    - 채택된 `B-SOURCE-03` 결과는 `scripts/kb/load-source-snapshots.mjs`로 `kb.source_snapshots`에 적재한다. 운영 적재는 Migration 적용 뒤 한다.
    - 나머지 16개 blocker는 `docs/ops/quality-evaluation-plan.md`에 따라 기준 완화·결과 맞춤 라벨 수정 없이 진행하며 Gate 상태를 변경하지 않는다.
 2. P0 `docs/04-feature-spec.md` — Implementation Gate가 `GO`가 된 뒤 확정
@@ -78,7 +77,7 @@
 - Provider ADR의 Architecture Decision이 승인됐다는 사실은 Implementation 또는 Product Release Gate 통과를 뜻하지 않는다.
 - 공개 `/api/mcp`는 P0에서 GET·OPTIONS·POST 모두 404 `MCP_DISABLED`로 차단하며, 기존 MCP protocol 구현은 P1 재검증 전까지 외부 route에서 사용하지 않는다.
 - Anthropic Sonnet 5의 auth·quota·schema·strict tool·지연·비용은 FinShield 전용 Workspace 키로 `B-MODEL-01` 범위에서 Live 검증됐다. 무효가 된 이전 run 세 건(`33783765337`·`33883439885`·`33912191567`)의 결과 파일도 이력으로 보존한다. Cohere `embed-v4.0`은 `B-EMBED-01`, 공공데이터 금융위·진흥원 API는 `B-SOURCE-02`·`B-SOURCE-03` 범위에서 Live 검증됐다. CLOVA OCR과 법제처 API는 아직 Live 검증되지 않았다.
-- 전용 FinShield Supabase Project·RLS·authenticated TUS one-use slot·24시간 물리 삭제와 Vercel Workflow Replay·Fencing은 아직 검증되지 않았다.
+- 전용 FinShield Supabase Project와 RLS·교차 소유 거부는 `B-SUPABASE-01` 범위에서 검증됐다. authenticated TUS one-use slot·24시간 물리 삭제와 Vercel Workflow Replay·Fencing은 아직 검증되지 않았다.
 - 법제처는 등록 도메인 `Referer`를 대조한다. 동적 egress IP는 차단 사유가 아니지만 배포 도메인이 바뀌면 재등록이 필요하므로 request-time Live 조회를 기본값으로 두지 않고 공식 Snapshot 수집 경로를 검증한다.
 - Vercel Function region은 `vercel.json`의 `regions`로 `icn1`(서울)에 고정한다. Supabase 프로젝트가 `ap-northeast-2`라 기본값 `iad1`이면 DB 왕복마다 태평양을 건넌다. Hobby는 단일 region까지 허용한다.
 - Vercel은 Hobby를 유지한다. DPA가 없으므로 제출 범위에서 실제 개인정보를 처리하지 않고, 자유 입력은 고지와 PII Gate로 강제한다. Fluid compute의 300초 상한은 Hobby에서도 그대로라 판단 예산에 영향이 없다.
