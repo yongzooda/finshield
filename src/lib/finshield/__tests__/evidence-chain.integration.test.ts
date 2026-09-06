@@ -333,8 +333,10 @@ maybe("근거 사슬", () => {
     });
 
     // AI-021: Domain Agent 는 넷이고 Manifest 순서대로 돈다.
-    expect(seen).toEqual(["PRODUCT_INSTITUTION", "FRAUD_CHANNEL", "SALES_CONDUCT", "REGULATION_DISPUTE"]);
-    expect(result.agentResults).toHaveLength(4);
+    expect(seen.slice(0, 4)).toEqual(["PRODUCT_INSTITUTION", "FRAUD_CHANNEL", "SALES_CONDUCT", "REGULATION_DISPUTE"]);
+    // 규칙 3: 그다음에 독립 재확인과 반대 근거 찾기가 돈다.
+    expect(seen.slice(4)).toEqual(["COVE", "RED_TEAM"]);
+    expect(result.agentResults).toHaveLength(6);
     // AI-013: Judge 입력에 원문이 들어가지 않는다.
     expect(judgeSawIntake).toBe(false);
     expect(result.judgeOutput?.claim_results[0].state).toBe("VERIFIED");
