@@ -19,7 +19,8 @@ export const SCENARIOS = Object.freeze([
   { key: "foreign_path_upload", expect: "deny", kind: "write" },
   { key: "anonymous_upload", expect: "deny", kind: "write" },
   { key: "owner_read", expect: "deny", kind: "read" },
-  { key: "owner_list", expect: "deny", kind: "read" },
+  // 목록은 RLS 가 걸러도 200 에 빈 배열이 온다. 상태가 아니라 돌려준 항목 수로 판단한다.
+  { key: "owner_list", expect: "deny", kind: "read", rule: "nonEmptyList" },
   { key: "oversize_upload", expect: "deny", kind: "write" },
   { key: "closed_slot_upload", expect: "deny", kind: "write" },
   { key: "resumable_token_after_close", expect: "deny", kind: "write" },
@@ -73,11 +74,17 @@ export const createStorageClient = ({ baseUrl, anonKey, fetchImpl = globalThis.f
       return call(`/storage/v1/object/${BUCKET}/${path}`, { method: "GET", headers });
     },
     async listObjects({ token, prefix }) {
-      return call(`/storage/v1/object/list/${BUCKET}`, {
+      const response = await call(`/storage/v1/object/list/${BUCKET}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ prefix, limit: 10 }),
       });
+      let entries = 0;
+      if (response.ok) {
+        const body = await response.json().catch(() => []);
+        entries = Array.isArray(body) ? body.length : 0;
+      }
+      return { status: response.status, entries };
     },
     // TUS 는 업로드 URL 을 먼저 받고 나중에 본문을 보낸다. 그 URL 이 slot 폐쇄 뒤에도
     // 통하는지가 ADR 6.1 이 Live Gate 에서 보라고 한 지점이다.
@@ -105,10 +112,18 @@ export const createStorageClient = ({ baseUrl, anonKey, fetchImpl = globalThis.f
   };
 };
 
-const record = (results, key, status) => {
+export const isAllowed = (scenario, status, detail) => (
+  scenario.rule === "nonEmptyList"
+    ? status >= 200 && status < 300 && (detail ?? 0) > 0
+    : status >= 200 && status < 300
+);
+
+const record = (results, key, status, detail = null) => {
   const scenario = SCENARIOS.find((s) => s.key === key);
-  const allowed = status >= 200 && status < 300;
-  results.push({ scenario: key, expect: scenario.expect, kind: scenario.kind, status, allowed });
+  results.push({
+    scenario: key, expect: scenario.expect, kind: scenario.kind, rule: scenario.rule ?? "status",
+    status, detail, allowed: isAllowed(scenario, status, detail),
+  });
 };
 
 export const runStorageSpike = async ({ client, sql, credentials, progress = () => {} }) => {
@@ -153,7 +168,8 @@ export const runStorageSpike = async ({ client, sql, credentials, progress = () 
   record(results, "owner_read", (await client.getObject({ token, path: first.object_path })).status);
 
   // 6. 본인 폴더를 나열한다.
-  record(results, "owner_list", (await client.listObjects({ token, prefix: `${userId}/` })).status);
+  const listed = await client.listObjects({ token, prefix: `${userId}/` });
+  record(results, "owner_list", listed.status, listed.entries);
 
   // 7. 상한을 넘는 본문을 올린다. slot 은 정상 크기로 열어 Storage 쪽 상한을 본다.
   const third = await slot();

@@ -111,11 +111,6 @@ if (mode === "--run") {
       environment: { node_version: process.version, region: process.env.EVIDENCE_REGION, transport: "postgres" },
       redactions_applied: true,
     };
-    console.log(`${blockerId} transfer: ${JSON.stringify(observations.transfer)}`);
-    console.log(`${blockerId} mask: ${JSON.stringify(observations.mask)}`);
-    for (const row of observations.scenarios) {
-      console.log(`${blockerId} scenario ${row.scenario}: sent=${row.sent} reason=${row.reason ?? "-"} audit=${row.audit_events.join(",")}`);
-    }
     const resultErrors = [];
     validateStorageEvidenceResult(result, (message) => resultErrors.push(message));
     if (resultErrors.length > 0) {

@@ -29,7 +29,7 @@ const fakeFetch = async (url, init) => {
     return new Response(null, { status: 201, headers: { location: "https://example.invalid/upload/1" } });
   }
   if (String(url).startsWith("https://example.invalid/upload/")) return new Response(null, { status: 403 });
-  if (String(url).includes("/storage/v1/object/list/")) return new Response("[]", { status: 400 });
+  if (String(url).includes("/storage/v1/object/list/")) return new Response("[]", { status: 200 });
   if (init?.method === "GET") return new Response(null, { status: 400 });
   // 첫 업로드만 성공하고 나머지 쓰기는 거부한다.
   const uploads = calls.filter((c) => c.method === "POST" && c.url.includes(`/storage/v1/object/${BUCKET}/`)).length;
@@ -61,6 +61,11 @@ ok(observations.contract.uses_service_role === false, "계약에 우회 키 미�
 ok(observations.contract.slot_path_chosen_by === "server", "경로를 서버가 정한다는 사실이 남아야 한다");
 ok(observations.scenarios.length === SCENARIOS.length, "시나리오 기록이 모두 있어야 한다");
 ok(observations.totals.unauthorized_allows === 0, "가짜 응답에서 부당 허용이 없어야 한다");
+// 목록이 200 이어도 빈 배열이면 거부로 센다. RLS 가 거른 결과와 실제 노출을 구분한다.
+{
+  const listRow = observations.scenarios.find((r) => r.scenario === "owner_list");
+  ok(listRow.status === 200 && listRow.detail === 0 && listRow.allowed === false, "빈 목록은 거부로 세야 한다");
+}
 ok(observations.totals.allow_passed === observations.totals.allow_scenarios, "허용 경로가 동작해야 한다");
 ok(PNG_BYTES.length > 0, "업로드 본문이 있어야 한다");
 
@@ -95,6 +100,8 @@ rejects("읽기 통과", (o) => { o.totals.unauthorized_reads = 1; });
 rejects("부당 허용 합계", (o) => { o.totals.unauthorized_allows = 1; });
 rejects("시나리오 누락", (o) => { o.scenarios.pop(); });
 rejects("상태 코드 이상", (o) => { o.scenarios[0].status = 999; });
+rejects("목록이 항목을 돌려줌", (o) => { const t = o.scenarios.find((x) => x.scenario === "owner_list"); t.detail = 3; t.allowed = true; o.totals.unauthorized_allows = 1; o.totals.unauthorized_reads = 1; });
+rejects("목록 판정 규칙 변경", (o) => { o.scenarios.find((x) => x.scenario === "owner_list").rule = "status"; });
 rejects("observations 키 추가", (o) => { o.extra = 1; });
 
 console.log(`B-STORAGE-01 계약 시험 통과: 합격 ${passed}건, 정책 거부 ${rejected}건.`);
