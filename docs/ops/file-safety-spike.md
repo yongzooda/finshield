@@ -29,7 +29,7 @@
 - worker가 본 환경변수에 secret 형태 이름이 0개이고 allowlist 밖 이름도 0개다. canary 유출 0건, network 시도 0건.
 - worker의 파일 쓰기·바깥 읽기·child process·worker thread가 모두 거부된다.
 - network canary 실행에서 격리 밖 연결이 성공하지 않는다.
-- 주입한 fault 여섯 종이 모두 worker 안에서 끝나고 어느 것도 파일 판정값을 만들지 않는다. 모드별 종료 형태가 계약과 같다.
+- 주입한 fault 여섯 종이 모두 worker 안에서 끝나고 어느 것도 파일 판정값을 만들지 않는다. 모드별 종료 형태와 시간 상한 사용 여부가 계약과 같다. heap 소진은 스스로 끝나야 하고 시간 상한으로 끝나면 미달이다.
 
 ## 분류와 기대 판정
 
@@ -42,7 +42,7 @@
 | `polyglot` | `REJECT` | 10 | ZIP 덧붙임, PDF·이미지 교차, 선언 MIME 불일치, 이중 확장자, 이름 바꾼 실행 파일, 경로 이동·NUL 파일명 |
 | `bomb` | `REJECT` | 8 | 11쪽·200쪽, 쪽수 거짓말, 2만×2만 이미지, pixel 합계, 40 MiB 해제, 중첩 Flate, 객체 수, 중첩 깊이, 10 MiB 초과 |
 | `malformed` | `REJECT` | 8 | 빈 파일, 잘린 문서, `%%EOF` 없음, `startxref` 어긋남, 쪽 객체 없음, PNG CRC·잘림·0 너비, JPEG SOF 없음 |
-| `fault` | 봉쇄 | 5 | abort, 무한 루프, heap 소진, 비정상 종료 코드, JSON 아닌 stdout, network canary |
+| `fault` | 봉쇄 | 5 | abort, 무한 루프(시간 상한), heap 소진(heap 한도), 비정상 종료 코드, JSON 아닌 stdout, network canary |
 
 `malformed-kids-dangling-reference`처럼 검사기가 잡지 못하는 구조는 Parser 단계에서 거부된다. 검사기와 Parser 중 어디서 걸렸는지 결과의 `stage`에 남는다.
 

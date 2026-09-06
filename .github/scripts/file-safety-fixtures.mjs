@@ -11,14 +11,18 @@ export const FIXTURE_GENERATOR_VERSION = "file-safety-fixtures-v1";
 export const BENIGN_TEXT = "APR 15.9% NOT guaranteed 1397";
 
 // fault 주입마다 기대하는 종료 형태. terminated 는 비정상 종료(코드 0 아님 또는 신호),
-// parsable 은 stdout 이 JSON 인지다. 어느 fault 도 파일 판정값을 만들어서는 안 된다.
+// wall_timeout 은 부모의 시간 상한이 끝냈는지, parsable 은 stdout 이 JSON 인지다.
+// 어느 fault 도 파일 판정값을 만들어서는 안 된다.
+//
+// oom 은 wall_timeout 이 false 여야 한다. run 34025455027 에서 Buffer 로 채운 heap 은
+// --max-old-space-size 에 걸리지 않아 시간 상한으로 끝났고, 그것은 hang 과 같은 시험이었다.
 export const FAULT_EXPECTATIONS = Object.freeze({
-  crash: Object.freeze({ terminated: true, parsable: false }),
-  hang: Object.freeze({ terminated: true, parsable: false }),
-  oom: Object.freeze({ terminated: true, parsable: false }),
-  "exit-nonzero": Object.freeze({ terminated: true, parsable: false }),
-  garbage: Object.freeze({ terminated: false, parsable: false }),
-  "network-canary": Object.freeze({ terminated: false, parsable: true }),
+  crash: Object.freeze({ terminated: true, wall_timeout: false, parsable: false }),
+  hang: Object.freeze({ terminated: true, wall_timeout: true, parsable: false }),
+  oom: Object.freeze({ terminated: true, wall_timeout: false, parsable: false }),
+  "exit-nonzero": Object.freeze({ terminated: true, wall_timeout: false, parsable: false }),
+  garbage: Object.freeze({ terminated: false, wall_timeout: false, parsable: false }),
+  "network-canary": Object.freeze({ terminated: false, wall_timeout: false, parsable: true }),
 });
 export const FAULT_WALL_MS = 5_000;
 
@@ -375,7 +379,7 @@ export const buildFixtures = () => {
   // ---------- fault injection (worker 격리 증명) ----------
   list.push(fixture("fault-crash-abort", "fault", benignPdf, { fault: "crash", wallMs: FAULT_WALL_MS }));
   list.push(fixture("fault-hang-wall-timeout", "fault", benignPdf, { fault: "hang", wallMs: FAULT_WALL_MS }));
-  list.push(fixture("fault-oom-heap-limit", "fault", benignPdf, { fault: "oom", wallMs: 30_000 }));
+  list.push(fixture("fault-oom-heap-limit", "fault", benignPdf, { fault: "oom", wallMs: 60_000 }));
   list.push(fixture("fault-exit-nonzero", "fault", benignPdf, { fault: "exit-nonzero", wallMs: FAULT_WALL_MS }));
   list.push(fixture("fault-stdout-garbage", "fault", benignPdf, { fault: "garbage", wallMs: FAULT_WALL_MS }));
   list.push(fixture("fault-network-canary", "fault", benignPdf, { fault: "network-canary", wallMs: 15_000 }));

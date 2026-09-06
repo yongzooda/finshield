@@ -129,7 +129,7 @@ export const validateFileSafetyEvidenceResult = (result, fail) => {
   const faults = Array.isArray(o.faults) ? o.faults : [];
   if (faults.length !== (byCategory.fault ?? 0)) fail("fault 기록 수가 fault Fixture 수와 다릅니다.");
   for (const f of faults) {
-    if (!exactKeys(f, ["name", "mode", "contained", "exit_status", "signal", "stdout_parsable"])) {
+    if (!exactKeys(f, ["name", "mode", "contained", "exit_status", "signal", "wall_timeout", "stdout_parsable"])) {
       fail(`fault 기록 '${f?.name ?? "이름 없음"}' 의 필드가 계약과 다릅니다.`);
       continue;
     }
@@ -138,6 +138,7 @@ export const validateFileSafetyEvidenceResult = (result, fail) => {
     if (!expectation) { fail(`fault '${f.name}' 의 주입 방식이 목록에 없습니다.`); continue; }
     const terminated = f.exit_status !== 0 || f.signal !== null;
     if (terminated !== expectation.terminated) fail(`fault '${f.name}' 의 종료 형태가 계약과 다릅니다.`);
+    if (f.wall_timeout !== expectation.wall_timeout) fail(`fault '${f.name}' 이 기대한 방식으로 끝나지 않았습니다.`);
     if (f.stdout_parsable !== expectation.parsable) fail(`fault '${f.name}' 의 stdout 형태가 계약과 다릅니다.`);
   }
   if (new Set(faults.map((f) => f.mode)).size !== Object.keys(FAULT_EXPECTATIONS).length) {
