@@ -46,15 +46,21 @@ ok(inspectFile({ bytes: Buffer.alloc(0), declaredMime: "application/pdf", filena
 
 // ---------- 3. 가짜 격리 worker 로 spike 를 돌린다 ----------
 const decodeOption = (args, name) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : null; };
-const fakeSpawn = (command, args, options) => {
-  if (args?.[args.length - 1] === "true") return { status: 0, stdout: "", stderr: "" };
+const makeFakeSpawn = ({ usernsWorks = true } = {}) => (command, args) => {
+  if (args?.[args.length - 1] === "true") {
+    const userns = command === "unshare";
+    return userns && !usernsWorks ? { status: 1, stdout: "", stderr: "uid_map" } : { status: 0, stdout: "", stderr: "" };
+  }
   const real = args.slice(args.indexOf("--") + 1);
   const filePath = decodeOption(real, "--file");
   const fault = decodeOption(real, "--fault");
   const filename = Buffer.from(decodeOption(real, "--name-b64") ?? "", "base64").toString("utf8");
-  const leaked = Object.entries(options?.env ?? {}).some(([k, v]) => /KEY|SECRET|TOKEN/i.test(k) && String(v).includes("finshield-file-safety-canary"));
+  // worker 환경은 `env -i KEY=VALUE ...` 로 만든다. 그 조각에서 canary 를 읽는다.
+  const envAssignments = real.filter((a) => /^[A-Z_]+=/.test(a));
+  const leaked = envAssignments.some((a) => /^(?:[A-Z_]*(?:KEY|SECRET|TOKEN))=/.test(a) && a.includes("finshield-file-safety-canary"));
+  ok(envAssignments.every((a) => /^(?:PATH|FINSHIELD_TEST_SECRET_KEY)=/.test(a)), "worker 환경은 PATH 와 대조용 canary 만 받는다");
   const isolation = {
-    env_names_count: Object.keys(options?.env ?? {}).length,
+    env_names_count: envAssignments.length,
     env_secret_like: leaked ? 1 : 0,
     env_unexpected: [],
     env_canary_leak: leaked,
@@ -85,12 +91,19 @@ const fakeSpawn = (command, args, options) => {
   return { status: 0, signal: null, stderr: "", stdout: `${JSON.stringify({ ok: true, verdict, reasons, stage, inspection: { detected_mime: inspection.detected_mime, extension: inspection.extension, metrics: inspection.metrics }, parse: null, isolation, elapsed_ms: 3 })}\n` };
 };
 
+const fakeSpawn = makeFakeSpawn();
+const fakeSpawnNoUserns = makeFakeSpawn({ usernsWorks: false });
 ok(probeNetworkNamespace(fakeSpawn, "darwin").available === false, "Linux 가 아니면 namespace 를 쓸 수 없다");
-ok(probeNetworkNamespace(fakeSpawn, "linux").available === true, "Linux 에서는 namespace 확인이 통과한다");
+ok(probeNetworkNamespace(fakeSpawn, "linux").mode === "userns", "가능하면 user namespace 를 쓴다");
+ok(probeNetworkNamespace(fakeSpawnNoUserns, "linux").mode === "sudo", "user namespace 가 막히면 sudo 로 대체한다");
+ok(probeNetworkNamespace(() => ({ status: 1 }), "linux").available === false, "둘 다 막히면 증거를 만들지 않는다");
 assert.throws(() => runFileSafetySpike({ parserRoot: "/nonexistent", spawn: fakeSpawn, platform: "darwin" }), /network namespace/);
 passed += 1;
 
 const observations = runFileSafetySpike({ parserRoot: "/nonexistent", spawn: fakeSpawn, platform: "linux" });
+ok(observations.contract.isolation.network_namespace_mode === "userns", "관측에 namespace mode 가 남는다");
+const sudoObservations = runFileSafetySpike({ parserRoot: "/nonexistent", spawn: fakeSpawnNoUserns, platform: "linux" });
+ok(sudoObservations.contract.isolation.network_namespace_mode === "sudo", "대체 mode 도 관측에 남는다");
 ok(observations.totals.mismatches === 0, "합계에 어긋남이 없어야 한다");
 ok(observations.isolation.network_attempts === 0, "network 시도는 0건");
 ok(observations.isolation.canary_leaks === 0, "본 실행에서는 canary 가 보이지 않아야 한다");
@@ -157,6 +170,8 @@ mustReject("network 시도", (r) => { r.observations.isolation.network_attempts 
 mustReject("파일 쓰기 허용", (r) => { r.observations.isolation.probes_denied.fs_write = false; });
 mustReject("child process 허용", (r) => { r.observations.isolation.probes_denied.child_process = false; });
 mustReject("음성 대조 없음", (r) => { r.observations.isolation.negative_control.detected = false; });
+mustReject("namespace 미사용", (r) => { r.observations.contract.isolation.network_namespace = false; });
+mustReject("알 수 없는 namespace mode", (r) => { r.observations.contract.isolation.network_namespace_mode = "none"; });
 mustReject("바깥 연결 성공", (r) => { r.observations.isolation.negative_control.network.external = "CONNECTED"; });
 mustReject("fault 전파", (r) => { r.observations.faults[0].contained = false; });
 mustReject("fault 가 정상 종료", (r) => { const f = r.observations.faults.find((x) => x.mode === "crash"); f.exit_status = 0; f.signal = null; });

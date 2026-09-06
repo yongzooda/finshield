@@ -16,6 +16,9 @@ export const PARSER_INTEGRITY = "sha512-ZHjSVpDa3D6izMq8/04lvkhkATUmL9px6ChPaXc1
 export const MAX_OLD_SPACE_MB = 512;
 export const MIN_DANGEROUS_FIXTURES = 50; // ADR 15.1 최소 표본
 export const WORKER_ENV_ALLOWLIST = Object.freeze(["PATH"]);
+// userns: 권한 없는 user namespace. sudo: Ubuntu 24.04 처럼 AppArmor 가 그것을 막을 때
+// network namespace 만 sudo 로 만들고 setpriv 로 곧바로 원래 사용자로 내려간다.
+export const NAMESPACE_MODES = Object.freeze(["userns", "sudo"]);
 
 const isRecord = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
 const exactKeys = (value, expected) => isRecord(value)
@@ -47,8 +50,9 @@ export const validateFileSafetyEvidenceResult = (result, fail) => {
     fail("Parser 의 package·version·integrity 가 고정값과 다릅니다.");
   }
   if (c.isolation?.permission_model !== true || c.isolation?.max_old_space_mb !== MAX_OLD_SPACE_MB
+    || c.isolation?.network_namespace !== true || !NAMESPACE_MODES.includes(c.isolation?.network_namespace_mode)
     || JSON.stringify(c.isolation?.env_allowlist) !== JSON.stringify([...WORKER_ENV_ALLOWLIST])) {
-    fail("격리 계약(권한 모델·heap 상한·환경변수 allowlist)이 고정값과 다릅니다.");
+    fail("격리 계약(권한 모델·namespace·heap 상한·환경변수 allowlist)이 고정값과 다릅니다.");
   }
 
   // 2. Fixture: 생성기를 다시 돌려 SHA-256 이 같은지 본다. 다르면 시험 대상이 바뀐 것이다.

@@ -50,10 +50,16 @@ jobs:
       - name: Install pinned parser
         run: npm --prefix trusted/.github/fixtures/file-safety-parser ci --ignore-scripts
 
-      - name: Confirm unprivileged network namespace
+      - name: Confirm network namespace isolation
         run: |
-          unshare --map-root-user --net -- true
-          echo "unshare --net available"
+          if unshare --map-root-user --net -- true 2>/dev/null; then
+            echo "network namespace mode: userns"
+          elif sudo -n unshare --net -- true; then
+            echo "network namespace mode: sudo"
+          else
+            echo "::error::no usable network namespace; evidence must not run without isolation"
+            exit 1
+          fi
 
       - name: Run blocker evidence harness
         env:
