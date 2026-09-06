@@ -11,6 +11,7 @@ import postgres from "postgres";
 import { createRunSession, executeTool, persistToolRuns, sha256, type ToolOutcome } from "../tools/runtime";
 import { parseUrlHost } from "../tools/url";
 import { runDomainAgent, type AgentModel } from "../agents/runner";
+import { runVerification, type JudgeModel } from "../orchestrator";
 import type { DomainAgentInput } from "../schemas";
 import { DEFINITION_VERSION } from "../manifest";
 import { loadManifest, resetManifestCache } from "../registry";
@@ -67,6 +68,21 @@ maybe("근거 사슬", () => {
         ${manifest.manifestId}::uuid, ${`run-${Date.now()}`}::text, ${"b".repeat(64)}::text,
         'INITIAL'::public.verification_run_kind, null) as id`;
     runId = run[0].id as string;
+    // 공식 채널 등록부에 한 줄 넣어 둔다. 적재는 관리자 역할의 일이다.
+    await admin`
+      insert into kb.source_snapshots
+        (source_type, authority_level, publisher_name, source_title, official_id, source_version,
+         retrieved_at, content_hash, source_fingerprint, freshness_status, is_complete, is_citable)
+      values ('GUIDE', 'B', '서민금융진흥원', '공식 신청 채널 안내', 'kinfa:channel:test', 'v1',
+              now(), ${"1".repeat(64)}, ${"2".repeat(64)}, 'FRESH', true, true)
+      on conflict do nothing`;
+    await admin`
+      insert into kb.official_channel_registry
+        (institution_code, channel_type, normalized_value, display_value, source_snapshot_id, valid_from)
+      select 'KINFA', 'URL', 'kinfa.or.kr', 'https://www.kinfa.or.kr', s.id, current_date
+        from kb.source_snapshots s where s.official_id = 'kinfa:channel:test'
+      on conflict do nothing`;
+
     const agentRun = await sql`
       insert into public.agent_runs
         (owner_id, case_id, verification_run_id, logical_agent_key, agent_code, agent_version,
@@ -260,5 +276,98 @@ maybe("근거 사슬", () => {
     expect(result.status).toBe("FAILED");
     expect(result.reasonCode).toBe("CITATION_INVALID");
   }, 30_000);
+
+
+  it("네 Agent 를 순서대로 돌리고 Judge 가 구조만 보고 정한다", async () => {
+    const seen: string[] = [];
+    const askedOnce = new Set<string>();
+    const agentModel: AgentModel = {
+      chooseTools: async ({ input }) => {
+        if (!seen.includes(input.agent_code)) seen.push(input.agent_code);
+        // 한 번만 도구를 고르고 그다음에는 그만 부른다.
+        if (askedOnce.has(input.agent_code)) return [];
+        askedOnce.add(input.agent_code);
+        return input.agent_code === "FRAUD_CHANNEL"
+          ? [{ toolCode: "lookup_official_channel", input: { values: ["https://kinfa.or.kr"] } }]
+          : [];
+      },
+      decide: async ({ input, evidence }) => ({
+        schema_version: "out-v1",
+        findings: evidence.length > 0
+          ? [{
+              claim_ref: "C1", state: "VERIFIED", relation: "SUPPORT",
+              evidence_refs: [evidence[0].evidence_ref],
+              summary_masked: `${input.agent_code} 확인함`, limits: [],
+            }]
+          : [{
+              claim_ref: "C1", state: "UNKNOWN", relation: "CONTEXT", evidence_refs: [],
+              summary_masked: `${input.agent_code} 범위에서 확인하지 못함`, limits: ["자료 없음"],
+            }],
+        out_of_scope_claim_refs: [],
+      }),
+    };
+    let judgeSawIntake = false;
+    const judgeModel: JudgeModel = {
+      judge: async (args) => {
+        judgeSawIntake = JSON.stringify(args).includes("마스킹된 상담 내용");
+        const supported = args.evidence[0]?.evidence_ref;
+        return {
+          schema_version: "out-v1",
+          claim_results: [{
+            claim_ref: "C1", state: supported ? "VERIFIED" : "UNKNOWN",
+            evidence_refs: supported ? [supported] : [],
+            withheld_reason: supported ? null : "근거를 찾지 못했습니다",
+            rationale_masked: "공식 안내로 확인했습니다",
+          }],
+          conflicts: [],
+        };
+      },
+    };
+
+    const result = await runVerification({
+      ctx: { sql, ownerId, caseId, runId, manifest: { manifestId: "", kbReleaseId: "", agentIds: {}, toolIds: {} } },
+      claims: agentInput().claims,
+      maskedIntake: "마스킹된 상담 내용",
+      journeyStage: "PRE_TRANSACTION",
+      agentModel, judgeModel,
+    });
+
+    // AI-021: Domain Agent 는 넷이고 Manifest 순서대로 돈다.
+    expect(seen).toEqual(["PRODUCT_INSTITUTION", "FRAUD_CHANNEL", "SALES_CONDUCT", "REGULATION_DISPUTE"]);
+    expect(result.agentResults).toHaveLength(4);
+    // AI-013: Judge 입력에 원문이 들어가지 않는다.
+    expect(judgeSawIntake).toBe(false);
+    expect(result.judgeOutput?.claim_results[0].state).toBe("VERIFIED");
+    const runs = await sql`
+      select count(*)::int as n from public.agent_runs where verification_run_id = ${runId}::uuid`;
+    expect(runs[0].n).toBeGreaterThanOrEqual(4);
+  }, 60_000);
+
+  it("Judge 가 지어낸 근거를 인용하면 결과를 버리고 부분 실패로 남긴다", async () => {
+    const agentModel: AgentModel = {
+      chooseTools: async () => [],
+      decide: async () => ({ schema_version: "out-v1", findings: [], out_of_scope_claim_refs: ["C1"] }),
+    };
+    const judgeModel: JudgeModel = {
+      judge: async () => ({
+        schema_version: "out-v1",
+        claim_results: [{
+          claim_ref: "C1", state: "VERIFIED", evidence_refs: ["E999"],
+          withheld_reason: null, rationale_masked: "확인했습니다",
+        }],
+        conflicts: [],
+      }),
+    };
+    const result = await runVerification({
+      ctx: { sql, ownerId, caseId, runId, manifest: { manifestId: "", kbReleaseId: "", agentIds: {}, toolIds: {} } },
+      claims: agentInput().claims,
+      maskedIntake: "마스킹된 상담 내용",
+      journeyStage: "PRE_TRANSACTION",
+      agentModel, judgeModel,
+    });
+    expect(result.judgeOutput).toBeNull();
+    expect(result.judgeReasonCode).toBe("JUDGE_CITATION_INVALID");
+    expect(result.partial).toBe(true);
+  }, 60_000);
 
 });
