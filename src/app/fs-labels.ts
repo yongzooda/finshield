@@ -22,6 +22,7 @@ export const AXIS_RESULT: Record<string, { label: string; tone: ChipTone }> = {
   CONTRADICTED: { label: "사실과 다름", tone: "contra" },
   CONFLICTING: { label: "자료가 엇갈림", tone: "caution" },
   UNCERTAIN: { label: "확정 못 함", tone: "neutral" },
+  NEED_MORE_INFORMATION: { label: "정보 부족", tone: "caution" },
   SUSPENDED: { label: "보류", tone: "neutral" },
 };
 

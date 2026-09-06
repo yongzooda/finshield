@@ -54,9 +54,10 @@ describe("축 결과", () => {
     expect(axes[0].result_code).toBe("CONTRADICTED");
   });
 
-  it("프로필을 건너뛰면 적합성 축만 보류한다", () => {
+  it("프로필을 건너뛰면 적합성 축만 정보 부족으로 남는다", () => {
     const axes = buildAxisResults([claim("VERIFIED")], false);
-    expect(axes[2].result_code).toBe("SUSPENDED");
+    // AUTH-007: 적합성만 미루고 나머지 축은 그대로 본다.
+    expect(axes[2].result_code).toBe("NEED_MORE_INFORMATION");
     expect(axes[2].limitation_codes).toContain("PROFILE_SKIPPED");
     // 다른 축은 그대로 진행한다.
     expect(axes[0].result_code).toBe("CONFIRMED");

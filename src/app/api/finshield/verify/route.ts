@@ -10,7 +10,8 @@
 import { ndjsonStream } from "@/lib/ops/ndjson";
 import { jsonNoStore, readJson, str } from "@/lib/ops/http";
 import { fsql } from "@/lib/finshield/db";
-import { resolveOwner, UnauthenticatedError } from "@/lib/finshield/auth";
+import { bearerToken, resolveOwner, UnauthenticatedError } from "@/lib/finshield/auth";
+import { restSelect } from "@/lib/finshield/rest";
 import { confirmClaims } from "@/lib/finshield/intake";
 import { loadManifest } from "@/lib/finshield/registry";
 import { runVerification, type RunProgress } from "@/lib/finshield/orchestrator";
@@ -24,7 +25,27 @@ export const maxDuration = 300;
 
 const STAGES = ["PRE_TRANSACTION", "ENROLLED", "FUNDS_SENT_OR_DAMAGE_SUSPECTED"] as const;
 
+/**
+ * 적합성을 볼 수 있는 프로필이 있는지 (AUTH-007).
+ *
+ * 프로필은 사용자 소유 표라 worker 가 읽지 못한다. 사용자의 token 으로 묻는다.
+ * 읽지 못했으면 있다고 보지 않는다. 없는 쪽으로 미루는 편이 안전하다.
+ */
+const profileUsable = async (token: string): Promise<boolean> => {
+  if (!token) return false;
+  try {
+    const rows = await restSelect({
+      token, path: "financial_profiles", query: { select: "completeness", limit: "1" },
+    });
+    const completeness = (rows[0] as { completeness?: unknown } | undefined)?.completeness;
+    return typeof completeness === "string" && completeness !== "SKIPPED";
+  } catch {
+    return false;
+  }
+};
+
 export async function POST(request: Request): Promise<Response> {
+  const token = bearerToken(request) ?? "";
   let ownerId: string;
   try {
     ownerId = await resolveOwner(request);
@@ -96,7 +117,8 @@ export async function POST(request: Request): Promise<Response> {
         statement_masked: claim.statement_masked, materiality: claim.materiality,
       }));
       const finals = buildFinalClaims({ claims: withIds, run: result });
-      const saved = await finalizeRun({ sql: fsql(), runId, claims: withIds, run: result, hasProfile: true });
+      const hasProfile = await profileUsable(token);
+      const saved = await finalizeRun({ sql: fsql(), runId, claims: withIds, run: result, hasProfile });
 
       push({
         type: "done",
