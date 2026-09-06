@@ -39,14 +39,26 @@ export type IntakeAccepted = {
   claims: (ConfirmedClaim & { claimId: string })[];
 };
 
+/**
+ * 접수 단계 알림.
+ *
+ * 화면이 가짜 백분율 대신 실제로 끝난 단계를 보여 줄 수 있게, 단계마다 한 번씩
+ * 부른다 (S-007). 부르는 쪽이 없으면 아무 일도 하지 않는다.
+ */
+export type IntakeStage =
+  | "INPUT_CREATED" | "VALIDATED" | "EXTRACTED" | "MASKED" | "CLAIMS_EXTRACTED";
+export type StageReporter = (stage: IntakeStage, detail?: Record<string, unknown>) => void;
+
 export const startIntake = async (args: {
   sql: Sql;
   ownerId: string;
   rawText: string;
   titleMasked: string;
   extractClaims: ClaimExtractor;
+  onStage?: StageReporter;
 }): Promise<IntakeAccepted | IntakeBlocked> => {
   const { sql, ownerId } = args;
+  const report: StageReporter = args.onStage ?? (() => undefined);
   const raw = args.rawText.trim();
   if (raw.length === 0) throw new Error("입력이 비어 있다");
   const bytes = Buffer.byteLength(raw, "utf8");
@@ -65,6 +77,7 @@ export const startIntake = async (args: {
   const input = await sql`
     select private.create_text_input(${ownerId}::uuid, ${caseId}::uuid, ${bytes}::bigint, 86400) as id`;
   const inputId = input[0].id as string;
+  report("INPUT_CREATED", { case_id: caseId, input_id: inputId, bytes });
 
   for (const [stage, patch] of [
     ["VALIDATED", {}],
@@ -77,6 +90,8 @@ export const startIntake = async (args: {
   ] as const) {
     await sql`select id from private.advance_input_stage(${ownerId}::uuid, ${caseId}::uuid,
       ${inputId}::uuid, ${stage}::public.input_stage, ${JSON.stringify(patch)}::text::jsonb)`;
+    // 마스킹 단계에서는 무엇을 몇 개 가렸는지 함께 알린다. 원문은 보내지 않는다.
+    report(stage, stage === "MASKED" ? { masked_count: gate.masked.total } : undefined);
   }
 
   // Claim 추출은 마스킹된 문장만 본다.
@@ -95,6 +110,7 @@ export const startIntake = async (args: {
     });
   }
 
+  report("CLAIMS_EXTRACTED", { claim_count: claims.length });
   return { ok: true, caseId, inputId, maskedText, claims };
 };
 

@@ -39,9 +39,26 @@ type ClaimResult = {
 };
 type AgentLine = { agentCode: string; status: string; findings?: number; toolCalls?: number };
 
+const STAGE_ORDER = ["INPUT_CREATED", "VALIDATED", "EXTRACTED", "MASKED", "CLAIMS_EXTRACTED"] as const;
+const STAGE_LABEL: Record<string, string> = {
+  INPUT_CREATED: "입력을 받았습니다",
+  VALIDATED: "형식과 크기를 확인했습니다",
+  EXTRACTED: "문장을 읽었습니다",
+  MASKED: "개인정보를 가렸습니다",
+  CLAIMS_EXTRACTED: "확인할 항목을 뽑았습니다",
+};
+
+/** 단계마다 덧붙일 한 줄. 원문은 넣지 않는다. */
+function stageDetail(event: { stage: string; masked_count?: number; claim_count?: number }): string {
+  if (event.stage === "MASKED") return `${event.masked_count ?? 0}곳을 가렸습니다`;
+  if (event.stage === "CLAIMS_EXTRACTED") return `${event.claim_count ?? 0}개 항목`;
+  return "";
+}
+
 export function VerifyFlow() {
   const [token, setToken, ready] = useFsToken();
-  const [step, setStep] = useState<"input" | "claims" | "running" | "result">("input");
+  const [step, setStep] = useState<"input" | "extracting" | "claims" | "running" | "result">("input");
+  const [stages, setStages] = useState<{ stage: string; detail: string }[]>([]);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [text, setText] = useState("");
@@ -54,6 +71,7 @@ export function VerifyFlow() {
   const [saved, setSaved] = useState(true);
   const [opened, setOpened] = useState<Set<string>>(new Set());
   const [caseId, setCaseId] = useState<string | null>(null);
+  const [inputId, setInputId] = useState<string | null>(null);
   // 마스킹한 문장은 이 화면 안에서만 들고 있는다. 저장소에 남기지 않는다.
   const masked = useRef("");
 
@@ -63,20 +81,69 @@ export function VerifyFlow() {
   });
 
   const submitText = async () => {
-    setBusy(true); setNotice(null);
+    setBusy(true); setNotice(null); setStages([]); setStep("extracting");
     try {
       const response = await fetch("/api/finshield/intake", {
         method: "POST", headers: authed(), body: JSON.stringify({ text }),
       });
-      const body = await response.json();
-      if (!response.ok) { setNotice(body.error ?? "접수하지 못했습니다"); return; }
-      if (body.blocked) { setNotice(body.ask); return; }
-      setClaims(body.claims);
-      setPicked(new Set(body.claims.filter((c: Claim) => c.materiality === "MATERIAL").map((c: Claim) => c.claim_id)));
-      setCaseId(body.case_id as string);
-      masked.current = body.masked_text ?? "";
-      setStep("claims");
+      if (!response.ok || !response.body) {
+        const body = await response.json().catch(() => null);
+        setNotice(body?.error ?? "접수하지 못했습니다"); setStep("input"); return;
+      }
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+        for (const line of lines) {
+          if (line.trim().length === 0) continue;
+          const event = JSON.parse(line);
+          if (event.type === "stage") {
+            setStages((prev) => [...prev, { stage: event.stage, detail: stageDetail(event) }]);
+            if (event.stage === "INPUT_CREATED") {
+              setCaseId(event.case_id as string);
+              setInputId(event.input_id as string);
+            }
+          } else if (event.type === "blocked") {
+            setNotice(event.ask); setStep("input");
+          } else if (event.type === "done") {
+            setClaims(event.claims);
+            setPicked(new Set(event.claims
+              .filter((c: Claim) => c.materiality === "MATERIAL").map((c: Claim) => c.claim_id)));
+            setCaseId(event.case_id as string);
+            setInputId(event.input_id as string);
+            masked.current = event.masked_text ?? "";
+            setStep("claims");
+          } else if (event.type === "error") {
+            setNotice(event.message); setStep("input");
+          }
+        }
+      }
     } finally { setBusy(false); }
+  };
+
+  /** 사용자가 중단하면 원본을 지우기 시작한다. 화면에서 물러나는 것이 아니다 (규칙 4). */
+  const stopInput = async () => {
+    if (!caseId || !inputId) { setStep("input"); return; }
+    setBusy(true);
+    try {
+      const response = await fetch(`/api/finshield/cases/${caseId}/stop`, {
+        method: "POST", headers: authed(), body: JSON.stringify({ input_id: inputId }),
+      });
+      const body = await response.json().catch(() => null);
+      setNotice(response.ok
+        ? "중단했습니다. 올리신 내용은 지우기 시작했습니다."
+        : (body?.error ?? "중단하지 못했습니다"));
+    } finally {
+      setBusy(false);
+      setClaims([]); setPicked(new Set()); setStages([]);
+      setCaseId(null); setInputId(null); masked.current = "";
+      setStep("input");
+    }
   };
 
   const startRun = async () => {
@@ -158,6 +225,32 @@ export function VerifyFlow() {
         </FsCard>
       ) : null}
 
+      {step === "extracting" ? (
+        <FsCard>
+          <h2 className="fs-h2">정리하는 중</h2>
+          <p className="fs-body mt-2">
+            지금 무엇을 하고 있는지 그대로 보여 드립니다. 진행률은 만들지 않습니다.
+          </p>
+          <ul className="fs-steps mt-5" aria-live="polite">
+            {STAGE_ORDER.map((stage) => {
+              const done = stages.find((entry) => entry.stage === stage);
+              const running = !done && stages.length === STAGE_ORDER.indexOf(stage);
+              if (!done && !running) return null;
+              return (
+                <li key={stage} data-state={done ? "done" : "running"}>
+                  <span className="font-bold">{STAGE_LABEL[stage] ?? stage}</span>
+                  {done?.detail ? <span className="fs-meta ml-2">{done.detail}</span> : null}
+                </li>
+              );
+            })}
+          </ul>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button type="button" disabled={busy} onClick={() => void stopInput()}
+              className="fs-btn fs-btn--quiet">중단하고 지우기</button>
+          </div>
+        </FsCard>
+      ) : null}
+
       {step === "claims" ? (
         <FsCard>
           <h2 className="fs-h2">무엇을 확인할까요</h2>
@@ -184,8 +277,15 @@ export function VerifyFlow() {
               </li>
             ))}
           </ul>
-          <button type="button" disabled={busy || picked.size === 0} onClick={startRun}
-            className="fs-btn fs-btn--primary mt-5">확인 시작</button>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button type="button" disabled={busy || picked.size === 0} onClick={startRun}
+              className="fs-btn fs-btn--primary">확인 시작</button>
+            <button type="button" disabled={busy} onClick={() => void stopInput()}
+              className="fs-btn fs-btn--quiet">중단하고 다시 입력</button>
+          </div>
+          <p className="fs-meta mt-3">
+            중단하시면 올리신 내용을 지우기 시작합니다. 확인한 항목만 남습니다.
+          </p>
         </FsCard>
       ) : null}
 
