@@ -101,7 +101,8 @@ export async function POST(request: Request): Promise<Response> {
         evidence: result.evidence.map((item) => ({
           ref: item.evidence_ref, title: item.title, source: item.source_type,
           grade: item.authority_grade, official_id: item.official_id, url: item.url,
-          published_at: item.published_at, freshness: item.freshness_at_use,
+          published_at: item.published_at, fetched_at: item.fetched_at,
+          content_hash: item.content_hash, freshness: item.freshness_at_use,
           directness: item.directness, reference_only: item.reference_only,
           excerpt: item.excerpt_masked,
         })),
