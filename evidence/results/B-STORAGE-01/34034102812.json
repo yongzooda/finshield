@@ -1,0 +1,132 @@
+{
+  "schema_version": 3,
+  "blocker_id": "B-STORAGE-01",
+  "requirements_blob_sha": "27ce706010344fbcedebe3abd707febff0f1dc26",
+  "adr_decision_sha256": "3c2a5e2dac9d626fdeea0b70eaa16454dd97688b54ad6d101b9b1d8dccdce736",
+  "code_under_test_sha": "fb48e3a18a960b7f425bff6fbd767164906d6d0d",
+  "workflow_head_sha": "fb48e3a18a960b7f425bff6fbd767164906d6d0d",
+  "scope_sha256": "da55e207571c2119e21f689bcfd9621bbf75aae0e56de33fa4cc917454ddf7e7",
+  "run": {
+    "id": 34034102812,
+    "attempt": 1
+  },
+  "observations": {
+    "contract": {
+      "formula_version": "storage-authenticated-slot-v1",
+      "bucket": "finshield-quarantine",
+      "size_limit_bytes": 10485760,
+      "scenarios": [
+        "open_slot_upload",
+        "same_path_upsert",
+        "foreign_path_upload",
+        "anonymous_upload",
+        "owner_read",
+        "owner_list",
+        "oversize_upload",
+        "closed_slot_upload",
+        "resumable_token_after_close"
+      ],
+      "uses_service_role": false,
+      "slot_path_chosen_by": "server"
+    },
+    "scenarios": [
+      {
+        "scenario": "open_slot_upload",
+        "expect": "allow",
+        "kind": "write",
+        "rule": "status",
+        "status": 200,
+        "detail": null,
+        "allowed": true
+      },
+      {
+        "scenario": "same_path_upsert",
+        "expect": "deny",
+        "kind": "write",
+        "rule": "status",
+        "status": 400,
+        "detail": null,
+        "allowed": false
+      },
+      {
+        "scenario": "foreign_path_upload",
+        "expect": "deny",
+        "kind": "write",
+        "rule": "status",
+        "status": 400,
+        "detail": null,
+        "allowed": false
+      },
+      {
+        "scenario": "anonymous_upload",
+        "expect": "deny",
+        "kind": "write",
+        "rule": "status",
+        "status": 400,
+        "detail": null,
+        "allowed": false
+      },
+      {
+        "scenario": "owner_read",
+        "expect": "deny",
+        "kind": "read",
+        "rule": "status",
+        "status": 400,
+        "detail": null,
+        "allowed": false
+      },
+      {
+        "scenario": "owner_list",
+        "expect": "deny",
+        "kind": "read",
+        "rule": "nonEmptyList",
+        "status": 200,
+        "detail": 0,
+        "allowed": false
+      },
+      {
+        "scenario": "oversize_upload",
+        "expect": "deny",
+        "kind": "write",
+        "rule": "status",
+        "status": 400,
+        "detail": null,
+        "allowed": false
+      },
+      {
+        "scenario": "closed_slot_upload",
+        "expect": "deny",
+        "kind": "write",
+        "rule": "status",
+        "status": 400,
+        "detail": null,
+        "allowed": false
+      },
+      {
+        "scenario": "resumable_token_after_close",
+        "expect": "deny",
+        "kind": "write",
+        "rule": "status",
+        "status": 403,
+        "detail": null,
+        "allowed": false
+      }
+    ],
+    "totals": {
+      "allow_scenarios": 1,
+      "allow_passed": 1,
+      "deny_scenarios": 8,
+      "unauthorized_allows": 0,
+      "unauthorized_writes": 0,
+      "unauthorized_reads": 0,
+      "upsert_allows": 0,
+      "resumable_reuse_allows": 0
+    }
+  },
+  "environment": {
+    "node_version": "v24.20.0",
+    "region": "github-hosted",
+    "transport": "postgres"
+  },
+  "redactions_applied": true
+}
