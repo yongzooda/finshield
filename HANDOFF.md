@@ -47,6 +47,7 @@
 - [x] 명세 6절 표·7.2 서버 함수·9.3 안전 View를 Migration `0004`~`0017`로 구현, 불변식 시험 429건
 - [x] `B-SUPABASE-01` 증거 harness와 main 전용 workflow, 운영 프로젝트 `0009`~`0017` 적용·측정·채택 (run `34024408248`)
 - [x] `B-SOURCE-02`·`B-SOURCE-03` 햇살론15 Snapshot harness와 main 전용 workflow, 측정·채택 (run `33981161310`·`33981225371`)
+- [x] `B-FILE-SAFETY` 합성 Fixture 103건과 격리 Parser 증거 harness, main 전용 workflow
 
 ## 다음 작업 순서
 

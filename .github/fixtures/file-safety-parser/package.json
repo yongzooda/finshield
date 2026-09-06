@@ -1,0 +1,9 @@
+{
+  "name": "finshield-file-safety-parser",
+  "version": "1.0.0",
+  "private": true,
+  "description": "B-FILE-SAFETY 격리 Parser 전용 의존성. 저장소 루트 package-lock.json 은 B-MODEL-01 증거 scope 라 건드리지 않는다.",
+  "dependencies": {
+    "pdfjs-dist": "6.3.289"
+  }
+}
