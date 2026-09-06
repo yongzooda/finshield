@@ -92,6 +92,11 @@ const makeRows = (units, provenance, { distance = 0.1, rank = 0.5 } = {}) => uni
   const { top, poolSize, collapsed } = rerankCase({ claimResults, provenance });
   ok(poolSize === 6 && collapsed === 0, "합집합 크기와 중복 제거 수가 맞아야 한다");
   ok(top.length === TOP_K, "top 은 5건이어야 한다");
+  // Claim 마다 한 자리를 먼저 준다. 두 Claim 이 있으면 각 Claim 의 최고 후보가 반드시 들어간다.
+  for (const key of ["c1", "c2"]) {
+    const forClaim = claimResults.find((entry) => entry.claim.key === key).rows.map((r) => provenance.get(r.source_snapshot_id).unit);
+    ok(top.some((c) => forClaim.includes(c.unit)), `Claim ${key} 의 근거가 top 에 있어야 한다`);
+  }
   ok(top[0].unit === "u1" || top[0].unit === "u2" || top[0].unit === "n1", "거리 가까운 쪽이 위로 와야 한다");
   const metrics = caseMetrics({ relevantUnits: new Set(["u1", "u2", "u3", "u4", "u5"]), criticalUnits: new Set(["u1"]), top });
   ok(metrics.precision_at_5 === metrics.recall_at_5, "관련 unit 5개면 Recall 과 Precision 이 같아야 한다");
@@ -104,6 +109,25 @@ const makeRows = (units, provenance, { distance = 0.1, rank = 0.5 } = {}) => uni
   provenance.get("snap-u1copy").fingerprint = "fp-u1";
   const { poolSize, deduped, collapsed } = rerankCase({ claimResults: [{ claim: { key: "c1" }, rows }], provenance });
   ok(poolSize === 2 && deduped === 1 && collapsed === 1, "같은 지문은 하나로 접혀야 한다");
+}
+{
+  // Claim 이 5개면 각 Claim 의 최고 후보가 한 자리씩 차지하고 전체 점수 상위가 그 자리를 밀어내지 못한다.
+  const provenance = new Map();
+  // own{i} 는 그 Claim 에서 가장 가깝고, loud 는 모든 Claim 에서 두 번째다.
+  // 전체 점수만 보면 loud 가 다섯 번 나와 상위를 차지하지만 자리 배분이 그것을 막는다.
+  const claimResults = ["c1", "c2", "c3", "c4", "c5"].map((key, index) => ({
+    claim: { key },
+    rows: makeRows([`own${index}`, "loud"], provenance, { distance: 0.05, rank: 0.4 }),
+  }));
+  for (const entry of claimResults) {
+    const loud = entry.rows.find((r) => provenance.get(r.source_snapshot_id).unit === "loud");
+    loud.vector_distance = 0.2;
+  }
+  const { top } = rerankCase({ claimResults, provenance });
+  ok(top.length === TOP_K, "Claim 5개면 top 이 5건이어야 한다");
+  for (let index = 0; index < 5; index += 1) {
+    ok(top.some((c) => c.unit === `own${index}`), `Claim ${index + 1} 의 고유 근거가 밀려나지 않아야 한다`);
+  }
 }
 ok(percentile([10, 20, 30, 40, 50], 0.95) === 50 && percentile([], 0.95) === null, "백분위 계산이 맞아야 한다");
 

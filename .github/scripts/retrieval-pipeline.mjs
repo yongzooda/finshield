@@ -70,6 +70,7 @@ export const rerankCase = ({ claimResults, provenance }) => {
         + (RELEVANCE_WEIGHTS.keyword * keywordScore(row.keyword_rank, maxRank));
       const existing = best.get(row.chunk_id);
       const candidate = {
+        claim_relevance: { [claim.key]: relevance },
         chunk_id: row.chunk_id,
         unit: meta.unit,
         fingerprint: meta.fingerprint,
@@ -82,6 +83,7 @@ export const rerankCase = ({ claimResults, provenance }) => {
       };
       if (!existing) { best.set(row.chunk_id, candidate); continue; }
       existing.claims.push(claim.key);
+      existing.claim_relevance[claim.key] = Math.max(existing.claim_relevance[claim.key] ?? 0, relevance);
       if (relevance > existing.relevance) { existing.relevance = relevance; existing.matched_by = row.matched_by; }
     }
   }
@@ -106,7 +108,26 @@ export const rerankCase = ({ claimResults, provenance }) => {
     || String(right.effective_from ?? "").localeCompare(String(left.effective_from ?? ""))
     || String(left.unit).localeCompare(String(right.unit))
   ));
-  return { top: ordered.slice(0, TOP_K), poolSize: best.size, deduped: byFingerprint.size, collapsed, ordered, effectiveRange };
+  // Case 의 근거 묶음은 Claim 을 모두 대표해야 한다. 전체 점수 상위 5개만 뽑으면 어떤 Claim 의
+  // 근거가 하나도 들어가지 않을 수 있고, 그것은 Claim 마다 근거를 요구하는 제품 계약과 어긋난다.
+  // 먼저 Claim 마다 그 Claim 에서 가장 높은 후보에 한 자리를 주고, 남는 자리를 전체 점수로 채운다.
+  const claimKeys = claimResults.map((entry) => entry.claim.key);
+  const chosen = [];
+  const taken = new Set();
+  for (const key of claimKeys) {
+    const forClaim = ordered
+      .filter((c) => !taken.has(c.unit) && typeof c.claim_relevance?.[key] === "number")
+      .sort((left, right) => (right.claim_relevance[key] - left.claim_relevance[key]) || (right.score - left.score)
+        || String(left.unit).localeCompare(String(right.unit)));
+    if (forClaim.length > 0 && chosen.length < TOP_K) { chosen.push(forClaim[0]); taken.add(forClaim[0].unit); }
+  }
+  for (const candidate of ordered) {
+    if (chosen.length >= TOP_K) break;
+    if (!taken.has(candidate.unit)) { chosen.push(candidate); taken.add(candidate.unit); }
+  }
+  const top = chosen.sort((left, right) => right.score - left.score
+    || String(left.unit).localeCompare(String(right.unit))).slice(0, TOP_K);
+  return { top, poolSize: best.size, deduped: byFingerprint.size, collapsed, ordered, effectiveRange };
 };
 
 // Case 단위 지표. 관련 unit 은 그 Case 의 Claim 들이 가리키는 unit 합집합이다.
