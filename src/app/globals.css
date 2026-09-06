@@ -119,3 +119,103 @@ button:focus-visible {
     text-decoration: none;
   }
 }
+
+/* ============================================================
+   FinShield 디자인 층
+  
+   들여온 PreCase 화면과 같은 색을 쓰면 같은 서비스로 보인다. 그래서 FinShield
+   화면은 `.fs` 안에서 자기 토큰을 쓴다. PreCase 쪽은 그대로 둔다.
+  
+   색을 상태의 유일한 신호로 쓰지 않는다 (S-COM-003). 상태 칩에는 항상 낱말이
+   함께 들어간다. 색은 훑어볼 때 도와주는 보조 신호다.
+   ============================================================ */
+.fs {
+  --fs-ink: #0b1220;          /* 본문. 흰 배경 대비 17.9:1 */
+  --fs-ink-soft: #47536b;     /* 보조 텍스트. 대비 7.9:1 */
+  --fs-ink-faint: #6b7688;    /* 세 번째 위계. 대비 5.1:1 */
+  --fs-line: #e3e7ee;
+  --fs-line-strong: #c7cede;
+  --fs-surface: #ffffff;
+  --fs-canvas: #f5f7fa;
+  --fs-brand: #14306b;        /* 딥 네이비. 흰 글씨 대비 11.8:1 */
+  --fs-brand-deep: #0d1f47;
+  --fs-brand-tint: #eef2fb;
+  --fs-verified: #0f6b4a;     /* 확인됨. 대비 5.6:1 */
+  --fs-verified-bg: #e8f5ef;
+  --fs-contra: #a3242b;       /* 사실과 다름. 대비 6.4:1 */
+  --fs-contra-bg: #fdecec;
+  --fs-caution: #8a5300;      /* 보류·불명. 대비 5.4:1 */
+  --fs-caution-bg: #fdf3e3;
+  --fs-neutral-bg: #eef1f6;
+  --fs-radius: 14px;
+  --fs-shadow: 0 1px 2px rgba(11, 18, 32, 0.05), 0 8px 24px -16px rgba(11, 18, 32, 0.28);
+}
+
+.fs { color: var(--fs-ink); background: var(--fs-canvas); }
+.fs-shell { max-width: 60rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+.fs-card {
+  background: var(--fs-surface);
+  border: 1px solid var(--fs-line);
+  border-radius: var(--fs-radius);
+  box-shadow: var(--fs-shadow);
+  padding: 1.5rem;
+}
+.fs-card + .fs-card { margin-top: 1rem; }
+.fs-eyebrow {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--fs-ink-faint);
+}
+.fs-h1 { font-size: 2.05rem; font-weight: 800; letter-spacing: -0.022em; line-height: 1.22; color: var(--fs-brand); }
+.fs-h2 { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.012em; color: var(--fs-ink); }
+.fs-lead { font-size: 1.04rem; line-height: 1.72; color: var(--fs-ink-soft); }
+.fs-body { font-size: 0.97rem; line-height: 1.72; color: var(--fs-ink-soft); }
+.fs-meta { font-size: 0.85rem; line-height: 1.6; color: var(--fs-ink-faint); }
+
+/* 상태 칩 — 낱말이 먼저이고 색은 보조다. */
+.fs-chip {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  border-radius: 999px; padding: 0.2rem 0.65rem;
+  font-size: 0.83rem; font-weight: 700; white-space: nowrap;
+}
+.fs-chip--verified { background: var(--fs-verified-bg); color: var(--fs-verified); }
+.fs-chip--contra { background: var(--fs-contra-bg); color: var(--fs-contra); }
+.fs-chip--caution { background: var(--fs-caution-bg); color: var(--fs-caution); }
+.fs-chip--neutral { background: var(--fs-neutral-bg); color: var(--fs-ink-soft); }
+
+.fs-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: var(--tap-min); padding: 0 1.35rem;
+  border-radius: 10px; border: 1px solid transparent;
+  font-size: 1rem; font-weight: 700; cursor: pointer; text-decoration: none;
+}
+.fs-btn--primary { background: var(--fs-brand); color: #fff; }
+.fs-btn--primary:hover { background: var(--fs-brand-deep); }
+.fs-btn--quiet { background: var(--fs-surface); border-color: var(--fs-line-strong); color: var(--fs-ink); }
+.fs-btn[disabled] { opacity: 0.45; cursor: default; }
+
+.fs-field {
+  width: 100%; border: 1px solid var(--fs-line-strong); border-radius: 10px;
+  padding: 0.7rem 0.85rem; font-size: 1rem; line-height: 1.6; background: var(--fs-surface);
+  color: var(--fs-ink);
+}
+.fs-field:focus-visible { outline: 3px solid var(--fs-brand); outline-offset: 1px; }
+.fs-label { display: block; font-size: 0.9rem; font-weight: 700; color: var(--fs-ink); margin-bottom: 0.35rem; }
+
+/* 왼쪽 세로선으로 단계를 보여 준다. 백분율을 쓰지 않는다. */
+.fs-steps { list-style: none; margin: 0; padding: 0; }
+.fs-steps li {
+  position: relative; padding: 0 0 1.1rem 1.5rem;
+  border-left: 2px solid var(--fs-line);
+}
+.fs-steps li:last-child { padding-bottom: 0; border-left-color: transparent; }
+.fs-steps li::before {
+  content: ""; position: absolute; left: -0.42rem; top: 0.35rem;
+  width: 0.7rem; height: 0.7rem; border-radius: 999px;
+  background: var(--fs-line-strong);
+}
+.fs-steps li[data-state="done"]::before { background: var(--fs-verified); }
+.fs-steps li[data-state="running"]::before { background: var(--fs-brand); }
+
+.fs-band { background: var(--fs-brand); color: #fff; }
+.fs-band a { color: #fff; }
