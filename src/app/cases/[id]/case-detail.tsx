@@ -13,12 +13,14 @@ import { CLAIM_STATE_VIEW, FsCard, FsChip } from "../../fs-shell";
 import { FsLoginCard, useFsToken } from "../../fs-session";
 import { fetchCase } from "../case-api";
 import {
-  AXIS_LABEL, FRESHNESS_LABEL, RELATION_LABEL, axisResultOf, actorLabel, coveLabel,
-  eventLabel, limitationLabel, nextAction, partialLabel, reasonLabel, runStatusLabel,
+  ACTION_LABEL, AFTERCARE_RESULT, AFTERCARE_STATUS, AXIS_LABEL, FRESHNESS_LABEL, JOURNEY_STAGE,
+  RELATION_LABEL, axisResultOf, actorLabel, coveLabel, eventLabel, limitationLabel, nextAction,
+  partialLabel, reasonLabel, runStatusLabel,
 } from "../../fs-labels";
 
 type Detail = {
-  case: { id: string; scenario: string; lifecycle: string; title_masked: string; created_at: string };
+  case: { id: string; scenario: string; lifecycle: string; title_masked: string; created_at: string;
+    journey_stage: string; enrollment_confirmed_at: string | null; aftercare_status: string };
   claims: { id: string; claim_type: string }[];
   runs: { id: string; run_no: number; status: string; overall_result: string | null;
     coverage_satisfied: boolean | null; partial_reason_codes: string[] | null; finished_at: string | null }[];
@@ -36,6 +38,10 @@ type Detail = {
   passports: { id: string; verification_run_id: string; passport_version_no: number;
     overall_result: string; created_at: string }[];
   events: { event_no: number; event_type: string; actor_type: string; created_at: string }[];
+  assessments: { id: string; assessment_no: number; status: string; result: string | null;
+    summary_masked: string | null; finished_at: string | null }[];
+  checklists: { id: string; precase_assessment_id: string; action_code: string; status: string;
+    required_material_codes: string[] | null }[];
 };
 
 export function CaseDetail({ caseId }: { caseId: string }) {
@@ -70,6 +76,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
   const axes = detail.axes.filter((row) => row.verification_run_id === latest?.id);
   const passport = detail.passports.find((row) => row.verification_run_id === latest?.id);
   const partialReasons = latest?.partial_reason_codes ?? [];
+  const assessments = detail.assessments ?? [];
   const action = finals.length > 0 ? nextAction(finals.map((row) => row.status)) : null;
   const evidenceOf = (finalId: string) => detail.claim_evidences
     .filter((link) => link.final_claim_version_id === finalId)
@@ -205,6 +212,68 @@ export function CaseDetail({ caseId }: { caseId: string }) {
             })}
           </ul>
         )}
+      </FsCard>
+
+      <FsCard>
+        <h2 className="fs-h2">가입과 그 뒤</h2>
+        <p className="fs-body mt-2">
+          검증 상태와 다른 축입니다. 가입 여부는 검증 결과를 바꾸지 않고, 검증 결과가 가입 여부를 정하지도 않습니다.
+        </p>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <FsChip tone={detail.case.journey_stage === "PRE_TRANSACTION" ? "neutral" : "caution"}>
+            {JOURNEY_STAGE[detail.case.journey_stage] ?? detail.case.journey_stage}
+          </FsChip>
+          <FsChip tone={detail.case.aftercare_status === "ACTION_REQUIRED" ? "contra" : "neutral"}>
+            {AFTERCARE_STATUS[detail.case.aftercare_status] ?? detail.case.aftercare_status}
+          </FsChip>
+          {detail.case.enrollment_confirmed_at ? (
+            <span className="fs-meta">
+              가입 확인 {new Date(detail.case.enrollment_confirmed_at).toLocaleString("ko-KR")}
+            </span>
+          ) : null}
+        </div>
+
+        {assessments.length > 0 ? (
+          <ul className="mt-5 space-y-4">
+            {assessments.map((row) => {
+              const actions = (detail.checklists ?? []).filter((item) => item.precase_assessment_id === row.id);
+              return (
+                <li key={row.id} className="border-t border-[var(--fs-line)] pt-4 first:border-0 first:pt-0">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="font-bold">{row.assessment_no}번째 점검</span>
+                    {row.result ? (
+                      <FsChip tone={AFTERCARE_RESULT[row.result]?.tone ?? "neutral"}>
+                        {AFTERCARE_RESULT[row.result]?.label ?? row.result}
+                      </FsChip>
+                    ) : null}
+                  </div>
+                  {row.summary_masked ? <p className="fs-body mt-2">{row.summary_masked}</p> : null}
+                  {actions.length > 0 ? (
+                    <ul className="fs-meta mt-2 list-disc space-y-1 pl-5">
+                      {actions.map((item) => (
+                        <li key={item.id}>{ACTION_LABEL[item.action_code] ?? item.action_code}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {row.finished_at ? (
+                    <p className="fs-meta mt-2">{new Date(row.finished_at).toLocaleString("ko-KR")}</p>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ul>
+        ) : null}
+
+        <div className="mt-5 flex flex-wrap gap-3">
+          <Link href={`/cases/${caseId}/journey`} className="fs-btn fs-btn--quiet">
+            {detail.case.enrollment_confirmed_at ? "가입 내용 고치기" : "가입·피해 사실 등록"}
+          </Link>
+          {detail.case.enrollment_confirmed_at ? (
+            <Link href={`/cases/${caseId}/aftercare`} className="fs-btn fs-btn--primary">
+              {assessments.length > 0 ? "다시 점검하기" : "가입 후 점검 시작"}
+            </Link>
+          ) : null}
+        </div>
       </FsCard>
 
       <FsCard>

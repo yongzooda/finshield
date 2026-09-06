@@ -173,3 +173,30 @@ export function nextAction(states: string[]): { title: string; detail: string } 
     detail: "근거를 찾지 못한 항목은 안전하다는 뜻이 아닙니다. 아래에서 무엇을 확인하지 못했는지 보시고 공식 창구로 확인하세요.",
   };
 }
+
+export const JOURNEY_STAGE: Record<string, string> = {
+  PRE_TRANSACTION: "가입 전",
+  ENROLLED: "가입함",
+  FUNDS_SENT_OR_DAMAGE_SUSPECTED: "송금·피해 의심",
+};
+
+export const AFTERCARE_STATUS: Record<string, string> = {
+  NOT_STARTED: "가입 후 점검 전",
+  IN_PROGRESS: "점검 중",
+  ACTION_REQUIRED: "할 일 있음",
+  COMPLETED: "점검 완료",
+};
+
+export const AFTERCARE_RESULT: Record<string, { label: string; tone: ChipTone }> = {
+  NORMAL_MANAGEMENT: { label: "조치 없음", tone: "verified" },
+  ADDITIONAL_EXPLANATION: { label: "추가 설명 필요", tone: "caution" },
+  CORRECTION_OR_INQUIRY: { label: "정정·문의 필요", tone: "caution" },
+  DISPUTE_PREPARATION: { label: "분쟁 준비", tone: "contra" },
+};
+
+export const ACTION_LABEL: Record<string, string> = {
+  KEEP_CONTRACT_AND_RECORDS: "계약서와 권유 기록 모아 두기",
+  REQUEST_WRITTEN_EXPLANATION: "설명받지 못한 부분을 서면으로 요청하기",
+  ASK_OFFICIAL_CHANNEL: "공식 상담 창구로 확인하기",
+  REPORT_IMPERSONATION: "공식 신고 창구 확인하기",
+};
