@@ -35,15 +35,22 @@ let requestNo = 0;
 let claimNo = 0;
 const requests = new Map();
 const uuid = (prefix, n) => `${prefix}-0000-4000-8000-${String(n).padStart(12, "0")}`;
+const OWNER = uuid("11111111", 1);
 
 const fakeFetch = async (url, init) => {
   const text = String(url);
   const method = init?.method ?? "GET";
   if (text.includes("/auth/v1/token")) {
-    return new Response(JSON.stringify({ access_token: "tok", user: { id: uuid("11111111", 1) } }),
+    return new Response(JSON.stringify({ access_token: "tok", user: { id: OWNER } }),
       { status: 200, headers: { "Content-Type": "application/json" } });
   }
   if (text.includes("/rest/v1/financial_profiles")) return new Response("[]", { status: 201 });
+  if (text.includes("/storage/v1/object/list/") && method === "POST") {
+    const prefix = JSON.parse(String(init?.body ?? "{}")).prefix ?? "";
+    const rows = [...objects].filter((name) => name.startsWith(prefix))
+      .map((name) => ({ id: name, name: name.slice(prefix.length) }));
+    return new Response(JSON.stringify(rows), { status: 200, headers: { "Content-Type": "application/json" } });
+  }
   if (text.includes("/storage/v1/object/sign/") && method === "POST") {
     const path = decodeURIComponent(text.split("/object/sign/finshield-quarantine/")[1]);
     return new Response(JSON.stringify({ signedURL: `/object/sign/finshield-quarantine/${path}?token=t` }),
@@ -68,7 +75,7 @@ const enqueue = (type, id) => {
   const unit = unitByAny(id);
   jobs.push({
     id: uuid("55555555", jobs.length + 1), target_type: type, target_id: id, status: "QUEUED", lease_token: null,
-    owner_id: "owner", case_id: unit.caseId, case_input_id: unit.caseInputId,
+    owner_id: OWNER, case_id: unit.caseId, case_input_id: unit.caseInputId,
   });
 };
 const unitByAny = (id) => [...units.values()].find((u) => u.objectId === id || u.ocrId === id || u.embeddingId === id);
@@ -82,7 +89,7 @@ const fakeSql = (strings, ...values) => {
     const unit = {
       caseId, caseInputId: uuid("33333333", unitNo), objectId: uuid("44444444", unitNo),
       pageId: uuid("88888888", unitNo), ocrId: uuid("66666666", unitNo), embeddingId: uuid("77777777", unitNo),
-      objectPath: `owner/${caseId}/${uuid("33333333", unitNo)}/${unitNo}.png`, ocrPath: null,
+      objectPath: `${OWNER}/${caseId}/${uuid("33333333", unitNo)}/${unitNo}.png`, ocrPath: null,
       inputDeleted: false, ocrDeleted: false, embeddingPresent: true, caseDeleted: false,
       rawDeleteStatus: "PENDING", rawDeletedAt: null,
       // 만든 수명이 곧 경계다. 시각을 나중에 고치지 않는다.
@@ -182,11 +189,9 @@ const fakeSql = (strings, ...values) => {
     if (ready) for (const unit of members) unit.caseDeleted = true;
     return Promise.resolve([{ done: ready }]);
   }
-  if (text.includes("as object_rows")) {
-    const unit = [...units.values()].find((u) => u.objectPath === arg(1));
+  if (text.includes("as live_embeddings")) {
+    const unit = unitByAny(arg(0));
     return Promise.resolve([{
-      object_rows: objects.has(unit.objectPath) ? 1 : 0,
-      ocr_object_rows: objects.has(unit.ocrPath) ? 1 : 0,
       live_embeddings: unit.embeddingPresent ? 1 : 0,
       input_job_done: unit.inputDeleted ? 1 : 0,
       ocr_job_done: unit.ocrDeleted ? 1 : 0,
@@ -194,13 +199,6 @@ const fakeSql = (strings, ...values) => {
       finished_at: unit.rawDeletedAt,
       purged_requests: unit.caseDeleted ? 1 : 0,
     }]);
-  }
-  if (text.includes("select name from storage.objects")) {
-    const prefix = String(arg(1)).replace(/%$/, "");
-    return Promise.resolve([...objects].filter((name) => name.startsWith(prefix)).map((name) => ({ name })));
-  }
-  if (text.includes("from storage.objects")) {
-    return Promise.resolve([{ n: [...units.values()].filter((u) => objects.has(u.objectPath) || objects.has(u.ocrPath)).length }]);
   }
   return Promise.resolve([]);
 };
@@ -215,7 +213,7 @@ const observations = await runDeleteSpike({
 ok(observations.cases.length === TOTAL_CASES, "Case 기록이 40건이어야 한다");
 ok(observations.contract.formula_version === FORMULA_VERSION, "산식 버전이 계약에 남아야 한다");
 ok(observations.contract.uses_secret_key_for === "delete-and-ocr-write", "서버 키 사용 범위가 남아야 한다");
-ok(observations.totals.residual_objects === 0, "삭제 대상 객체가 남지 않아야 한다");
+ok(observations.totals.unfinished_input_jobs === 0, "원본 청소가 모두 종결돼야 한다");
 ok(observations.totals.issued_url_served_after_delete === 0, "기발급 URL 이 삭제 뒤 통하면 안 된다");
 ok(observations.totals.issued_url_served_before_delete === DELETED_CASES, "삭제 전에는 발급 URL 이 통해야 한다");
 ok(observations.totals.boundary_early_enqueued === 0, "만료 이전 대상이 대기열에 들어가면 안 된다");
@@ -253,11 +251,11 @@ rejects("24시간 상한 완화", (o) => { o.contract.max_delete_seconds = 99999
 rejects("특권 키로 부재 판정", (o) => { o.contract.absence_verified_by = ["service-role-list"]; });
 rejects("서버 키 사용 범위 변경", (o) => { o.contract.uses_secret_key_for = "everything"; });
 rejects("Case 수 부족", (o) => { o.cases.pop(); });
-rejects("원본 객체 잔존", (o) => { deletedRow(o).object_rows = 1; o.totals.residual_objects = 1; });
 rejects("청소 미종결", (o) => { deletedRow(o).input_job_done = 0; o.totals.unfinished_input_jobs = 1; });
 rejects("상태 판정 표 변경", (o) => { o.contract.state_source = ["public.case_inputs"]; });
+rejects("부재 판정을 특권 목록으로", (o) => { o.contract.object_absence_source = ["service-role-list"]; });
+rejects("보존 대상이 이미 사라짐", (o) => { const r = o.cases.find((x) => x.family === "ttl_boundary_early"); r.issued_url_served_after = false; o.totals.boundary_early_objects_present = 4; });
 rejects("경로 출처 변경", (o) => { o.contract.cleanup_path_source = "harness-map"; });
-rejects("OCR 임시 객체 잔존", (o) => { deletedRow(o).ocr_object_rows = 1; o.totals.residual_ocr_objects = 1; });
 rejects("Case vector 잔존", (o) => { deletedRow(o).live_embeddings = 1; o.totals.residual_case_embeddings = 1; });
 rejects("기발급 URL 이 삭제 뒤 통함", (o) => {
   const row = deletedRow(o); row.issued_url_after_status = 200; row.issued_url_after_bytes = 12;
