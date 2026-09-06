@@ -1,0 +1,143 @@
+{
+  "schema_version": 3,
+  "blocker_id": "B-RUNTIME-01",
+  "requirements_blob_sha": "27ce706010344fbcedebe3abd707febff0f1dc26",
+  "adr_decision_sha256": "3c2a5e2dac9d626fdeea0b70eaa16454dd97688b54ad6d101b9b1d8dccdce736",
+  "code_under_test_sha": "6e5641a7389d6490333876c2939044c16d7f62c0",
+  "workflow_head_sha": "6e5641a7389d6490333876c2939044c16d7f62c0",
+  "scope_sha256": "4a83f5d92c8a3e5b98c18b9c40185a5460013026933cf9a4d115969563635e06",
+  "run": {
+    "id": 34044111706,
+    "attempt": 1
+  },
+  "observations": {
+    "contract": {
+      "formula_version": "runtime-deployment-manifest-v1",
+      "targets": [
+        "production",
+        "preview"
+      ],
+      "required_per_target": 3,
+      "expected_node_major": 24,
+      "probe_path": "/api/runtime-manifest",
+      "manifest_fields": [
+        "schema_version",
+        "node_version",
+        "node_major",
+        "node_minor",
+        "node_patch",
+        "vercel_env",
+        "vercel_region",
+        "vercel_deployment_id",
+        "vercel_commit_sha",
+        "observed_at"
+      ],
+      "measured_inside_deployment": true,
+      "protection_bypass": "automation-secret"
+    },
+    "deployments": [
+      {
+        "target": "production",
+        "probe_status": 200,
+        "manifest_well_formed": true,
+        "node_version": "v24.18.0",
+        "node_major": 24,
+        "node_minor": 18,
+        "node_patch": 0,
+        "region": "icn1",
+        "environment": "production",
+        "deployment_id_matches_api": true,
+        "commit_sha_present": true
+      },
+      {
+        "target": "production",
+        "probe_status": 200,
+        "manifest_well_formed": true,
+        "node_version": "v24.18.0",
+        "node_major": 24,
+        "node_minor": 18,
+        "node_patch": 0,
+        "region": "icn1",
+        "environment": "production",
+        "deployment_id_matches_api": true,
+        "commit_sha_present": true
+      },
+      {
+        "target": "production",
+        "probe_status": 200,
+        "manifest_well_formed": true,
+        "node_version": "v24.18.0",
+        "node_major": 24,
+        "node_minor": 18,
+        "node_patch": 0,
+        "region": "icn1",
+        "environment": "production",
+        "deployment_id_matches_api": true,
+        "commit_sha_present": true
+      },
+      {
+        "target": "preview",
+        "probe_status": 200,
+        "manifest_well_formed": true,
+        "node_version": "v24.18.0",
+        "node_major": 24,
+        "node_minor": 18,
+        "node_patch": 0,
+        "region": "icn1",
+        "environment": "preview",
+        "deployment_id_matches_api": true,
+        "commit_sha_present": true
+      },
+      {
+        "target": "preview",
+        "probe_status": 200,
+        "manifest_well_formed": true,
+        "node_version": "v24.18.0",
+        "node_major": 24,
+        "node_minor": 18,
+        "node_patch": 0,
+        "region": "icn1",
+        "environment": "preview",
+        "deployment_id_matches_api": true,
+        "commit_sha_present": true
+      },
+      {
+        "target": "preview",
+        "probe_status": 200,
+        "manifest_well_formed": true,
+        "node_version": "v24.18.0",
+        "node_major": 24,
+        "node_minor": 18,
+        "node_patch": 0,
+        "region": "icn1",
+        "environment": "preview",
+        "deployment_id_matches_api": true,
+        "commit_sha_present": true
+      }
+    ],
+    "totals": {
+      "probed": 6,
+      "production_probed": 3,
+      "preview_probed": 3,
+      "complete_records": 6,
+      "malformed_manifests": 0,
+      "deployment_id_mismatches": 0,
+      "missing_region": 0,
+      "unexpected_node_major": 0,
+      "distinct_node_versions": 1,
+      "distinct_regions": 1,
+      "node_versions": [
+        "v24.18.0"
+      ],
+      "regions": [
+        "icn1"
+      ]
+    }
+  },
+  "environment": {
+    "node_version": "v24.20.0",
+    "region": "github-hosted",
+    "transport": "https"
+  },
+  "redactions_applied": true
+}
