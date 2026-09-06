@@ -5,8 +5,8 @@
 import assert from "node:assert/strict";
 import { createStorageClient } from "./storage-spike.mjs";
 import {
-  DELETED_CASES, FAMILIES, FORMULA_VERSION, MAX_DELETE_SECONDS, SIGNED_URL_TTL_SECONDS,
-  TOTAL_CASES, createAdminStorageClient, runDeleteSpike, servedContent,
+  DELETED_CASES, DUE_TTL_SECONDS, FAMILIES, FORMULA_VERSION, MAX_DELETE_SECONDS,
+  SIGNED_URL_TTL_SECONDS, TOTAL_CASES, createAdminStorageClient, runDeleteSpike, servedContent,
 } from "./delete-spike.mjs";
 import { validateDeleteEvidenceResult } from "./delete-evidence-policy.mjs";
 
@@ -32,6 +32,7 @@ const units = new Map();
 const jobs = [];
 let unitNo = 0;
 let requestNo = 0;
+let claimNo = 0;
 const requests = new Map();
 const uuid = (prefix, n) => `${prefix}-0000-4000-8000-${String(n).padStart(12, "0")}`;
 
@@ -77,32 +78,48 @@ const fakeSql = (strings, ...values) => {
     const caseId = arg(1);
     const unit = {
       caseId, caseInputId: uuid("33333333", unitNo), objectId: uuid("44444444", unitNo),
-      ocrId: uuid("66666666", unitNo), embeddingId: uuid("77777777", unitNo),
+      pageId: uuid("88888888", unitNo), ocrId: uuid("66666666", unitNo), embeddingId: uuid("77777777", unitNo),
       objectPath: `owner/${caseId}/input/${unitNo}.png`, ocrPath: null,
       inputDeleted: false, ocrDeleted: false, embeddingPresent: true, caseDeleted: false,
-      rawDeleteStatus: "PENDING", rawDeletedAt: null, expired: false,
+      rawDeleteStatus: "PENDING", rawDeletedAt: null,
+      // 만든 수명이 곧 경계다. 시각을 나중에 고치지 않는다.
+      expired: arg(3) === DUE_TTL_SECONDS,
     };
     units.set(unit.objectId, unit);
-    return Promise.resolve([{ case_input_id: unit.caseInputId, object_id: unit.objectId, object_path: unit.objectPath }]);
+    // 이미 지난 시각을 돌려줘 계약 시험이 실제로 기다리지 않게 한다.
+    return Promise.resolve([{
+      case_input_id: unit.caseInputId, object_id: unit.objectId, object_path: unit.objectPath,
+      expires_at: new Date(Date.now() - 5_000).toISOString(),
+    }]);
   }
   if (text.includes("confirm_upload_slot")) return Promise.resolve([{ slot_state: "UPLOADED" }]);
-  if (text.includes("case_input_pages")) return Promise.resolve([{ id: uuid("88888888", unitNo) }]);
-  if (text.includes("insert into private.ocr_artifacts")) {
+  if (text.includes("register_input_pages")) {
+    return Promise.resolve([{ pgid: [...units.values()].find((u) => u.caseInputId === arg(2)).pageId }]);
+  }
+  if (text.includes("register_ocr_artifact")) {
     const unit = [...units.values()].find((u) => u.caseInputId === arg(2));
     unit.ocrPath = arg(5);
     return Promise.resolve([{ id: unit.ocrId }]);
   }
-  if (text.includes("insert into private.case_embeddings")) {
+  if (text.includes("register_case_embedding")) {
+    return Promise.resolve([{ id: [...units.values()].find((u) => u.caseInputId === arg(2)).embeddingId }]);
+  }
+  if (text.includes("record_extracted_claim")) return Promise.resolve([{ id: uuid("bbbbbbbb", ++claimNo) }]);
+  if (text.includes("confirm_claim")) return Promise.resolve([{ n: 2 }]);
+  if (text.includes("advance_input_stage")) {
+    // CLAIM_CONFIRMED 전진만 청소를 만든다. 나머지 단계는 상태만 옮긴다.
+    if (text.includes("CLAIM_CONFIRMED")) {
+      const unit = [...units.values()].find((u) => u.caseInputId === arg(2));
+      enqueue("INPUT_OBJECT", unit.objectId); enqueue("OCR_ARTIFACT", unit.ocrId);
+      enqueue("CASE_EMBEDDING", unit.embeddingId);
+    }
+    return Promise.resolve([{ id: arg(2) }]);
+  }
+  if (text.includes("stop_case_input")) {
     const unit = [...units.values()].find((u) => u.caseInputId === arg(2));
-    return Promise.resolve([{ id: unit.embeddingId }]);
-  }
-  if (text.includes("update public.case_inputs")) return Promise.resolve([]);
-  if (text.includes("update private.input_objects set expires_at")) {
-    unitByAny(arg(1)).expired = String(arg(0)).startsWith("-");
-    return Promise.resolve([]);
-  }
-  if (text.includes("update private.ocr_artifacts set expires_at") || text.includes("update private.case_embeddings set expires_at")) {
-    return Promise.resolve([]);
+    enqueue("INPUT_OBJECT", unit.objectId); enqueue("OCR_ARTIFACT", unit.ocrId);
+    enqueue("CASE_EMBEDDING", unit.embeddingId);
+    return Promise.resolve([{ n: 3 }]);
   }
   if (text.includes("request_case_deletion")) {
     const caseId = arg(1);
@@ -201,6 +218,8 @@ ok(observations.totals.purged_cases === 10, "Case 삭제 요청이 모두 Purge 
 ok(observations.totals.leftover_objects_after_teardown === 0, "시험이 객체를 남기지 않아야 한다");
 ok(!JSON.stringify(observations).includes("sb_secret_"), "결과에 서버 키가 남지 않아야 한다");
 ok(!JSON.stringify(observations.cases).includes("owner/"), "결과에 객체 경로가 남지 않아야 한다");
+ok(observations.contract.boundary_made_by === "ttl-at-creation", "경계를 만든 방식이 계약에 남아야 한다");
+ok(observations.contract.due_ttl_seconds === DUE_TTL_SECONDS, "만료 수명이 계약에 남아야 한다");
 
 // ---------- 4. 정책 ----------
 const good = () => ({
@@ -251,6 +270,9 @@ rejects("경계 이전 대상 소멸", (o) => { o.totals.boundary_early_objects_
 rejects("경계 이후 대상 잔존", (o) => { o.totals.boundary_due_deleted = 4; });
 rejects("Purge 미완료", (o) => { o.totals.purged_cases = 9; });
 rejects("시험 흔적 잔존", (o) => { o.totals.leftover_objects_after_teardown = 1; });
+rejects("만료 경계를 시각 조작으로 만듦", (o) => { o.contract.boundary_made_by = "expires-at-update"; });
+rejects("만료 수명 변경", (o) => { o.contract.due_ttl_seconds = 1; });
+rejects("보존 수명 변경", (o) => { o.contract.live_ttl_seconds = 10; });
 rejects("만료 청소 기록 없음", (o) => { o.sweep = []; });
 rejects("observations 키 추가", (o) => { o.extra = 1; });
 

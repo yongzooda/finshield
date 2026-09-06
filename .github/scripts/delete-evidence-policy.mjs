@@ -9,8 +9,8 @@
 // 돌려줬어야 하고, 경계 이전 대상은 그대로 남아 있어야 한다.
 // ============================================================
 import {
-  BUCKET, DELETED_CASES, FAMILIES, FORMULA_VERSION, MAX_DELETE_SECONDS,
-  SIGNED_URL_TTL_SECONDS, TOTAL_CASES,
+  BUCKET, DELETED_CASES, DUE_TTL_SECONDS, FAMILIES, FORMULA_VERSION, LIVE_TTL_SECONDS,
+  MAX_DELETE_SECONDS, SIGNED_URL_TTL_SECONDS, TOTAL_CASES,
 } from "./delete-spike.mjs";
 
 export { FORMULA_VERSION };
@@ -52,14 +52,18 @@ export const validateDeleteEvidenceResult = (result, fail) => {
 
   const c = o.contract;
   if (!exactKeys(c, ["formula_version", "bucket", "families", "total_cases", "max_delete_seconds",
-    "signed_url_ttl_seconds", "uses_secret_key_for", "absence_verified_by"])
+    "signed_url_ttl_seconds", "due_ttl_seconds", "live_ttl_seconds", "boundary_made_by",
+    "uses_secret_key_for", "absence_verified_by"])
     || c.formula_version !== FORMULA_VERSION || c.bucket !== BUCKET
     || c.total_cases !== TOTAL_CASES || c.max_delete_seconds !== MAX_DELETE_SECONDS
     || c.signed_url_ttl_seconds !== SIGNED_URL_TTL_SECONDS
+    || c.due_ttl_seconds !== DUE_TTL_SECONDS || c.live_ttl_seconds !== LIVE_TTL_SECONDS
     || JSON.stringify(c.families) !== JSON.stringify(
       FAMILIES.map((f) => ({ key: f.key, reason: f.reason, cases: f.cases, expect: f.expect })))) {
     fail("contract 의 산식·Bucket·family 구성이 현재 코드와 다릅니다.");
   }
+  // 만료 경계를 시각을 고쳐서 만들면 청소가 시간에 반응했다고 말할 수 없다.
+  if (c.boundary_made_by !== "ttl-at-creation") fail("만료 경계를 만든 방식이 계약과 다릅니다.");
   // 서버 키는 삭제와 OCR 임시물 쓰기에만 쓴다. 부재 판정에는 쓰지 않는다.
   if (c.uses_secret_key_for !== "delete-and-ocr-write") fail("서버 키의 사용 범위 선언이 계약과 다릅니다.");
   if (JSON.stringify(c.absence_verified_by) !== JSON.stringify(["issued-signed-url", "member-jwt-read"])) {

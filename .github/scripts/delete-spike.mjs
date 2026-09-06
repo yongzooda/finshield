@@ -22,12 +22,16 @@ export const SIGNED_URL_TTL_SECONDS = 900;
 
 // 각 family 는 삭제를 유발하는 경로 하나를 나타낸다.
 // ttl_boundary_early 만 남아 있어야 정상이다. 경계 이전에 지우면 규칙 위반이다.
+// 만료 경계는 expires_at 을 나중에 고쳐서 만들지 않는다. 만들 때 정한 수명이
+// 실제로 지나가기를 기다린다. 그래야 청소가 시간에 반응한다고 말할 수 있다.
+export const DUE_TTL_SECONDS = 60;
+export const LIVE_TTL_SECONDS = 3600;
 export const FAMILIES = Object.freeze([
-  { key: "claim_confirmed", reason: "CLAIM_CONFIRMED", cases: 10, expect: "deleted" },
-  { key: "user_stopped", reason: "USER_STOPPED", cases: 10, expect: "deleted" },
-  { key: "case_deleted", reason: "CASE_DELETED", cases: 10, expect: "deleted" },
-  { key: "ttl_boundary_due", reason: "TTL_EXPIRED", cases: 5, expect: "deleted" },
-  { key: "ttl_boundary_early", reason: "TTL_EXPIRED", cases: 5, expect: "retained" },
+  { key: "claim_confirmed", reason: "CLAIM_CONFIRMED", cases: 10, expect: "deleted", ttl: LIVE_TTL_SECONDS },
+  { key: "user_stopped", reason: "USER_STOPPED", cases: 10, expect: "deleted", ttl: LIVE_TTL_SECONDS },
+  { key: "case_deleted", reason: "CASE_DELETED", cases: 10, expect: "deleted", ttl: LIVE_TTL_SECONDS },
+  { key: "ttl_boundary_due", reason: "TTL_EXPIRED", cases: 5, expect: "deleted", ttl: DUE_TTL_SECONDS },
+  { key: "ttl_boundary_early", reason: "TTL_EXPIRED", cases: 5, expect: "retained", ttl: LIVE_TTL_SECONDS },
 ]);
 export const TOTAL_CASES = FAMILIES.reduce((sum, f) => sum + f.cases, 0);
 export const DELETED_CASES = FAMILIES.filter((f) => f.expect === "deleted")
@@ -121,37 +125,31 @@ const buildCase = async ({ sql, client, admin, token, userId, family, index }) =
 
   const slotRows = await sql`
     select * from private.open_upload_slot(${userId}::uuid, ${caseId}::uuid, 'IMAGE'::public.case_input_type,
-      'image/png', ${PNG_BYTES.length}::bigint, 1, 3600)`;
+      'image/png', ${PNG_BYTES.length}::bigint, 1, ${family.ttl}::integer)`;
   const slot = slotRows[0];
 
   const upload = await client.putObject({ token, path: slot.object_path, bytes: PNG_BYTES });
   if (!upload.ok) throw new Error(`slot upload failed with status ${upload.status}`);
   await sql`select slot_state from private.confirm_upload_slot(${slot.object_id}::uuid, '89504e47')`;
 
+  // worker 는 소유자 표에 직접 쓰지 못한다. 산출물은 전부 함수로 만든다.
   const pageRows = await sql`
-    insert into public.case_input_pages (owner_id, case_id, case_input_id, page_no, parse_status, locator_schema_version)
-    values (${userId}::uuid, ${caseId}::uuid, ${slot.case_input_id}::uuid, 1, 'PARSED', 'v1')
-    returning id`;
-  const pageId = pageRows[0].id;
+    select pgid from private.register_input_pages(${userId}::uuid, ${caseId}::uuid,
+      ${slot.case_input_id}::uuid, 1) as pgid`;
+  const pageId = pageRows[0].pgid;
 
   // OCR 임시물은 서버가 만든다. 회원 JWT 는 slot 경로 밖에 쓸 수 없다.
   const ocrPath = `${userId}/${caseId}/${slot.case_input_id}/ocr-${slot.object_id}.png`;
   const ocrUpload = await admin.putObject({ path: ocrPath, bytes: PNG_BYTES });
   if (!ocrUpload.ok) throw new Error(`ocr artifact upload failed with status ${ocrUpload.status}`);
   const ocrRows = await sql`
-    insert into private.ocr_artifacts (owner_id, case_id, case_input_id, page_id, provider_code,
-      storage_object_path, status, expires_at)
-    values (${userId}::uuid, ${caseId}::uuid, ${slot.case_input_id}::uuid, ${pageId}::uuid, 'SPIKE',
-      ${ocrPath}, 'AVAILABLE', now() + interval '1 hour')
-    returning id`;
+    select private.register_ocr_artifact(${userId}::uuid, ${caseId}::uuid, ${slot.case_input_id}::uuid,
+      ${pageId}::uuid, 'SPIKE', ${ocrPath}, ${family.ttl}::integer) as id`;
 
   const embedRows = await sql`
-    insert into private.case_embeddings (owner_id, case_id, case_input_id, page_id, model_id, model_version,
-      dimensions, embedding, masked_content_hash, expires_at)
-    values (${userId}::uuid, ${caseId}::uuid, ${slot.case_input_id}::uuid, ${pageId}::uuid,
-      'spike', 'v1', 1024, ${`[${Array(1024).fill(0).join(",")}]`}::extensions.vector,
-      ${hex64(`embed-${label}`)}, now() + interval '1 hour')
-    returning id`;
+    select private.register_case_embedding(${userId}::uuid, ${caseId}::uuid, ${slot.case_input_id}::uuid,
+      ${pageId}::uuid, 'spike', 'v1', ${`[${Array(1024).fill(0).join(",")}]`}::extensions.vector,
+      ${hex64(`embed-${label}`)}, ${family.ttl}::integer) as id`;
 
   // 지우기 전에 열람 URL 을 받아 두고, 실제로 본문이 오는지 먼저 확인한다.
   // 나중의 부재 판정이 의미를 가지려면 지금은 반드시 와야 한다.
@@ -167,45 +165,53 @@ const buildCase = async ({ sql, client, admin, token, userId, family, index }) =
     caseInputId: slot.case_input_id,
     objectId: slot.object_id,
     objectPath: slot.object_path,
+    pageId,
     ocrId: ocrRows[0].id,
     ocrPath,
     embeddingId: embedRows[0].id,
     issuedUrl,
     issuedUrlBefore: { status: before.status, bytes: before.bytes },
     issuedAt,
+    expiresAt: new Date(slot.expires_at).getTime(),
     createdAt: Date.now(),
   };
 };
 
 // family 별 삭제 유발 경로. 제품이 실제로 부르는 함수만 쓴다.
+// 청소 대기열에 넣는 것도 제품 함수가 한다. harness 가 직접 넣지 않는다.
 const triggerDeletion = async ({ sql, unit, family }) => {
   if (family.key === "claim_confirmed") {
-    await sql`update public.case_inputs set claim_confirmed_at = now(), input_stage = 'CLAIM_CONFIRMED'
-               where id = ${unit.caseInputId}::uuid`;
-  } else if (family.key === "user_stopped") {
-    await sql`update public.case_inputs set input_outcome = 'CANCELLED'
-               where id = ${unit.caseInputId}::uuid`;
-  } else if (family.key === "case_deleted") {
+    // 입력 단계를 한 칸씩 실제로 전진시킨다. 건너뛰면 제품 경로가 아니다.
+    await sql`select id from private.advance_input_stage(${unit.ownerId}::uuid, ${unit.caseId}::uuid,
+      ${unit.caseInputId}::uuid, 'VALIDATED'::public.input_stage,
+      ${JSON.stringify({ detected_mime: "image/png", magic_signature: "89504e47" })}::jsonb)`;
+    await sql`select id from private.advance_input_stage(${unit.ownerId}::uuid, ${unit.caseId}::uuid,
+      ${unit.caseInputId}::uuid, 'EXTRACTED'::public.input_stage, '{}'::jsonb)`;
+    await sql`select id from private.advance_input_stage(${unit.ownerId}::uuid, ${unit.caseId}::uuid,
+      ${unit.caseInputId}::uuid, 'MASKED'::public.input_stage,
+      ${JSON.stringify({ masked_text: "마스킹 본문", masked_text_hash: hex64(`mask-${unit.label}`), pii_policy_version: "v1" })}::jsonb)`;
+    const claimRows = await sql`
+      select private.record_extracted_claim(${unit.ownerId}::uuid, ${unit.caseId}::uuid,
+        ${unit.caseInputId}::uuid, ${unit.pageId}::uuid, 'PRODUCT_TERM', '확인할 Claim') as id`;
+    await sql`select private.confirm_claim(${unit.ownerId}::uuid, ${unit.caseId}::uuid, ${claimRows[0].id}::uuid) as n`;
+    // 이 전진이 원본·임시물·vector 를 청소에 넣는다.
+    await sql`select id from private.advance_input_stage(${unit.ownerId}::uuid, ${unit.caseId}::uuid,
+      ${unit.caseInputId}::uuid, 'CLAIM_CONFIRMED'::public.input_stage, '{}'::jsonb)`;
+    return {};
+  }
+  if (family.key === "user_stopped") {
+    await sql`select private.stop_case_input(${unit.ownerId}::uuid, ${unit.caseId}::uuid,
+      ${unit.caseInputId}::uuid, 'USER_STOPPED') as n`;
+    return {};
+  }
+  if (family.key === "case_deleted") {
     const rows = await sql`
       select private.request_case_deletion(${unit.ownerId}::uuid, ${unit.caseId}::uuid,
         ${`delete-spike:${unit.label}`}::text, ${hex64(`req-${unit.label}`)}::text,
         ${hex64(`hmac-${unit.label}`)}::text, 'spike-k1', 'spike-p1') as request_id`;
     return { deletionRequestId: rows[0].request_id };
-  } else {
-    // 24시간 경계. due 는 만료를 지난 상태로, early 는 아직 남은 상태로 둔다.
-    const shift = family.expect === "deleted" ? "-1 minute" : "+5 minutes";
-    await sql`update private.input_objects set expires_at = now() + ${shift}::interval where id = ${unit.objectId}::uuid`;
-    await sql`update private.ocr_artifacts set expires_at = now() + ${shift}::interval where id = ${unit.ocrId}::uuid`;
-    await sql`update private.case_embeddings set expires_at = now() + ${shift}::interval where id = ${unit.embeddingId}::uuid`;
-    return {};
   }
-
-  if (family.key === "claim_confirmed" || family.key === "user_stopped") {
-    for (const [type, id] of [["INPUT_OBJECT", unit.objectId], ["OCR_ARTIFACT", unit.ocrId],
-      ["CASE_EMBEDDING", unit.embeddingId]]) {
-      await sql`select private.enqueue_file_cleanup(${type}::text, ${id}::uuid, ${family.reason}::text)`;
-    }
-  }
+  // 만료 경계는 유발할 것이 없다. 만들 때 정한 수명이 지나가기를 기다린다.
   return {};
 };
 
@@ -276,6 +282,13 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
     }
   }
   progress("triggered");
+
+  // 만료가 지나가기를 기다린다. 시각을 고쳐서 만들지 않는다.
+  const dueUnits = units.filter((u) => u.family === "ttl_boundary_due");
+  const waitUntil = Math.max(...dueUnits.map((u) => u.expiresAt)) + 2_000;
+  const waitedMs = Math.max(0, waitUntil - Date.now());
+  if (waitedMs > 0) await new Promise((done) => { setTimeout(done, waitedMs); });
+  progress("waited");
 
   // 만료 청소는 한 번만 돈다. 경계 이전 대상까지 집어가면 그 자리에서 드러난다.
   const sweep = await sql`select kind, affected from private.sweep_expired_raw_objects()`;
@@ -356,6 +369,9 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
       total_cases: TOTAL_CASES,
       max_delete_seconds: MAX_DELETE_SECONDS,
       signed_url_ttl_seconds: SIGNED_URL_TTL_SECONDS,
+      due_ttl_seconds: DUE_TTL_SECONDS,
+      live_ttl_seconds: LIVE_TTL_SECONDS,
+      boundary_made_by: "ttl-at-creation",
       // 삭제에는 서버 키가 필요하다. 회원 JWT 는 격리 Bucket 객체를 지울 수 없고
       // 24시간 만료 청소는 회원 접속과 무관하게 돌아야 한다.
       uses_secret_key_for: "delete-and-ocr-write",

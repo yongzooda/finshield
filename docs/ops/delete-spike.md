@@ -6,7 +6,8 @@
 - 상위 기준은 ADR 6.4 삭제 계약과 15.1 물리 삭제 행, `INP-011`·`D-012`·`SEC-FILE-006`이다.
 - 현재 상태: `NOT-EVALUATED`
 - 업로드 경계 자체는 `B-STORAGE-01`이 이미 쟀다. 여기서는 올라간 뒤 사라지는지만 본다.
-- 새 Migration을 만들지 않는다. 삭제 원장과 cleanup 함수는 `0013`에 이미 있다.
+- 삭제 원장과 cleanup 함수는 `0013`에 이미 있다. 그런데 산출물을 만드는 경로가 없었다. worker는 `NOBYPASSRLS`라 소유자 표에 직접 쓰지 못한다. 그래서 Migration `0020`이 페이지·OCR 임시물·Case vector·Claim 등록과 사용자 중단 함수를 채운다.
+- `0020`은 `advance_input_stage`도 고친다. Claim 확인 분기가 원본과 OCR 임시물만 청소에 넣고 Case vector를 빠뜨리고 있었다. ADR 15.1은 case vector 잔존까지 0건을 요구한다.
 
 ## 왜 여기서는 서버 키를 쓰는가
 
@@ -30,6 +31,9 @@
 | Case 수 | 40 |
 | 삭제 상한 | 86,400초 |
 | 발급 URL 수명 | 900초 |
+| 만료 대상 수명 | 60초 |
+| 보존 대상 수명 | 3,600초 |
+| 경계를 만든 방식 | 만들 때 정한 수명 |
 | 서버 키 사용 범위 | 삭제와 OCR 임시물 쓰기 |
 
 발급 URL을 제품의 60초가 아니라 900초로 만든다. 오래 사는 URL일수록 삭제 뒤에도 통할 시간이 길어 시험이 더 엄격해진다. 짧게 잡으면 "그냥 만료됐다"로 설명되는 관측이 섞인다. 정책은 확인 시점의 경과가 수명보다 짧았는지도 함께 본다.
@@ -47,6 +51,10 @@
 Case마다 원본 객체 하나, OCR 임시 객체 하나, Case vector 하나를 만든다. 셋이 모두 사라져야 그 Case를 통과로 센다.
 
 경계 이전 대상 다섯 건은 일부러 남긴다. 만료 청소가 그것까지 집어가면 규칙이 시간이 아니라 우연으로 도는 것이다. 관측이 끝나면 그 다섯 건도 지우고 시험을 마친다.
+
+경계는 `expires_at`을 나중에 고쳐서 만들지 않는다. 만들 때 정한 수명이 실제로 지나가기를 기다린다. 시각을 손으로 옮기면 청소가 시간에 반응했다고 말할 수 없다. 결과에 그 방식을 남기고 정책이 확인한다.
+
+삭제를 유발하는 것도 제품 함수다. harness가 청소 대기열에 직접 넣지 않는다. Claim 확인은 입력 단계를 한 칸씩 전진시켜 `CLAIM_CONFIRMED`에 도달하고, 중단은 `private.stop_case_input`을, Case 삭제는 `private.request_case_deletion`과 `private.purge_case`를 부른다.
 
 ## 합격선
 
@@ -68,14 +76,15 @@ Case마다 원본 객체 하나, OCR 임시 객체 하나, Case vector 하나를
 
 ## 실행
 
-1. `provider-spike` environment에 `SUPABASE_SECRET_KEY`를 더한다. `B-STORAGE-01`이 쓰는 네 값은 이미 있다. 값은 비밀번호 관리자에만 보관한다.
-2. `Delete Evidence` workflow를 main에서 `B-DELETE-01`로 dispatch한다.
-3. 정책 미달이면 결과 파일을 만들지 않는다.
-4. 별도 Adoption PR에서 artifact를 `evidence/`에 채택하고 ADR 14.1·14.2를 갱신한다.
+1. Migration `0020`을 운영 Supabase 프로젝트에 적용한다.
+2. `provider-spike` environment에 `SUPABASE_SECRET_KEY`를 더한다. `B-STORAGE-01`이 쓰는 네 값은 이미 있다. 값은 비밀번호 관리자에만 보관한다.
+3. `Delete Evidence` workflow를 main에서 `B-DELETE-01`로 dispatch한다.
+4. 정책 미달이면 결과 파일을 만들지 않는다.
+5. 별도 Adoption PR에서 artifact를 `evidence/`에 채택하고 ADR 14.1·14.2를 갱신한다.
 
 ## 알려진 한계
 
-- 24시간 경계는 만료 시각을 앞뒤로 옮겨 만든다. 실제로 24시간을 기다리지 않는다. DB 제약이 `expires_at`을 생성 후 24시간 안으로 이미 묶고 있다.
+- 24시간 경계는 짧은 수명으로 줄여 만든다. 실제로 24시간을 기다리지 않는다. DB 제약이 `expires_at`을 생성 후 24시간 안으로 이미 묶고 있으므로 상한 자체는 Schema가 강제한다.
 - Vercel Hobby Cron의 하루 1회 실행은 여기서 재지 않는다. ADR 6.4가 이미 그것을 유일한 삭제 장치로 쓰지 않기로 했다.
 - Backup 복원 뒤의 재삭제는 Release Gate 항목이다.
 - 결과 파일에는 Case 표식과 수치만 남는다. 객체 경로·식별자·서버 키는 남지 않는다.
