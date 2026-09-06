@@ -118,6 +118,14 @@ if (mode === "--run") {
     });
     console.log(`${blockerId} totals: ${JSON.stringify(observations.totals)}`);
     console.log(`${blockerId} sweep: ${JSON.stringify(observations.sweep)}`);
+    // Case 마다 한 줄씩 남긴다. 정책이 막았을 때 어느 Case 가 왜인지 로그로 안다.
+    for (const row of observations.cases) {
+      console.log(`${blockerId} case ${row.label}: url_before=${row.issued_url_before_status}/${row.issued_url_before_bytes}`
+        + ` url_after=${row.issued_url_after_status}/${row.issued_url_after_bytes}`
+        + ` jwt_after=${row.authenticated_read_after_status} elapsed=${row.issued_url_elapsed_seconds}`
+        + ` jobs=${row.input_job_done}/${row.ocr_job_done}/${row.embedding_job_done}`
+        + ` vector=${row.live_embeddings} purge=${row.purge_verified} secs=${row.delete_seconds}`);
+    }
     for (const family of new Set(observations.cases.map((row) => row.family))) {
       const rows = observations.cases.filter((row) => row.family === family);
       console.log(`${blockerId} family ${family}: cases=${rows.length}`
