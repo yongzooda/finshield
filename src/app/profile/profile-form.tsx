@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FsCard, FsChip } from "../fs-shell";
 import { FsLoginCard, useFsToken } from "../fs-session";
+import { fetchProfile } from "../cases/case-api";
 import {
   EMPTY_PROFILE, PROFILE_FIELDS, completenessOf, type ProfileKey, type ProfileValues,
 } from "@/lib/finshield/profile";
@@ -35,18 +36,14 @@ export function ProfileForm() {
     if (!ready || !token) return;
     let alive = true;
     void (async () => {
-      const response = await fetch("/api/finshield/profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const body = await response.json().catch(() => null);
+      const response = await fetchProfile<{ profile: (ProfileValues & { updated_at?: string }) | null }>(token);
       if (!alive) return;
       if (!response.ok) {
         if (response.status === 401) setToken(null);
-        setNotice(body?.error ?? "불러오지 못했습니다");
-        setLoaded(true);
+        setNotice(response.error);
         return;
       }
-      const row = body?.profile as (ProfileValues & { updated_at?: string }) | null;
+      const row = response.data.profile;
       if (row) {
         const next = { ...EMPTY_PROFILE };
         for (const field of PROFILE_FIELDS) {
@@ -79,6 +76,8 @@ export function ProfileForm() {
       }
       setValues(next);
       setSaved((body?.profile?.updated_at as string | undefined) ?? new Date().toISOString());
+    } catch {
+      setNotice("연결이 끊어졌습니다. 처리 결과를 확인한 뒤 다시 시도해 주세요.");
     } finally { setBusy(false); }
   };
 
@@ -91,10 +90,9 @@ export function ProfileForm() {
     <>
       <header>
         <p className="fs-eyebrow">금융 프로필</p>
-        <h1 className="fs-h1 mt-2">적합성을 보려면 이만큼만 있으면 됩니다</h1>
+        <h1 className="fs-h1 mt-2">금융 프로필</h1>
         <p className="fs-lead mt-3">
-          금액과 계좌는 묻지 않습니다. 구간만 받습니다. 전부 건너뛰셔도 진위 확인과 거래·권유 위험은
-          그대로 확인해 드리고, 적합성 축만 판단을 미룹니다.
+          원하는 항목만 선택하세요. 시험용 가상 정보만 입력할 수 있으며, 모든 항목을 건너뛸 수 있습니다.
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <FsChip tone={completeness === "COMPLETE" ? "verified" : "neutral"}>
@@ -112,7 +110,7 @@ export function ProfileForm() {
 
       <FsCard className="mt-8">
         {!loaded ? (
-          <p className="fs-body">불러오는 중입니다.</p>
+          <p className="fs-body">{notice ? "프로필을 불러오지 못했습니다. 다시 열어 주세요." : "불러오는 중입니다."}</p>
         ) : (
           <>
             <ul className="space-y-7">
@@ -126,7 +124,7 @@ export function ProfileForm() {
                       return (
                         <button key={option.value} type="button" aria-pressed={picked}
                           onClick={() => setValues((prev) => ({ ...prev, [field.key]: option.value }))}
-                          className={`fs-btn !min-h-0 !px-3 !py-2 !text-[0.92rem] ${
+                          className={`fs-btn !px-3 !text-[0.92rem] ${
                             picked ? "fs-btn--primary" : "fs-btn--quiet"}`}>
                           {option.label}
                         </button>
@@ -151,10 +149,10 @@ export function ProfileForm() {
       </FsCard>
 
       <FsCard>
-        <h2 className="fs-h2">이 값은 이렇게 쓰입니다</h2>
+        <h2 className="fs-h2">프로필 이용 안내</h2>
         <ul className="fs-body mt-3 list-disc space-y-2 pl-5">
-          <li>검증을 시작할 때 그 시점의 프로필이 그대로 굳어 기록에 남습니다. 나중에 여기서 고쳐도 이미 나온 결과는 바뀌지 않습니다.</li>
-          <li>적합성 축을 볼 때만 씁니다. 상품이 실제로 있는지, 권유 방식에 문제가 없는지는 프로필과 무관하게 확인합니다.</li>
+          <li>새 검증에는 당시의 프로필이 기록됩니다. 이후 프로필을 바꿔도 과거 기록은 유지됩니다.</li>
+          <li>현재 적합성의 세부 판단은 완료되지 않았습니다. 프로필을 입력해도 적합 판정을 제공하지 않습니다.</li>
           <li>전부 건너뛰면 적합성 축은 &ldquo;정보 부족&rdquo;으로 남습니다. 안전하다는 뜻이 아니라 판단하지 않았다는 뜻입니다.</li>
         </ul>
       </FsCard>

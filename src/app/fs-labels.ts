@@ -88,7 +88,7 @@ const LIMITATION: Record<string, string> = {
 export const limitationLabel = (code: string): string => pick(LIMITATION, code);
 
 export const RUN_STATUS_LABEL: Record<string, string> = {
-  QUEUED: "대기", RUNNING: "확인 중", SUCCEEDED: "완료", PARTIAL: "일부만 확인",
+  QUEUED: "대기", RUNNING: "확인 중", COMPLETED: "완료", SUCCEEDED: "완료", PARTIAL: "일부만 확인",
   FAILED: "실패", BLOCKED: "중단됨", CANCELLED: "취소됨",
 };
 export const runStatusLabel = (code: string): string => pick(RUN_STATUS_LABEL, code);
@@ -134,6 +134,11 @@ export const ACTOR_LABEL: Record<string, string> = {
 export const actorLabel = (code: string): string => pick(ACTOR_LABEL, code);
 
 export const OVERALL_RESULT: Record<string, { label: string; tone: ChipTone }> = {
+  MATERIAL_RISK_FOUND: { label: "중요한 위험 확인", tone: "contra" },
+  HIGH_CAUTION: { label: "높은 주의 필요", tone: "caution" },
+  INSUFFICIENT_INFORMATION: { label: "판단 정보 부족", tone: "neutral" },
+  VERIFY_BEFORE_PROCEEDING: { label: "거래 전 추가 확인", tone: "caution" },
+  NO_SPECIAL_RISK_IN_VERIFIED_SCOPE: { label: "확인 범위 내 특이 위험 없음", tone: "verified" },
   CONFIRMED_RISK: { label: "위험 확인", tone: "contra" },
   NO_RISK_FOUND: { label: "확인된 위험 없음", tone: "verified" },
   UNCERTAIN: { label: "확정 못 함", tone: "neutral" },
@@ -188,7 +193,7 @@ export const AFTERCARE_STATUS: Record<string, string> = {
 };
 
 export const AFTERCARE_RESULT: Record<string, { label: string; tone: ChipTone }> = {
-  NORMAL_MANAGEMENT: { label: "조치 없음", tone: "verified" },
+  NORMAL_MANAGEMENT: { label: "계약 자료 보관", tone: "neutral" },
   ADDITIONAL_EXPLANATION: { label: "추가 설명 필요", tone: "caution" },
   CORRECTION_OR_INQUIRY: { label: "정정·문의 필요", tone: "caution" },
   DISPUTE_PREPARATION: { label: "분쟁 준비", tone: "contra" },

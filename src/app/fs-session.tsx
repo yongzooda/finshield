@@ -14,6 +14,8 @@
  */
 
 import { useCallback, useState, useSyncExternalStore } from "react";
+import Link from "next/link";
+import { FsIcon } from "./fs-icon";
 import { FsCard } from "./fs-shell";
 
 const KEY = "finshield_token";
@@ -102,19 +104,25 @@ export function FsLoginCard({ onToken, title = "로그인" }: {
         setMode("login");
         return;
       }
-      onToken(body.access_token as string);
+      if (typeof body.access_token !== "string" || !body.access_token) {
+        setNotice("로그인 정보를 받지 못했습니다. 다시 시도해 주세요."); return;
+      }
+      onToken(body.access_token);
+    } catch {
+      setNotice("연결이 끊어졌습니다. 잠시 후 다시 시도해 주세요.");
     } finally { setBusy(false); }
   };
 
   return (
-    <FsCard className="mt-8">
+    <FsCard className="fs-auth-card">
+      <span className="fs-icon-tile mb-4"><FsIcon name="shield" /></span>
       <h2 className="fs-h2">{mode === "login" ? title : "회원가입"}</h2>
       <p className="fs-body mt-2">
         {mode === "login"
           ? "검증 기록은 본인만 볼 수 있어 로그인이 필요합니다."
-          : "이메일과 비밀번호만 받습니다. 이름도 연락처도 묻지 않습니다."}
+          : "이메일로 계정을 만들고 검증 기록을 관리하세요."}
       </p>
-      {notice ? <p className="fs-body mt-2">{notice}</p> : null}
+      {notice ? <p role="alert" className="fs-inline-notice mt-3">{notice}</p> : null}
       <form className="mt-5 max-w-sm" onSubmit={submit}>
         <label className="fs-label" htmlFor="email">이메일</label>
         <input id="email" name="email" type="email" required autoComplete="username" className="fs-field" />
@@ -123,15 +131,16 @@ export function FsLoginCard({ onToken, title = "로그인" }: {
           autoComplete={mode === "login" ? "current-password" : "new-password"} className="fs-field" />
         {mode === "signup" ? <p className="fs-meta mt-1">10자 이상으로 정해 주세요.</p> : null}
         <div className="mt-5 flex flex-wrap items-center gap-3">
-          <button type="submit" disabled={busy} className="fs-btn fs-btn--primary">
+          <button type="submit" disabled={busy} className="fs-btn fs-btn--primary w-full">
             {busy ? "확인하는 중" : mode === "login" ? "로그인" : "가입하기"}
           </button>
-          <button type="button" className="fs-body underline"
+          <button type="button" disabled={busy} className="fs-body mx-auto underline"
             onClick={() => { setMode(mode === "login" ? "signup" : "login"); setNotice(null); }}>
             {mode === "login" ? "계정이 없으신가요" : "이미 계정이 있으신가요"}
           </button>
         </div>
       </form>
+      <div className="fs-details"><Link href="/live-demo" className="fs-text-link">먼저 로그인 없이 체험하기 <FsIcon name="arrow" /></Link></div>
     </FsCard>
   );
 }

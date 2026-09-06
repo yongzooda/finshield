@@ -92,7 +92,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
         <div className="mt-4 flex flex-wrap gap-3">
           <Link href="/cases" className="fs-btn fs-btn--quiet">목록으로</Link>
           {passport ? (
-            <Link href={`/cases/${caseId}/passport`} className="fs-btn fs-btn--primary">Evidence Passport</Link>
+            <Link href={`/cases/${caseId}/passport`} className="fs-btn fs-btn--primary">검증 근거 기록</Link>
           ) : null}
           {passport ? (
             <Link href={`/cases/${caseId}/revalidate`} className="fs-btn fs-btn--quiet">다시 확인하기</Link>
@@ -101,7 +101,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
       </header>
 
       {/* RES-008: 온전히 끝나지 않았으면 맨 위에 알린다. */}
-      {latest && (latest.status !== "SUCCEEDED" || partialReasons.length > 0) ? (
+      {latest && (!["COMPLETED", "SUCCEEDED"].includes(latest.status) || partialReasons.length > 0) ? (
         <FsCard className="mt-8">
           <FsChip tone="caution">{runStatusLabel(latest.status)}</FsChip>
           <p className="fs-body mt-2">
@@ -123,9 +123,10 @@ export function CaseDetail({ caseId }: { caseId: string }) {
 
       {latest ? (
         <FsCard>
-          <h2 className="fs-h2">축별 결과</h2>
-          <p className="fs-body mt-2">축을 하나로 합치지 않습니다. 각각 다른 것을 봅니다.</p>
+          <h2 className="fs-h2">세 가지 확인 결과</h2>
+          <p className="fs-body mt-2">진위성, 거래 위험, 개인 적합성의 확인 결과입니다.</p>
           <ul className="mt-4 space-y-3">
+            {axes.length === 0 ? <li className="fs-body">아직 확정된 축별 결과가 없습니다.</li> : null}
             {axes.map((axis) => {
               const view = axisResultOf(axis.result_code);
               return (
@@ -171,7 +172,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
                   {items.length > 0 ? (
                     <>
                       <button type="button" aria-expanded={isOpen}
-                        className="fs-btn fs-btn--quiet mt-3 !min-h-0 !px-3 !py-1.5 !text-[0.9rem]"
+                        className="fs-btn fs-btn--quiet mt-3 !px-3 !text-[0.9rem]"
                         onClick={() => setOpened((prev) => {
                           const next = new Set(prev);
                           if (next.has(row.id)) next.delete(row.id); else next.add(row.id);
@@ -196,12 +197,14 @@ export function CaseDetail({ caseId }: { caseId: string }) {
                                 {evidence!.reference_only ? <FsChip tone="caution">참고용</FsChip> : null}
                               </div>
                               <p className="fs-body mt-2">{evidence!.excerpt_masked ?? "본문 없음"}</p>
-                              <dl className="fs-meta mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
+                              <details className="fs-details"><summary>출처·조회 정보</summary>
+                              <dl className="fs-meta mt-2 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1">
                                 <dt>위치</dt><dd className="break-all">{JSON.stringify(evidence!.source_locator)}</dd>
                                 <dt>인용 가능</dt><dd>{evidence!.citable ? "예" : "아니오"}</dd>
                                 <dt>조회 시각</dt><dd>{new Date(evidence!.created_at).toLocaleString("ko-KR")}</dd>
                                 <dt>본문 해시</dt><dd className="break-all">{evidence!.content_hash}</dd>
                               </dl>
+                              </details>
                             </li>
                           ))}
                         </ul>
@@ -218,9 +221,9 @@ export function CaseDetail({ caseId }: { caseId: string }) {
       </FsCard>
 
       <FsCard>
-        <h2 className="fs-h2">가입과 그 뒤</h2>
+        <h2 className="fs-h2">가입 후 보호</h2>
         <p className="fs-body mt-2">
-          검증 상태와 다른 축입니다. 가입 여부는 검증 결과를 바꾸지 않고, 검증 결과가 가입 여부를 정하지도 않습니다.
+          가입 사실을 등록하면 이 기록에서 설명과 계약 조건을 이어서 점검할 수 있습니다.
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <FsChip tone={detail.case.journey_stage === "PRE_TRANSACTION" ? "neutral" : "caution"}>
@@ -280,7 +283,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
       </FsCard>
 
       <FsCard>
-        <h2 className="fs-h2">진행 기록</h2>
+        <details><summary className="font-semibold">진행 기록</summary>
         <ul className="fs-steps mt-4">
           {detail.events.map((event) => (
             <li key={event.event_no} data-state="done">
@@ -291,6 +294,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
             </li>
           ))}
         </ul>
+        </details>
       </FsCard>
     </>
   );

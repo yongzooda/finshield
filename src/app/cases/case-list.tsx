@@ -19,7 +19,7 @@ type CaseRow = {
   title_masked: string; created_at: string;
 };
 
-export function CaseList() {
+export function CaseList({ intent = "history" }: { intent?: "history" | "aftercare" }) {
   const [token, setToken, ready] = useFsToken();
   const [rows, setRows] = useState<CaseRow[] | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -38,7 +38,7 @@ export function CaseList() {
   }, [ready, token, setToken]);
 
   if (!ready) return null;
-  if (!token) return <FsLoginCard onToken={setToken} title="내 기록 보기" />;
+  if (!token) return <FsLoginCard onToken={setToken} title={intent === "aftercare" ? "가입 후 보호 시작하기" : "내 기록 보기"} />;
 
   if (rows === null) {
     return (
@@ -52,7 +52,7 @@ export function CaseList() {
     return (
       <FsCard className="mt-8">
         <h2 className="fs-h2">아직 기록이 없습니다</h2>
-        <p className="fs-body mt-2">거래 전 검증을 한 번 해 보시면 여기에 남습니다.</p>
+        <p className="fs-body mt-2">대출 권유를 먼저 확인해 주세요. 같은 기록에서 가입 후 점검까지 이어집니다.</p>
         <Link href="/verify" className="fs-btn fs-btn--primary mt-4">거래 전에 확인하기</Link>
       </FsCard>
     );
@@ -60,12 +60,13 @@ export function CaseList() {
 
   return (
     <FsCard className="mt-8">
+      <h2 className="fs-h2 mb-2">{intent === "aftercare" ? "점검할 거래를 선택하세요" : "최근 검증 기록"}</h2>
       <ul className="space-y-4">
         {rows.map((row) => {
           const state = LIFECYCLE_LABEL[row.lifecycle] ?? { label: row.lifecycle, tone: "neutral" as const };
           return (
             <li key={row.id} className="border-t border-[var(--fs-line)] pt-4 first:border-0 first:pt-0">
-              <Link href={`/cases/${row.id}`}
+              <Link href={intent === "aftercare" ? `/cases/${row.id}/journey` : `/cases/${row.id}`}
                 className="-mx-3 flex flex-wrap items-baseline justify-between gap-3 rounded-[10px] px-3 py-2 no-underline hover:bg-[var(--fs-canvas)]">
                 <span>
                   <span className="block font-bold">{row.title_masked}</span>

@@ -25,8 +25,8 @@ type Result = { result: string; reasons: string[]; actions: Action[] };
 
 const RESULT_VIEW: Record<string, { label: string; state: string; tone: ChipTone; lead: string }> = {
   NORMAL_MANAGEMENT: {
-    label: "지금은 조치할 것이 없습니다", state: "조치 없음", tone: "verified",
-    lead: "답하신 범위에서는 지금 해야 할 일이 나오지 않았습니다. 계약서는 그대로 보관해 두세요.",
+    label: "계약서와 권유 기록을 보관하세요", state: "계약 자료 보관", tone: "neutral",
+    lead: "답변한 범위에서 정정이나 분쟁 준비가 필요한 항목은 나오지 않았습니다. 답하지 않은 항목은 점검 범위에 포함되지 않습니다.",
   },
   ADDITIONAL_EXPLANATION: {
     label: "설명을 더 받으세요", state: "추가 설명 필요", tone: "caution",
@@ -69,6 +69,8 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
         return;
       }
       setResult(body as Result);
+    } catch {
+      setNotice("연결이 끊어졌습니다. 처리 결과를 확인한 뒤 다시 시도해 주세요.");
     } finally { setBusy(false); }
   };
 
@@ -113,13 +115,12 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
         </FsCard>
 
         <FsCard>
-          <h2 className="fs-h2">이렇게 정했습니다</h2>
+          <h2 className="fs-h2">판단 이유</h2>
           <ul className="fs-body mt-3 list-disc space-y-2 pl-5">
             {result.reasons.map((reason) => <li key={reason}>{reason}</li>)}
           </ul>
           <p className="fs-meta mt-4">
-            이 결과는 답하신 내용과 이미 확정된 검증 결과만 보고 정해집니다. 같은 답이면 언제나 같은 결과가 나옵니다.
-            사기나 위법을 판단한 것이 아니며, 이 점검이 금융·법률 전문가의 상담을 대신하지 않습니다.
+            이 점검은 답변과 이전 기록을 바탕으로 한 안내입니다. 사기·위법 여부를 확정하거나 금융·법률 상담을 대신하지 않습니다.
           </p>
         </FsCard>
       </>
@@ -132,10 +133,9 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
     <>
       <header>
         <p className="fs-eyebrow">가입 후 점검</p>
-        <h1 className="fs-h1 mt-2">가입하고 나서 확인할 것들</h1>
+        <h1 className="fs-h1 mt-2">설명과 계약 조건을 점검하세요</h1>
         <p className="fs-lead mt-3">
-          상품이 진짜인지는 거래 전에 이미 봤습니다. 여기서는 설명을 제대로 들으셨는지와 계약이 설명과
-          같은지를 봅니다. 다른 사이트로 옮겨 가지 않습니다.
+          설명받은 내용과 이해한 정도, 실제 계약 조건의 차이를 확인합니다. 시험용 가상 상황으로 답해 주세요.
         </p>
         <Link href={`/cases/${caseId}`} className="fs-btn fs-btn--quiet mt-4">기록으로 돌아가기</Link>
       </header>
@@ -154,7 +154,7 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
                   return (
                     <button key={option.value} type="button" aria-pressed={picked}
                       onClick={() => setAnswers((prev) => ({ ...prev, [question.code]: option.value }))}
-                      className={`fs-btn !min-h-0 !px-3 !py-2 !text-[0.92rem] ${
+                      className={`fs-btn !px-3 !text-[0.92rem] ${
                         picked ? "fs-btn--primary" : "fs-btn--quiet"}`}>
                       {option.label}
                     </button>

@@ -9,10 +9,10 @@
 
 import type { ReactNode } from "react";
 
-export function FsShell({ children }: { children: ReactNode }) {
+export function FsShell({ children, wide = false }: { children: ReactNode; wide?: boolean }) {
   return (
     <div className="fs min-h-[70vh]">
-      <div className="fs-shell">{children}</div>
+      <div className={`fs-shell${wide ? " fs-shell--wide" : ""}`}>{children}</div>
     </div>
   );
 }

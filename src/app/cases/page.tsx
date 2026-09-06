@@ -10,9 +10,9 @@ export default function CasesPage() {
     <FsShell>
       <header>
         <p className="fs-eyebrow">내 검증 기록</p>
-        <h1 className="fs-h1 mt-2">지금까지 확인한 건들</h1>
+        <h1 className="fs-h1 mt-2">내 검증 기록</h1>
         <p className="fs-lead mt-3 max-w-2xl">
-          본인이 만든 건만 보입니다. 다른 사람의 기록은 데이터베이스 정책이 막습니다.
+          이전 결과와 근거를 다시 보고, 재검증과 가입 후 점검을 이어가세요.
         </p>
       </header>
       <CaseList />

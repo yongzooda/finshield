@@ -41,6 +41,7 @@ export function PassportView({ caseId }: { caseId: string }) {
   const [token, setToken, ready] = useFsToken();
   const [detail, setDetail] = useState<Detail | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
 
   useEffect(() => {
     if (!ready || !token) return;
@@ -59,13 +60,14 @@ export function PassportView({ caseId }: { caseId: string }) {
   if (!token) return <FsLoginCard onToken={setToken} />;
   if (!detail) return <FsCard className="mt-8"><p className="fs-body">{notice ?? "불러오는 중입니다."}</p></FsCard>;
 
-  const passport = detail.passports[0];
+  const passport = detail.passports.find((row) => row.id === selectedVersion) ?? detail.passports[0];
   if (!passport) {
     return (
       <FsCard className="mt-8">
-        <h2 className="fs-h2">아직 Passport 가 없습니다</h2>
+        <h2 className="fs-h2">아직 검증 근거 기록이 없습니다</h2>
         <p className="fs-body mt-2">검증이 확정되면 이 자리에 남습니다.</p>
         <Link href={`/cases/${caseId}`} className="fs-btn fs-btn--quiet mt-4">기록으로 돌아가기</Link>
+
       </FsCard>
     );
   }
@@ -83,7 +85,7 @@ export function PassportView({ caseId }: { caseId: string }) {
   return (
     <>
       <header>
-        <p className="fs-eyebrow">Evidence Passport</p>
+        <p className="fs-eyebrow">검증 근거 기록 · Evidence Passport</p>
         <h1 className="fs-h1 mt-2">{detail.case.title_masked}</h1>
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <FsChip tone={overall.tone}>{overall.label}</FsChip>
@@ -91,10 +93,21 @@ export function PassportView({ caseId }: { caseId: string }) {
             {passport.coverage_satisfied ? "범위 충족" : "범위 미충족"}
           </FsChip>
           <span className="fs-meta">
-            판 {passport.passport_version_no} · {new Date(passport.created_at).toLocaleString("ko-KR")}
+            버전 {passport.passport_version_no} · {new Date(passport.created_at).toLocaleString("ko-KR")}
           </span>
         </div>
         <Link href={`/cases/${caseId}`} className="fs-btn fs-btn--quiet mt-4">기록으로 돌아가기</Link>
+        {detail.passports.length > 1 ? (
+          <div className="mt-5 max-w-sm">
+            <label htmlFor="passport-version" className="fs-label">기록 버전</label>
+            <select id="passport-version" className="fs-field" value={passport.id}
+              onChange={(event) => setSelectedVersion(event.target.value)}>
+              {detail.passports.map((row) => <option key={row.id} value={row.id}>
+                버전 {row.passport_version_no} · {new Date(row.created_at).toLocaleDateString("ko-KR")}
+              </option>)}
+            </select>
+          </div>
+        ) : null}
       </header>
 
       {(run?.partial_reason_codes ?? []).length > 0 ? (
@@ -107,7 +120,7 @@ export function PassportView({ caseId }: { caseId: string }) {
       ) : null}
 
       <FsCard className="mt-8">
-        <h2 className="fs-h2">축별 결과</h2>
+        <h2 className="fs-h2">세 가지 확인 결과</h2>
         <ul className="mt-4 space-y-3">
           {axes.map((axis) => {
             const view = axisResultOf(axis.result_code);
@@ -125,7 +138,7 @@ export function PassportView({ caseId }: { caseId: string }) {
       </FsCard>
 
       <FsCard>
-        <h2 className="fs-h2">확정한 항목</h2>
+        <h2 className="fs-h2">항목별 확인 결과</h2>
         <ul className="mt-4 space-y-4">
           {finals.map((row) => {
             const view = CLAIM_STATE_VIEW[row.status] ?? { label: row.status, tone: "neutral" as const, help: "" };
@@ -149,9 +162,10 @@ export function PassportView({ caseId }: { caseId: string }) {
       </FsCard>
 
       <FsCard>
-        <h2 className="fs-h2">이 판단이 선 자리</h2>
+        <details>
+        <summary className="font-semibold">검증 기록 상세 정보</summary>
         <dl className="fs-meta mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-          <dt>Passport 판</dt><dd>{passport.passport_version_no} · schema {passport.passport_schema_version}</dd>
+          <dt>기록 버전</dt><dd>{passport.passport_version_no} · schema {passport.passport_schema_version}</dd>
           <dt>실행 번호</dt><dd>{run?.run_no ?? "-"} · {run ? runStatusLabel(run.status) : "-"}</dd>
           <dt>쓴 근거</dt><dd>{used.length}건 · 독립 출처 {independentKeys.size}곳</dd>
           <dt>인용 가능 근거</dt><dd>{used.filter((row) => row.citable).length}건</dd>
@@ -160,9 +174,9 @@ export function PassportView({ caseId }: { caseId: string }) {
           <dt>본문 해시</dt><dd className="break-all">{passport.payload_hash}</dd>
         </dl>
         <p className="fs-meta mt-4">
-          같은 원문에서 나온 근거는 하나로 셉니다. 그래서 근거 수보다 독립 출처 수가 적을 수 있습니다.
-          이 값이 같으면 서로 다른 자료로 확인했다는 뜻입니다.
+          같은 원문에서 나온 근거는 하나로 셉니다. 출처 수만으로 판단의 정확성을 보장하지 않습니다.
         </p>
+        </details>
       </FsCard>
     </>
   );

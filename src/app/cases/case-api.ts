@@ -15,13 +15,17 @@ export type CaseFetch<T> =
   | { ok: false; status: number; error: string };
 
 const ask = async <T,>(path: string, token: string): Promise<CaseFetch<T>> => {
-  const response = await fetch(path, { headers: { Authorization: `Bearer ${token}` } });
-  const body = (await response.json().catch(() => null)) as { error?: unknown } | null;
-  if (!response.ok) {
-    const error = typeof body?.error === "string" ? body.error : "불러오지 못했습니다";
-    return { ok: false, status: response.status, error };
+  try {
+    const response = await fetch(path, { headers: { Authorization: `Bearer ${token}` } });
+    const body = (await response.json().catch(() => null)) as { error?: unknown } | null;
+    if (!response.ok || body === null) {
+      const error = typeof body?.error === "string" ? body.error : "불러오지 못했습니다";
+      return { ok: false, status: response.status, error };
+    }
+    return { ok: true, data: body as T };
+  } catch {
+    return { ok: false, status: 0, error: "연결이 끊어졌습니다. 다시 열어 주세요." };
   }
-  return { ok: true, data: body as T };
 };
 
 export const fetchCase = <T,>(caseId: string, token: string): Promise<CaseFetch<T>> =>
@@ -29,3 +33,9 @@ export const fetchCase = <T,>(caseId: string, token: string): Promise<CaseFetch<
 
 export const fetchCases = <T,>(token: string): Promise<CaseFetch<T>> =>
   ask<T>("/api/finshield/cases", token);
+
+export const fetchNotifications = <T,>(token: string): Promise<CaseFetch<T>> =>
+  ask<T>("/api/finshield/notifications", token);
+
+export const fetchProfile = <T,>(token: string): Promise<CaseFetch<T>> =>
+  ask<T>("/api/finshield/profile", token);
