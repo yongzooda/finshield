@@ -612,6 +612,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `EVID-RATE-01` | 예산·Rate·Provider 직렬화 원장 | PASS | main run `34038572782`, artifact `9990958223`. 같은 상한에 동시 예약 60건을 던져 상한이 허용하는 20건만 승인되고 40건이 예산 초과로 거부됐다. 상한을 넘긴 승인 0건이다. 정산 10건과 해제 10건 뒤 예약액이 0 로 돌아가고 사용액 1000 이 정산 합계와 같아 원장 불일치 0건이다. Rate 는 시도 40건 중 10건 허용·30건 거부이며 재시도 시각 없는 거부 0건이다. Provider 슬롯 5개의 최소 간격 1000ms 로 CLOVA 기본 1 TPS 를 지켰다. 외부 Provider 는 부르지 않았다 Migration `0020` 반영 뒤 같은 정책으로 다시 쟀다. |
 | `EVID-CONSENT-01` | 동의 격리와 원본 전송 경계 | PASS | main run `34038648522`, artifact `9990977394`. 원본 전송 경로를 함수 하나로 좁히고 동의 상태 8가지를 만들었다. 동의하지 않은 7건에서 외부 전송이 0건이고, 동의한 1건은 실제로 전송했다. 외부가 받은 내용과 보내려던 원본의 차이 0건, 감사 기록이 없는 결정 0건, 결정과 다른 기록 0건이다. 차단 사유에는 동의 없음·거절·철회·대체·원본 삭제·연결 불일치가 들어간다. 모델 경로는 제품이 쓰는 PII 모듈을 그대로 불러 fixture 132건 중 117건을 마스킹해 내보내고 15건을 잔존 의심으로 막았다. 마스킹을 통과한 문장의 원문 식별자 잔존 0건, 정상 문장 25건의 오차단 0건이다. 외부 Provider 는 부르지 않았고 ADR 14.2 가 규정한 prototype 범위다 Migration `0020` 반영 뒤 같은 정책으로 다시 쟀다. |
 | `EVID-STORAGE-01` | 인증 사용자 Storage 권한과 발급 token 재사용 | PASS | main run `34038701736`, artifact `9990990846`. 시험 전용 계정으로 실제 로그인해 받은 사용자 JWT 로만 쟀고 RLS 우회 키를 쓰지 않았다. slot 은 서버 함수가 만들어 경로를 호출자가 고르지 못한다. 정상 업로드 1건이 통과하고 거부 8건이 모두 막혔다. 허용되지 않은 쓰기 0건, 읽기 0건, 덮어쓰기 통과 0건, 닫힌 slot 의 발급 token 재사용 통과 0건이다. 목록 조회는 RLS 가 거르면 200 에 빈 배열이 오므로 상태가 아니라 항목 수로 판단한다 Migration `0020` 반영 뒤 같은 정책으로 다시 쟀다. |
+| `EVID-DELETE-01` | 원본·OCR 임시물·Case vector 물리 삭제와 기발급 URL 차단 | PASS | main run `34042449137`, artifact `9992188939`. 확인·중단·Case 삭제·만료 경계 네 경로에서 Case 40건을 만들어 35건을 지우고 5건을 남겼다. Case 마다 원본 객체와 OCR 임시 객체와 Case vector 를 하나씩 만들었다. 지운 35건에서 남은 vector 0건, 청소 미종결 0건이다. Case 삭제 10건은 purge_case 가 객체 부재를 확인한 뒤 참을 돌려줬다. 지우기 전에 발급한 열람 URL 이 삭제 뒤에 통한 것 0건, 회원 token 으로 읽힌 것 0건이다. 그 판정이 뜻을 가지도록 삭제 전 35건 모두에서 본문이 온 것을 먼저 확인했다. 삭제 확인까지 가장 오래 걸린 것이 196초로 상한 86,400초 안이다. 만료 이전 5건은 청소에 들어가지 않고 남았고 만료를 지난 5건은 모두 지워졌다. 시험이 Bucket 에 남긴 객체 0건이다 |
 
 위 PASS는 제품 Live Vertical Slice PASS가 아니다. GitHub의 Vercel status는 build/deploy 성공을 뜻하며 Provider key·OCR·RLS·Workflow 기능 성공을 증명하지 않는다.
 
@@ -626,7 +627,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `B-FILE-SAFETY` | encrypted/active/polyglot/bomb·격리 parser·dependency advisory | PASS | §15.1 File safety 합격 |
 | `B-CONSENT-01` | OCR 동의/거절·외부 전송·삭제 격리 prototype | PASS | §15.1 동의 거절 전송 0건 + 감사 row |
 | `B-STORAGE-01` | authenticated TUS·one-use slot·10 MiB·MIME/Magic Byte·cross-user/worker RLS | PASS | positive/negative test와 발급 URL/token 재사용 거부 |
-| `B-DELETE-01` | 확인·중단·Case 삭제·기발급 URL·24시간 cleanup | NOT-EVALUATED | §15.1 물리 삭제 합격 + deletion ledger |
+| `B-DELETE-01` | 확인·중단·Case 삭제·기발급 URL·24시간 cleanup | PASS | §15.1 물리 삭제 합격 + deletion ledger |
 | `B-SUPABASE-01` | 전용 Project·최소권한 role·pooler 6543·pgvector·Migration/RLS | PASS | §15.1 cross-user/worker 시험과 preflight 합격 |
 | `B-PROCESSOR-PRIVACY` | Anthropic·Cohere·CLOVA·Supabase 학습/보존/DPA/region/하위처리자·PII fail-closed | NOT-EVALUATED | §15.1 Processor privacy + 계약 inventory |
 | `B-PRIVACY-VERCEL` | Hobby plan·고객 콘텐츠 조건·region·Log 보존·Workflow RBAC과 실개인정보 미처리 강제 | NOT-EVALUATED | plan 조건 기록 + §15.1 Processor privacy 합격; 실데이터 운영 시 DPA plan 재평가 |
