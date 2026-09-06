@@ -108,7 +108,7 @@ export const validateRetrievalEvidenceResult = (result, fail) => {
   // 4. 합계. slice 는 결과가 아니라 기록에서 다시 계산해 대조한다.
   const t = o.totals;
   if (!exactKeys(t, ["recall_at_5", "precision_at_5", "critical_recall_at_5", "slice_recall_at_5",
-    "query_p95_ms", "query_p50_ms", "filter_excluded_answers", "duplicate_fingerprint_inflation", "collapsed_fingerprints"])) {
+    "query_p95_ms", "query_p50_ms", "db_p95_ms", "filter_excluded_answers", "duplicate_fingerprint_inflation", "collapsed_fingerprints"])) {
     fail("합계가 계약과 다릅니다.");
     return;
   }
@@ -129,12 +129,13 @@ export const validateRetrievalEvidenceResult = (result, fail) => {
   const ledger = Array.isArray(o.ledger) ? o.ledger : [];
   if (ledger.length !== GATE_CLAIMS) fail("단계 원장이 gate Claim 100건에 대해 남아 있지 않습니다.");
   for (const row of ledger) {
-    if (!exactKeys(row, ["claim_key", "case_id", "filtered", "keyword", "vector", "merged", "relevant_in_pool", "query_ms"])) {
+    if (!exactKeys(row, ["claim_key", "case_id", "filtered", "keyword", "vector", "merged", "relevant_in_pool", "provider_ms", "db_ms"])) {
       fail(`원장 '${row?.claim_key ?? "이름 없음"}' 이 계약과 다릅니다.`);
       continue;
     }
     if (row.filtered < row.merged) fail(`원장 '${row.claim_key}' 의 Filter 통과 수가 후보 수보다 작습니다.`);
     if (row.merged > CANDIDATE_POOL_K * 2) fail(`원장 '${row.claim_key}' 의 후보 수가 상한을 넘습니다.`);
     if (row.keyword === 0 && row.vector === 0) fail(`원장 '${row.claim_key}' 에 어느 단계의 후보도 없습니다.`);
+    if (!Number.isFinite(row.provider_ms) || row.provider_ms <= 0) fail(`원장 '${row.claim_key}' 에 Provider 질의 지연이 없습니다.`);
   }
 };
