@@ -9,6 +9,7 @@ import { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
 import { validateModelEvidenceResult } from "./provider-model-policy.mjs";
 import { expectedInventory as supabaseExpectedInventory, validateSupabaseEvidenceResult } from "./supabase-evidence-policy.mjs";
 import { validateSourceEvidenceResult } from "./source-evidence-policy.mjs";
+import { validateFileSafetyEvidenceResult } from "./file-safety-policy.mjs";
 
 export { adrDecisionDigest } from "./provider-adr-digest.mjs";
 export { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
@@ -68,6 +69,26 @@ const TRUSTED_SOURCE_WORKFLOW_BLOB = "2c7c7300fb2a8305e72230b9e60d6f790df6fb4f";
 const TRUSTED_SOURCE_HARNESS_BLOB = "f23b5cfab2beffcf7aad50aa21512bdb89c22a76";
 const TRUSTED_SOURCE_POLICY_BLOB = "d547746a60c0c385cac22d862c2e738fde1ea169";
 const TRUSTED_SOURCE_SPIKE_BLOB = "2739c9157ea141c0525ecccebf1e6f815c824f9c";
+const FILE_SAFETY_WORKFLOW_PATH = ".github/workflows/file-safety-evidence.yml";
+const FILE_SAFETY_HARNESS_PATH = ".github/scripts/run-file-safety-evidence.mjs";
+const FILE_SAFETY_POLICY_PATH = ".github/scripts/file-safety-policy.mjs";
+const FILE_SAFETY_SPIKE_PATH = ".github/scripts/file-safety-spike.mjs";
+const FILE_SAFETY_INSPECTOR_PATH = ".github/scripts/file-safety-inspector.mjs";
+const FILE_SAFETY_FIXTURES_PATH = ".github/scripts/file-safety-fixtures.mjs";
+const FILE_SAFETY_GUARD_PATH = ".github/scripts/file-safety-guard.mjs";
+const FILE_SAFETY_WORKER_PATH = ".github/scripts/file-safety-worker.mjs";
+const FILE_SAFETY_PARSER_LOCK_PATH = ".github/fixtures/file-safety-parser/package-lock.json";
+const FILE_SAFETY_PARSER_MANIFEST_PATH = ".github/fixtures/file-safety-parser/package.json";
+const FILE_SAFETY_OPS_PATH = "docs/ops/file-safety-spike.md";
+const TRUSTED_FILE_SAFETY_WORKFLOW_BLOB = "2ea5e310cf9fb00ac4f30b3690d81f9b73bd526c";
+const TRUSTED_FILE_SAFETY_HARNESS_BLOB = "0aaa683b4b8cf798c684f1c88c06e115bd389e1e";
+const TRUSTED_FILE_SAFETY_POLICY_BLOB = "b7025fdcac99d531b652f2157659b70e0bae6265";
+const TRUSTED_FILE_SAFETY_SPIKE_BLOB = "2b32c398ee065f8f8e0e3d31452cf73e27b1231e";
+const TRUSTED_FILE_SAFETY_INSPECTOR_BLOB = "120628ce8b79f2a9856f27859b280b84069a30cd";
+const TRUSTED_FILE_SAFETY_FIXTURES_BLOB = "ecb5a03d5c0cca6cc1f3d53a4da516e384eff038";
+const TRUSTED_FILE_SAFETY_GUARD_BLOB = "061bc295edd244b1fe4c9e11b1ea85a821e12937";
+const TRUSTED_FILE_SAFETY_WORKER_BLOB = "5ee936c8d1101ec2673165cc45077a134e4e694c";
+const TRUSTED_FILE_SAFETY_PARSER_LOCK_BLOB = "05fe45d6507aef416eeacbe678532eb26666da7d";
 const MAX_ARCHIVE_BYTES = 2 * 1024 * 1024;
 const MAX_RESULT_BYTES = 512 * 1024;
 const MAX_EVIDENCE_AGE_MS = 27 * 24 * 60 * 60 * 1000;
@@ -270,12 +291,51 @@ const sourceEvidencePolicy = (blockerId) => ({
 
 // PASS is fail-closed: each remaining blocker gets a policy only with its real
 // harness. A prose criterion or a hand-authored `result: PASS` is never enough.
+const fileSafetyEvidencePolicy = {
+  gate: "implementation",
+  workflowName: "File Safety Evidence",
+  workflowPath: FILE_SAFETY_WORKFLOW_PATH,
+  workflowBlobSha: TRUSTED_FILE_SAFETY_WORKFLOW_BLOB,
+  harnessPath: FILE_SAFETY_HARNESS_PATH,
+  harnessBlobSha: TRUSTED_FILE_SAFETY_HARNESS_BLOB,
+  trustedExecutionFiles: Object.freeze([
+    Object.freeze({ path: FILE_SAFETY_WORKFLOW_PATH, blobSha: TRUSTED_FILE_SAFETY_WORKFLOW_BLOB }),
+    Object.freeze({ path: FILE_SAFETY_HARNESS_PATH, blobSha: TRUSTED_FILE_SAFETY_HARNESS_BLOB }),
+    Object.freeze({ path: FILE_SAFETY_POLICY_PATH, blobSha: TRUSTED_FILE_SAFETY_POLICY_BLOB }),
+    Object.freeze({ path: FILE_SAFETY_SPIKE_PATH, blobSha: TRUSTED_FILE_SAFETY_SPIKE_BLOB }),
+    Object.freeze({ path: FILE_SAFETY_INSPECTOR_PATH, blobSha: TRUSTED_FILE_SAFETY_INSPECTOR_BLOB }),
+    Object.freeze({ path: FILE_SAFETY_FIXTURES_PATH, blobSha: TRUSTED_FILE_SAFETY_FIXTURES_BLOB }),
+    Object.freeze({ path: FILE_SAFETY_GUARD_PATH, blobSha: TRUSTED_FILE_SAFETY_GUARD_BLOB }),
+    Object.freeze({ path: FILE_SAFETY_WORKER_PATH, blobSha: TRUSTED_FILE_SAFETY_WORKER_BLOB }),
+    Object.freeze({ path: FILE_SAFETY_PARSER_LOCK_PATH, blobSha: TRUSTED_FILE_SAFETY_PARSER_LOCK_BLOB }),
+    Object.freeze({ path: ADR_DIGEST_PATH, blobSha: TRUSTED_ADR_DIGEST_BLOB }),
+  ]),
+  jobName: "file-safety-evidence / B-FILE-SAFETY",
+  scopePaths: Object.freeze([
+    FILE_SAFETY_PARSER_LOCK_PATH,
+    FILE_SAFETY_PARSER_MANIFEST_PATH,
+    FILE_SAFETY_FIXTURES_PATH,
+    FILE_SAFETY_GUARD_PATH,
+    FILE_SAFETY_INSPECTOR_PATH,
+    FILE_SAFETY_POLICY_PATH,
+    FILE_SAFETY_SPIKE_PATH,
+    FILE_SAFETY_WORKER_PATH,
+    ADR_DIGEST_PATH,
+    FILE_SAFETY_HARNESS_PATH,
+    ".github/scripts/test-file-safety-evidence.mjs",
+    FILE_SAFETY_WORKFLOW_PATH,
+    FILE_SAFETY_OPS_PATH,
+  ]),
+  validate: validateFileSafetyEvidenceResult,
+};
+
 export const evidencePolicies = Object.freeze({
   "B-MODEL-01": modelEvidencePolicy,
   "B-EMBED-01": embedEvidencePolicy,
   "B-SUPABASE-01": supabaseEvidencePolicy,
   "B-SOURCE-02": sourceEvidencePolicy("B-SOURCE-02"),
   "B-SOURCE-03": sourceEvidencePolicy("B-SOURCE-03"),
+  "B-FILE-SAFETY": fileSafetyEvidencePolicy,
 });
 
 export const computeEvidenceScopeDigest = (root, policy, fail) => {
