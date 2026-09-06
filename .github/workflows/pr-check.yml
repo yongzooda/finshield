@@ -102,6 +102,9 @@ jobs:
       - name: Delete Contract Test
         run: node .github/scripts/test-delete-evidence.mjs
 
+      - name: Runtime Contract Test
+        run: node .github/scripts/test-runtime-evidence.mjs
+
       - name: 한국어 기록 검사 회귀 테스트
         run: node .github/scripts/test-korean-records.mjs
 

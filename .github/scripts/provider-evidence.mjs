@@ -15,6 +15,7 @@ import { validateRateEvidenceResult } from "./rate-evidence-policy.mjs";
 import { validateConsentEvidenceResult } from "./consent-evidence-policy.mjs";
 import { validateStorageEvidenceResult } from "./storage-evidence-policy.mjs";
 import { validateDeleteEvidenceResult } from "./delete-evidence-policy.mjs";
+import { validateRuntimeEvidenceResult } from "./runtime-evidence-policy.mjs";
 
 export { adrDecisionDigest } from "./provider-adr-digest.mjs";
 export { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
@@ -148,6 +149,16 @@ const TRUSTED_DELETE_WORKFLOW_BLOB = "e8520c36f49e797082b8b2a601539ac08eef5c13";
 const TRUSTED_DELETE_HARNESS_BLOB = "f40e54914dd290a23fe0e11bb0ba7b0deb799ff2";
 const TRUSTED_DELETE_POLICY_BLOB = "8da6bb461a43124f1427913f4083c5fcb0a0c152";
 const TRUSTED_DELETE_SPIKE_BLOB = "88a37303d8735ab0ea48525dac5988aabeb9db2f";
+const RUNTIME_WORKFLOW_PATH = ".github/workflows/runtime-evidence.yml";
+const RUNTIME_HARNESS_PATH = ".github/scripts/run-runtime-evidence.mjs";
+const RUNTIME_POLICY_PATH = ".github/scripts/runtime-evidence-policy.mjs";
+const RUNTIME_SPIKE_PATH = ".github/scripts/runtime-spike.mjs";
+const RUNTIME_ROUTE_PATH = "src/app/api/runtime-manifest/route.ts";
+const RUNTIME_OPS_PATH = "docs/ops/runtime-spike.md";
+const TRUSTED_RUNTIME_WORKFLOW_BLOB = "0c9568727900234787e76365589f9a4d3fcd8869";
+const TRUSTED_RUNTIME_HARNESS_BLOB = "1a084cd5b38dbd24de07436b645be0b666a49420";
+const TRUSTED_RUNTIME_POLICY_BLOB = "8b437c07cfa87fa1eb2e8bb0932c3c323e2b63af";
+const TRUSTED_RUNTIME_SPIKE_BLOB = "f8a28ecf827152c23049c0db56b2aead1336c187";
 const MAX_ARCHIVE_BYTES = 2 * 1024 * 1024;
 const MAX_RESULT_BYTES = 512 * 1024;
 const MAX_EVIDENCE_AGE_MS = 27 * 24 * 60 * 60 * 1000;
@@ -550,6 +561,37 @@ const deleteEvidencePolicy = {
   validate: validateDeleteEvidenceResult,
 };
 
+// B-RUNTIME-01 은 배포 안의 관측 endpoint 응답만 증거로 쓴다.
+// 그 endpoint 자체가 scope 에 들어가야 응답의 출처가 고정된다.
+const runtimeEvidencePolicy = {
+  gate: "implementation",
+  workflowName: "Runtime Evidence",
+  workflowPath: RUNTIME_WORKFLOW_PATH,
+  workflowBlobSha: TRUSTED_RUNTIME_WORKFLOW_BLOB,
+  harnessPath: RUNTIME_HARNESS_PATH,
+  harnessBlobSha: TRUSTED_RUNTIME_HARNESS_BLOB,
+  trustedExecutionFiles: Object.freeze([
+    Object.freeze({ path: RUNTIME_WORKFLOW_PATH, blobSha: TRUSTED_RUNTIME_WORKFLOW_BLOB }),
+    Object.freeze({ path: RUNTIME_HARNESS_PATH, blobSha: TRUSTED_RUNTIME_HARNESS_BLOB }),
+    Object.freeze({ path: RUNTIME_POLICY_PATH, blobSha: TRUSTED_RUNTIME_POLICY_BLOB }),
+    Object.freeze({ path: RUNTIME_SPIKE_PATH, blobSha: TRUSTED_RUNTIME_SPIKE_BLOB }),
+    Object.freeze({ path: ADR_DIGEST_PATH, blobSha: TRUSTED_ADR_DIGEST_BLOB }),
+  ]),
+  jobName: "runtime-evidence / B-RUNTIME-01",
+  scopePaths: Object.freeze([
+    ADR_DIGEST_PATH,
+    RUNTIME_SPIKE_PATH,
+    RUNTIME_POLICY_PATH,
+    RUNTIME_HARNESS_PATH,
+    ".github/scripts/test-runtime-evidence.mjs",
+    RUNTIME_WORKFLOW_PATH,
+    RUNTIME_OPS_PATH,
+    RUNTIME_ROUTE_PATH,
+    "src/lib/ops/http.ts",
+  ]),
+  validate: validateRuntimeEvidenceResult,
+};
+
 export const evidencePolicies = Object.freeze({
   "B-MODEL-01": modelEvidencePolicy,
   "B-EMBED-01": embedEvidencePolicy,
@@ -562,6 +604,7 @@ export const evidencePolicies = Object.freeze({
   "B-CONSENT-01": consentEvidencePolicy,
   "B-STORAGE-01": storageEvidencePolicy,
   "B-DELETE-01": deleteEvidencePolicy,
+  "B-RUNTIME-01": runtimeEvidencePolicy,
 });
 
 export const computeEvidenceScopeDigest = (root, policy, fail) => {
