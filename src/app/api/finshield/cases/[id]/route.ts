@@ -28,9 +28,11 @@ export async function GET(
 
   const eq = `eq.${id}`;
   try {
-    const [cases, claims, runs, finals, axes, links, evidences, passports, events] = await Promise.all([
+    const [cases, claims, runs, finals, axes, links, evidences, passports, events,
+           assessments, checklists] = await Promise.all([
       restSelect({ token, path: "financial_cases", query: {
-        select: "id,scenario,lifecycle,title_masked,created_at,updated_at", id: eq } }),
+        select: "id,scenario,lifecycle,title_masked,created_at,updated_at,"
+          + "journey_stage,enrollment_confirmed_at,aftercare_status", id: eq } }),
       restSelect({ token, path: "claims", query: {
         select: "id,claim_type,source_input_id,created_at", case_id: eq, order: "created_at.asc" } }),
       restSelect({ token, path: "verification_runs", query: {
@@ -52,12 +54,19 @@ export async function GET(
       restSelect({ token, path: "case_events", query: {
         select: "event_no,event_type,actor_type,from_state,to_state,created_at",
         case_id: eq, order: "event_no.asc" } }),
+      restSelect({ token, path: "precase_assessments", query: {
+        select: "id,assessment_no,status,result,summary_masked,finished_at",
+        case_id: eq, order: "assessment_no.desc" } }),
+      restSelect({ token, path: "action_checklists", query: {
+        select: "id,precase_assessment_id,action_code,status,required_material_codes,created_at",
+        case_id: eq } }),
     ]);
 
     if (cases.length === 0) return jsonNoStore({ error: "찾을 수 없습니다" }, 404);
     return jsonNoStore({
       case: cases[0], claims, runs, final_claims: finals, axes,
       claim_evidences: links, evidences, passports, events,
+      assessments, checklists,
     }, 200);
   } catch (error) {
     if (error instanceof RestError) return jsonNoStore({ error: error.message }, error.status);
