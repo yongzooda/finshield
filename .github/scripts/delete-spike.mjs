@@ -125,11 +125,11 @@ export const runCleanupWorker = async ({ sql, admin, maxRounds = 40 }) => {
   throw new Error("cleanup worker did not drain within the round limit");
 };
 
-const buildCase = async ({ sql, client, admin, token, userId, family, index }) => {
+const buildCase = async ({ sql, client, admin, token, userId, family, index, runToken }) => {
   const label = `${family.key}-${index}`;
   const caseRows = await sql`
     select private.create_case(${userId}::uuid, 'LOAN'::public.case_scenario, '삭제 시험 Case',
-      ${`delete-${Date.now()}-${label}`}::text, ${hex64(label)}::text) as case_id`;
+      ${`delete-${runToken}-${label}`}::text, ${hex64(`${runToken}-${label}`)}::text) as case_id`;
   const caseId = caseRows[0].case_id;
 
   const slotRows = await sql`
@@ -188,7 +188,7 @@ const buildCase = async ({ sql, client, admin, token, userId, family, index }) =
 
 // family 별 삭제 유발 경로. 제품이 실제로 부르는 함수만 쓴다.
 // 청소 대기열에 넣는 것도 제품 함수가 한다. harness 가 직접 넣지 않는다.
-const triggerDeletion = async ({ sql, unit, family, progress = () => {} }) => {
+const triggerDeletion = async ({ sql, unit, family, runToken, progress = () => {} }) => {
   if (family.key === "claim_confirmed") {
     // 입력 단계를 한 칸씩 실제로 전진시킨다. 건너뛰면 제품 경로가 아니다.
     progress(`trigger:${unit.label}:validated`);
@@ -223,8 +223,8 @@ const triggerDeletion = async ({ sql, unit, family, progress = () => {} }) => {
     progress(`trigger:${unit.label}:request`);
     const rows = await sql`
       select private.request_case_deletion(${unit.ownerId}::uuid, ${unit.caseId}::uuid,
-        ${`delete-spike:${unit.label}`}::text, ${hex64(`req-${unit.label}`)}::text,
-        ${hex64(`hmac-${unit.label}`)}::text, 'spike-k1', 'spike-p1') as request_id`;
+        ${`delete-spike:${runToken}:${unit.label}`}::text, ${hex64(`req-${runToken}-${unit.label}`)}::text,
+        ${hex64(`hmac-${runToken}-${unit.label}`)}::text, 'spike-k1', 'spike-p1') as request_id`;
     return { deletionRequestId: rows[0].request_id };
   }
   // 만료 경계는 유발할 것이 없다. 만들 때 정한 수명이 지나가기를 기다린다.
@@ -276,7 +276,7 @@ const verifyUnit = async ({ sql, client, admin, token, unit }) => {
   };
 };
 
-export const runDeleteSpike = async ({ client, admin, sql, credentials, progress = () => {} }) => {
+export const runDeleteSpike = async ({ client, admin, sql, credentials, runToken, progress = () => {} }) => {
   const { token, userId } = await client.signIn(credentials);
   const profile = await client.upsertProfile({ token, ownerId: userId });
   if (!profile.ok && profile.status !== 409) throw new Error(`profile upsert failed with status ${profile.status}`);
@@ -285,7 +285,7 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
   const units = [];
   for (const family of FAMILIES) {
     for (let i = 0; i < family.cases; i += 1) {
-      units.push(await buildCase({ sql, client, admin, token, userId, family, index: i }));
+      units.push(await buildCase({ sql, client, admin, token, userId, family, index: i, runToken }));
     }
     progress(`built:${family.key}`);
   }
@@ -293,7 +293,7 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
   const deletionRequests = [];
   for (const family of FAMILIES) {
     for (const unit of units.filter((u) => u.family === family.key)) {
-      const extra = await triggerDeletion({ sql, unit, family, progress });
+      const extra = await triggerDeletion({ sql, unit, family, runToken, progress });
       if (extra.deletionRequestId) deletionRequests.push({ requestId: extra.deletionRequestId, caseId: unit.caseId });
     }
   }
@@ -378,9 +378,14 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
   }
   const teardown = await runCleanupWorker({ sql, admin });
   // 뒷정리 확인은 Storage API 로 한다. 위생 점검이지 부재 판정 경로가 아니다.
-  const leftover = await admin.listObjects({ prefix: `${userId}/`, limit: 100 });
+  // 목록은 한 단계씩만 돌려주므로 입력 단위 접두사로 세야 파일이 보인다.
+  let leftover = 0;
+  for (const unit of units) {
+    const prefix = `${unit.ownerId}/${unit.caseId}/${unit.caseInputId}/`;
+    leftover += (await admin.listObjects({ prefix })).length;
+  }
   totals.teardown_jobs_finished = teardown.finished;
-  totals.leftover_objects_after_teardown = leftover.length;
+  totals.leftover_objects_after_teardown = leftover;
   progress("teardown");
 
   return {
@@ -406,6 +411,8 @@ export const runDeleteSpike = async ({ client, admin, sql, credentials, progress
       // 청소 대상의 Storage 경로를 돌려주는 함수가 아직 없다. 그동안은 job 이 들고 있는
       // 소유자·Case·입력으로 접두사를 만들어 Storage API 로 찾는다.
       cleanup_path_source: "storage-api-prefix-listing",
+      // 실행마다 다른 표식을 멱등 key 에 넣는다. 같은 key 면 이전 실행의 요청을 되받는다.
+      idempotency_scope: "per-run",
     },
     sweep: sweep.map((row) => ({ kind: row.kind, affected: Number(row.affected) })),
     cases: observations,
