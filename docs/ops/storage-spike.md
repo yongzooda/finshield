@@ -30,7 +30,7 @@
 | `foreign_path_upload` | 거부 | 다른 소유자 경로에 올린다 |
 | `anonymous_upload` | 거부 | 로그인 없이 올린다 |
 | `owner_read` | 거부 | 본인 객체를 직접 읽는다. 열람은 서버가 발급하는 짧은 URL로만 한다 |
-| `owner_list` | 거부 | 본인 폴더를 나열한다 |
+| `owner_list` | 거부 | 본인 폴더를 나열한다. RLS 가 거르면 상태는 200 이고 배열이 비어 온다. 그래서 상태가 아니라 돌려준 항목 수로 판단한다 |
 | `oversize_upload` | 거부 | 상한을 넘는 본문을 올린다 |
 | `closed_slot_upload` | 거부 | 닫힌 slot 경로에 올린다 |
 | `resumable_token_after_close` | 거부 | slot이 열려 있을 때 재개 업로드 URL을 받아 두고 닫은 뒤 본문을 보낸다 |

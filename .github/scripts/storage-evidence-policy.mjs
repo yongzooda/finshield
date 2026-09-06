@@ -6,7 +6,7 @@
 // 교차 소유 200건과 즉시 접근 차단 P95 는 B-SUPABASE-01 의 행렬이 이미 쟀다.
 // 여기서는 실제 Storage HTTP 경로만 본다.
 // ============================================================
-import { BUCKET, FORMULA_VERSION, SCENARIOS, SIZE_LIMIT_BYTES } from "./storage-spike.mjs";
+import { BUCKET, FORMULA_VERSION, SCENARIOS, SIZE_LIMIT_BYTES, isAllowed } from "./storage-spike.mjs";
 
 export { FORMULA_VERSION };
 
@@ -36,14 +36,16 @@ export const validateStorageEvidenceResult = (result, fail) => {
   for (const scenario of SCENARIOS) {
     const row = rows.find((r) => r.scenario === scenario.key);
     if (!row) { fail(`시나리오 '${scenario.key}' 기록이 없습니다.`); continue; }
-    if (!exactKeys(row, ["scenario", "expect", "kind", "status", "allowed"])) {
+    if (!exactKeys(row, ["scenario", "expect", "kind", "rule", "status", "detail", "allowed"])) {
       fail(`시나리오 '${scenario.key}' 기록이 계약과 다릅니다.`);
       continue;
     }
-    if (row.expect !== scenario.expect || row.kind !== scenario.kind) fail(`시나리오 '${scenario.key}' 의 기대·종류가 계약과 다릅니다.`);
+    if (row.expect !== scenario.expect || row.kind !== scenario.kind || row.rule !== (scenario.rule ?? "status")) {
+      fail(`시나리오 '${scenario.key}' 의 기대·종류·판정 규칙이 계약과 다릅니다.`);
+    }
     if (!Number.isInteger(row.status) || row.status < 100 || row.status > 599) fail(`시나리오 '${scenario.key}' 의 상태 코드가 유효하지 않습니다.`);
-    const allowed = row.status >= 200 && row.status < 300;
-    if (row.allowed !== allowed) fail(`시나리오 '${scenario.key}' 의 허용 표시가 상태 코드와 다릅니다.`);
+    const allowed = isAllowed(scenario, row.status, row.detail);
+    if (row.allowed !== allowed) fail(`시나리오 '${scenario.key}' 의 허용 표시가 판정 규칙과 다릅니다.`);
     if (scenario.expect === "allow" && !allowed) fail(`허용해야 할 시나리오 '${scenario.key}' 가 거부됐습니다.`);
     if (scenario.expect === "deny" && allowed) fail(`거부해야 할 시나리오 '${scenario.key}' 가 통과했습니다.`);
   }
