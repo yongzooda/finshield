@@ -22,6 +22,8 @@
 
 결과 파일에 이 사실을 남기고 정책이 확인한다.
 
+상태 판정도 소유자 표를 직접 읽지 않는다. worker 역할은 `public.case_inputs`와 `private.input_objects`를 읽지 못한다. 그래서 `storage.objects`와 `private.case_embeddings`와 `private.file_cleanup_jobs`와 `public.deletion_requests`만 본다. 청소 작업의 성공은 `finish_file_cleanup_job`이 객체 부재를 다시 조회한 뒤에만 기록하므로, 그 성공 표시가 삭제 축 종결을 대신 말해 준다.
+
 ## 사전 고정 계약
 
 | 항목 | 고정값 |
@@ -87,4 +89,5 @@ Case마다 원본 객체 하나, OCR 임시 객체 하나, Case vector 하나를
 - 24시간 경계는 짧은 수명으로 줄여 만든다. 실제로 24시간을 기다리지 않는다. DB 제약이 `expires_at`을 생성 후 24시간 안으로 이미 묶고 있으므로 상한 자체는 Schema가 강제한다.
 - Vercel Hobby Cron의 하루 1회 실행은 여기서 재지 않는다. ADR 6.4가 이미 그것을 유일한 삭제 장치로 쓰지 않기로 했다.
 - Backup 복원 뒤의 재삭제는 Release Gate 항목이다.
+- 청소 대상의 Storage 경로를 돌려주는 함수가 아직 없다. worker 역할은 그 표를 읽지 못한다. 그동안 harness는 자기가 만든 표에서 경로를 찾는다. 지우는 행위와 부재 확인은 제품 경로 그대로이지만, 제품의 Cleanup Worker는 이 함수가 생기기 전에는 동작할 수 없다. 다음 Migration 묶음에서 채운다.
 - 결과 파일에는 Case 표식과 수치만 남는다. 객체 경로·식별자·서버 키는 남지 않는다.

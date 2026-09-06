@@ -184,12 +184,12 @@ const fakeSql = (strings, ...values) => {
     return Promise.resolve([{
       object_rows: objects.has(unit.objectPath) ? 1 : 0,
       ocr_object_rows: objects.has(unit.ocrPath) ? 1 : 0,
-      live_input_objects: unit.inputDeleted ? 0 : 1,
-      live_ocr_artifacts: unit.ocrDeleted ? 0 : 1,
       live_embeddings: unit.embeddingPresent ? 1 : 0,
-      raw_delete_status: unit.caseDeleted ? null : unit.rawDeleteStatus,
-      raw_deleted_at: unit.caseDeleted ? null : unit.rawDeletedAt,
-      live_cases: unit.caseDeleted ? 0 : 1,
+      input_job_done: unit.inputDeleted ? 1 : 0,
+      ocr_job_done: unit.ocrDeleted ? 1 : 0,
+      embedding_job_done: unit.embeddingPresent ? 0 : 1,
+      finished_at: unit.rawDeletedAt,
+      purged_requests: unit.caseDeleted ? 1 : 0,
     }]);
   }
   if (text.includes("from storage.objects")) {
@@ -247,6 +247,9 @@ rejects("특권 키로 부재 판정", (o) => { o.contract.absence_verified_by =
 rejects("서버 키 사용 범위 변경", (o) => { o.contract.uses_secret_key_for = "everything"; });
 rejects("Case 수 부족", (o) => { o.cases.pop(); });
 rejects("원본 객체 잔존", (o) => { deletedRow(o).object_rows = 1; o.totals.residual_objects = 1; });
+rejects("청소 미종결", (o) => { deletedRow(o).input_job_done = 0; o.totals.unfinished_input_jobs = 1; });
+rejects("상태 판정 표 변경", (o) => { o.contract.state_source = ["public.case_inputs"]; });
+rejects("경로 출처 변경", (o) => { o.contract.cleanup_path_source = "database"; });
 rejects("OCR 임시 객체 잔존", (o) => { deletedRow(o).ocr_object_rows = 1; o.totals.residual_ocr_objects = 1; });
 rejects("Case vector 잔존", (o) => { deletedRow(o).live_embeddings = 1; o.totals.residual_case_embeddings = 1; });
 rejects("기발급 URL 이 삭제 뒤 통함", (o) => {
