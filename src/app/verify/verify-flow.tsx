@@ -29,6 +29,8 @@ type Evidence = {
 type ClaimResult = {
   claim_ref: string; state: string; evidence_refs: string[];
   withheld_reason: string | null; rationale_masked: string;
+  /** 독립 재확인과 반대 근거 찾기의 결과. 확정을 낮춘 이유가 여기 남는다. */
+  cove_status?: string; red_team_status?: string; reason_code?: string;
 };
 type AgentLine = { agentCode: string; status: string; findings?: number; toolCalls?: number };
 
@@ -85,6 +87,7 @@ export function VerifyFlow() {
   const [claimResults, setClaimResults] = useState<ClaimResult[]>([]);
   const [evidence, setEvidence] = useState<Evidence[]>([]);
   const [partial, setPartial] = useState(false);
+  const [saved, setSaved] = useState(true);
   const [opened, setOpened] = useState<Set<string>>(new Set());
   const token = useRef<string | null>(null);
 
@@ -158,7 +161,14 @@ export function VerifyFlow() {
             setAgents((prev) => prev.map((a) => a.agentCode === event.agentCode
               ? { ...a, status: event.status, findings: event.findings, toolCalls: event.toolCalls } : a));
           } else if (event.type === "done") {
-            setClaimResults(event.claim_results);
+            // 독립 검증까지 반영한 최종 상태를 쓴다. 저장된 값과 화면이 같아야 한다.
+            const finals = (event.final_claims ?? []) as ClaimResult[];
+            const merged = (event.claim_results as ClaimResult[]).map((base) => {
+              const settled = finals.find((entry) => entry.claim_ref === base.claim_ref);
+              return settled ? { ...base, ...settled } : base;
+            });
+            setSaved(event.saved !== false);
+            setClaimResults(merged);
             setEvidence(event.evidence);
             setPartial(event.partial);
             setStep("result");
@@ -262,6 +272,14 @@ export function VerifyFlow() {
 
       {step === "result" && action ? (
         <div>
+          {!saved ? (
+            <FsCard className="mb-4">
+              <FsChip tone="caution">저장 실패</FsChip>
+              <p className="fs-body mt-2">
+                결과를 기록으로 남기지 못했습니다. 아래 내용은 이번 화면에서만 보실 수 있습니다.
+              </p>
+            </FsCard>
+          ) : null}
           {partial ? (
             <FsCard className="mb-4">
               <FsChip tone="caution">일부만 확인</FsChip>
@@ -295,6 +313,13 @@ export function VerifyFlow() {
                     <p className="fs-body mt-2">{result.rationale_masked}</p>
                     {result.withheld_reason ? <p className="fs-meta mt-1">{result.withheld_reason}</p> : null}
                     <p className="fs-meta mt-1">{view.help}</p>
+                    {result.cove_status && result.cove_status !== "NOT_REQUIRED" ? (
+                      <p className="fs-meta mt-1">
+                        독립 재확인 {result.cove_status === "CONFIRMED" ? "같은 결론"
+                          : result.cove_status === "REFUTED" ? "다른 결론" : "판단 못 함"}
+                        {result.red_team_status === "COUNTER_EVIDENCE" ? " · 반대 근거 있음" : ""}
+                      </p>
+                    ) : null}
                     {items.length > 0 ? (
                       <>
                         <button type="button" className="fs-btn fs-btn--quiet mt-3 !min-h-0 !px-3 !py-1.5 !text-[0.9rem]"

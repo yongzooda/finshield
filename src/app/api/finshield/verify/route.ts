@@ -14,6 +14,7 @@ import { resolveOwner, UnauthenticatedError } from "@/lib/finshield/auth";
 import { confirmClaims } from "@/lib/finshield/intake";
 import { loadManifest } from "@/lib/finshield/registry";
 import { runVerification, type RunProgress } from "@/lib/finshield/orchestrator";
+import { buildFinalClaims, finalizeRun } from "@/lib/finshield/finalize";
 import { createAgentModel, createJudgeModel } from "@/lib/finshield/agents/model-adapter";
 import type { ConfirmedClaim } from "@/lib/finshield/schemas";
 
@@ -89,8 +90,25 @@ export async function POST(request: Request): Promise<Response> {
         progress,
       });
 
+      // 결과를 남긴다. 저장에 실패하면 확정된 것처럼 보여 주지 않는다.
+      const withIds = claims.map((claim) => ({
+        claimId: claim.claim_id, claim_ref: claim.claim_ref, claim_type: claim.claim_type,
+        statement_masked: claim.statement_masked, materiality: claim.materiality,
+      }));
+      const finals = buildFinalClaims({ claims: withIds, run: result });
+      const saved = await finalizeRun({ sql: fsql(), runId, claims: withIds, run: result, hasProfile: true });
+
       push({
         type: "done",
+        saved: saved.ok,
+        save_reason: saved.ok ? null : saved.reason,
+        // 독립 검증이 상태를 낮췄으면 그 결과를 보여 준다. 화면과 저장이 같은 값을 쓴다.
+        final_claims: finals.map((entry) => ({
+          claim_ref: claims.find((claim) => claim.claim_id === entry.claim_id)?.claim_ref ?? "",
+          state: entry.status, reason_code: entry.reason_code,
+          cove_status: entry.cove_status, red_team_status: entry.red_team_status,
+          summary_masked: entry.decision_summary_masked,
+        })),
         run_id: runId,
         // RES-008: 온전히 끝나지 않았으면 결과 맨 위에 알린다.
         partial: result.partial,

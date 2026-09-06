@@ -69,6 +69,8 @@ export type AgentRunResult = {
   agentRunId: string;
   output: DomainAgentOutput | null;
   evidence: ToolEvidence[];
+  /** 인용 이름과 저장된 근거 행의 연결. 최종 확정이 이 식별자로 근거를 건다. */
+  evidenceIds: Map<string, string>;
   status: "SUCCEEDED" | "PARTIAL" | "FAILED";
   reasonCode: string | null;
   toolCalls: number;
@@ -167,9 +169,9 @@ export const runDomainAgent = async (args: {
   const agentRunId = created[0].id as string;
 
   // Tool 기록은 Agent 기록을 가리키므로 그다음에 남긴다.
-  await persistToolRuns(session, agentRunId, pendings);
+  const evidenceIds = await persistToolRuns(session, agentRunId, pendings);
 
-  return { agentRunId, output, evidence, status, reasonCode, toolCalls };
+  return { agentRunId, output, evidence, evidenceIds, status, reasonCode, toolCalls };
 };
 
 /**
