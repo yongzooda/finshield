@@ -111,7 +111,7 @@ const cases = Array.from({ length: GATE_CASES }, (_, i) => caseRow(`case-${Strin
 const ledger = Array.from({ length: GATE_CLAIMS }, (_, i) => ({
   claim_key: `case-${String(Math.floor(i / 5)).padStart(2, "0")}:c${(i % 5) + 1}`,
   case_id: `case-${String(Math.floor(i / 5)).padStart(2, "0")}`,
-  filtered: 40, keyword: 8, vector: 20, merged: 22, relevant_in_pool: 1, query_ms: 300,
+  filtered: 40, keyword: 8, vector: 20, merged: 22, relevant_in_pool: 1, provider_ms: 320, db_ms: 3,
 }));
 const observations = {
   contract: {
@@ -124,7 +124,7 @@ const observations = {
   cases,
   totals: {
     recall_at_5: 1, precision_at_5: 1, critical_recall_at_5: 1, slice_recall_at_5: { product: 1 },
-    query_p95_ms: 400, query_p50_ms: 300, filter_excluded_answers: 0, duplicate_fingerprint_inflation: 0, collapsed_fingerprints: 0,
+    query_p95_ms: 400, query_p50_ms: 300, db_p95_ms: 4, filter_excluded_answers: 0, duplicate_fingerprint_inflation: 0, collapsed_fingerprints: 0,
   },
   ledger,
 };
@@ -163,6 +163,8 @@ mustReject("가족별 Precision 미달", (r) => { r.observations.cases[7].precis
 mustReject("slice Recall 미달", (r) => { r.observations.cases.forEach((c) => { c.recall_at_5 = 0.8; }); r.observations.totals.slice_recall_at_5.product = 0.8; });
 mustReject("slice 값이 기록과 불일치", (r) => { r.observations.totals.slice_recall_at_5.product = 0.95; });
 mustReject("P95 초과", (r) => { r.observations.totals.query_p95_ms = 1600; });
+mustReject("Provider 지연이 없는 원장", (r) => { r.observations.ledger[0].provider_ms = null; });
+mustReject("DB 지연을 Provider 지연으로 표시", (r) => { delete r.observations.totals.db_p95_ms; });
 mustReject("Filter 가 정답 제외", (r) => { r.observations.totals.filter_excluded_answers = 1; r.observations.cases[0].filter_excluded_answers = 1; });
 mustReject("중복 출처가 근거를 늘림", (r) => { r.observations.totals.duplicate_fingerprint_inflation = 1; });
 mustReject("top 에 같은 unit 중복", (r) => { r.observations.cases[0].top_units = ["a", "a", "c", "d", "e"]; });

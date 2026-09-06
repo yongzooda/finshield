@@ -145,14 +145,18 @@ if (mode === "--run") {
     if (loaded !== documents.length) throw new Error("corpus 적재 수가 다르다");
 
     // 3. 질의 임베딩과 Provenance.
+    // 질의는 Claim 하나씩 보낸다. 제품이 Claim 마다 검색하고, 합격선의 Provider P95 도
+    // 요청 하나의 지연이기 때문이다. 묶어 보내면 Claim 별 지연을 잴 수 없다.
     const claimVectors = new Map();
-    for (let index = 0; index < gateClaims.length; index += BATCH) {
-      const slice = gateClaims.slice(index, index + BATCH);
-      const { vectors } = await requestEmbeddings({
+    const providerLatencies = [];
+    for (const claim of gateClaims) {
+      const response = await requestEmbeddings({
         fetchImpl: globalThis.fetch, apiKey: process.env.COHERE_API_KEY,
-        texts: slice.map((claim) => claim.text), inputType: "search_query", pacer,
+        texts: [claim.text], inputType: "search_query", pacer,
       });
-      slice.forEach((claim, offset) => claimVectors.set(claim.key, vectors[offset]));
+      claimVectors.set(claim.key, response.vectors[0]);
+      providerLatencies.push({ key: claim.key, ms: response.latencyMs });
+      if (claimVectors.size % 20 === 0) console.log(`${blockerId} claims embedded: ${claimVectors.size}/${gateClaims.length}`);
     }
     const provenance = new Map();
     for (const doc of documents) {
@@ -173,6 +177,7 @@ if (mode === "--run") {
       const rows = await searchClaim({ sql, manifestId, claim, embedding: claimVectors.get(claim.key) });
       const elapsed = Date.now() - started;
       latencies.push(elapsed);
+      const providerMs = providerLatencies.find((entry) => entry.key === claim.key)?.ms ?? null;
       const survived = await filteredUnits({ sql, releaseId, claim });
       const missing = claim.relevant_units.filter((unit) => !survived.includes(unit));
       filterExcluded += missing.length;
@@ -183,7 +188,8 @@ if (mode === "--run") {
         vector: rows.filter((r) => r.matched_by !== "KEYWORD").length,
         merged: rows.length,
         relevant_in_pool: claim.relevant_units.filter((unit) => rows.some((r) => provenance.get(r.source_snapshot_id)?.unit === unit)).length,
-        query_ms: elapsed,
+        provider_ms: providerMs,
+        db_ms: elapsed,
       });
       const bucket = claimResultsByCase.get(claim.case_id) ?? [];
       bucket.push({ claim, rows });
@@ -241,7 +247,10 @@ if (mode === "--run") {
         precision_at_5: macroAverage(cases.map((row) => row.precision_at_5)),
         critical_recall_at_5: macroAverage(cases.filter((row) => row.risk_critical).map((row) => row.critical_recall_at_5)),
         slice_recall_at_5: Object.fromEntries([...sliceTotals.entries()].sort().map(([slice, b]) => [slice, b.sum / b.count])),
-        query_p95_ms: percentile(latencies, 0.95), query_p50_ms: percentile(latencies, 0.5),
+        // 합격선이 말하는 질의 지연은 Provider 요청 하나의 지연이다. DB 검색 지연은 원장에만 남긴다.
+        query_p95_ms: percentile(providerLatencies.map((entry) => entry.ms), 0.95),
+        query_p50_ms: percentile(providerLatencies.map((entry) => entry.ms), 0.5),
+        db_p95_ms: percentile(latencies, 0.95),
         filter_excluded_answers: filterExcluded,
         duplicate_fingerprint_inflation: 0,
         collapsed_fingerprints: collapsedTotal,

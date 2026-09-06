@@ -45,7 +45,7 @@ ADR 15.1의 값을 그대로 쓴다. 낮추지 않는다.
 | Precision@5 (20 Case macro) | `≥ 0.80` |
 | 모든 slice Recall@5 | `≥ 0.90` |
 | 가족별 Precision@5 | `≥ 0.80` |
-| 질의 Provider P95 | `≤ 1,500ms` |
+| 질의 Provider P95 | `≤ 1,500ms`. Claim 하나를 임베딩하는 요청 하나의 지연이다. `B-EMBED-01` 과 같은 방식으로 재고, DB 검색 지연은 원장과 `db_p95_ms` 에 따로 남긴다 |
 | Filter가 정답을 제외한 건수 | `0` |
 | 중복 `source_fingerprint`가 독립 근거 수를 늘린 건수 | `0` |
 
@@ -53,7 +53,7 @@ Case마다 관련 unit이 5개이므로 `Recall@5`와 `Precision@5`는 같은 �
 
 ## 원장
 
-`AI-007`이 요구하는 단계별 후보 수를 Claim 100건마다 남긴다. Filter 통과 문서 수, Keyword 후보 수, Vector 후보 수, 합집합 크기, 후보 풀 안의 관련 unit 수, 질의 지연이다. Case마다 후보 합집합 크기와 중복 제거로 접힌 수를 남긴다.
+`AI-007`이 요구하는 단계별 후보 수를 Claim 100건마다 남긴다. Filter 통과 문서 수, Keyword 후보 수, Vector 후보 수, 합집합 크기, 후보 풀 안의 관련 unit 수, Provider 질의 지연과 DB 검색 지연이다. Case마다 후보 합집합 크기와 중복 제거로 접힌 수를 남긴다.
 
 ## 실행
 
