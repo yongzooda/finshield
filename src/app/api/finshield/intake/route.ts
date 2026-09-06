@@ -35,7 +35,7 @@ export async function POST(request: Request): Promise<Response> {
   if (text.length > MAX_CHARS) return jsonNoStore({ error: `${MAX_CHARS}자를 넘을 수 없습니다` }, 400);
 
   const result = await startIntake({
-    sql: fsql,
+    sql: fsql(),
     ownerId,
     rawText: text,
     // 제목도 마스킹된 값만 남긴다. 원문 앞부분을 그대로 쓰지 않는다.

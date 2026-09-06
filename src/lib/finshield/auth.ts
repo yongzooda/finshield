@@ -11,7 +11,7 @@
  */
 
 import "server-only";
-import { finshieldEnv } from "./env";
+import { authConfigured, finshieldEnv } from "./env";
 
 export class UnauthenticatedError extends Error {}
 
@@ -29,11 +29,13 @@ export const resolveOwner = async (
 ): Promise<string> => {
   const token = bearerToken(request);
   if (!token) throw new UnauthenticatedError("로그인이 필요합니다");
-  if (!finshieldEnv.SUPABASE_URL || !finshieldEnv.SUPABASE_ANON_KEY) {
+  if (!authConfigured()) throw new UnauthenticatedError("인증 설정이 없습니다");
+  const env = finshieldEnv();
+  if (!env.SUPABASE_URL || !env.SUPABASE_ANON_KEY) {
     throw new UnauthenticatedError("인증 설정이 없습니다");
   }
-  const response = await fetchImpl(`${finshieldEnv.SUPABASE_URL.replace(/\/+$/, "")}/auth/v1/user`, {
-    headers: { apikey: finshieldEnv.SUPABASE_ANON_KEY, Authorization: `Bearer ${token}` },
+  const response = await fetchImpl(`${env.SUPABASE_URL.replace(/\/+$/, "")}/auth/v1/user`, {
+    headers: { apikey: env.SUPABASE_ANON_KEY, Authorization: `Bearer ${token}` },
     signal: AbortSignal.timeout(10_000),
   });
   if (!response.ok) throw new UnauthenticatedError("로그인이 필요합니다");

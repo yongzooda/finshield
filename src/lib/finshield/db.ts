@@ -19,9 +19,10 @@ declare global {
   var __finshield_sql: ReturnType<typeof postgres> | undefined;
 }
 
-export const fsql =
-  globalThis.__finshield_sql ??
-  postgres(finshieldEnv.FINSHIELD_DATABASE_URL, {
+// 연결은 처음 쓸 때 연다. 모듈을 읽는 순간 열면 빌드가 DSN 을 요구하게 된다.
+export const fsql = (): ReturnType<typeof postgres> => {
+  if (globalThis.__finshield_sql) return globalThis.__finshield_sql;
+  const client = postgres(finshieldEnv().FINSHIELD_DATABASE_URL, {
     // Supavisor 트랜잭션 모드는 prepared statement 를 지원하지 않는다.
     prepare: false,
     max: 5,
@@ -29,7 +30,6 @@ export const fsql =
     connect_timeout: 10,
     onnotice: () => {},
   });
-
-if (process.env.NODE_ENV !== "production") {
-  globalThis.__finshield_sql = fsql;
-}
+  globalThis.__finshield_sql = client;
+  return client;
+};

@@ -9,27 +9,30 @@
  */
 
 import { jsonNoStore, readJson, str } from "@/lib/ops/http";
-import { finshieldEnv } from "@/lib/finshield/env";
+import { authConfigured, finshieldEnv } from "@/lib/finshield/env";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request): Promise<Response> {
-  if (!finshieldEnv.SUPABASE_URL || !finshieldEnv.SUPABASE_ANON_KEY) {
-    return jsonNoStore({ error: "인증 설정이 없습니다" }, 503);
-  }
+  
   const parsed = await readJson(request);
   if (!parsed.ok) return jsonNoStore({ error: "요청 형식이 올바르지 않습니다" }, 400);
   const email = str(parsed.value, "email");
   const password = str(parsed.value, "password");
   if (!email || !password) return jsonNoStore({ error: "이메일과 비밀번호를 입력해 주세요" }, 400);
 
+  const env = finshieldEnv();
+  if (!env.SUPABASE_URL || !env.SUPABASE_ANON_KEY) {
+    return jsonNoStore({ error: "인증 설정이 없습니다" }, 503);
+  }
+
   const response = await fetch(
-    `${finshieldEnv.SUPABASE_URL.replace(/\/+$/, "")}/auth/v1/token?grant_type=password`,
+    `${env.SUPABASE_URL.replace(/\/+$/, "")}/auth/v1/token?grant_type=password`,
     {
       method: "POST",
       headers: {
-        apikey: finshieldEnv.SUPABASE_ANON_KEY,
+        apikey: env.SUPABASE_ANON_KEY,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ email, password }),

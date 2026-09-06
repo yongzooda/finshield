@@ -62,20 +62,20 @@ export async function POST(request: Request): Promise<Response> {
 
   const work = (async () => {
     try {
-      await confirmClaims({ sql: fsql, ownerId, caseId, claimIds: claims.map((claim) => claim.claim_id) });
-      await fsql`select private.transition_financial_case(${ownerId}::uuid, ${caseId}::uuid,
+      await confirmClaims({ sql: fsql(), ownerId, caseId, claimIds: claims.map((claim) => claim.claim_id) });
+      await fsql()`select private.transition_financial_case(${ownerId}::uuid, ${caseId}::uuid,
         'INPUT_REVIEW'::public.case_lifecycle, 'USER', 'CLAIMS_CONFIRMED') as ok`;
-      const manifest = await loadManifest(fsql);
-      const run = await fsql`
+      const manifest = await loadManifest(fsql());
+      const run = await fsql()`
         select private.create_verification_run(${ownerId}::uuid, ${caseId}::uuid,
           ${manifest.manifestId}::uuid, ${`run-${caseId}-${Date.now()}`}::text,
           ${"0".repeat(64)}::text, 'INITIAL'::public.verification_run_kind, null) as id`;
       const runId = run[0].id as string;
-      await fsql`select id from private.start_verification_run(${runId}::uuid)`;
+      await fsql()`select id from private.start_verification_run(${runId}::uuid)`;
       push({ type: "run_started", run_id: runId });
 
       const result = await runVerification({
-        ctx: { sql: fsql, ownerId, caseId, runId, manifest },
+        ctx: { sql: fsql(), ownerId, caseId, runId, manifest },
         claims: claims.map((claim) => ({
           claim_ref: claim.claim_ref, claim_type: claim.claim_type,
           statement_masked: claim.statement_masked, materiality: claim.materiality,
