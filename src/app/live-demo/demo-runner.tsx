@@ -12,6 +12,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { readRunStream } from "../run-stream";
 import { FsCard, FsChip, CLAIM_STATE_VIEW } from "../fs-shell";
 import { AGENT_LABEL, DIRECTNESS_LABEL, FRESHNESS_LABEL } from "../fs-labels";
 
@@ -41,41 +42,35 @@ export function DemoRunner() {
 
   const start = async () => {
     setNotice(null); setAgents([]); setResult(null); setStep("running");
-    const response = await fetch("/api/finshield/demo", { method: "POST" });
-    if (!response.ok || !response.body) {
-      const body = await response.json().catch(() => null);
-      setNotice(body?.error ?? "실행하지 못했습니다");
-      setStep("idle");
-      return;
-    }
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop() ?? "";
-      for (const line of lines) {
-        if (line.trim().length === 0) continue;
-        const event = JSON.parse(line);
-        if (event.type === "started") {
-          setSeedText(event.masked_input as string);
-          setSeedClaims(event.claims as Claim[]);
-        } else if (event.type === "agent_started") {
-          setAgents((prev) => prev.some((a) => a.agentCode === event.agentCode)
-            ? prev : [...prev, { agentCode: event.agentCode, status: "RUNNING" }]);
-        } else if (event.type === "agent_finished") {
-          setAgents((prev) => prev.map((a) => a.agentCode === event.agentCode
-            ? { ...a, status: event.status, toolCalls: event.toolCalls } : a));
-        } else if (event.type === "done") {
-          setResult(event as Result);
-          setStep("done");
-        } else if (event.type === "error") {
-          setNotice(event.message); setStep("idle");
-        }
+    try {
+      const response = await fetch("/api/finshield/demo", { method: "POST" });
+      if (!response.ok || !response.body) {
+        const body = await response.json().catch(() => null);
+        setNotice(body?.error ?? "실행하지 못했습니다");
+        setStep("idle");
+        return;
       }
+      await readRunStream(response, (line) => {
+        const event = JSON.parse(line);
+          if (event.type === "started") {
+            setSeedText(event.masked_input as string);
+            setSeedClaims(event.claims as Claim[]);
+          } else if (event.type === "agent_started") {
+            setAgents((prev) => prev.some((a) => a.agentCode === event.agentCode)
+              ? prev : [...prev, { agentCode: event.agentCode, status: "RUNNING" }]);
+          } else if (event.type === "agent_finished") {
+            setAgents((prev) => prev.map((a) => a.agentCode === event.agentCode
+              ? { ...a, status: event.status, toolCalls: event.toolCalls } : a));
+          } else if (event.type === "done") {
+            setResult(event as Result);
+            setStep("done");
+          } else if (event.type === "error") {
+            setNotice(event.message); setStep("idle");
+          }
+      });
+    } catch {
+      setNotice("완료 결과를 받지 못했습니다. 연결 상태를 확인하고 다시 시도해 주세요.");
+      setStep("idle");
     }
   };
 
@@ -84,32 +79,17 @@ export function DemoRunner() {
   return (
     <>
       <header>
-        <p className="fs-eyebrow">공개 Demo</p>
-        <h1 className="fs-h1 mt-2">로그인 없이 한 번 돌려 보세요</h1>
-        <p className="fs-lead mt-3">
-          미리 준비한 합성 문자 한 건을 실제 파이프라인에 그대로 넣습니다. 네 개의 확인 단계가 공식 자료를
-          찾아보고, 무엇을 근거로 판단했는지 항목마다 열어 보실 수 있습니다.
-        </p>
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <FsChip tone="verified">실제 실행</FsChip>
-          <span className="fs-meta">사전 계산해 둔 결과가 아니라 지금 실행한 결과입니다.</span>
-        </div>
+        <p className="fs-eyebrow">서비스 체험</p>
+        <h1 className="fs-h1 mt-2">대출 권유, 어떻게 확인할까요?</h1>
+        <p className="fs-lead mt-3">준비된 가상 문자로 검증 과정과 공식 근거를 확인해 보세요. 회원가입은 필요하지 않습니다.</p>
       </header>
 
-      <FsCard className="mt-8">
-        <FsChip tone="caution">개인정보 입력 금지</FsChip>
-        <p className="fs-body mt-2">
-          이 화면에는 입력란이 없습니다. 방문자가 받은 문자나 계약서를 넣을 자리를 두지 않았습니다.
-          받지 않으면 잘못 다룰 일도 없습니다. 본인 건을 확인하시려면 회원으로 진행해 주세요.
-        </p>
-      </FsCard>
-
-      {notice ? <FsCard><p className="fs-body">{notice}</p></FsCard> : null}
+      {notice ? <FsCard><p role="alert" className="fs-body">{notice}</p></FsCard> : null}
 
       {seedText ? (
         <FsCard>
           <h2 className="fs-h2">넣은 내용</h2>
-          <p className="fs-meta mt-1">승인된 합성 Seed 입니다. 실제 사용자의 문장이 아닙니다.</p>
+          <p className="fs-meta mt-1">체험용 가상 권유문입니다.</p>
           <p className="fs-body mt-3 whitespace-pre-wrap rounded-[10px] bg-[var(--fs-canvas)] px-4 py-3">
             {seedText}
           </p>
@@ -130,12 +110,12 @@ export function DemoRunner() {
 
       {step === "idle" ? (
         <FsCard>
-          <h2 className="fs-h2">지금 실행하기</h2>
+          <h2 className="fs-h2">가상 대출 문자 확인</h2>
           <p className="fs-body mt-2">
-            실제로 외부 공식 자료를 찾아보므로 시간이 걸립니다. 공개 실행은 한 시간에 세 번까지입니다.
+            시작하면 공식 자료를 조회해 항목별 결과를 만듭니다. 체험은 한 시간에 세 번까지 가능합니다.
           </p>
           <button type="button" onClick={() => void start()} className="fs-btn fs-btn--primary mt-4">
-            Live Seed 실행
+            체험 시작하기
           </button>
         </FsCard>
       ) : null}
@@ -143,7 +123,7 @@ export function DemoRunner() {
       {step === "running" ? (
         <FsCard>
           <h2 className="fs-h2">확인하는 중</h2>
-          <p className="fs-body mt-2">각 단계가 무엇을 하고 있는지 그대로 보여 드립니다. 진행률은 만들지 않습니다.</p>
+          <p className="fs-body mt-2">공식 자료를 조회하고 근거를 검토하고 있습니다. 이 화면을 유지해 주세요.</p>
           <ul className="fs-steps mt-5" aria-live="polite">
             {agents.map((agent) => (
               <li key={agent.agentCode} data-state={agent.status === "RUNNING" ? "running" : "done"}>
@@ -163,13 +143,13 @@ export function DemoRunner() {
         <>
           <FsCard>
             <div className="flex flex-wrap items-center gap-3">
-              <FsChip tone="verified">실제 실행</FsChip>
-              <FsChip tone="neutral">Seed {result.seed_version}</FsChip>
+              <FsChip tone={result.is_precomputed ? "caution" : "verified"}>{result.is_precomputed ? "사전 계산 결과" : "실제 실행 결과"}</FsChip>
+              <span className="fs-meta">체험 자료 {result.seed_version}</span>
               {result.partial ? <FsChip tone="caution">일부만 확인</FsChip> : null}
             </div>
             <h2 className="fs-h2 mt-3">항목별 확인 결과</h2>
             <p className="fs-body mt-2">
-              이 결과는 방금 실행한 것입니다. 사전 계산해 둔 값을 보여 드리는 것이 아닙니다.
+              {result.is_precomputed ? "미리 계산된 결과입니다. 현재 실행 결과와 구분해 확인해 주세요." : "이번에 조회한 자료를 바탕으로 확인한 결과입니다."}
             </p>
             <ul className="mt-5 space-y-5">
               {result.claims.map((claim) => {
@@ -188,7 +168,7 @@ export function DemoRunner() {
                     {items.length > 0 ? (
                       <>
                         <button type="button" aria-expanded={isOpen}
-                          className="fs-btn fs-btn--quiet mt-3 !min-h-0 !px-3 !py-1.5 !text-[0.9rem]"
+                          className="fs-btn fs-btn--quiet mt-3 !px-3 !text-[0.9rem]"
                           onClick={() => setOpened((prev) => {
                             const next = new Set(prev);
                             if (next.has(claim.claim_ref)) next.delete(claim.claim_ref);

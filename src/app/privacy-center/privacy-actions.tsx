@@ -65,6 +65,8 @@ export function PrivacyActions() {
       setRows((prev) => (prev ?? []).map((row) =>
         row.id === caseId ? { ...row, deletion_status: "PENDING", deleted_at: new Date().toISOString() } : row));
       setNotice("지우기를 시작했습니다. 원본이 실제로 사라진 것을 확인한 뒤에 완료로 기록됩니다.");
+    } catch {
+      setNotice("연결이 끊어졌습니다. 처리 결과를 확인한 뒤 다시 시도해 주세요.");
     } finally { setBusy(false); setAsking(null); }
   };
 
@@ -73,8 +75,8 @@ export function PrivacyActions() {
     return (
       <>
         <FsCard>
-          <h2 className="fs-h2">지금 이 브라우저</h2>
-          <p className="fs-body mt-2">로그인하지 않은 상태입니다. 이 브라우저에 남아 있는 자료가 없습니다.</p>
+          <h2 className="fs-h2">로그인 관리</h2>
+          <p className="fs-body mt-2">현재 로그인하지 않았습니다. 기록 관리는 로그인 후 이용할 수 있습니다.</p>
         </FsCard>
         <FsLoginCard onToken={setToken} title="내 자료 관리" />
       </>
@@ -84,9 +86,9 @@ export function PrivacyActions() {
   return (
     <>
       <FsCard>
-        <h2 className="fs-h2">지금 이 브라우저</h2>
+        <h2 className="fs-h2">로그인 관리</h2>
         <p className="fs-body mt-2">
-          로그인 상태입니다. 접속 표는 이 탭에만 있고 탭을 닫으면 사라집니다. 지금 바로 끊으실 수도 있습니다.
+          현재 탭에서 로그인 상태를 유지하고 있습니다.
         </p>
         <button type="button" onClick={() => setToken(null)} className="fs-btn fs-btn--quiet mt-4">
           이 브라우저에서 로그아웃
@@ -94,7 +96,7 @@ export function PrivacyActions() {
       </FsCard>
 
       <FsCard>
-        <h2 className="fs-h2">남아 있는 검증 기록</h2>
+        <h2 className="fs-h2">검증 기록 관리</h2>
         {notice ? <p className="fs-body mt-2">{notice}</p> : null}
         {rows === null ? (
           <p className="fs-body mt-2">불러오는 중입니다.</p>
@@ -122,7 +124,7 @@ export function PrivacyActions() {
                   </p>
                   {deleting ? (
                     <p className="fs-meta mt-2">
-                      이미 지우기가 시작됐습니다. 원본과 중간 산출물과 검색용 벡터를 지운 뒤 완료로 기록됩니다.
+                      삭제를 요청한 기록입니다. 연결된 자료의 정리가 완료될 때까지 접근할 수 없습니다.
                     </p>
                   ) : asking === row.id ? (
                     <div className="mt-3 rounded-[10px] bg-[var(--fs-canvas)] px-4 py-3">
@@ -131,11 +133,11 @@ export function PrivacyActions() {
                       </p>
                       <div className="mt-3 flex flex-wrap gap-3">
                         <button type="button" disabled={busy} onClick={() => void requestDelete(row.id)}
-                          className="fs-btn fs-btn--primary !min-h-0 !px-3 !py-1.5 !text-[0.9rem]">
+                          className="fs-btn fs-btn--primary !px-3 !text-[0.9rem]">
                           지우기 시작
                         </button>
                         <button type="button" onClick={() => setAsking(null)}
-                          className="fs-btn fs-btn--quiet !min-h-0 !px-3 !py-1.5 !text-[0.9rem]">
+                          className="fs-btn fs-btn--quiet !px-3 !text-[0.9rem]">
                           그만두기
                         </button>
                       </div>
@@ -143,9 +145,9 @@ export function PrivacyActions() {
                   ) : (
                     <div className="mt-3 flex flex-wrap gap-3">
                       <Link href={`/cases/${row.id}`}
-                        className="fs-btn fs-btn--quiet !min-h-0 !px-3 !py-1.5 !text-[0.9rem]">기록 열기</Link>
+                        className="fs-btn fs-btn--quiet !px-3 !text-[0.9rem]">기록 열기</Link>
                       <button type="button" onClick={() => setAsking(row.id)}
-                        className="fs-btn fs-btn--quiet !min-h-0 !px-3 !py-1.5 !text-[0.9rem]">
+                        className="fs-btn fs-btn--quiet !px-3 !text-[0.9rem]">
                         이 기록 지우기
                       </button>
                     </div>

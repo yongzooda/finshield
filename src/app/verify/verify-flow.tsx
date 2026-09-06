@@ -15,6 +15,7 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
+import { readRunStream } from "../run-stream";
 import { CLAIM_STATE_VIEW, FsCard, FsChip } from "../fs-shell";
 import { FsLoginCard, useFsToken } from "../fs-session";
 import {
@@ -90,17 +91,7 @@ export function VerifyFlow() {
         const body = await response.json().catch(() => null);
         setNotice(body?.error ?? "접수하지 못했습니다"); setStep("input"); return;
       }
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      for (;;) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
-        for (const line of lines) {
-          if (line.trim().length === 0) continue;
+      await readRunStream(response, (line) => {
           const event = JSON.parse(line);
           if (event.type === "stage") {
             setStages((prev) => [...prev, { stage: event.stage, detail: stageDetail(event) }]);
@@ -121,8 +112,9 @@ export function VerifyFlow() {
           } else if (event.type === "error") {
             setNotice(event.message); setStep("input");
           }
-        }
-      }
+      });
+    } catch {
+      setNotice("연결이 끊어졌습니다. 다시 시도해 주세요."); setStep("input");
     } finally { setBusy(false); }
   };
 
@@ -138,6 +130,8 @@ export function VerifyFlow() {
       setNotice(response.ok
         ? "중단했습니다. 올리신 내용은 지우기 시작했습니다."
         : (body?.error ?? "중단하지 못했습니다"));
+    } catch {
+      setNotice("중단 요청을 확인하지 못했습니다. 내 기록에서 처리 상태를 확인해 주세요.");
     } finally {
       setBusy(false);
       setClaims([]); setPicked(new Set()); setStages([]);
@@ -158,18 +152,12 @@ export function VerifyFlow() {
           claims: claims.filter((claim) => picked.has(claim.claim_id)),
         }),
       });
-      if (!response.body) { setNotice("결과를 받지 못했습니다"); setStep("claims"); return; }
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      for (;;) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
-        for (const line of lines) {
-          if (line.trim().length === 0) continue;
+      if (!response.ok || !response.body) {
+        const error = await response.json().catch(() => null);
+        if (response.status === 401) setToken(null);
+        setNotice(error?.error ?? "검증을 시작하지 못했습니다."); setStep("claims"); return;
+      }
+      await readRunStream(response, (line) => {
           const event = JSON.parse(line);
           if (event.type === "agent_started") {
             setAgents((prev) => prev.some((a) => a.agentCode === event.agentCode)
@@ -192,8 +180,9 @@ export function VerifyFlow() {
           } else if (event.type === "error") {
             setNotice(event.message); setStep("claims");
           }
-        }
-      }
+      });
+    } catch {
+      setNotice("완료 결과를 받지 못했습니다. 내 기록에서 처리 상태를 확인해 주세요."); setStep("claims");
     } finally { setBusy(false); }
   };
 
@@ -204,23 +193,30 @@ export function VerifyFlow() {
   if (!token) return <FsLoginCard onToken={setToken} />;
 
   return (
-    <div className="mt-8">
+    <div className="mt-7">
+      <ol className="fs-flow-progress" aria-label="검증 순서">
+        {["내용 입력", "항목 확인", "결과 확인"].map((label, index) => {
+          const current = step === "input" || step === "extracting" ? 0 : step === "claims" ? 1 : 2;
+          return <li key={label} aria-current={current === index ? "step" : undefined}>{index + 1}. {label}</li>;
+        })}
+      </ol>
       {notice ? (
         <FsCard className="mb-4">
-          <p className="fs-body">{notice}</p>
+          <p className="fs-body" role="alert">{notice}</p>
         </FsCard>
       ) : null}
 
       {step === "input" ? (
         <FsCard>
           <h2 className="fs-h2">권유받은 내용</h2>
-          <p className="fs-body mt-2">문자나 통화로 들으신 내용을 그대로 붙여 넣어 주세요. 원문은 저장하지 않습니다.</p>
+          <p className="fs-body mt-2">햇살론15 관련 가상 권유문을 붙여 넣어 주세요.</p>
           <label className="sr-only" htmlFor="statement">권유받은 내용</label>
-          <textarea id="statement" rows={9} value={text} onChange={(e) => setText(e.target.value)}
+          <p className="fs-inline-notice mt-4">시험 서비스입니다. 실제 개인정보와 금융 서류는 입력하지 마세요.</p>
+          <textarea id="statement" maxLength={4000} rows={7} value={text} onChange={(e) => setText(e.target.value)}
             className="fs-field mt-4" placeholder="예) 정부지원 햇살론15 승인 대상입니다. 연 3% 고정으로 2천만원까지 가능하고 오늘까지만 접수합니다." />
           <button type="button" disabled={busy || text.trim().length === 0} onClick={submitText}
             className="fs-btn fs-btn--primary mt-4">
-            {busy ? "정리하는 중" : "확인할 항목 만들기"}
+            {busy ? "정리하는 중" : "다음 · 확인 항목 선택"}
           </button>
         </FsCard>
       ) : null}
@@ -229,7 +225,7 @@ export function VerifyFlow() {
         <FsCard>
           <h2 className="fs-h2">정리하는 중</h2>
           <p className="fs-body mt-2">
-            지금 무엇을 하고 있는지 그대로 보여 드립니다. 진행률은 만들지 않습니다.
+            문장에서 상품 조건과 확인할 내용을 정리하고 있습니다.
           </p>
           <ul className="fs-steps mt-5" aria-live="polite">
             {STAGE_ORDER.map((stage) => {
@@ -254,7 +250,7 @@ export function VerifyFlow() {
       {step === "claims" ? (
         <FsCard>
           <h2 className="fs-h2">무엇을 확인할까요</h2>
-          <p className="fs-body mt-2">고르신 항목만 확인합니다. 사실과 다른 항목은 빼 주세요.</p>
+          <p className="fs-body mt-2">받은 권유와 같은 내용인지 확인하고 검증할 항목을 선택해 주세요. 입력과 다르게 추출됐다면 다시 입력해 주세요.</p>
           <ul className="mt-5 space-y-2">
             {claims.map((claim) => (
               <li key={claim.claim_id}>
@@ -279,7 +275,7 @@ export function VerifyFlow() {
           </ul>
           <div className="mt-5 flex flex-wrap gap-3">
             <button type="button" disabled={busy || picked.size === 0} onClick={startRun}
-              className="fs-btn fs-btn--primary">확인 시작</button>
+              className="fs-btn fs-btn--primary">선택한 항목 검증하기</button>
             <button type="button" disabled={busy} onClick={() => void stopInput()}
               className="fs-btn fs-btn--quiet">중단하고 다시 입력</button>
           </div>
@@ -292,7 +288,7 @@ export function VerifyFlow() {
       {step === "running" ? (
         <FsCard>
           <h2 className="fs-h2">확인하는 중</h2>
-          <p className="fs-body mt-2">각 단계가 무엇을 하고 있는지 그대로 보여 드립니다.</p>
+          <p className="fs-body mt-2">공식 자료를 조회하고 판단 근거를 검토하고 있습니다. 이 화면을 유지해 주세요.</p>
           <ul className="fs-steps mt-5" aria-live="polite">
             {agents.map((agent) => (
               <li key={agent.agentCode} data-state={agent.status === "RUNNING" ? "running" : "done"}>
@@ -358,7 +354,7 @@ export function VerifyFlow() {
                     ) : null}
                     {items.length > 0 ? (
                       <>
-                        <button type="button" className="fs-btn fs-btn--quiet mt-3 !min-h-0 !px-3 !py-1.5 !text-[0.9rem]"
+                        <button type="button" className="fs-btn fs-btn--quiet mt-3 !px-3 !text-[0.9rem]"
                           aria-expanded={isOpen}
                           onClick={() => setOpened((prev) => {
                             const next = new Set(prev);
@@ -412,11 +408,11 @@ export function VerifyFlow() {
             <FsCard>
               <h2 className="fs-h2">이 결과는 기록으로 남았습니다</h2>
               <p className="fs-body mt-2">
-                판단과 근거는 덮어쓰지 않고 판을 쌓습니다. 나중에 다시 열어 무엇을 보고 그렇게 판단했는지 확인하실 수 있습니다.
+                내 기록에서 결과와 근거를 다시 보고, 재검증이나 가입 후 점검을 이어갈 수 있습니다.
               </p>
               <div className="mt-4 flex flex-wrap gap-3">
                 <Link href={`/cases/${caseId}`} className="fs-btn fs-btn--primary">기록 열기</Link>
-                <Link href={`/cases/${caseId}/passport`} className="fs-btn fs-btn--quiet">Evidence Passport</Link>
+                <Link href={`/cases/${caseId}/passport`} className="fs-btn fs-btn--quiet">검증 근거 기록</Link>
               </div>
             </FsCard>
           ) : null}

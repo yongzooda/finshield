@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FsCard, FsChip } from "../fs-shell";
 import { FsLoginCard, useFsToken } from "../fs-session";
+import { fetchNotifications } from "../cases/case-api";
 
 type Notification = {
   id: string; case_id: string; notification_type: string; title: string;
@@ -28,23 +29,21 @@ export function NotificationCenter() {
     if (!ready || !token) return;
     let alive = true;
     void (async () => {
-      const response = await fetch("/api/finshield/notifications", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const body = await response.json().catch(() => null);
+      const response = await fetchNotifications<{ notifications: Notification[] }>(token);
       if (!alive) return;
       if (!response.ok) {
         if (response.status === 401) setToken(null);
-        setNotice(body?.error ?? "알림을 읽지 못했습니다");
+        setNotice(response.error);
         return;
       }
-      setRows((body?.notifications ?? []) as Notification[]);
+      setRows(response.data.notifications);
     })();
     return () => { alive = false; };
   }, [ready, token, setToken]);
 
   const markRead = async (id: string) => {
     if (!token) return;
+    try {
     const response = await fetch("/api/finshield/notifications", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -53,6 +52,7 @@ export function NotificationCenter() {
     if (!response.ok) { setNotice("읽음으로 바꾸지 못했습니다"); return; }
     setRows((prev) => (prev ?? []).map((row) =>
       row.id === id ? { ...row, read_at: new Date().toISOString() } : row));
+    } catch { setNotice("연결이 끊어졌습니다. 다시 시도해 주세요."); }
   };
 
   if (!ready) return null;
@@ -62,16 +62,16 @@ export function NotificationCenter() {
     <>
       <header>
         <p className="fs-eyebrow">알림</p>
-        <h1 className="fs-h1 mt-2">다시 확인한 결과를 여기 남깁니다</h1>
+        <h1 className="fs-h1 mt-2">알림</h1>
         <p className="fs-lead mt-3">
-          달라진 것이 없을 때도 남깁니다. 조용한 것과 확인하지 않은 것은 다르기 때문입니다.
+          재검증 결과와 기록의 변화를 확인하세요.
         </p>
       </header>
 
       {notice ? <FsCard className="mt-8"><p className="fs-body">{notice}</p></FsCard> : null}
 
       {rows === null ? (
-        <FsCard className="mt-8"><p className="fs-body">불러오는 중입니다.</p></FsCard>
+        notice ? null : <FsCard className="mt-8"><p className="fs-body">불러오는 중입니다.</p></FsCard>
       ) : rows.length === 0 ? (
         <FsCard className="mt-8">
           <h2 className="fs-h2">아직 알림이 없습니다</h2>
@@ -92,12 +92,12 @@ export function NotificationCenter() {
                 <p className="fs-body mt-1">{row.body_masked}</p>
                 <p className="fs-meta mt-1">{new Date(row.created_at).toLocaleString("ko-KR")}</p>
                 <div className="mt-3 flex flex-wrap gap-3">
-                  <Link href={`/cases/${row.case_id}`} className="fs-btn fs-btn--quiet !min-h-0 !px-3 !py-1.5 !text-[0.9rem]">
+                  <Link href={`/cases/${row.case_id}`} className="fs-btn fs-btn--quiet !px-3 !text-[0.9rem]">
                     기록 열기
                   </Link>
                   {row.read_at ? null : (
                     <button type="button" onClick={() => void markRead(row.id)}
-                      className="fs-btn fs-btn--quiet !min-h-0 !px-3 !py-1.5 !text-[0.9rem]">
+                      className="fs-btn fs-btn--quiet !px-3 !text-[0.9rem]">
                       읽음으로 표시
                     </button>
                   )}

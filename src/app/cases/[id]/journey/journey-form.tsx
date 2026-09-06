@@ -56,6 +56,8 @@ export function JourneyForm({ caseId }: { caseId: string }) {
       }
       if (result?.blocked) { setNotice(result.ask as string); return; }
       setDone(body.kind === "DAMAGE" ? "DAMAGE" : "ENROLLED");
+    } catch {
+      setNotice("연결이 끊어졌습니다. 처리 결과를 확인한 뒤 다시 시도해 주세요.");
     } finally { setBusy(false); }
   };
 
@@ -72,7 +74,7 @@ export function JourneyForm({ caseId }: { caseId: string }) {
           </h1>
           <p className="fs-lead mt-3">
             {done === "ENROLLED"
-              ? "이제 같은 기록 안에서 가입 후 점검을 하실 수 있습니다. 다른 사이트로 옮겨 가지 않습니다."
+              ? "이어서 설명받은 내용과 계약 조건을 점검해 보세요."
               : "가입한 것으로 세지 않습니다. 지금은 자료를 모으고 공식 창구로 알리는 편이 좋습니다."}
           </p>
         </header>
@@ -92,9 +94,9 @@ export function JourneyForm({ caseId }: { caseId: string }) {
     <>
       <header>
         <p className="fs-eyebrow">가입·피해 사실 등록</p>
-        <h1 className="fs-h1 mt-2">그 뒤에 어떻게 되셨습니까</h1>
+        <h1 className="fs-h1 mt-2">거래 이후 상황을 알려주세요</h1>
         <p className="fs-lead mt-3">
-          검증 결과와 따로 적습니다. 여기에 무엇을 남기셔도 이미 나온 확인 결과는 바뀌지 않습니다.
+          가입 여부나 피해가 의심되는 상황을 남기고, 필요한 점검을 이어가세요.
         </p>
         <Link href={`/cases/${caseId}`} className="fs-btn fs-btn--quiet mt-4">기록으로 돌아가기</Link>
       </header>
@@ -105,12 +107,12 @@ export function JourneyForm({ caseId }: { caseId: string }) {
         <h2 className="fs-h2">가입했습니다</h2>
         <p className="fs-body mt-2">가입 사실을 남기면 같은 기록 안에서 가입 후 점검을 할 수 있습니다.</p>
 
-        <label className="fs-label mt-5" htmlFor="channel">어디에서 가입하셨습니까</label>
+        <label className="fs-label mt-5" htmlFor="channel">가입 경로</label>
         <div className="mt-2 flex flex-wrap gap-2" id="channel" role="group" aria-label="가입 경로">
           {CHANNELS.map((item) => (
             <button key={item.value} type="button" aria-pressed={channel === item.value}
               onClick={() => setChannel(item.value)}
-              className={`fs-btn !min-h-0 !px-3 !py-2 !text-[0.92rem] ${
+              className={`fs-btn !px-3 !text-[0.92rem] ${
                 channel === item.value ? "fs-btn--primary" : "fs-btn--quiet"}`}>
               {item.label}
             </button>
@@ -123,8 +125,7 @@ export function JourneyForm({ caseId }: { caseId: string }) {
 
         <label className="fs-label mt-5" htmlFor="terms">최종 계약 조건 (선택)</label>
         <p className="fs-meta">
-          계약서에 적힌 조건을 짧게 적어 주세요. 이름·연락처·계좌번호는 적지 마세요. 저장 전에 가리지만
-          애초에 받지 않는 편이 안전합니다.
+          시험용 가상 계약 조건을 입력해 주세요. 실제 개인정보와 계약 내용은 입력하지 마세요.
         </p>
         <textarea id="terms" rows={3} value={terms} onChange={(event) => setTerms(event.target.value)}
           className="fs-field mt-2" placeholder="예) 연 15.9% 고정, 한도 1,000만원, 36개월" />
@@ -146,7 +147,7 @@ export function JourneyForm({ caseId }: { caseId: string }) {
           {DAMAGE.map((item) => (
             <button key={item.value} type="button" aria-pressed={damage === item.value}
               onClick={() => setDamage(item.value)}
-              className={`fs-btn !min-h-0 !px-3 !py-2 !text-[0.92rem] ${
+              className={`fs-btn !px-3 !text-[0.92rem] ${
                 damage === item.value ? "fs-btn--primary" : "fs-btn--quiet"}`}>
               {item.label}
             </button>
