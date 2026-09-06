@@ -14,6 +14,7 @@ import { validateRetrievalEvidenceResult } from "./retrieval-evidence-policy.mjs
 import { validateRateEvidenceResult } from "./rate-evidence-policy.mjs";
 import { validateConsentEvidenceResult } from "./consent-evidence-policy.mjs";
 import { validateStorageEvidenceResult } from "./storage-evidence-policy.mjs";
+import { validateDeleteEvidenceResult } from "./delete-evidence-policy.mjs";
 
 export { adrDecisionDigest } from "./provider-adr-digest.mjs";
 export { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
@@ -138,6 +139,15 @@ const TRUSTED_STORAGE_WORKFLOW_BLOB = "9893957251fd0446eacc9b3dddbe69c902b1c0c8"
 const TRUSTED_STORAGE_HARNESS_BLOB = "3d3ec4d6d444d0b9e11bc7897fad7652c02cb070";
 const TRUSTED_STORAGE_POLICY_BLOB = "d699b24cadb17ce491e972767035cb3eef94048a";
 const TRUSTED_STORAGE_SPIKE_BLOB = "2151fe4a4d707626afad1069eb46dcf1655e7af7";
+const DELETE_WORKFLOW_PATH = ".github/workflows/delete-evidence.yml";
+const DELETE_HARNESS_PATH = ".github/scripts/run-delete-evidence.mjs";
+const DELETE_POLICY_PATH = ".github/scripts/delete-evidence-policy.mjs";
+const DELETE_SPIKE_PATH = ".github/scripts/delete-spike.mjs";
+const DELETE_OPS_PATH = "docs/ops/delete-spike.md";
+const TRUSTED_DELETE_WORKFLOW_BLOB = "e8520c36f49e797082b8b2a601539ac08eef5c13";
+const TRUSTED_DELETE_HARNESS_BLOB = "f40e54914dd290a23fe0e11bb0ba7b0deb799ff2";
+const TRUSTED_DELETE_POLICY_BLOB = "8da6bb461a43124f1427913f4083c5fcb0a0c152";
+const TRUSTED_DELETE_SPIKE_BLOB = "88a37303d8735ab0ea48525dac5988aabeb9db2f";
 const MAX_ARCHIVE_BYTES = 2 * 1024 * 1024;
 const MAX_RESULT_BYTES = 512 * 1024;
 const MAX_EVIDENCE_AGE_MS = 27 * 24 * 60 * 60 * 1000;
@@ -507,6 +517,39 @@ const storageEvidencePolicy = {
   validate: validateStorageEvidenceResult,
 };
 
+// B-DELETE-01 은 삭제에 서버 키를 쓴다. 부재 판정은 발급 URL 과 회원 JWT 로만 한다.
+// 그 사실은 결과 contract 에 남고 delete-evidence-policy 가 확인한다.
+const deleteEvidencePolicy = {
+  gate: "implementation",
+  workflowName: "Delete Evidence",
+  workflowPath: DELETE_WORKFLOW_PATH,
+  workflowBlobSha: TRUSTED_DELETE_WORKFLOW_BLOB,
+  harnessPath: DELETE_HARNESS_PATH,
+  harnessBlobSha: TRUSTED_DELETE_HARNESS_BLOB,
+  trustedExecutionFiles: Object.freeze([
+    Object.freeze({ path: DELETE_WORKFLOW_PATH, blobSha: TRUSTED_DELETE_WORKFLOW_BLOB }),
+    Object.freeze({ path: DELETE_HARNESS_PATH, blobSha: TRUSTED_DELETE_HARNESS_BLOB }),
+    Object.freeze({ path: DELETE_POLICY_PATH, blobSha: TRUSTED_DELETE_POLICY_BLOB }),
+    Object.freeze({ path: DELETE_SPIKE_PATH, blobSha: TRUSTED_DELETE_SPIKE_BLOB }),
+    Object.freeze({ path: STORAGE_SPIKE_PATH, blobSha: TRUSTED_STORAGE_SPIKE_BLOB }),
+    Object.freeze({ path: ADR_DIGEST_PATH, blobSha: TRUSTED_ADR_DIGEST_BLOB }),
+  ]),
+  jobName: "delete-evidence / B-DELETE-01",
+  scopePaths: Object.freeze([
+    ...supabaseExpectedInventory(resolve(fileURLToPath(new URL("../../", import.meta.url)))).migrations.map((file) => `supabase/migrations/${file}`),
+    "supabase/tests/00_supabase_stub.sql",
+    ADR_DIGEST_PATH,
+    STORAGE_SPIKE_PATH,
+    DELETE_SPIKE_PATH,
+    DELETE_POLICY_PATH,
+    DELETE_HARNESS_PATH,
+    ".github/scripts/test-delete-evidence.mjs",
+    DELETE_WORKFLOW_PATH,
+    DELETE_OPS_PATH,
+  ]),
+  validate: validateDeleteEvidenceResult,
+};
+
 export const evidencePolicies = Object.freeze({
   "B-MODEL-01": modelEvidencePolicy,
   "B-EMBED-01": embedEvidencePolicy,
@@ -518,6 +561,7 @@ export const evidencePolicies = Object.freeze({
   "B-RATE-01": rateEvidencePolicy,
   "B-CONSENT-01": consentEvidencePolicy,
   "B-STORAGE-01": storageEvidencePolicy,
+  "B-DELETE-01": deleteEvidencePolicy,
 });
 
 export const computeEvidenceScopeDigest = (root, policy, fail) => {
