@@ -10,15 +10,15 @@
  */
 
 import "server-only";
-import { DOMAIN_AGENTS } from "./manifest";
+import { COVE_AGENT, DOMAIN_AGENTS, RED_TEAM_AGENT } from "./manifest";
 import { loadManifest } from "./registry";
 import {
-  citationProblems, judgeOutput, type ConfirmedClaim, type DomainFinding, type JudgeOutput,
-  type ToolEvidence,
+  citationProblems, coveOutput, judgeOutput, redTeamOutput, type ConfirmedClaim,
+  type CoveOutput, type DomainFinding, type JudgeOutput, type RedTeamOutput, type ToolEvidence,
 } from "./schemas";
 import { createRunSession, type ToolCallContext } from "./tools/runtime";
 import { TOOL_IMPLS, assertToolsImplemented } from "./tools";
-import { runDomainAgent, type AgentModel } from "./agents/runner";
+import { runDomainAgent, runReviewAgent, type AgentModel } from "./agents/runner";
 import { assertPromptsComplete } from "./agents/prompts";
 
 export type JudgeModel = {
@@ -42,6 +42,10 @@ export type OrchestratedRun = {
   evidence: ToolEvidence[];
   judgeOutput: JudgeOutput | null;
   judgeReasonCode: string | null;
+  cove: CoveOutput | null;
+  redTeam: RedTeamOutput | null;
+  /** 인용 이름과 저장된 근거 행의 연결. 최종 확정이 이 식별자로 근거를 건다. */
+  evidenceIds: Map<string, string>;
   /** 하나라도 Agent 가 온전히 끝나지 않았으면 참이다. 화면 맨 위에 알려야 한다 (RES-008). */
   partial: boolean;
 };
@@ -63,6 +67,7 @@ export const runVerification = async (args: {
   const agentResults: OrchestratedRun["agentResults"] = [];
   const findings: (DomainFinding & { agent_code: string })[] = [];
   const evidence: ToolEvidence[] = [];
+  const evidenceIds = new Map<string, string>();
   const progress = args.progress ?? (() => {});
 
   for (const agent of DOMAIN_AGENTS) {
@@ -86,6 +91,7 @@ export const runVerification = async (args: {
       reasonCode: result.reasonCode, toolCalls: result.toolCalls,
     });
     evidence.push(...result.evidence);
+    for (const [ref, id] of result.evidenceIds) evidenceIds.set(ref, id);
     for (const finding of result.output?.findings ?? []) {
       findings.push({ ...finding, agent_code: agent.agentCode });
     }
@@ -93,6 +99,44 @@ export const runVerification = async (args: {
       type: "agent_finished", agentCode: agent.agentCode, status: result.status,
       findings: result.output?.findings.length ?? 0, toolCalls: result.toolCalls,
     });
+  }
+
+  // 규칙 3: 중요 Claim 은 독립 재확인과 반대 근거 찾기를 거친다. 두 Agent 는
+  // Domain Agent 의 판단도 그때 쓴 근거도 받지 않는다.
+  const materialClaims = args.claims.filter((claim) => claim.materiality === "MATERIAL");
+  let cove: CoveOutput | null = null;
+  let redTeam: RedTeamOutput | null = null;
+
+  if (materialClaims.length > 0 && COVE_AGENT && RED_TEAM_AGENT) {
+    for (const [agent, kind] of [[COVE_AGENT, "cove"], [RED_TEAM_AGENT, "red_team"]] as const) {
+      progress({ type: "agent_started", agentCode: agent.agentCode });
+      const parse = (raw: unknown) => {
+        const schema = kind === "cove" ? coveOutput : redTeamOutput;
+        const parsed = schema.safeParse(raw);
+        return parsed.success ? ({ ok: true, value: parsed.data } as const) : ({ ok: false } as const);
+      };
+      const result = await runReviewAgent<CoveOutput | RedTeamOutput>({
+        session, agentCode: agent.agentCode, claims: materialClaims,
+        journeyStage: args.journeyStage, model: args.agentModel, impls: TOOL_IMPLS,
+        parse,
+        refsOf: (value) => value.results.map((entry) => ({
+          refs: entry.evidence_refs,
+          // 확인·반증을 말하려면 근거가 있어야 한다. 못 찾았다는 상태는 근거가 없어도 된다.
+          confirmed: entry.status === "CONFIRMED" || entry.status === "REFUTED"
+            || entry.status === "COUNTER_EVIDENCE",
+        })),
+      });
+      if (kind === "cove") cove = (result.output as CoveOutput | null);
+      else redTeam = (result.output as RedTeamOutput | null);
+      agentResults.push({
+        agentCode: agent.agentCode, status: result.status,
+        reasonCode: result.reasonCode, toolCalls: result.toolCalls,
+      });
+      progress({
+        type: "agent_finished", agentCode: agent.agentCode, status: result.status,
+        findings: result.output?.results.length ?? 0, toolCalls: result.toolCalls,
+      });
+    }
   }
 
   progress({ type: "judge_started" });
@@ -123,6 +167,9 @@ export const runVerification = async (args: {
     evidence,
     judgeOutput: judged,
     judgeReasonCode,
+    cove,
+    redTeam,
+    evidenceIds,
     partial: judged === null || agentResults.some((result) => result.status !== "SUCCEEDED"),
   };
 };

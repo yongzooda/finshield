@@ -222,7 +222,9 @@ export const persistToolRuns = async (
   session: RunSession,
   agentRunId: string,
   pendings: PendingToolRun[],
-): Promise<void> => {
+): Promise<Map<string, string>> => {
+  // 인용 이름과 저장된 근거 행을 잇는다. 최종 확정이 행 식별자로 근거를 건다.
+  const ids = new Map<string, string>();
   const { sql, ownerId, caseId, runId } = session;
   // 시도 번호는 이 Agent 실행 안에서 이어진다. 이미 남은 행이 있으면 그 뒤부터 센다.
   const existing = await sql`
@@ -252,10 +254,10 @@ export const persistToolRuns = async (
       returning id`;
     const toolRunId = created[0].id as string;
 
-    for (const { item } of pending.items) {
+    for (const { ref, item } of pending.items) {
       const snapshotId = await recordSnapshot(sql, item, pending.toolCode, runId);
       const citable = item.isCitable && item.isComplete && !item.referenceOnly;
-      await sql`
+      const inserted = await sql`
         insert into public.evidences
           (owner_id, case_id, verification_run_id, kb_snapshot_id, produced_by_tool_run_id, source_locator,
            excerpt_masked, directness, citable, reference_only, incomplete, freshness_at_use, target_match,
@@ -264,7 +266,10 @@ export const persistToolRuns = async (
                 ${sql.json(JSON.parse(JSON.stringify({ schema_version: "1", ...item.locator })))}, ${item.excerptMasked},
                 ${item.directness}::public.evidence_directness, ${citable}, ${item.referenceOnly},
                 ${!item.isComplete}, ${item.freshness}::public.freshness_status, true,
-                ${item.fingerprint}, ${item.selectionReasonCode}, ${item.contentHash})`;
+                ${item.fingerprint}, ${item.selectionReasonCode}, ${item.contentHash})
+        returning id`;
+      ids.set(ref, inserted[0].id as string);
     }
   }
+  return ids;
 };
