@@ -200,3 +200,13 @@ export const ACTION_LABEL: Record<string, string> = {
   ASK_OFFICIAL_CHANNEL: "공식 상담 창구로 확인하기",
   REPORT_IMPERSONATION: "공식 신고 창구 확인하기",
 };
+
+/** Claim 상태를 낱말로만 옮긴다. 칩이 필요 없는 자리에서 쓴다. */
+export const CLAIM_STATE_LABEL: Record<string, string> = {
+  VERIFIED: "확인됨",
+  CONTRADICTED: "사실과 다름",
+  CONFLICT: "자료가 엇갈림",
+  UNKNOWN: "확인 못 함",
+  NEED_MORE_INFORMATION: "정보 부족",
+  WITHHELD: "판단 보류",
+};

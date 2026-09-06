@@ -94,6 +94,9 @@ export function CaseDetail({ caseId }: { caseId: string }) {
           {passport ? (
             <Link href={`/cases/${caseId}/passport`} className="fs-btn fs-btn--primary">Evidence Passport</Link>
           ) : null}
+          {passport ? (
+            <Link href={`/cases/${caseId}/revalidate`} className="fs-btn fs-btn--quiet">다시 확인하기</Link>
+          ) : null}
         </div>
       </header>
 
