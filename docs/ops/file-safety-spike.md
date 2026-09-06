@@ -17,8 +17,9 @@
 | 한도 | 파일 10 MiB, PDF 10쪽, 이미지 한 장 2,500만 pixel, 문서 합계 1억 pixel, 해제 32 MiB, 간접 객체 50,000개, 중첩 128, `%%EOF` 뒤 1,024바이트 |
 | 허용 형식 | `application/pdf`, `image/png`, `image/jpeg`. 확장자·선언 MIME·Magic Byte가 모두 맞아야 한다 |
 | Parser | `pdfjs-dist` 6.3.289. 저장소 루트가 아니라 `.github/fixtures/file-safety-parser/`의 lockfile로 고정한다. 루트 `package-lock.json`은 `B-MODEL-01` 증거 scope라 건드리지 않는다 |
-| 격리 | Fixture마다 새 프로세스. Linux `unshare --map-root-user --net`로 network namespace를 끊고, Node 권한 모델로 읽기 경로만 열고, 환경변수를 `PATH` 하나로 줄이고, heap 상한 512 MB, 기본 wall 30초 |
+| 격리 | Fixture마다 새 프로세스. Linux에서 network namespace를 끊고, Node 권한 모델로 읽기 경로만 열고, 환경변수를 `env -i`로 `PATH` 하나로 줄이고, heap 상한 512 MB, 기본 wall 30초 |
 | guard | `file-safety-guard.mjs`가 `net`·`tls`·`http`·`https`·`dns`·`fetch`·`WebSocket`을 막고 시도 횟수를 센다. namespace가 1차 방어이고 guard는 관측기다 |
+| namespace mode | `userns`는 권한 없는 user namespace다. Ubuntu 24.04는 AppArmor가 그것을 막으므로(run `34024928680`의 `write failed /proc/self/uid_map`) `sudo`로 network namespace만 만들고 `setpriv`로 곧바로 원래 사용자로 내려간다. 어느 쪽이든 worker는 권한 없는 사용자로 돌고 network가 없다. 쓴 mode를 결과에 남긴다 |
 | 음성 대조 | 같은 worker에 canary를 일부러 넣은 실행을 한 번 더 한다. 탐지되지 않으면 결과를 만들지 않는다 |
 
 ## 합격선
@@ -63,6 +64,7 @@ node .github/scripts/test-file-safety-evidence.mjs
 ## 알려진 한계
 
 - 이 harness는 Parser 이전 검사와 실행 격리를 measure한다. 실제 악성 문서 corpus나 상용 Malware Scanner는 쓰지 않는다. `SEC-FILE-007`은 P1이다.
-- `unshare`가 없는 실행 환경에서는 증거를 만들 수 없다. 우회 경로를 두지 않는다.
+- 두 mode 모두 쓸 수 없는 실행 환경에서는 증거를 만들 수 없다. 우회 경로를 두지 않는다.
+- `sudo` mode는 namespace를 만들 때만 권한을 쓰고 worker 자체는 원래 사용자로 돈다. 부모 harness가 sudo를 쓸 수 있는 실행 환경이라는 사실은 결과에 남는다.
 - 이미지 pixel 한도는 헤더에 적힌 크기로 판단한다. 실제 decode는 하지 않으므로 decode 비용 자체는 이 blocker의 관측이 아니다.
 - Fixture는 구조만 유효한 최소 문서다. 실제 스캔 문서의 다양성을 대신하지 않는다.

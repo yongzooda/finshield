@@ -16,7 +16,7 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { CATEGORY_RULES, FIXTURE_GENERATOR_VERSION, buildFixtures } from "./file-safety-fixtures.mjs";
 import { LIMITS } from "./file-safety-inspector.mjs";
-import { FORMULA_VERSION, MAX_OLD_SPACE_MB, PARSER_INTEGRITY, PARSER_PACKAGE, PARSER_VERSION, WORKER_ENV_ALLOWLIST } from "./file-safety-policy.mjs";
+import { FORMULA_VERSION, MAX_OLD_SPACE_MB, NAMESPACE_MODES, PARSER_INTEGRITY, PARSER_PACKAGE, PARSER_VERSION, WORKER_ENV_ALLOWLIST } from "./file-safety-policy.mjs";
 
 const DEFAULT_WALL_MS = 30_000;
 const CANARY = "finshield-file-safety-canary";
@@ -24,11 +24,21 @@ const CANARY = "finshield-file-safety-canary";
 const scriptsDir = resolve(new URL(".", import.meta.url).pathname);
 
 // network namespace 를 실제로 끊을 수 있는지 먼저 확인한다. 끊지 못하면 증거를 만들지 않는다.
+//
+// mode userns: 권한 없는 user namespace 로 끊는다.
+// mode sudo  : Ubuntu 24.04 는 AppArmor 가 권한 없는 user namespace 를 막는다
+//              (run 34024928680 의 `write failed /proc/self/uid_map`). 그 환경에서는 sudo 로
+//              network namespace 만 만들고 setpriv 로 곧바로 원래 사용자로 내려간다.
+//              worker 는 어느 쪽이든 권한 없는 사용자로 돌고 network 가 없다.
+export { NAMESPACE_MODES };
+
 export const probeNetworkNamespace = (spawn = spawnSync, platform = process.platform) => {
-  if (platform !== "linux") return { available: false, reason: `platform-${platform}` };
-  const r = spawn("unshare", ["--map-root-user", "--net", "--", "true"], { encoding: "utf8", timeout: 10_000 });
-  if (r.error || r.status !== 0) return { available: false, reason: `unshare-${r.error?.code ?? r.status}` };
-  return { available: true, reason: null };
+  if (platform !== "linux") return { available: false, mode: null, reason: `platform-${platform}` };
+  const userns = spawn("unshare", ["--map-root-user", "--net", "--", "true"], { encoding: "utf8", timeout: 10_000 });
+  if (!userns.error && userns.status === 0) return { available: true, mode: "userns", reason: null };
+  const sudo = spawn("sudo", ["-n", "unshare", "--net", "--", "true"], { encoding: "utf8", timeout: 10_000 });
+  if (!sudo.error && sudo.status === 0) return { available: true, mode: "sudo", reason: null };
+  return { available: false, mode: null, reason: `unshare-${userns.error?.code ?? userns.status}/sudo-${sudo.error?.code ?? sudo.status}` };
 };
 
 const workerArgs = ({ fixturePath, fixture, parserRoot, fixtureDir }) => {
@@ -51,12 +61,21 @@ const workerArgs = ({ fixturePath, fixture, parserRoot, fixtureDir }) => {
   return args;
 };
 
-const runOne = ({ fixture, fixturePath, parserRoot, fixtureDir, useNamespace, leakCanary, spawn }) => {
+// worker 의 환경변수는 sudo 의 처리에 기대지 않고 `env -i` 로 직접 만든다.
+// 그래야 어느 mode 에서든 worker 가 보는 환경이 똑같이 PATH 하나로 고정된다.
+const envPrefix = (leakCanary) => {
+  const parts = ["env", "-i", `PATH=${process.env.PATH ?? "/usr/bin:/bin"}`];
+  if (leakCanary) parts.push(`FINSHIELD_TEST_SECRET_KEY=${CANARY}`); // 음성 대조: 탐지기가 실제로 잡는지 본다
+  return parts;
+};
+
+const runOne = ({ fixture, fixturePath, parserRoot, fixtureDir, mode, leakCanary, spawn, ids }) => {
   const args = workerArgs({ fixturePath, fixture, parserRoot, fixtureDir });
-  const command = useNamespace ? "unshare" : process.execPath;
-  const commandArgs = useNamespace ? ["--map-root-user", "--net", "--", process.execPath, ...args] : args;
+  const tail = [...envPrefix(leakCanary), process.execPath, ...args];
+  const [command, commandArgs] = mode === "sudo"
+    ? ["sudo", ["-n", "unshare", "--net", "--", "setpriv", `--reuid=${ids.uid}`, `--regid=${ids.gid}`, "--clear-groups", ...tail]]
+    : ["unshare", ["--map-root-user", "--net", "--", ...tail]];
   const env = { PATH: process.env.PATH ?? "/usr/bin:/bin" };
-  if (leakCanary) env.FINSHIELD_TEST_SECRET_KEY = CANARY; // 음성 대조: 탐지기가 실제로 잡는지 본다
   const started = Date.now();
   const r = spawn(command, commandArgs, { encoding: "utf8", timeout: fixture.wall_ms ?? DEFAULT_WALL_MS, maxBuffer: 8 * 1024 * 1024, env });
   const ms = Date.now() - started;
@@ -70,6 +89,7 @@ export const runFileSafetySpike = ({ parserRoot, spawn = spawnSync, platform = p
   if (!namespace.available) throw new Error(`File safety evidence requires a network namespace: ${namespace.reason}`);
   const fixtures = buildFixtures();
   const fixtureDir = mkdtempSync(resolve(tmpdir(), "finshield-file-safety-"));
+  const ids = { uid: typeof process.getuid === "function" ? process.getuid() : 0, gid: typeof process.getgid === "function" ? process.getgid() : 0 };
   try {
     const runs = [];
     const faults = [];
@@ -89,7 +109,7 @@ export const runFileSafetySpike = ({ parserRoot, spawn = spawnSync, platform = p
       byCategory[fixture.category] = (byCategory[fixture.category] ?? 0) + 1;
       const fixturePath = resolve(fixtureDir, fixture.name);
       writeFileSync(fixturePath, fixture.bytes, { mode: 0o400 });
-      const outcome = runOne({ fixture, fixturePath, parserRoot, fixtureDir, useNamespace: true, leakCanary: false, spawn });
+      const outcome = runOne({ fixture, fixturePath, parserRoot, fixtureDir, mode: namespace.mode, leakCanary: false, spawn, ids });
       maxMs = Math.max(maxMs, outcome.ms);
       progress(fixture.name, fixture.category, outcome.ms);
 
@@ -136,7 +156,7 @@ export const runFileSafetySpike = ({ parserRoot, spawn = spawnSync, platform = p
     const control = fixtures.find((f) => f.name === "benign-pdf-1page");
     const controlPath = resolve(fixtureDir, control.name);
     writeFileSync(controlPath, control.bytes, { mode: 0o400 });
-    const controlRun = runOne({ fixture: control, fixturePath: controlPath, parserRoot, fixtureDir, useNamespace: true, leakCanary: true, spawn });
+    const controlRun = runOne({ fixture: control, fixturePath: controlPath, parserRoot, fixtureDir, mode: namespace.mode, leakCanary: true, spawn, ids });
     rmSync(controlPath, { force: true });
     const controlIsolation = controlRun.parsed?.isolation;
     const negativeControl = {
@@ -152,7 +172,7 @@ export const runFileSafetySpike = ({ parserRoot, spawn = spawnSync, platform = p
         limits: { ...LIMITS },
         categories: Object.fromEntries(Object.entries(CATEGORY_RULES).map(([k, v]) => [k, { expected: v.expected, minimum: v.minimum }])),
         parser: { package: PARSER_PACKAGE, version: PARSER_VERSION, integrity: PARSER_INTEGRITY, lockfile_path: ".github/fixtures/file-safety-parser/package-lock.json" },
-        isolation: { permission_model: true, network_namespace: true, env_allowlist: [...WORKER_ENV_ALLOWLIST], max_old_space_mb: MAX_OLD_SPACE_MB, wall_ms_default: DEFAULT_WALL_MS },
+        isolation: { permission_model: true, network_namespace: true, network_namespace_mode: namespace.mode, env_allowlist: [...WORKER_ENV_ALLOWLIST], max_old_space_mb: MAX_OLD_SPACE_MB, wall_ms_default: DEFAULT_WALL_MS },
       },
       fixtures: { total: fixtures.length, by_category: byCategory, sha256 },
       runs,
