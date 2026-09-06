@@ -92,6 +92,15 @@ const fixturePaths = [
   ".github/scripts/test-rate-evidence.mjs",
   ".github/workflows/rate-evidence.yml",
   "docs/ops/rate-budget-spike.md",
+  ".github/scripts/consent-gate.mjs",
+  ".github/scripts/consent-privacy-spike.mjs",
+  ".github/scripts/consent-evidence-policy.mjs",
+  ".github/scripts/run-consent-evidence.mjs",
+  ".github/scripts/test-consent-evidence.mjs",
+  ".github/workflows/consent-evidence.yml",
+  "docs/ops/consent-isolation-spike.md",
+  "src/lib/agents/pii.ts",
+  "src/lib/agents/__tests__/pii-synthetic.ts",
   ...readdirSync(resolve(fileURLToPath(new URL("../../", import.meta.url)), "supabase/migrations"))
     .filter((file) => /^\d{4}_.*\.sql$/.test(file)).sort().map((file) => `supabase/migrations/${file}`),
   ...readdirSync(resolve(fileURLToPath(new URL("../../", import.meta.url)), "supabase/tests"))
@@ -636,6 +645,11 @@ for (const [name, path] of [
   ["trusted rate harness changes invalidate its policy pin", ".github/scripts/run-rate-evidence.mjs"],
   ["trusted rate policy changes invalidate its policy pin", ".github/scripts/rate-evidence-policy.mjs"],
   ["trusted rate spike changes invalidate its policy pin", ".github/scripts/rate-budget-spike.mjs"],
+  ["trusted consent workflow changes invalidate its policy pin", ".github/workflows/consent-evidence.yml"],
+  ["trusted consent harness changes invalidate its policy pin", ".github/scripts/run-consent-evidence.mjs"],
+  ["trusted consent policy changes invalidate its policy pin", ".github/scripts/consent-evidence-policy.mjs"],
+  ["trusted consent gate changes invalidate its policy pin", ".github/scripts/consent-gate.mjs"],
+  ["trusted PII module changes invalidate its policy pin", "src/lib/agents/pii.ts"],
   ["trusted package manifest changes invalidate its policy pin", "package.json"],
   ["trusted package lock changes invalidate its policy pin", "package-lock.json"],
 ]) {
