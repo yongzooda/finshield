@@ -4,7 +4,58 @@
 // 분류(category)별 기대 판정과 사유 가족은 CATEGORY_RULES 에 고정한다.
 // ============================================================
 import { createHash } from "node:crypto";
-import { deflateSync } from "node:zlib";
+
+// zlib 의 deflate 출력은 구현·버전마다 다르다. run 34025763646 을 채택하려다
+// Fixture 5건의 SHA-256 이 로컬과 실행 환경에서 갈리는 것을 확인했다.
+// 압축기 heuristic 을 쓰지 않고 규격이 값을 완전히 정하는 두 가지만 쓴다.
+//   storedZlib: 저장 블록만 쓴다. 압축은 되지 않지만 바이트가 완전히 결정된다.
+//   zerosZlib : 0 바이트 반복을 고정 Huffman 의 길이·거리 부호로 적는다. 압축비가 크다.
+const adler32 = (bytes) => {
+  let a = 1;
+  let b = 0;
+  for (let i = 0; i < bytes.length; i += 1) { a = (a + bytes[i]) % 65521; b = (b + a) % 65521; }
+  return ((b * 65536) + a) >>> 0;
+};
+const zlibWrap = (deflated, adler) => {
+  const tail = Buffer.alloc(4);
+  tail.writeUInt32BE(adler >>> 0);
+  return Buffer.concat([Buffer.from([0x78, 0x01]), deflated, tail]);
+};
+export const storedZlib = (input) => {
+  const parts = [];
+  const MAX = 65535;
+  for (let offset = 0; offset < input.length || offset === 0; offset += MAX) {
+    const part = input.subarray(offset, Math.min(offset + MAX, input.length));
+    const head = Buffer.alloc(5);
+    head[0] = offset + MAX >= input.length ? 1 : 0;
+    head.writeUInt16LE(part.length, 1);
+    head.writeUInt16LE(~part.length & 0xffff, 3);
+    parts.push(head, Buffer.from(part));
+    if (input.length === 0) break;
+  }
+  return zlibWrap(Buffer.concat(parts), adler32(input));
+};
+// 고정 Huffman 한 블록. 0 리터럴 하나를 적고 길이 258·거리 1 반복으로 늘린다.
+// 258 로 나눠떨어지지 않는 나머지는 리터럴로 채운다. 어떤 길이든 결정적으로 나온다.
+export const zerosZlib = (length) => {
+  if (!Number.isInteger(length) || length < 1) throw new Error("zerosZlib 길이는 1 이상 정수여야 한다");
+  const bits = [];
+  const pushBits = (value, count) => { for (let i = 0; i < count; i += 1) bits.push((value >> i) & 1); };
+  const pushCode = (value, count) => { for (let i = count - 1; i >= 0; i -= 1) bits.push((value >> i) & 1); };
+  const repeats = Math.floor((length - 1) / 258);
+  const literals = length - (repeats * 258);
+  pushBits(1, 1); // BFINAL
+  pushBits(1, 2); // BTYPE = 고정 Huffman
+  for (let i = 0; i < literals; i += 1) pushCode(0x30, 8); // literal 0x00
+  for (let i = 0; i < repeats; i += 1) {
+    pushCode(0xc5, 8); // length code 285 = 258
+    pushCode(0, 5);    // distance code 0 = 1
+  }
+  pushCode(0, 7); // end of block
+  const bytes = Buffer.alloc(Math.ceil(bits.length / 8));
+  bits.forEach((bit, index) => { if (bit) bytes[index >> 3] |= 1 << (index & 7); });
+  return zlibWrap(bytes, adler32(Buffer.alloc(length)));
+};
 import { LIMITS, crc32 } from "./file-safety-inspector.mjs";
 
 export const FIXTURE_GENERATOR_VERSION = "file-safety-fixtures-v1";
@@ -83,7 +134,7 @@ export const simplePdf = ({ pages = 1, text = BENIGN_TEXT, catalogExtra = "", pa
     const contentNumber = 5 + i * 2;
     objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 320 120] /Resources << /Font << /F1 3 0 R >> >> /Contents ${contentNumber} 0 R${pageExtra} >>`);
     const content = contentStream(`${text} p${i + 1}`);
-    objects.push(flate ? streamObject("", deflateSync(latin1(content)), { filter: "/FlateDecode" }) : streamObject("", content));
+    objects.push(flate ? streamObject("", storedZlib(latin1(content)), { filter: "/FlateDecode" }) : streamObject("", content));
   }
   for (const extra of extraObjects) objects.push(extra);
   return buildPdf({ objects, trailerExtra, header, omitEof, badStartxref, trailing, version });
@@ -104,15 +155,10 @@ export const buildPng = ({ width, height, ihdrOverride = null, corruptCrc = fals
   ihdr.writeUInt32BE(ihdrOverride?.width ?? width, 0);
   ihdr.writeUInt32BE(ihdrOverride?.height ?? height, 4);
   ihdr[8] = 8; ihdr[9] = 2; ihdr[10] = 0; ihdr[11] = 0; ihdr[12] = 0;
-  const rowBytes = 1 + width * 3;
-  const raw = Buffer.alloc(rowBytes * height);
-  for (let y = 0; y < height; y += 1) {
-    for (let x = 0; x < width; x += 1) {
-      const o = y * rowBytes + 1 + x * 3;
-      raw[o] = (x * 7 + y) & 0xff; raw[o + 1] = (y * 3) & 0xff; raw[o + 2] = 0x40;
-    }
-  }
-  const parts = [Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk("IHDR", ihdr, corruptCrc), chunk("IDAT", deflateSync(raw))];
+  // 모든 행의 필터 바이트와 화소를 0 으로 둔다. 검사 대상은 구조와 크기이지 그림이 아니다.
+  const rawLength = (1 + width * 3) * height;
+  const idat = zerosZlib(rawLength);
+  const parts = [Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk("IHDR", ihdr, corruptCrc), chunk("IDAT", idat)];
   if (!omitIend) parts.push(chunk("IEND", Buffer.alloc(0)));
   if (trailing) parts.push(trailing);
   let out = Buffer.concat(parts);
@@ -178,7 +224,7 @@ const fixture = (name, category, bytes, { filename = null, declaredMime = "appli
 export const buildFixtures = () => {
   const list = [];
   const benignPdf = simplePdf();
-  const zeros40 = Buffer.alloc(40 * 1024 * 1024);
+  const zeros40Length = 40 * 1024 * 1024;
 
   // ---------- benign ----------
   list.push(fixture("benign-pdf-1page", "benign", benignPdf));
@@ -187,7 +233,7 @@ export const buildFixtures = () => {
   list.push(fixture("benign-pdf-flate-content", "benign", simplePdf({ flate: true })));
   {
     const n = nextObjectNumber(1);
-    const image = streamObject("/Type /XObject /Subtype /Image /Width 64 /Height 64 /ColorSpace /DeviceRGB /BitsPerComponent 8", deflateSync(Buffer.alloc(64 * 64 * 3, 0x80)), { filter: "/FlateDecode" });
+    const image = streamObject("/Type /XObject /Subtype /Image /Width 64 /Height 64 /ColorSpace /DeviceRGB /BitsPerComponent 8", storedZlib(Buffer.alloc(64 * 64 * 3)), { filter: "/FlateDecode" });
     list.push(fixture("benign-pdf-small-image", "benign", simplePdf({ extraObjects: [image], pageExtra: ` /Resources << /Font << /F1 3 0 R >> /XObject << /Im1 ${n} 0 R >> >>` })));
   }
   list.push(fixture("benign-pdf-openaction-goto-array", "benign", simplePdf({ catalogExtra: " /OpenAction [4 0 R /Fit]" })));
@@ -266,7 +312,7 @@ export const buildFixtures = () => {
     const inner = `${n + 1} 0 ${jsAction}`;
     const headerText = `${n + 1} 0 `;
     const body = latin1(`${headerText}${jsAction}`);
-    const objStm = streamObject(`/Type /ObjStm /N 1 /First ${headerText.length}`, deflateSync(latin1(`${headerText}${jsAction}`)), { filter: "/FlateDecode" });
+    const objStm = streamObject(`/Type /ObjStm /N 1 /First ${headerText.length}`, storedZlib(latin1(`${headerText}${jsAction}`)), { filter: "/FlateDecode" });
     void inner; void body;
     list.push(fixture("active-javascript-in-object-stream", "active", simplePdf({ extraObjects: [objStm] })));
   }
@@ -279,7 +325,7 @@ export const buildFixtures = () => {
     list.push(fixture("active-movie-annotation", "active", simplePdf({ pageExtra: ` /Annots [${n} 0 R]`, extraObjects: ["<< /Type /Annot /Subtype /Movie /Rect [0 0 10 10] /Movie << /F (clip.avi) >> >>"] })));
   }
   {
-    const nested = deflateSync(deflateSync(latin1(`<< /S /JavaScript /JS (app.alert\\(2\\)) >>`)));
+    const nested = storedZlib(storedZlib(latin1(`<< /S /JavaScript /JS (app.alert\\(2\\)) >>`)));
     list.push(fixture("active-javascript-nested-flate", "active", simplePdf({ extraObjects: [streamObject("", nested, { filter: "[/FlateDecode /FlateDecode]" })] })));
   }
   list.push(fixture("active-openaction-mixed-actions", "active", simplePdf({ catalogExtra: " /OpenAction << /S /GoTo /D [4 0 R /Fit] /Next << /S /Launch /F (calc.exe) >> >>" })));
@@ -295,7 +341,7 @@ export const buildFixtures = () => {
   }
   {
     const n = nextObjectNumber(1);
-    list.push(fixture("embedded-executable-payload", "embedded", simplePdf({ catalogExtra: ` /Names << /EmbeddedFiles << /Names [(setup.exe) ${n} 0 R] >> >>`, extraObjects: [`<< /Type /Filespec /F (setup.exe) /EF << /F ${n + 1} 0 R >> >>`, streamObject("/Type /EmbeddedFile", deflateSync(peBytes()), { filter: "/FlateDecode" })] })));
+    list.push(fixture("embedded-executable-payload", "embedded", simplePdf({ catalogExtra: ` /Names << /EmbeddedFiles << /Names [(setup.exe) ${n} 0 R] >> >>`, extraObjects: [`<< /Type /Filespec /F (setup.exe) /EF << /F ${n + 1} 0 R >> >>`, streamObject("/Type /EmbeddedFile", storedZlib(peBytes()), { filter: "/FlateDecode" })] })));
   }
   list.push(fixture("embedded-filespec-only", "embedded", simplePdf({ extraObjects: ["<< /Type /Filespec /F (c.bin) /EF << /F 3 0 R >> >>"] })));
   list.push(fixture("embedded-raw-executable-stream", "embedded", simplePdf({ extraObjects: [streamObject("", peBytes())] })));
@@ -334,19 +380,19 @@ export const buildFixtures = () => {
   list.push(fixture("bomb-pdf-page-count-lie", "bomb", simplePdf({ pagesCountOverride: 100000 })));
   {
     const n = nextObjectNumber(1);
-    const image = streamObject("/Type /XObject /Subtype /Image /Width 20000 /Height 20000 /ColorSpace /DeviceRGB /BitsPerComponent 8", deflateSync(Buffer.alloc(64)), { filter: "/FlateDecode" });
+    const image = streamObject("/Type /XObject /Subtype /Image /Width 20000 /Height 20000 /ColorSpace /DeviceRGB /BitsPerComponent 8", storedZlib(Buffer.alloc(64)), { filter: "/FlateDecode" });
     list.push(fixture("bomb-pdf-image-20000x20000", "bomb", simplePdf({ extraObjects: [image], pageExtra: ` /Resources << /Font << /F1 3 0 R >> /XObject << /Im1 ${n} 0 R >> >>` })));
   }
   {
     const n = nextObjectNumber(1);
-    const images = Array.from({ length: 8 }, () => streamObject("/Type /XObject /Subtype /Image /Width 4500 /Height 4500 /ColorSpace /DeviceRGB /BitsPerComponent 8", deflateSync(Buffer.alloc(64)), { filter: "/FlateDecode" }));
+    const images = Array.from({ length: 8 }, () => streamObject("/Type /XObject /Subtype /Image /Width 4500 /Height 4500 /ColorSpace /DeviceRGB /BitsPerComponent 8", storedZlib(Buffer.alloc(64)), { filter: "/FlateDecode" }));
     const xobjects = images.map((_, i) => `/Im${i} ${n + i} 0 R`).join(" ");
     list.push(fixture("bomb-pdf-total-image-pixels", "bomb", simplePdf({ extraObjects: images, pageExtra: ` /Resources << /Font << /F1 3 0 R >> /XObject << ${xobjects} >> >>` })));
   }
-  list.push(fixture("bomb-pdf-flate-40mib", "bomb", simplePdf({ extraObjects: [streamObject("", deflateSync(zeros40), { filter: "/FlateDecode" })] })));
-  list.push(fixture("bomb-pdf-nested-flate", "bomb", simplePdf({ extraObjects: [streamObject("", deflateSync(deflateSync(zeros40)), { filter: "[/FlateDecode /FlateDecode]" })] })));
+  list.push(fixture("bomb-pdf-flate-40mib", "bomb", simplePdf({ extraObjects: [streamObject("", zerosZlib(zeros40Length), { filter: "/FlateDecode" })] })));
+  list.push(fixture("bomb-pdf-nested-flate", "bomb", simplePdf({ extraObjects: [streamObject("", storedZlib(zerosZlib(zeros40Length)), { filter: "[/FlateDecode /FlateDecode]" })] })));
   {
-    const oneMib = deflateSync(Buffer.alloc(1024 * 1024));
+    const oneMib = zerosZlib(1024 * 1024);
     list.push(fixture("bomb-pdf-many-streams-200mib", "bomb", simplePdf({ extraObjects: Array.from({ length: 200 }, () => streamObject("", oneMib, { filter: "/FlateDecode" })) })));
   }
   list.push(fixture("bomb-pdf-object-count", "bomb", simplePdf({ extraObjects: Array.from({ length: LIMITS.MAX_OBJECTS + 10 }, () => "<< >>") })));
