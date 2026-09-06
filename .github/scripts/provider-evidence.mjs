@@ -12,6 +12,7 @@ import { validateSourceEvidenceResult } from "./source-evidence-policy.mjs";
 import { validateFileSafetyEvidenceResult } from "./file-safety-policy.mjs";
 import { validateRetrievalEvidenceResult } from "./retrieval-evidence-policy.mjs";
 import { validateRateEvidenceResult } from "./rate-evidence-policy.mjs";
+import { validateConsentEvidenceResult } from "./consent-evidence-policy.mjs";
 
 export { adrDecisionDigest } from "./provider-adr-digest.mjs";
 export { validateEmbedEvidenceResult } from "./provider-embed-policy.mjs";
@@ -112,6 +113,21 @@ const TRUSTED_RATE_WORKFLOW_BLOB = "ffc408ce953baea16837d81134117719989f8c72";
 const TRUSTED_RATE_HARNESS_BLOB = "ba2e0d403f4cd337216c33dfa4dd97d783cb1d08";
 const TRUSTED_RATE_POLICY_BLOB = "0fc5c68023bccdeae4dac562ed19f992ce0d1405";
 const TRUSTED_RATE_SPIKE_BLOB = "17f0b31ad4db5bc52013e4e6201678a3408a9221";
+const CONSENT_WORKFLOW_PATH = ".github/workflows/consent-evidence.yml";
+const CONSENT_HARNESS_PATH = ".github/scripts/run-consent-evidence.mjs";
+const CONSENT_POLICY_PATH = ".github/scripts/consent-evidence-policy.mjs";
+const CONSENT_SPIKE_PATH = ".github/scripts/consent-privacy-spike.mjs";
+const CONSENT_GATE_PATH = ".github/scripts/consent-gate.mjs";
+const CONSENT_PII_PATH = "src/lib/agents/pii.ts";
+const CONSENT_FIXTURE_PATH = "src/lib/agents/__tests__/pii-synthetic.ts";
+const CONSENT_OPS_PATH = "docs/ops/consent-isolation-spike.md";
+const TRUSTED_CONSENT_WORKFLOW_BLOB = "d8f92e1e244949415a602d5da41c51bc48e078ef";
+const TRUSTED_CONSENT_HARNESS_BLOB = "e861f36dfd2c3fa679bed04f59fe93731b9b0fc1";
+const TRUSTED_CONSENT_POLICY_BLOB = "6d5198dc8963506c80844b5dfc354fa22635f329";
+const TRUSTED_CONSENT_SPIKE_BLOB = "ab4ec20e424b4ec50115c9797ba0a4ed0545d496";
+const TRUSTED_CONSENT_GATE_BLOB = "eae1b967dd6a4c31071ea09e9432e6ef042925c5";
+const TRUSTED_CONSENT_PII_BLOB = "411d6dce5cc0c66b4d18a2a51f4386f52ab07bb0";
+const TRUSTED_CONSENT_FIXTURE_BLOB = "4be85c448a9dcfb1311e6739d29f19628b87b939";
 const MAX_ARCHIVE_BYTES = 2 * 1024 * 1024;
 const MAX_RESULT_BYTES = 512 * 1024;
 const MAX_EVIDENCE_AGE_MS = 27 * 24 * 60 * 60 * 1000;
@@ -417,6 +433,41 @@ const rateEvidencePolicy = {
   validate: validateRateEvidenceResult,
 };
 
+const consentEvidencePolicy = {
+  gate: "implementation",
+  workflowName: "Consent Isolation Evidence",
+  workflowPath: CONSENT_WORKFLOW_PATH,
+  workflowBlobSha: TRUSTED_CONSENT_WORKFLOW_BLOB,
+  harnessPath: CONSENT_HARNESS_PATH,
+  harnessBlobSha: TRUSTED_CONSENT_HARNESS_BLOB,
+  trustedExecutionFiles: Object.freeze([
+    Object.freeze({ path: CONSENT_WORKFLOW_PATH, blobSha: TRUSTED_CONSENT_WORKFLOW_BLOB }),
+    Object.freeze({ path: CONSENT_HARNESS_PATH, blobSha: TRUSTED_CONSENT_HARNESS_BLOB }),
+    Object.freeze({ path: CONSENT_POLICY_PATH, blobSha: TRUSTED_CONSENT_POLICY_BLOB }),
+    Object.freeze({ path: CONSENT_SPIKE_PATH, blobSha: TRUSTED_CONSENT_SPIKE_BLOB }),
+    Object.freeze({ path: CONSENT_GATE_PATH, blobSha: TRUSTED_CONSENT_GATE_BLOB }),
+    Object.freeze({ path: CONSENT_PII_PATH, blobSha: TRUSTED_CONSENT_PII_BLOB }),
+    Object.freeze({ path: CONSENT_FIXTURE_PATH, blobSha: TRUSTED_CONSENT_FIXTURE_BLOB }),
+    Object.freeze({ path: ADR_DIGEST_PATH, blobSha: TRUSTED_ADR_DIGEST_BLOB }),
+  ]),
+  jobName: "consent-evidence / B-CONSENT-01",
+  scopePaths: Object.freeze([
+    ...supabaseExpectedInventory(resolve(fileURLToPath(new URL("../../", import.meta.url)))).migrations.map((file) => `supabase/migrations/${file}`),
+    "supabase/tests/00_supabase_stub.sql",
+    CONSENT_GATE_PATH,
+    ADR_DIGEST_PATH,
+    CONSENT_PII_PATH,
+    CONSENT_FIXTURE_PATH,
+    CONSENT_SPIKE_PATH,
+    CONSENT_POLICY_PATH,
+    CONSENT_HARNESS_PATH,
+    ".github/scripts/test-consent-evidence.mjs",
+    CONSENT_WORKFLOW_PATH,
+    CONSENT_OPS_PATH,
+  ]),
+  validate: validateConsentEvidenceResult,
+};
+
 export const evidencePolicies = Object.freeze({
   "B-MODEL-01": modelEvidencePolicy,
   "B-EMBED-01": embedEvidencePolicy,
@@ -426,6 +477,7 @@ export const evidencePolicies = Object.freeze({
   "B-FILE-SAFETY": fileSafetyEvidencePolicy,
   "B-RETRIEVAL-01": retrievalEvidencePolicy,
   "B-RATE-01": rateEvidencePolicy,
+  "B-CONSENT-01": consentEvidencePolicy,
 });
 
 export const computeEvidenceScopeDigest = (root, policy, fail) => {

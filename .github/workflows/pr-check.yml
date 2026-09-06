@@ -93,6 +93,9 @@ jobs:
       - name: Rate Budget Contract Test
         run: node .github/scripts/test-rate-evidence.mjs
 
+      - name: Consent Isolation Contract Test
+        run: node .github/scripts/test-consent-evidence.mjs
+
       - name: 한국어 기록 검사 회귀 테스트
         run: node .github/scripts/test-korean-records.mjs
 
