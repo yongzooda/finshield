@@ -32,20 +32,20 @@ const visitorKey = (request: Request): string => {
 
 export async function POST(request: Request): Promise<Response> {
   const sql = fsql();
-  if (!(await allowDemo(sql, visitorKey(request)))) {
-    return jsonNoStore({
-      error: "잠시 뒤에 다시 해 주세요. 공개 실행은 한 시간에 세 번까지입니다",
-    }, 429);
-  }
-
   let session;
   let seed;
   try {
+    if (!(await allowDemo(sql, visitorKey(request)))) {
+      return jsonNoStore({
+        error: "잠시 뒤에 다시 해 주세요. 공개 실행은 한 시간에 세 번까지입니다",
+      }, 429);
+    }
     session = await createSession(sql);
     seed = await readSeed(sql, session.seedVersionId);
   } catch (error) {
     if (error instanceof DemoUnavailableError) return jsonNoStore({ error: error.message }, 503);
-    throw error;
+    // 공개 경로다. 내부 사정을 그대로 흘리지 않되 빈 500 으로 끝내지도 않는다.
+    return jsonNoStore({ error: "지금은 공개 실행을 시작할 수 없습니다" }, 503);
   }
 
   const events: unknown[] = [];

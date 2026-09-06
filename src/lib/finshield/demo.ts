@@ -38,10 +38,15 @@ export class DemoUnavailableError extends Error {}
 
 const sha256 = (value: string): string => createHash("sha256").update(value).digest("hex");
 
-/** 이 방문자가 최근에 얼마나 돌렸는지 본다. 공개 경로라 상한이 필요하다. */
+/**
+ * 이 방문자가 최근에 얼마나 돌렸는지 본다. 공개 경로라 상한이 필요하다.
+ *
+ * 범위 값은 데이터베이스가 정한 다섯 가지 중에서 고른다. 주소를 해시로만 들고
+ * 있으므로 `IP_HMAC` 이다. 없는 낱말을 새로 만들면 제약이 막는다.
+ */
 export const allowDemo = async (sql: Sql, visitorKey: string): Promise<boolean> => {
   const rows = await sql`
-    select allowed from private.consume_rate_limit('DEMO', ${visitorKey}, 'DEMO_RUN', 3, 3600)`;
+    select allowed from private.consume_rate_limit('IP_HMAC', ${visitorKey}, 'DEMO_RUN', 3, 3600)`;
   return rows[0]?.allowed === true;
 };
 
