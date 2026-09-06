@@ -192,6 +192,25 @@
       "result_sha256": "61a084f3caddb028112fc56e0a998d72749b24077b39c1cbf86ede125640ba32",
       "adoption_pr_number": 160,
       "adopted_at": "2026-09-06T15:36:46Z"
+    },
+    "B-RUNTIME-01": {
+      "code_under_test_sha": "6e5641a7389d6490333876c2939044c16d7f62c0",
+      "workflow_head_sha": "6e5641a7389d6490333876c2939044c16d7f62c0",
+      "run_id": 34044111706,
+      "run_attempt": 1,
+      "workflow_id": 351582026,
+      "workflow_path": ".github/workflows/runtime-evidence.yml",
+      "workflow_blob_sha": "0c9568727900234787e76365589f9a4d3fcd8869",
+      "harness_blob_sha": "57c7772125cb23bf614644e26af36b5b19faed5f",
+      "scope_sha256": "4a83f5d92c8a3e5b98c18b9c40185a5460013026933cf9a4d115969563635e06",
+      "job_name": "runtime-evidence / B-RUNTIME-01",
+      "artifact_id": 9992567920,
+      "artifact_name": "provider-evidence-B-RUNTIME-01-6e5641a7389d6490333876c2939044c16d7f62c0",
+      "artifact_digest": "sha256:a2d2275345acf2294a3cba676721d8bc47f14c1cce418097b28c815166e3d91c",
+      "result_path": "evidence/results/B-RUNTIME-01/34044111706.json",
+      "result_sha256": "8f5f8b9e77790724462a840ef028cb45a4125e30e528c6a7712d3aaf3ff525e2",
+      "adoption_pr_number": 163,
+      "adopted_at": "2026-09-06T16:02:43Z"
     }
   }
 }
