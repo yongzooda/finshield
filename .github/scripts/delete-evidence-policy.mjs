@@ -75,7 +75,7 @@ export const validateDeleteEvidenceResult = (result, fail) => {
     ["storage.objects", "private.case_embeddings", "private.file_cleanup_jobs", "public.deletion_requests"])) {
     fail("상태 판정에 쓴 표 선언이 계약과 다릅니다.");
   }
-  if (c.cleanup_path_source !== "harness-map") fail("청소 경로 출처 선언이 계약과 다릅니다.");
+  if (c.cleanup_path_source !== "job-prefix-listing") fail("청소 경로 출처 선언이 계약과 다릅니다.");
 
   const rows = Array.isArray(o.cases) ? o.cases : [];
   if (rows.length !== TOTAL_CASES) fail("Case 기록 수가 계약과 다릅니다.");
