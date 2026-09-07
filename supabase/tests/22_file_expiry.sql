@@ -24,4 +24,5 @@ begin
  if (state->>'pending')::boolean then raise exception '실제 부재 이후 미종결';end if;
  raise notice '  통과: 만료 전 보호·만료 접근 차단·한 입력만 중복 없이 정리·부재 확인';
 end $$;
+do $$ begin raise notice '22_file_expiry 시험을 모두 통과했습니다'; end $$;
 rollback;

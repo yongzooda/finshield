@@ -36,4 +36,5 @@ begin
  perform private.release_usage_budget(reservation,'PROVIDER_NOT_BILLED');
  raise notice '  통과: 마스킹 전·타인 입력 차단·예약 합산 상한·4범위 정산·중복 정산 거부·Demo 분리';
 end $$;
+do $$ begin raise notice '23_model_budget_context 시험을 모두 통과했습니다'; end $$;
 rollback;

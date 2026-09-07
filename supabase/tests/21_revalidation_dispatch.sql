@@ -42,4 +42,5 @@ begin
  if (select count(*) from public.evidence_passports where case_id=c.id)<>base_count then raise exception '실패가 이전 결과를 변경';end if;
  raise notice '  통과: 상태 복원·교차 소유자 차단·취소 종결·Lease 회전·불명확한 Provider 재호출 방지';
 end $$;
+do $$ begin raise notice '21_revalidation_dispatch 시험을 모두 통과했습니다'; end $$;
 rollback;
