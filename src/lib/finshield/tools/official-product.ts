@@ -48,7 +48,7 @@ export async function readOfficialProduct(_input: unknown, ctx: ToolCallContext)
   const asOf = `${day("year")}-${day("month")}-${day("day")}`;
   const temporal = productTemporalStatus(text, asOf);
   return {provenanceComplete:true,candidateCount:1,items:[{
-    sourceType:"PRODUCT",authorityGrade:"B",publisher:"서민금융진흥원",title:temporal.citable ? "햇살론15 공식 상품 안내" : "햇살론15 공식 상품 안내 (보증 종료 자료)",
+    sourceType:"PRODUCT",authorityGrade:"B",publisher:"서민금융진흥원",title:temporal.citable ? "햇살론15 공식 상품 안내" : temporal.status === "ENDED" ? "햇살론15 공식 상품 안내 (보증 종료 자료)" : "햇살론15 공식 상품 안내 (종료 시점 확인 필요)",
     officialId:"kinfa:hessalLoan",canonicalUrl:PRODUCT_URL,publishedAt:null,
     sourceVersion:`html-section-v1:${contentHash.slice(0,24)}`,contentHash,fingerprint:hash(PRODUCT_URL),
     freshness:"FRESH",licenseCode:null,isComplete:true,isCitable:temporal.citable,
