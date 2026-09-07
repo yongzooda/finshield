@@ -29,6 +29,11 @@ it("과금 확인 뒤 잘못된 Vector도 비용을 0으로 지우지 않는다"
 it("Fast는 명시적인 합성 소유자 설정 없이는 호출하지 않는다", async () => {
   await expect(rerankFast("대출 금리", ["공식 상품 금리"], ctx)).rejects.toThrow("RERANK_DEVELOPMENT_ONLY"); expect(fetchMock).not.toHaveBeenCalled();
 });
+it("Production은 합성 소유자 설정이 있어도 Fast를 호출하지 않는다", async () => {
+  vi.stubEnv("VERCEL_ENV", "production"); vi.stubEnv("FINSHIELD_RERANK_FAST_DEVELOPMENT", "1"); vi.stubEnv("FINSHIELD_PROBE_OWNER_ID", ctx.ownerId);
+  await expect(rerankFast("대출 금리", ["공식 상품 금리"], ctx)).rejects.toThrow("RERANK_DEVELOPMENT_ONLY");
+  expect(sql).not.toHaveBeenCalled(); expect(fetchMock).not.toHaveBeenCalled();
+});
 it("Fast의 원래 후보 순서와 과금 search unit을 복원한다", async () => {
   vi.stubEnv("FINSHIELD_RERANK_FAST_DEVELOPMENT", "1"); vi.stubEnv("FINSHIELD_PROBE_OWNER_ID", ctx.ownerId);
   fetchMock.mockResolvedValue(Response.json({ id: "synthetic-rerank", results: [{ index: 1, relevance_score: .9 }, { index: 0, relevance_score: .1 }], meta: { billed_units: { search_units: 1 } } }));
