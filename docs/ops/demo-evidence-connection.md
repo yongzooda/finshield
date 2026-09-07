@@ -54,3 +54,11 @@ main `2a86ba4`와 원격 Migration 0048의 Production 공개 Demo는 55.354초�
 Regulation은 4초 도구 선택 제한에서 `DEADLINE_EXCEEDED`였고 판단 결과만 남아 `PARTIAL`로 종결됐다. 해당 호출의 Provider 결과가 불명확해 예약 1건을 해제하지 않고 보존했다. Migration 0049와 v6 Manifest는 Domain 선택을 6초, 전체 Domain 단계를 16초로 조정한다. 단계 상한 합은 106초로 공개 Demo 110초를 넘지 않는다. 처리 화면에는 실제 실측에 맞춰 약 1분 소요와 단계 갱신을 안내한다.
 
 v6의 원격 적용·Production 재실행 전이므로 전체 성공과 `B-DEMO-01` PASS를 기록하지 않는다.
+
+## 2026-09-08 v6 Production 법령 원장 실패
+
+main `82e6cf3`과 원격 Migration 0049를 적용한 뒤 실행한 공개 Demo는 HTTP 200 스트림을 39.884초에 닫았지만 성공하지 않았다. Product·Fraud·Sales와 Regulation의 모델 호출은 모두 성공했고 Regulation도 3개 도구·2개 근거를 만들었으나, 네 번째 Agent 결과를 저장할 때 PostgreSQL `23514`가 발생해 Run은 `FAILED`로 종결됐다. 실패 원본과 Run을 그대로 보존하며 `B-DEMO-01` 성공으로 채택하지 않는다.
+
+원인은 `lookup_statute`가 여러 조문 본문을 한 excerpt로 합치면서 `article_no=null`인 LAW Snapshot을 만들었던 코드와, LAW 근거에 법령명·조문 번호를 모두 요구하는 DB 계약의 불일치다. 후속 수정은 검색어에 명시된 조문을 우선하고 그렇지 않으면 검색어와 가장 많이 겹치는 실제 조문 하나를 선택해 법령명·조문 번호·본문·Locator를 함께 고정한다. 번호나 본문을 확정하지 못하면 제목만으로 LAW 근거를 만들지 않는다. 배포 뒤 전체 Agent·Judge·Claim·근거·비용 원장을 다시 확인하기 전에는 완료로 표시하지 않는다.
+
+로컬 코드에서 실제 법제처 API에 `금융소비자 보호에 관한 법률 제19조`를 조회해 법률과 시행령의 `제19조` 본문을 각각 복원했다. 두 SourceItem은 실제 FinShield DB의 `record_source_snapshot` 함수와 LAW 제약을 트랜잭션 안에서 통과했고, 시험 쓰기는 전체 rollback했다. 조문 번호를 목록 검색어에서는 분리하고 본문 선택에는 유지해 API 0건 오류와 원장 식별자 누락을 함께 막는다. 이는 법령 도구·DB 계약의 연결 확인이며 전체 Demo 성공 증거는 아니다.
