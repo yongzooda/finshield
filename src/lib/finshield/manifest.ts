@@ -15,7 +15,7 @@
 
 // 시험 fixture 와 같은 이름을 쓰지 않도록 제품 정의는 p0-v2 을 버전으로 쓴다.
 export const DEFINITION_VERSION = "p0-v2";
-export const MANIFEST_VERSION = "finshield-p0-loan-v3";
+export const MANIFEST_VERSION = "finshield-p0-loan-v4";
 export const FINSHIELD_MODEL = "claude-sonnet-5";
 export const SCENARIO = "LOAN" as const;
 export const SCENARIO_VERSION = "sunshine15-v1";

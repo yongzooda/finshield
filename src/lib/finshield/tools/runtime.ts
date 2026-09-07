@@ -101,6 +101,8 @@ export type ToolCallContext = {
   manifest: ResolvedManifest;
   recorder?: RunRecorder;
   signal?: AbortSignal;
+  /** 공개 Demo 는 승인된 Seed 출처 밖의 공용 KB 문서를 조회하지 않는다. */
+  allowedSourceSnapshotIds?: string[];
   /** 전용 recorder와 함께 사용하며 거래 전 verification_run_id를 쓰지 않는다. */
   aftercareJobId?: string;
 };

@@ -15,19 +15,41 @@ import {
   lookupOfficialChannel, searchFinancialProduct, verifyFinancialInstitution,
 } from "./registry";
 import { parseUrlHost } from "./url";
-import { analyzeRiskPattern, checkDocuments, getSourceSnapshot, searchDisputeCase } from "./public-knowledge";
+import { analyzeRiskPattern, checkDocuments, getSourceSnapshot, searchDisputeCase, searchPublicKnowledge } from "./public-knowledge";
 import { searchOfficialWarning } from "./official-warning";
+
+const searchProductForContext: ToolImpl = async (input, ctx) => {
+  if (ctx.allowedSourceSnapshotIds?.length) {
+    return searchPublicKnowledge(input, ctx, ["PRODUCT"]);
+  }
+  return searchFinancialProduct(input, ctx);
+};
+
+const searchWarningForContext: ToolImpl = async (input, ctx) => {
+  if (ctx.allowedSourceSnapshotIds?.length) {
+    const stored = await searchPublicKnowledge(input, ctx, ["GUIDE", "ALERT"]);
+    return {
+      ...stored,
+      observations: {
+        ...stored.observations,
+        kind: "APPROVED_DEMO_GUIDE_SEARCH",
+        current_transaction_proof: false,
+      },
+    };
+  }
+  return searchOfficialWarning(input, ctx);
+};
 
 export const TOOL_IMPLS: Record<string, ToolImpl> = {
   lookup_statute: lookupStatute,
   search_precedent: searchPrecedent,
   parse_url_host: parseUrlHost,
   lookup_official_channel: lookupOfficialChannel,
-  search_financial_product: searchFinancialProduct,
+  search_financial_product: searchProductForContext,
   verify_financial_institution: verifyFinancialInstitution,
   // 공용 KB는 Manifest Release와 실제 적재 범위 안에서 조회한다.
   get_source_snapshot: getSourceSnapshot,
-  search_consumer_warning: searchOfficialWarning,
+  search_consumer_warning: searchWarningForContext,
   analyze_risk_pattern: analyzeRiskPattern,
   check_documents: checkDocuments,
   search_dispute_case: searchDisputeCase,

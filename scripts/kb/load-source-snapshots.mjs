@@ -77,7 +77,7 @@ for (const s of currentSnapshots) {
     canonicalUrl: s.official_url, officialId: s.official_id, sourceVersion: rec[fsc.bas_ym_field] ?? null,
     publishedAt: rec[fsc.bas_ym_field] ? `${String(rec[fsc.bas_ym_field]).slice(0, 4)}-${String(rec[fsc.bas_ym_field]).slice(4, 6)}-01` : null,
     retrievedAt: s.fetched_at, contentHash: s.sha256, fingerprint: s.source_fingerprint, licenseUrl: registry.portal_pages.fsc,
-    isComplete: true, isCitable: true, adapter: "data_go_kr_fsc_small_loan", requestKey: s.official_id,
+    isComplete: true, isCitable: true, adapter: "data_go_kr_fsc_small_loan", requestKey: `${s.official_id}:${s.fetched_at}`,
   }));
 }
 
@@ -89,7 +89,7 @@ for (const s of kinfa.snapshots) {
     title: `${rec.insttNm} 햇살론15 취급기관`, canonicalUrl: s.official_url, officialId: s.official_id, sourceVersion: null,
     publishedAt: null, retrievedAt: s.fetched_at, contentHash: s.sha256, fingerprint: s.source_fingerprint,
     licenseUrl: registry.portal_pages.kinfa, isComplete: true, isCitable: true,
-    adapter: "data_go_kr_kinfa_handling_agency", requestKey: s.official_id,
+    adapter: "data_go_kr_kinfa_handling_agency", requestKey: `${s.official_id}:${s.fetched_at}`,
   }));
 }
 

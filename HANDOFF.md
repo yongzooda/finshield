@@ -1,9 +1,15 @@
+## 2026-09-08 공개 Demo 공식 근거 연결 보완
+
+- Production 공개 체험은 약 20~25초에 종결됐지만 Product·Fraud·CoVe·Red Team·Judge가 인용 검증에 실패해 다섯 Claim이 모두 `UNKNOWN`이었다. Tool 성공 원장에도 Source 연결이 0건이었다.
+- main `43c40a0`의 B-SOURCE-03 run `34156392378`로 공식 상품·사칭 안내를 다시 확인했다. Migration 0047은 두 문서·Chunk의 새 KB Release와 v4 Manifest를 추가하고, Demo는 Seed가 승인한 Snapshot 범위만 조회한다. Recorder의 저장 Snapshot 연결 누락도 수정했다.
+- 격리 DB에서 47개 Migration·SQL 34파일, 관련 단위 시험과 타입 검사가 통과했다. 원격 Migration·배포·실제 Demo 재실행 전이며 `B-RETRIEVAL-01`·`B-DEMO-01`을 PASS로 바꾸지 않았다. [상세 기록](docs/ops/demo-evidence-connection.md)을 따른다.
+
 ## 2026-09-08 심사 운영 예산 증액
 
 - 합성 개발 시험용 전체 일 USD 0.50·Case/Run USD 0.20을 심사 운영 상한으로 사용하지 않도록 Migration 0046을 추가했다. 전체 합산은 일 USD 20, 사용자·Case USD 3, Run USD 0.80이다.
 - Cohere `embed-v4.0`의 누락된 운영 예산을 추가했다. `rerank-v4.0-fast`는 운영 예산에 등록하지 않고 Production에서 호출을 코드로도 차단했다. 승인된 합성 Fast 개발 시험의 USD 0.05 상한은 그대다.
 - 기존 미확정 예약·사용량을 초기화하지 않고 현재 Counter를 증액한다. 더 높은 수동 상한은 낮추지 않으며 Worker에게는 변경 권한이 없다.
-- 격리 DB의 46개 Migration·전체 SQL 시험, Vitest 606건, 타입, 린트, Production build가 통과했다. 원격 DB 적용과 Production 재검증은 PR 병합 후 진행한다. Gate metadata는 변경하지 않았다.
+- 격리 DB의 46개 Migration·전체 SQL 시험, Vitest 606건, 타입, 린트, Production build가 통과했다. Migration 0046은 실제 FinShield DB에 적용했고 Production main `43c40a0`의 Runtime manifest와 Health를 확인했다. 적용 뒤 상한 12행·활성 Counter·Worker 변경 거부를 확인했으며 미확정 예약 4건 USD 0.172932는 그대로 보존했다. Gate metadata는 변경하지 않았다.
 
 ## 2026-09-08 계약 PDF 수정 후 실측 완료·사용자 요청으로 작업 종료
 
