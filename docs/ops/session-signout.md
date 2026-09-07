@@ -19,4 +19,10 @@
 
 Supabase의 발급 JWT는 만료 전까지 암호학적으로 유효할 수 있다. 이번 시험은 앱의 `/auth/v1/user` 기반 인증 거부를 확인했으며 직접 PostgREST·Storage RLS 접근의 즉시 폐기 보증은 아니다. 직접 접근의 세션 유효성, refresh token 보관·갱신·회전 경합, 전체 탈퇴·다른 기기 인증 수명은 남아 있다. `AUTH-001~002` 전체나 Release 완료로 표시하지 않는다.
 
+## 새 브랜치 Preview 확인 실패
+
+PR #222의 첫 SHA `2d91ec05d5ec221421da8842fe39bcb56352191c`에서 CI와 Preview 빌드는 통과했다. 보호 Preview의 Runtime manifest로 같은 SHA·Preview 환경·배포 ID를 확인했지만 로그인 단계에서 시험이 중단됐다. 별도 잘못된 합성 자격증명 요청도 HTTP 500이었다. 생성된 시험 세션은 없고 원본은 `2026-09-07-session-preview.json`에 보존한다. Preview 로그아웃의 배포 검증은 통과하지 않았다.
+
+기존 격리 설정 절차는 `codex/p0-audit-contract-spike`에만 환경변수를 등록한다. 새 브랜치의 누락 설정이 의심되지만 Vercel CLI와 연결 API가 팀 접근 403을 반환해 원격 설정·로그로 원인을 확정하지 못했다. 로그인은 현재 DB 환경변수도 요구한다. Production의 같은 잘못된 합성 로그인은 정상 인증 거부 401이었으며, 이 관측만으로 로그아웃의 Production 성공을 뜻하지 않는다. 설정 범위·배포 보호·유료 계약은 변경하지 않았다.
+
 참고: [Supabase 세션](https://supabase.com/docs/guides/auth/sessions), [로그아웃 계약](https://supabase.com/docs/reference/javascript/auth-signout), [발급처 세션 검증 구현](https://github.com/supabase/auth/blob/master/internal/api/auth.go), [현재 세션 폐기 구현](https://github.com/supabase/auth/blob/master/internal/api/logout.go). 2026-09-07 문서·소스 확인과 실제 계정 관측을 구분한다.
