@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { parse } from "yaml";
-import { SQUASH_WRAP_COLUMNS, isBranchUpdateMergeCommit, validateKoreanRecord, validateCommitMessage, validatePullRequest, wrapSquashBody } from "./validate-korean-records.mjs";
+import { withoutVerifiedConflictFooter, SQUASH_WRAP_COLUMNS, isBranchUpdateMergeCommit, validateKoreanRecord, validateCommitMessage, validatePullRequest, wrapSquashBody } from "./validate-korean-records.mjs";
 
 assert.deepEqual(validateCommitMessage("fix: 한국어 기록 검사 추가\n\nCloses #36\n관련 이슈: #29"), []);
 for (const message of ["test: add evidence harness", "fix: 한국어 제목\n\nRetain sanitized diagnostics.",
@@ -92,3 +92,24 @@ assert.ok(Object.values(records.permissions).every((v) => v === "read"));
 assert.ok(!JSON.stringify(records).includes("pull_request_target"));
 assert.match(readFileSync(".githooks/commit-msg", "utf8"), /validate-korean-records\.mjs --commit-file "\$1"/);
 console.log("한국어 기록 검사: 제목·본문·커밋·연결 이슈·squash 줄바꿈·페이지 누락·권한·CI 연결 회귀 테스트 통과.");
+
+const footer = "merge: 가입 후 DB 계약 병합\n\n# Conflicts:\n#\tHANDOFF.md\n";
+const verified = { parentCount: 2, files: ["HANDOFF.md"] };
+assert.deepEqual(validateCommitMessage(withoutVerifiedConflictFooter(footer, verified)), []);
+for (const context of [{}, { parentCount: 1, files: ["HANDOFF.md"] }, { parentCount: 2, files: [] }]) {
+  assert.ok(validateCommitMessage(withoutVerifiedConflictFooter(footer, context)).length);
+}
+for (const bad of [footer + "English description", footer.replace("HANDOFF.md", "other.md"),
+  footer.replace("#\tHANDOFF.md", "# English description"), footer.replace("# Conflicts:", "# Notes:")]) {
+  assert.ok(validateCommitMessage(withoutVerifiedConflictFooter(bad, verified)).length);
+}
+const sha = "a".repeat(40);
+const merge = { sha, parents: [{}, {}], commit: { message: footer } };
+const mergeApi = async path => path.includes("/commits?") ? [merge]
+  : path.includes(`/commits/${sha}?`) ? { ...merge, files: [{ filename: "HANDOFF.md" }] } : api(path);
+assert.deepEqual(await validatePullRequest(pr, mergeApi), []);
+assert.ok((await validatePullRequest(pr, async path => path.includes(`/commits/${sha}?`)
+  ? { ...merge, files: [{ filename: "not-changed.md" }] } : mergeApi(path))).length);
+await assert.rejects(validatePullRequest(pr, async path => path.includes(`/commits/${sha}?`)
+  ? { ...merge, files: Array(100).fill({ filename: "HANDOFF.md" }) } : mergeApi(path)), /변경 파일 전체/);
+console.log("병합 충돌 메타데이터: 부모·파일 대조 및 영어 주석 거부 검증 통과.");
