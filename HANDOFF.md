@@ -12,7 +12,7 @@
 - 최신 작업 상태와 재개 지시는 [개발 재개 기록](docs/ops/2026-09-07-development-resume.md)를 우선 확인한다. 아래 과거 완료·다음 작업 목록은 기준선 이력이므로 현재 작업 브랜치 상태와 구분한다.
 - 작업 브랜치는 `codex/p0-audit-contract-spike`다. 서버 Claim 확정, Case 조회, 독립 검토 계약, 보류 결과 저장·수동 재검증을 보완했고 파일 파서·가입 후 비교 코드는 전체 연결 검증 전이다.
 - 초기 실제 회원 검증은 시간 초과로 보류됐다. 이후 합성 단일 Claim의 실제 Provider·공식 근거·로컬 worker 저장(약 47초)과 native PDF의 실제 파서·모델·로컬 저장(약 11초, Storage 대체)을 통과했다. 재검증/만료 정리 Workflow와 가입 후 점검 복원도 격리 구현·시험했다. 실제 Storage/OCR 전체 흐름과 Production 반영·Release는 미완료다.
-- FinShield DB에 0026~0028과 동등한 함수 변경이 적용됐다. ledger 동기화와 0029~0035 운영 적용은 남았다. 로컬 0001~0035/SQL 01~24는 통과했다. 관련 Evidence scope를 다시 검증해야 한다.
+- FinShield DB에 0026~0035를 적용하고 원격·로컬 전체 schema digest 일치를 확인했다. 기존 Migration ledger는 없으며 소급 기록을 만들지 않았다. 관련 Evidence scope를 다시 측정 중이다.
 - 11시 추가: 모델 비용 예약·실사용 정산·미확정 보존을 연결했고 입력 취소/늦은 결과 차단을 보완했다. 단위 시험 430건과 실제 합성 단일/복수 Claim 저장을 확인했다. 복수 Claim은 Domain 시간 초과/분쟁 자료 미연결에 따른 부분 결과다.
 - 제출 확정 PDF는 `output/pdf/`에 보존했다. 상세 중단 기록은 [제출 우선 중단 기록](docs/ops/2026-09-07-submission-stop.md)을 따른다.
 ## 2026-09-07 입력·Worker 인프라 계약

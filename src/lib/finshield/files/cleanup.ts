@@ -1,6 +1,7 @@
 import "server-only";
 import type postgres from "postgres";
 import { finshieldEnv } from "../env";
+import { storageServiceHeaders } from "./service-headers";
 
 /** SEC-FILE-006: 서버가 임대한 정확한 객체를 지운 뒤 DB의 실제 부재 검사로 종결한다. */
 export async function cleanupCaseFiles(sql: ReturnType<typeof postgres>, ownerId: string, caseId: string) {
@@ -15,8 +16,7 @@ export async function cleanupCaseFiles(sql: ReturnType<typeof postgres>, ownerId
       if (target.path) {
         if (target.bucket !== "finshield-quarantine") throw new Error("CLEANUP_BUCKET_REJECTED");
         const response = await fetch(`${env.SUPABASE_URL}/storage/v1/object/${target.bucket}`, {
-          method: "DELETE", headers: { apikey: env.SUPABASE_SECRET_KEY,
-            Authorization: `Bearer ${env.SUPABASE_SECRET_KEY}`, "Content-Type": "application/json" },
+          method: "DELETE", headers: { ...storageServiceHeaders(env.SUPABASE_SECRET_KEY), "Content-Type": "application/json" },
           body: JSON.stringify({ prefixes: [target.path] }), signal: AbortSignal.timeout(5000), redirect: "error",
         });
         if (!response.ok) throw new Error("STORAGE_DELETE_FAILED");

@@ -1,12 +1,13 @@
 import "server-only";
 import {finshieldEnv} from "../env";
+import { storageServiceHeaders } from "./service-headers";
 
 const BUCKET="finshield-quarantine";
 export async function readQuarantinedFile(path:string,expectedSize:number,signal?:AbortSignal) {
   const env=finshieldEnv();const key=env.SUPABASE_SECRET_KEY;
   if(!key)throw new Error("STORAGE_UNAVAILABLE");
   const response=await fetch(`${env.SUPABASE_URL}/storage/v1/object/${BUCKET}/${path}`,{
-    headers:{apikey:key,Authorization:`Bearer ${key}`},signal:signal ? AbortSignal.any([signal,AbortSignal.timeout(10000)]) : AbortSignal.timeout(10000),redirect:"error",cache:"no-store"});
+    headers:storageServiceHeaders(key),signal:signal ? AbortSignal.any([signal,AbortSignal.timeout(10000)]) : AbortSignal.timeout(10000),redirect:"error",cache:"no-store"});
   if(!response.ok||!response.body)throw new Error("UPLOAD_NOT_FOUND");
   const reader=response.body.getReader();const chunks:Uint8Array[]=[];let size=0;
   try {for(;;){const {value,done}=await reader.read();if(done)break;size+=value.byteLength;
