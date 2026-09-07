@@ -2,6 +2,10 @@
 
 PR #240은 main `7b3c29c`로 병합됐고 원격 CI가 통과했다. 원격 0043의 구조 해시 6종 일치, RLS/FORCE 83개·anon 누출 0건을 확인했다. 실제 계약 PDF는 마스킹 뒤 비용 예약에서 실패했고 추가 과금은 없었다. 실패 Case는 삭제했다. Migration 0044와 처리 실패 정리를 보완했으며 [실패와 검증 범위](docs/ops/aftercare-input-budget.md)를 따른다. 전체 P0·Gate 완료는 아니다.
 
+## 2026-09-08 가입 후 계약 PDF 비용 예약 수정
+
+보호 Preview의 실제 계약 PDF가 마스킹 뒤 비용 예약에서 거부된 실패를 재현했다. Migration 0044는 같은 Case의 AFTERCARE 문서에 기존 비용 경계를 연결한다. 격리 44 Migration·32 SQL 파일이 통과했으며 상한·소유권·확인 후 재호출 거부를 검사했다. 원격은 0043이며 수정 후 실제 파일 검증과 Gate 재채택은 남아 있다. [실패와 수정 범위](docs/ops/aftercare-input-budget.md)를 따른다.
+
 ## 2026-09-08 가입 후 계약 문서 DB 경계
 
 PC-008·PC-011의 Migration 0043과 격리 SQL 시험을 기능 Draft에서 분리했다. 동일 Case의 가입 후 문구는 전용 표에 저장하며 과거 Claim/Passport를 변경하지 않는다. 원격 적용 전 기록은 [검증 범위](docs/ops/aftercare-document-contracts.md)에 보존한다.
