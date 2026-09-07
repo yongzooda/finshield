@@ -32,3 +32,9 @@
 ```bash
 node .github/scripts/test-provider-model-spike.mjs
 ```
+
+## 2026-09-07 실행 의존성 재등록
+
+격리 Parser와 요청 독립 Job 검증용 `@vercel/sandbox@3.2.1`·`workflow@4.8.5`를 설치한다. 간접 의존성의 알려진 취약점 수정을 위해 `@workflow/core`의 `nanoid@5.1.16`, 두 World 패키지의 `undici@7.29.0`을 override한다. 이 PR은 의존성과 검증 정책을 사전등록하며 제품 기능 연결은 별도 변경이다.
+
+새 패키지 Git Blob을 `provider-evidence.mjs`와 mutation 시험의 신뢰 기준에 함께 등록한다. 기존 run `33956322908`의 측정 결과는 보존하지만 현재 evidence index에서 제거한다. 새 의존성이 설치된 main에서 동일한 50건·100회 및 fault 20건을 재측정하고 별도 Adoption PR에서 채택한다. 모델·단가·합격선·Fixture·harness·workflow·다른 blocker 정책은 바꾸지 않는다. 검사에서 과거 scope를 새 scope로 덮어쓰거나 STALE 증거를 PASS로 취급하지 않는다.

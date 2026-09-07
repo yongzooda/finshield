@@ -268,8 +268,8 @@ const expectPartialEvidence = async ({
       [".github/scripts/provider-adr-digest.mjs", "a0d89bbd01fcdd4cc2659afb29d243ba2bdfc099"],
       [".github/scripts/provider-model-policy.mjs", "50a19a237b29951021e271173fe1ee692b13ccaf"],
       [".github/scripts/provider-model-spike.mjs", "7448338a029999476c4ec0580ca181dbe50e8135"],
-      ["package.json", "ecb26cd086f874ea4f989d50f2719a8390c282de"],
-      ["package-lock.json", "678296a5f7e2256799413740041886f29f939191"],
+      ["package.json", "45e072d1998428cfdc280560f4871dcae944bf0c"],
+      ["package-lock.json", "5cf574b86ede5fe9d57789b909212401c8068bae"],
     ]);
     const requirementsBlob = "27ce706010344fbcedebe3abd707febff0f1dc26";
     update(fixture, "docs/adr/001-p0-provider-stack.md", (source) => source.replace(
