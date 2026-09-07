@@ -49,4 +49,5 @@ begin
   exception when check_violation then null; end;
   raise notice '제출 흐름 원장: 교차 소유·중복·오래된 판·실행 중 수정 거부, 이전 판 보존·고정 입력 통과';
 end $$;
+do $$ begin raise notice '19_submission_contract_invariants 시험을 모두 통과했습니다'; end $$;
 rollback;
