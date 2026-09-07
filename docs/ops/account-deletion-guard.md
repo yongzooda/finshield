@@ -8,4 +8,4 @@ Migration 0036은 소유 Case, 삭제되지 않은 원본·OCR 임시물, Case E
 
 이는 탈퇴 API·최근 재인증·전체 계정 삭제 Worker의 완성이 아니다. 후속 계정 삭제는 Profile 잠금으로 새 자료 생성과 직렬화하고 모든 Case의 승인된 삭제·물리 부재 확인을 끝낸 뒤 Auth를 마지막에 지워야 한다. 진행 중인 ACCOUNT 요청의 완료 표시와 최종 Auth 삭제가 어긋나지 않도록 Transaction/복구 절차를 별도로 검증해야 한다. 이 Guard를 끄거나 완료 상태를 앞당겨 우회하지 않는다.
 
-DB 실행 scope가 바뀌므로 Supabase·Rate·Consent·Storage·Delete의 이전 원본은 이력으로 보존하고 새 main에서 재측정·별도 Adoption한다. 본 문서 작성 시 원격 DB 적용과 새 실제 측정은 아직 완료되지 않았다. Implementation과 Release 완료로 확대하지 않는다.
+DB 실행 scope가 바뀌므로 Supabase·Rate·Consent·Storage·Delete의 이전 원본은 이력으로 보존하고 새 main에서 재측정·별도 Adoption한다. 후속 PR #220에서 원격 적용과 새 main의 5종 실제 측정 성공을 채택했다. Supabase 비교는 36개 Migration·25개 SQL 파일·484개 검증과 원격 Schema digest 4종 일치를 확인했다. Implementation과 Release 완료로 확대하지 않는다.
