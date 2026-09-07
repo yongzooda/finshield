@@ -15,7 +15,7 @@ import { resolveOwner, UnauthenticatedError } from "@/lib/finshield/auth";
 import { loadRunInput, maskSelection, selectionSchema } from "@/lib/finshield/run-input";
 import { loadManifest } from "@/lib/finshield/registry";
 import { runVerification, type RunProgress } from "@/lib/finshield/orchestrator";
-import { buildAxisResults, buildFinalClaims, finalizeRun } from "@/lib/finshield/finalize";
+import { buildFinalClaims, finalizeRun } from "@/lib/finshield/finalize";
 import { createAgentModel, createJudgeModel } from "@/lib/finshield/agents/model-adapter";
 import { createHash, randomUUID } from "node:crypto";
 import { dispatchNotifications } from "@/lib/finshield/revalidate";
@@ -104,14 +104,15 @@ export async function POST(request: Request): Promise<Response> {
       }));
       const finals = buildFinalClaims({ claims: withIds, run: result });
       const hasProfile = input.profile_completeness === "COMPLETE";
-      const saved = await finalizeRun({ sql: fsql(), runId, claims: withIds, run: result, hasProfile });
+      const saved = await finalizeRun({ sql: fsql(), runId, ownerId, claims: withIds, run: result, hasProfile });
 
       if (!saved.ok) await fsql()`select id from private.fail_verification_run(${runId}::uuid,'FINALIZE_FAILED',${saved.reason})`;
       else await dispatchNotifications(fsql()).catch(()=>0);
       push({
         type: "done",
         guide: saved.ok ? saved.guide : null,
-        axes: buildAxisResults(finals, hasProfile),
+        axes: saved.ok ? saved.axes : null,
+        axes_pending_restore: saved.ok && saved.axes === null,
         saved: saved.ok,
         save_reason: saved.ok ? null : saved.reason,
         // 독립 검증이 상태를 낮췄으면 그 결과를 보여 준다. 화면과 저장이 같은 값을 쓴다.

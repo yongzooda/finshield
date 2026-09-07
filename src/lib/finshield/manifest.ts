@@ -15,7 +15,7 @@
 
 // 시험 fixture 와 같은 이름을 쓰지 않도록 제품 정의는 p0-v2 을 버전으로 쓴다.
 export const DEFINITION_VERSION = "p0-v2";
-export const MANIFEST_VERSION = "finshield-p0-loan-v2";
+export const MANIFEST_VERSION = "finshield-p0-loan-v3";
 export const FINSHIELD_MODEL = "claude-sonnet-5";
 export const SCENARIO = "LOAN" as const;
 export const SCENARIO_VERSION = "sunshine15-v1";
@@ -149,7 +149,7 @@ export const POLICY_VERSIONS = Object.freeze({
   evidencePolicyVersion: "evidence-policy-v1",
   resultMatrixVersion: "result-matrix-v1",
   coverageContractVersion: "coverage-contract-v1",
-  profilePolicyVersion: "profile-policy-v1",
+  profilePolicyVersion: "profile-policy-v2",
   piiPolicyVersion: "pii-policy-v1",
 });
 
@@ -206,11 +206,15 @@ export const POLICIES = Object.freeze([
   {
     policyType: "PROFILE",
     version: POLICY_VERSIONS.profilePolicyVersion,
-    schemaVersion: "1",
+    schemaVersion: "2",
     rules: {
       // AUTH-006·007: 프로필을 건너뛰면 적합성 축만 보류하고 나머지는 진행한다.
       skip_suspends_axes: ["SUITABILITY"],
       snapshot_at: "RUN_START",
+      implementation: "db-profile-policy-v2",
+      rules: ["LOAN_DEBT_BURDEN", "LOAN_EMERGENCY_BUFFER", "LOAN_PURPOSE", "LOAN_HORIZON", "LOAN_LIQUIDITY", "LOAN_ELIGIBILITY", "LOAN_AFFORDABILITY"],
+      approval_inference: false,
+      annualize_monthly_income: false,
     },
   },
   {

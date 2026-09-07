@@ -35,7 +35,7 @@ type Detail = {
     finished_at: string | null }[];
   final_claims: { id: string; verification_run_id: string; status: string; reason_code: string;
     cove_status: string; red_team_status: string; is_material: boolean; statement_masked: string; decision_summary_masked: string }[];
-  axes: { verification_run_id: string; axis: string; result_code: string; summary_masked: string }[];
+  axes: { verification_run_id: string; axis: string; result_code: string; summary_masked: string; policy_evaluation?: { policy_version: string; checks: { rule_code: string; reason_masked: string; outcome: string; evidence_id?: string }[] } | null }[];
   claim_evidences: { final_claim_version_id: string; evidence_id: string; relation: string; is_independent: boolean }[];
   evidences: (EvidenceCitationData & { independence_key: string; citable: boolean })[];
   passports: Passport[];
@@ -140,6 +140,14 @@ export function PassportView({ caseId, requestedPassport = null }: { caseId: str
                   <FsChip tone={view.tone}>{view.label}</FsChip>
                 </div>
                 <p className="fs-meta mt-1">{axis.summary_masked}</p>
+                {axis.policy_evaluation ? <details className="mt-2">
+                  <summary className="cursor-pointer text-sm underline">프로필 비교 이유와 확인하지 못한 조건</summary>
+                  <p className="fs-meta mt-2">검증을 시작할 때 저장한 프로필을 사용했습니다. 현재 프로필을 수정해도 이 결과는 바뀌지 않습니다.</p>
+                  <ul className="mt-2 space-y-2 text-sm">
+                    {axis.policy_evaluation.checks.map((check, index) => <li key={`${check.rule_code}:${index}`}>{check.reason_masked}</li>)}
+                  </ul>
+                  <p className="fs-meta mt-2">적용 규칙: {axis.policy_evaluation.policy_version}</p>
+                </details> : null}
               </li>
             );
           })}

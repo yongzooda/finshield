@@ -169,10 +169,11 @@ export const buildAxisResults = (finals: FinalClaim[], hasProfile: boolean) => {
 export const finalizeRun = async (args: {
   sql: Sql;
   runId: string;
+  ownerId: string;
   claims: (ConfirmedClaim & { claimId: string })[];
   run: OrchestratedRun;
   hasProfile: boolean;
-}): Promise<{ ok: true; passportId: string; guide: Awaited<ReturnType<typeof buildActionGuide>>["display"] } | { ok: false; reason: string }> => {
+}): Promise<{ ok: true; passportId: string; axes: ReturnType<typeof buildAxisResults> | null; guide: Awaited<ReturnType<typeof buildActionGuide>>["display"] } | { ok: false; reason: string }> => {
   const finals = buildFinalClaims({ claims: args.claims, run: args.run });
   const axes = buildAxisResults(finals, args.hasProfile);
   const partialReasons = args.run.agentResults
@@ -185,7 +186,14 @@ export const finalizeRun = async (args: {
       select private.finalize_verification_run(${args.runId}::uuid,
         ${JSON.stringify(finals)}::text::jsonb, ${JSON.stringify(axes)}::text::jsonb, ${JSON.stringify(guide.stored)}::text::jsonb,
         ${partialReasons}::text[], 'p1') as id`;
-    return { ok: true, passportId: rows[0].id as string, guide: guide.display };
+    const passportId = rows[0].id as string;
+    // SQL 규칙이 확정한 축을 표시한다. 조회 응답 유실로 이미 종결된 Run을 실패로 되돌리지 않는다.
+    let storedAxes: ReturnType<typeof buildAxisResults> | null = null;
+    try {
+      const [stored] = await args.sql`select private.read_finalized_axes(${args.ownerId}::uuid,${passportId}::uuid) as axes`;
+      if (Array.isArray(stored?.axes) && stored.axes.length === 3) storedAxes = stored.axes;
+    } catch { /* Passport 재조회에서 저장된 결과를 복원한다. */ }
+    return { ok: true, passportId, axes: storedAxes, guide: guide.display };
   } catch (error) {
     // 저장에 실패하면 결과를 확정된 것처럼 보여 주지 않는다.
     const code = String((error as { code?: string })?.code ?? "FINALIZE_FAILED");

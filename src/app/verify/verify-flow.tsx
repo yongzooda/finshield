@@ -363,6 +363,7 @@ export function VerifyFlow() {
 
           <FsCard>
             <h2 className="fs-h2">세 가지 확인 결과</h2>
+            {axes.length === 0 ? <p className="fs-body mt-3" role="status">{saved ? "저장된 축 결과를 이번 응답에서 읽지 못했습니다. 내 기록의 Passport에서 확인해 주세요." : "축 결과가 저장되지 않아 확정된 판단으로 표시하지 않습니다."}</p> : null}
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               {axes.map(axis => <section key={axis.axis}>
                 <h3 className="font-bold">{AXIS_LABEL[axis.axis]}</h3>

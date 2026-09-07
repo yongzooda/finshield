@@ -1,6 +1,7 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import type { ToolCallContext, ToolOutcome } from "./runtime";
+import { extractProfileTerms } from "../product-profile-terms";
 
 const PRODUCT_URL = "https://www.kinfa.or.kr/financialProduct/hessalLoan.do";
 const hash = (text: string) => createHash("sha256").update(text).digest("hex");
@@ -52,7 +53,7 @@ export async function readOfficialProduct(_input: unknown, ctx: ToolCallContext)
     officialId:"kinfa:hessalLoan",canonicalUrl:PRODUCT_URL,publishedAt:null,
     sourceVersion:`html-section-v1:${contentHash.slice(0,24)}`,contentHash,fingerprint:hash(PRODUCT_URL),
     freshness:"FRESH",licenseCode:null,isComplete:true,isCitable:temporal.citable,
-    locator:{kind:"html_section",selector:"#ConTitle",end_marker:"일반보증이란?",normalization_version:"html-text-v1",temporal_status:temporal.status,product_end_date:temporal.endDate,assessed_on:asOf},
+    locator:{kind:"html_section",selector:"#ConTitle",end_marker:"일반보증이란?",normalization_version:"html-text-v1",temporal_status:temporal.status,product_end_date:temporal.endDate,assessed_on:asOf,profile_terms:extractProfileTerms(text)},
     excerptMasked:text,directness:temporal.citable ? "DIRECT" : "CONTEXT_ONLY",referenceOnly:false,selectionReasonCode:temporal.citable ? "OFFICIAL_PRODUCT_BODY" : "PRODUCT_END_NOTICE",
   }]};
 }

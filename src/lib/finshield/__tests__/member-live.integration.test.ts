@@ -41,7 +41,7 @@ it.skipIf(process.env.FINSHIELD_LIVE_PROBE!=='1').each([
  const finals=buildFinalClaims({claims:claims.map(c=>({...c,claimId:c.claim_id})),run:result});
  const usage=await sql`select status,coalesce(sum(actual_microunits),0)::text as cost_microunits,count(*)::int as calls from private.usage_reservations where run_id=${runId}::uuid group by status`;
  const agentUsage=await sql`select agent_code,input_tokens,output_tokens,cost_microunits from public.agent_runs where verification_run_id=${runId}::uuid`;
- const saved=await finalizeRun({sql,runId,claims:claims.map(c=>({...c,claimId:c.claim_id})),run:result,hasProfile:false});
+ const saved=await finalizeRun({sql,runId,ownerId,claims:claims.map(c=>({...c,claimId:c.claim_id})),run:result,hasProfile:false});
  writeFileSync(`/tmp/finshield-member-live-${name}.json`,JSON.stringify({caseId:intake.caseId,runId,saved,usage,agentUsage,agents:result.agentResults,cove:result.cove,redTeam:result.redTeam,judge:result.judgeOutput,judgeReason:result.judgeReasonCode,finals,rows},null,2),{mode:0o600});
  expect(saved.ok).toBe(true);
  expect(result.judgeOutput).not.toBeNull();

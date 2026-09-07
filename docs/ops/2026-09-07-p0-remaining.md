@@ -1,3 +1,5 @@
+추가 적합성 구현: Migration 0041의 Profile Policy v2를 연결했다. 부담·목적·기간 주의사항과 가입/상환 정보 부족을 구분하며 현재 Profile 변경 후 이전 Passport 불변을 실제 격리 DB에서 확인했다. 일반 상품 조건·원격 적용·Live UI·판정 품질 Gate는 남아 있다. 상세는 `evidence/development/profile/2026-09-07-profile-policy.md`를 따른다.
+
 Fast 개발 실제 완료: main run 34128723611, 4가족 20 Claim, USD 0.040829(Embed 포함), 미확정 0, Fast P95 382ms. 같은 후보 개발 macro Recall/Precision은 결정적 0.95·Fast 1.00이다. 기존 Gate 실패·제품 기본 Rerank는 유지한다. 운영 DB 원장 밖 개발 비용을 다음 일일 예산에 별도 합산해야 한다.
 
 추가 알림 구현: Migration 0040의 알림·Outbox 원자성, 과거 PROCESSING 복구·중복 방지·소유자별 조회 복구를 연결했다. 실제 격리 SQL 29파일·기본 572건·빌드를 통과했다. 알림의 저장된 판 이동도 구현했으며 원격 적용·Live UI·전역 주기 Dispatcher는 남았다. 기록 페이지는 보호 Preview에서 합성 Case 51개를 별도 두 로그인 세션으로 누락/중복 없이 조회하고 전부 삭제했다.
