@@ -27,7 +27,7 @@ const digest = (value: unknown) => createHash("sha256").update(JSON.stringify(va
 // 반복하면 같은 조회가 시간을 잠식해 최종 판단이 deadline 직전에 잘렸다.
 export const MAX_TOOL_TURNS = 1;
 
-export type Decoded = { ok: true; value: unknown } | { ok: false; reason: string };
+export type Decoded = { ok: true; value: unknown; reason?: string } | { ok: false; reason: string };
 
 /**
  * Domain Agent 출력 해독.
@@ -35,15 +35,30 @@ export type Decoded = { ok: true; value: unknown } | { ok: false; reason: string
  * Schema 를 통과해도 인용이 틀리면 받지 않는다. 지어낸 근거 이름과 근거 없는
  * 확정을 여기서 버린다. 규칙 1 의 마지막 관문이다.
  */
-const decodeDomainOutput = (raw: unknown, session: RunSession): Decoded => {
+export const decodeDomainOutput = (raw: unknown, session: RunSession): Decoded => {
   const parsed = domainAgentOutput.safeParse(raw);
   if (!parsed.success) return { ok: false, reason: "OUTPUT_SCHEMA_INVALID" };
-  const problems: string[] = [];
-  for (const finding of parsed.data.findings) {
-    problems.push(...citationProblems(finding.evidence_refs, finding.state, session.evidence));
-  }
-  if (problems.length > 0) return { ok: false, reason: "CITATION_INVALID" };
-  return { ok: true, value: parsed.data };
+  let citationInvalid = false;
+  const findings = parsed.data.findings.map((finding) => {
+    const problems = citationProblems(finding.evidence_refs, finding.state, session.evidence);
+    if (problems.length === 0) return finding;
+    citationInvalid = true;
+    // AI-015: 한 Claim의 잘못된 인용이 같은 Agent의 다른 정상 결과까지
+    // 폐기하지 않게 한다. 확인된 ref만 맥락으로 남기고 확정 상태는 낮춘다.
+    const knownRefs = finding.evidence_refs.filter((ref) => session.evidence.has(ref));
+    return {
+      ...finding,
+      state: "UNKNOWN" as const,
+      relation: "CONTEXT" as const,
+      evidence_refs: knownRefs,
+      limits: [...new Set([...finding.limits, "일부 근거 인용을 확인하지 못했습니다."])].slice(0, 5),
+    };
+  });
+  return {
+    ok: true,
+    value: { ...parsed.data, findings },
+    ...(citationInvalid ? { reason: "CITATION_INVALID" } : {}),
+  };
 };
 
 export type ToolChoice = { toolCode: string; input: unknown };
@@ -180,6 +195,7 @@ export const runDomainAgent = async <T = DomainAgentOutput>(args: {
       reasonCode = decoded.reason;
     } else {
       output = decoded.value as T;
+      reasonCode ??= decoded.reason ?? null;
     }
   } catch (error) {
     status = "FAILED";
@@ -247,6 +263,7 @@ export const runReviewAgent = async <T>(args: {
   impls: Record<string, ToolImpl>;
   parse: (raw: unknown) => { ok: true; value: T } | { ok: false };
   refsOf: (value: T) => { refs: string[]; confirmed: boolean }[];
+  downgradeInvalid?: (value: T, invalidIndexes: Set<number>) => T;
 }): Promise<AgentRunResult<T>> => {
   const result = await runDomainAgent<T>({
     session: args.session,
@@ -267,11 +284,17 @@ export const runReviewAgent = async <T>(args: {
       const parsed = args.parse(raw);
       if (!parsed.ok) return { ok: false, reason: "OUTPUT_SCHEMA_INVALID" };
       const problems: string[] = [];
-      for (const entry of args.refsOf(parsed.value)) {
-        problems.push(...citationProblems(entry.refs, entry.confirmed ? "VERIFIED" : "UNKNOWN", new Map(evidence.map((entry) => [entry.evidence_ref, entry]))));
+      const invalidIndexes = new Set<number>();
+      const pool = new Map(evidence.map((entry) => [entry.evidence_ref, entry]));
+      for (const [index, entry] of args.refsOf(parsed.value).entries()) {
+        const entryProblems = citationProblems(entry.refs, entry.confirmed ? "VERIFIED" : "UNKNOWN", pool);
+        if (entryProblems.length > 0) invalidIndexes.add(index);
+        problems.push(...entryProblems);
       }
-      return problems.length > 0
-        ? { ok: false, reason: "CITATION_INVALID" }
+      return problems.length > 0 && args.downgradeInvalid
+        ? { ok: true, value: args.downgradeInvalid(parsed.value, invalidIndexes) as unknown, reason: "CITATION_INVALID" }
+        : problems.length > 0
+          ? { ok: false, reason: "CITATION_INVALID" }
         : { ok: true, value: parsed.value as unknown };
     },
   });

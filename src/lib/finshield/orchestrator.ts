@@ -58,6 +58,75 @@ export const judgeFailureReason = (error: unknown, deadlineSignal: AbortSignal):
   (error as { code?: string }).code === "MODEL_BUDGET_BLOCKED" ? "TOOL_BUDGET"
     : deadlineSignal.aborted ? "JUDGE_DEADLINE_EXCEEDED" : "JUDGE_CALL_FAILED";
 
+/**
+ * Judge의 한 Claim에 잘못된 인용이나 누락이 있어도 다른 Claim의 검증된 결과는
+ * 보존한다. 모델 출력을 올려서 고치지 않고 영향 Claim만 UNKNOWN으로 낮춘다.
+ */
+export const normalizeJudgeOutput = (
+  output: JudgeOutput,
+  claims: ConfirmedClaim[],
+  evidence: Map<string, ToolEvidence>,
+): { output: JudgeOutput; reasonCode: string | null } => {
+  const requested = new Set(claims.map((claim) => claim.claim_ref));
+  const grouped = new Map<string, JudgeOutput["claim_results"]>();
+  let coverageInvalid = output.claim_results.some((entry) => !requested.has(entry.claim_ref));
+  let citationInvalid = false;
+
+  for (const entry of output.claim_results) {
+    if (!requested.has(entry.claim_ref)) continue;
+    const group = grouped.get(entry.claim_ref) ?? [];
+    group.push(entry);
+    grouped.set(entry.claim_ref, group);
+  }
+
+  const claimResults = claims.map((claim) => {
+    const candidates = grouped.get(claim.claim_ref) ?? [];
+    if (candidates.length !== 1) coverageInvalid = true;
+    const candidate = candidates[0];
+    if (!candidate) {
+      return {
+        claim_ref: claim.claim_ref,
+        state: "UNKNOWN" as const,
+        evidence_refs: [],
+        withheld_reason: "판단 결과가 누락되었습니다.",
+        rationale_masked: "이 항목의 판단 결과를 확인하지 못했습니다.",
+      };
+    }
+    const problems = citationProblems(candidate.evidence_refs, candidate.state, evidence);
+    if (problems.length === 0) return candidate;
+    citationInvalid = true;
+    return {
+      ...candidate,
+      state: "UNKNOWN" as const,
+      evidence_refs: candidate.evidence_refs.filter((ref) => evidence.has(ref)),
+      withheld_reason: "근거 인용을 확인하지 못했습니다.",
+    };
+  });
+
+  const conflicts = output.conflicts.filter((conflict) => {
+    const refs = [...new Set(conflict.evidence_refs)];
+    const valid = requested.has(conflict.claim_ref)
+      && refs.length >= 2
+      && refs.every((ref) => evidence.has(ref));
+    if (!valid) citationInvalid = true;
+    return valid;
+  });
+
+  return {
+    output: { schema_version: "out-v1", claim_results: claimResults, conflicts },
+    reasonCode: coverageInvalid ? "JUDGE_CLAIM_COVERAGE_INVALID"
+      : citationInvalid ? "JUDGE_CITATION_INVALID" : null,
+  };
+};
+
+export const selectJudgeEvidence = (
+  findings: (DomainFinding & { agent_code: string })[],
+  evidence: ToolEvidence[],
+): ToolEvidence[] => {
+  const domainRefs = new Set(findings.flatMap((finding) => finding.evidence_refs));
+  return evidence.filter((item) => domainRefs.has(item.evidence_ref));
+};
+
 export const runVerification = async (args: {
   ctx: ToolCallContext;
   claims: ConfirmedClaim[];
@@ -137,11 +206,20 @@ export const runVerification = async (args: {
           confirmed: entry.status === "CONFIRMED" || entry.status === "REFUTED"
             || entry.status === "COUNTER_EVIDENCE",
         })),
+        downgradeInvalid: (value, invalidIndexes) => ({
+          ...value,
+          results: value.results.map((entry, index) => invalidIndexes.has(index)
+            ? kind === "cove"
+              ? { ...entry, status: "INCONCLUSIVE" as const, evidence_refs: [], note_masked: "근거 인용을 확인하지 못했습니다." }
+              : { ...entry, status: "NONE_FOUND" as const, evidence_refs: [], note_masked: "근거 인용을 확인하지 못했습니다." }
+            : entry),
+        }) as CoveOutput | RedTeamOutput,
       });
       evidence.push(...result.evidence);
       for (const [ref, id] of result.evidenceIds) evidenceIds.set(ref, id);
       // 조회 자체가 실패한 검토의 NONE_FOUND/CONFIRMED는 독립 검증 증거가 아니다.
-      const reviewed = result.status === "SUCCEEDED" ? result.output : null;
+      const reviewed = result.status === "SUCCEEDED" || result.reasonCode === "CITATION_INVALID"
+        ? result.output : null;
       if (kind === "cove") cove = (reviewed as CoveOutput | null);
       else redTeam = (reviewed as RedTeamOutput | null);
       agentResults.push({
@@ -167,22 +245,21 @@ export const runVerification = async (args: {
     const signal = session.signal ? AbortSignal.any([session.signal, judgeStageSignal]) : judgeStageSignal;
     signal.throwIfAborted();
     if (budgetExhausted) throw Object.assign(new Error("MODEL_BUDGET_BLOCKED"), {code:"MODEL_BUDGET_BLOCKED"});
-    const raw = await args.judgeModel.judge({ claims: args.claims, findings, evidence, signal });
+    // 독립 검토 근거는 CoVe·Red Team 정책 단계에서 사용한다. Judge에는 Domain
+    // 판단이 실제 인용한 근거만 보내 입력 크기와 잘못된 ref 선택 가능성을 줄인다.
+    const judgeEvidence = selectJudgeEvidence(findings, evidence);
+    const raw = await args.judgeModel.judge({ claims: args.claims, findings, evidence: judgeEvidence, signal });
     const parsed = judgeOutput.safeParse(raw);
     if (!parsed.success) {
       judgeReasonCode = "JUDGE_SCHEMA_INVALID";
     } else {
-      const problems: string[] = [];
-      const requested = new Set(args.claims.map(claim => claim.claim_ref));
-      const returned = parsed.data.claim_results.map(claim => claim.claim_ref);
-      if (new Set(returned).size !== requested.size || returned.length !== requested.size || returned.some(ref => !requested.has(ref))) {
-        problems.push("CLAIM_COVERAGE_INVALID");
-      }
-      for (const result of parsed.data.claim_results) {
-        problems.push(...citationProblems(result.evidence_refs, result.state, session.evidence));
-      }
-      if (problems.length > 0) judgeReasonCode = "JUDGE_CITATION_INVALID";
-      else judged = parsed.data;
+      const normalized = normalizeJudgeOutput(
+        parsed.data,
+        args.claims,
+        new Map(judgeEvidence.map((item) => [item.evidence_ref, item])),
+      );
+      judged = normalized.output;
+      judgeReasonCode = normalized.reasonCode;
     }
   } catch (error) {
     judgeReasonCode = judgeFailureReason(error, judgeStageSignal);
