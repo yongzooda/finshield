@@ -1,3 +1,23 @@
+## 2026-09-07 갱신 보안의 기능 Draft 통합
+
+- main PR #224·#226의 Cookie 갱신·직접 세션 RLS를 기존 기능 Draft에 통합했다. 재검증 Job·중단 신호·서버 Claim·상세 Passport 계약은 보존했다.
+- 가입 후 점검과 재검증 조회는 세션 식별자를 사용해 갱신 시 재초기화하지 않는다. 파일 Slot·Process·중단과 TUS 시작·청크·복구 조회에 최신 세션을 적용했다.
+- 기본 시험 550건 통과·선택적 93건 건너뜀, 타입·린트 오류 0건·빌드 통과다. TUS 응답 유실·Offset 복원·취소·계정 교체 시험을 포함한다. 기존 린트 경고 2건은 유지한다.
+- main 배포의 실제 Cookie 갱신·로그아웃·다른 세션 유지와 정리를 확인했다. [원본](evidence/development/auth/2026-09-07-session-refresh-production.json)은 합성 API 경계이며 전체 파일 Live·Release 증거가 아니다.
+- 다섯 DB 증거의 재채택 전 현재 Draft PASS는 7/20이다. main은 8/20이며 Health 한 항목의 차이를 유지한다.
+
+## 2026-09-07 세션 갱신 보안 보완
+
+- `AUTH-002` 서버 Cookie 갱신과 보호 요청 전 갱신을 연결했다. 갱신·로그아웃·로그인 교체 경합과 저장하지 않은 입력 보존을 검증했다.
+- 기본 시험 449건 통과·선택적 85건 건너뜀, 타입·린트·빌드 통과다. 실제 Supabase 회전·동시 요청·응답 유실 복구와 로컬 Chrome 검증은 [세션 갱신 기록](docs/ops/session-refresh.md)을 따른다.
+- 실제 기본 1시간 만료 뒤 조회 거부·Cookie 갱신·조회 복구와 세션 정리가 통과했다. 전체 탈퇴·Gate·Release 완료가 아니다. 직접 RLS는 아래 별도 보안 검증을 따른다.
+
+## 2026-09-07 직접 RLS 세션 경계 보완
+
+- 로그아웃 뒤 유효 JWT로 직접 PostgREST 개인정보 행을 읽는 문제를 실제 재현했다. 원본 실패를 보존한다.
+- Migration 0037은 회원 Base table·정의자 Helper·진행 View·Storage slot에서 활성 Auth 세션을 검사한다. 실제 원격 적용·폐기 JWT의 직접 조회·Storage/TUS 거부와 다른 세션 보존·합성 Case 정리를 확인했다. 세부 범위는 `docs/ops/session-rls.md`를 따른다.
+- Supabase·Rate·Consent·Storage·Delete의 기존 증거 5개는 DB scope 변경으로 STALE이다. Implementation은 NO-GO이며 새 main 측정과 별도 Adoption이 필요하다.
+
 ## 2026-09-07 서버 로그아웃 보안 수정 통합
 
 - main PR #222의 보안 수정을 통합했다. Production 합성 새 세션의 폐기·조회 네 경로 401·다른 세션 유지·시험 세션 정리를 확인했다.

@@ -1,0 +1,20 @@
+{
+  "schema_version": "processor-account-observation-v1",
+  "observed_on": "2026-09-07",
+  "provider": "Cohere",
+  "method": "로그인된 Dashboard의 표시된 UI 읽기",
+  "sources": ["https://dashboard.cohere.com/data-controls", "https://dashboard.cohere.com/billing", "https://cohere.com/pricing"],
+  "training_setting_label": "ALLOW PROMPT AND GENERATION USE FOR TRAINING",
+  "training_allowed": true,
+  "settings_changed": false,
+  "billing_observed": {"embed_paid_rows_present": true, "trial_embed_row_present": true, "period": "Last 7 days", "display_last_updated": "Sep 7, 2026"},
+  "public_pricing_tab": "Advanced retrieval models",
+  "public_usd_per_1000_searches": {"rerank-v4.0-fast": 2, "rerank-v4.0-pro": 2.5},
+  "account_dpa_verified": false,
+  "account_zdr_verified": false,
+  "account_region_verified": false,
+  "subprocessor_inventory_verified": false,
+  "service_key_account_binding_verified": false,
+  "actual_user_data_authorized": false,
+  "gate_adopted": false
+}

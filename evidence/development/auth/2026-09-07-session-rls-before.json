@@ -1,0 +1,15 @@
+{
+  "scope": "변경 전 실제 Supabase Auth 로그아웃·직접 PostgREST profiles 조회",
+  "observed_at": "2026-09-07T11:03:30.489Z",
+  "before": {
+    "status": 200,
+    "rows": 1
+  },
+  "logout_status": 204,
+  "after": {
+    "status": 200,
+    "rows": 1
+  },
+  "outcome": "FAIL",
+  "cleanup_confirmed": true
+}

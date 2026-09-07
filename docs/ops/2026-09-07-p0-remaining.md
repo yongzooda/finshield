@@ -1,3 +1,5 @@
+현재 추가 보안 작업: Migration 0037의 직접 RLS 세션 차단을 실제 검증했다. DB scope 변경으로 Supabase·Rate·Consent·Storage·Delete는 재측정·별도 채택 전까지 STALE이며 이 브랜치의 현재 부분 PASS는 8/20이다. 아래 13/20은 기존 기준선 기록이다. 세션 갱신은 별도 PR #224에서 실제 1시간 자연 만료 뒤 복구까지 확인했다.
+
 # 2026-09-07 개발 재개 확인표
 
 원격 확인 기준은 main `6e096aa`, Draft #192 `e84b52a`다. Draft의 원격 CI `34091783329`와 Preview는 성공했고 기존 기능 worktree는 clean이었다. 현재 작업은 main에서 분리한 `fix/auth-session-logout`의 보안 수정이다. 기존 기능 브랜치를 강제 checkout하거나 제출 확정본을 수정하지 않았다.
@@ -6,7 +8,7 @@
 
 | 요구사항·차단 항목 | 확인된 구현·검증 | 남은 작업·단계 |
 |---|---|---|
-| AUTH-001~002·AUTH-011 | 로그인 존재, Draft 삭제 재인증 실측, 이번 서버 로그아웃·세션 격리 실제 확인 | refresh 보관·갱신·회전·만료 복귀·직접 RLS 세션 폐기 미완료 |
+| AUTH-001~002·AUTH-011 | 로그인 존재, Draft 삭제 재인증 실측, 서버 로그아웃·세션 격리·Cookie 회전·실제 만료 복구·직접 RLS 폐기 확인 | 전체 탈퇴 수명·배포 통합의 추가 검증은 별도이며 전체 AUTH 완료 아님 |
 | AUTH-005·D-014·SEC-PRI-005 | Migration 0036 선행 정리 Guard, Draft Case 삭제·반복 요청 실제 확인 | 전체 계정 탈퇴·신규 작업 경합·Auth 마지막 삭제 미구현·Live 미검증 |
 | INP-001~013·CLM-001~004·B-OCR-01 | Draft native PDF·PNG·10쪽 스캔의 실제 처리·물리 삭제 연결 | 정식 field F1 0.9791667 실패 유지, 개발 진단·새 가족 사전등록 평가·OCR 확인 UX 필요 |
 | AI-006~008·EV-002~009·B-RETRIEVAL-01 | 후보 생성 PASS, 종단 두 차례 미달. 이번 실제 worker 조회에서 KB 문서·청크·Embedding 각 0건 | 기존 gate 재측정 금지, 범위/Provider 별도 결정·공식 자료 적재·미연결 도구 필요 |

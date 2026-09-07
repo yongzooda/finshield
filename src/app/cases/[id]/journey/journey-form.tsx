@@ -1,5 +1,7 @@
 "use client";
 
+import { sessionFetch } from "../../../session-client";
+
 /**
  * 가입·송금/피해 사실 등록 (S-015).
  *
@@ -43,7 +45,7 @@ export function JourneyForm({ caseId }: { caseId: string }) {
     if (!token) return;
     setBusy(true); setNotice(null);
     try {
-      const response = await fetch(`/api/finshield/cases/${caseId}/journey`, {
+      const response = await sessionFetch(`/api/finshield/cases/${caseId}/journey`, token, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify(body),

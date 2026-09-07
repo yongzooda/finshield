@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
+import { freshSessionToken, sessionFetch } from "../session-client";
 import { uploadFile } from "./upload-file";
 
 type FileClaim={claim_id:string;claim_ref:string;claim_type:string;statement_masked:string;materiality:string;expected_revision_no:number;source_page_no:number};
@@ -13,7 +14,7 @@ export function FileIntake({token,onPrepared,onBusyChange}:{token:string;onPrepa
   const headers={"Content-Type":"application/json",Authorization:`Bearer ${token}`};
   const stop=async()=>{
     controller.current?.abort();
-    if(slot.current){const response=await fetch(`/api/finshield/cases/${slot.current.case_id}/stop`,{
+    if(slot.current){const response=await sessionFetch(`/api/finshield/cases/${slot.current.case_id}/stop`,token,{
       method:"POST",headers,body:JSON.stringify({input_id:slot.current.input_id})});
       if(!response.ok)throw new Error("중단 요청을 확인하지 못했습니다. 내 기록에서 상태를 확인해 주세요.");}
     slot.current=null;
@@ -24,13 +25,13 @@ export function FileIntake({token,onPrepared,onBusyChange}:{token:string;onPrepa
     setBusy(true);onBusyChange(true);setMessage("업로드를 준비하고 있습니다.");
     const abort=new AbortController();controller.current=abort;
     try{
-      const opened=await fetch("/api/finshield/files/slot",{method:"POST",headers,body:JSON.stringify({mime:file.type,size:file.size}),signal:abort.signal});
+      const opened=await sessionFetch("/api/finshield/files/slot",token,{method:"POST",headers,body:JSON.stringify({mime:file.type,size:file.size}),signal:abort.signal});
       const data=await opened.json();if(!opened.ok)throw new Error(data.error??"업로드를 준비하지 못했습니다.");
       slot.current={case_id:data.case_id,input_id:data.input_id};
-      await uploadFile({file,supabaseUrl:data.supabase_url,publishableKey:data.publishable_key,objectPath:data.object_path,token,signal:abort.signal,
+      await uploadFile({file,supabaseUrl:data.supabase_url,publishableKey:data.publishable_key,objectPath:data.object_path,token:()=>freshSessionToken(token),signal:abort.signal,
         onProgress:(sent,total)=>setMessage(`파일 업로드 ${Math.round(sent/total*100)}%`)});
       setMessage("파일의 안전성을 확인하고 문장을 읽고 있습니다.");
-      const processed=await fetch("/api/finshield/files/process",{method:"POST",headers,
+      const processed=await sessionFetch("/api/finshield/files/process",token,{method:"POST",headers,
         body:JSON.stringify({...slot.current,ocr_consent:consent}),signal:abort.signal});
       const result=await processed.json();if(!processed.ok)throw new Error(result.error??"파일을 읽지 못했습니다.");
       slot.current=null;setFile(null);onPrepared(result);

@@ -1,0 +1,20 @@
+{
+  "schema_version": "auth-refresh-browser-development-v1",
+  "scope": "로컬 Next·Chrome·실제 Supabase, 갱신 일정만 브라우저 시계로 앞당긴 시험",
+  "checks": {
+    "login": true,
+    "refresh_cookie_hidden_from_script": true,
+    "refresh_status": 200,
+    "access_token_rotated": true,
+    "unsaved_profile_choice_preserved": true,
+    "profile_refetch_during_rotation": 0,
+    "logout_confirmed": true,
+    "tab_token_removed": true
+  },
+  "limitations": [
+    "실제 1시간 만료 시험은 별도 진행",
+    "첫 fetch 계측은 this 바인딩 누락으로 실패했고 계측만 고친 뒤 재실행",
+    "모델·OCR·Profile 저장 요청 없음"
+  ],
+  "outcome": "PASS"
+}

@@ -1,5 +1,7 @@
 "use client";
 
+import { sessionFetch, readSessionToken, sessionIdentity } from "../../../session-client";
+
 /**
  * 재검증 비교 (S-014).
  *
@@ -30,6 +32,7 @@ type Done = {
 
 export function RevalidateFlow({ caseId }: { caseId: string }) {
   const [token, setToken, ready] = useFsToken();
+  const sessionKey = sessionIdentity(token);
   const [step, setStep] = useState<"idle" | "running" | "done">("idle");
   const [agents, setAgents] = useState<AgentLine[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
@@ -41,13 +44,14 @@ export function RevalidateFlow({ caseId }: { caseId: string }) {
   const [requestKey, setRequestKey] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!token) return;
+    const token = readSessionToken();
+    if (!ready || !token || sessionIdentity(token) !== sessionKey) return;
     let active = true;
     let timer: ReturnType<typeof setTimeout>;
     const controller = new AbortController();
     const poll = async () => {
       try {
-        const response = await fetch(`/api/finshield/cases/${caseId}/revalidate`, {
+        const response = await sessionFetch(`/api/finshield/cases/${caseId}/revalidate`, token, {
           headers: { Authorization: `Bearer ${token}` }, signal: controller.signal,
         });
         const body = await response.json();
@@ -87,14 +91,14 @@ export function RevalidateFlow({ caseId }: { caseId: string }) {
     };
     void poll();
     return () => { active = false; controller.abort(); clearTimeout(timer); };
-  }, [token, caseId, setToken, refresh]);
+  }, [ready, sessionKey, caseId, setToken, refresh]);
 
   const start = async () => {
     if (!token) return;
     const key = requestKey ?? crypto.randomUUID();
     setRequestKey(key); setNotice(null); setAgents([]); setStep("running");
     try {
-      const response = await fetch(`/api/finshield/cases/${caseId}/revalidate`, {
+      const response = await sessionFetch(`/api/finshield/cases/${caseId}/revalidate`, token, {
         method: "POST", headers: { Authorization: `Bearer ${token}`, "Idempotency-Key": key },
       });
       const body = await response.json();
@@ -111,7 +115,7 @@ export function RevalidateFlow({ caseId }: { caseId: string }) {
   const cancel = async () => {
     if (!token || !jobId) return;
     try {
-      const response = await fetch(`/api/finshield/cases/${caseId}/revalidate?job_id=${jobId}`, {
+      const response = await sessionFetch(`/api/finshield/cases/${caseId}/revalidate?job_id=${jobId}`, token, {
         method: "DELETE", headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) throw new Error("취소 요청을 전달하지 못했습니다");

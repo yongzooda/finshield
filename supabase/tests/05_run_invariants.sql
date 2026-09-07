@@ -279,7 +279,7 @@ do $$
 declare n int;
 begin
   set local role authenticated;
-  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a"}';
+  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a","session_id":"10000000-0000-4000-8000-00000000000a","exp":4102444800}';
   perform fstest.expect_fail($sql$ select count(*) from public.verification_runs $sql$,
     '회원이 Run 표를 직접 조회 (View 전용)');
   perform fstest.expect_fail($sql$ select count(*) from private.execution_manifests $sql$,

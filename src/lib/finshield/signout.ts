@@ -2,6 +2,7 @@ import "server-only";
 import { jsonNoStore } from "@/lib/ops/http";
 import { bearerToken } from "./auth";
 import { authConfigured, finshieldEnv } from "./env";
+import { setRefreshCookie, tokenSession } from "./session-cookie";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
@@ -35,11 +36,11 @@ export async function signOutSession(request: Request): Promise<Response> {
       cache: "no-store",
       redirect: "error",
     });
-    if (response.status === 204) return jsonNoStore({ status: "SIGNED_OUT" });
+    if (response.status === 204) return setRefreshCookie(jsonNoStore({ status: "SIGNED_OUT" }), request, tokenSession(token)!.id, null);
     const body = await response.json().catch(() => null);
     // 응답이 유실된 첫 요청을 반복하면 발급처에 세션이 이미 없을 수 있다.
     if (response.status === 403 && ["session_not_found", "user_not_found"].includes(body?.error_code)) {
-      return jsonNoStore({ status: "SIGNED_OUT" });
+      return setRefreshCookie(jsonNoStore({ status: "SIGNED_OUT" }), request, tokenSession(token)!.id, null);
     }
     if ([401, 403].includes(response.status) && ["bad_jwt", "no_authorization"].includes(body?.error_code)) {
       return jsonNoStore({ code: "SESSION_EXPIRED", error: "로그인이 만료됐습니다. 서버 로그아웃은 확인하지 못했습니다" }, 401);

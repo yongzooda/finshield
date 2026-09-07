@@ -1,5 +1,7 @@
 "use client";
 
+import { readSessionToken, sessionIdentity } from "../../../session-client";
+
 /**
  * Evidence Passport (S-012).
  *
@@ -41,12 +43,14 @@ type Detail = {
 
 export function PassportView({ caseId }: { caseId: string }) {
   const [token, setToken, ready] = useFsToken();
+  const sessionKey = sessionIdentity(token);
   const [detail, setDetail] = useState<Detail | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!ready || !token) return;
+    const token = readSessionToken();
+    if (!ready || !token || sessionIdentity(token) !== sessionKey) return;
     let alive = true;
     void (async () => {
       const result = await fetchCase<Detail>(caseId, token);
@@ -56,7 +60,7 @@ export function PassportView({ caseId }: { caseId: string }) {
       setNotice(result.error);
     })();
     return () => { alive = false; };
-  }, [ready, token, caseId, setToken]);
+  }, [ready, sessionKey, caseId, setToken]);
 
   if (!ready) return null;
   if (!token) return <FsLoginCard onToken={setToken} />;

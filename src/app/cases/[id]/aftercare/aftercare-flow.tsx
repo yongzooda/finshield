@@ -1,5 +1,7 @@
 "use client";
 
+import { sessionFetch, readSessionToken, sessionIdentity } from "../../../session-client";
+
 /**
  * 가입 후 점검 (S-016).
  *
@@ -50,24 +52,26 @@ const MATERIAL_LABEL: Record<string, string> = {
 
 export function AftercareFlow({ caseId }: { caseId: string }) {
   const [token, setToken, ready] = useFsToken();
+  const sessionKey = sessionIdentity(token);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [prior, setPrior] = useState<PriorClaim[]>([]);
   const [basePassport, setBasePassport] = useState<string | null>(null);
   const [terms, setTerms] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
-  const [loadedToken, setLoadedToken] = useState<string | null>(null);
+  const [loadedSession, setLoadedSession] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
 
   useEffect(() => {
-    if (!token) return;
+    const token = readSessionToken();
+    if (!ready || !token || sessionIdentity(token) !== sessionKey) return;
     let alive = true;
     void (async () => {
       try {
         const [response, savedResponse] = await Promise.all([
           fetchCase<{ passports: { id: string; verification_run_id: string }[];
             final_claims: (PriorClaim & { verification_run_id: string })[] }>(caseId, token),
-          fetch(`/api/finshield/cases/${caseId}/aftercare`, { headers: { Authorization: `Bearer ${token}` } }),
+          sessionFetch(`/api/finshield/cases/${caseId}/aftercare`, token, { headers: { Authorization: `Bearer ${token}` } }),
         ]);
         const saved = await savedResponse.json();
         if (!alive) return;
@@ -85,16 +89,16 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
           setResult(assessment);
         } else { setResult(null); setAnswers({}); setTerms({}); }
       } catch { if (alive) setNotice("이전 기록을 읽지 못했습니다. 다시 열어 주세요."); }
-      finally { if (alive) setLoadedToken(token); }
+      finally { if (alive) setLoadedSession(sessionKey); }
     })();
     return () => { alive = false; };
-  }, [caseId, token]);
+  }, [ready, caseId, sessionKey]);
 
   const submit = async () => {
     if (!token) return;
     setBusy(true); setNotice(null);
     try {
-      const response = await fetch(`/api/finshield/cases/${caseId}/aftercare`, {
+      const response = await sessionFetch(`/api/finshield/cases/${caseId}/aftercare`, token, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ answers, base_passport_id: basePassport, contract_terms: terms }),
@@ -114,7 +118,7 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
   if (!ready) return null;
   if (!token) return <FsLoginCard onToken={setToken} title="가입 후 점검" />;
 
-  if (loadedToken !== token) return <FsCard><p className="fs-body">저장된 점검 기록을 읽고 있습니다.</p></FsCard>;
+  if (loadedSession !== sessionKey) return <FsCard><p className="fs-body">저장된 점검 기록을 읽고 있습니다.</p></FsCard>;
 
   if (result) {
     const view = RESULT_VIEW[result.result]

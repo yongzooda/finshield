@@ -17,6 +17,8 @@ assert.ok(inventory.tests.includes("14_cross_owner_matrix.sql"));
 
 const schema = () => ({
   tracked_schemas: [...TRACKED_SCHEMAS], tables: 72, tables_digest: "a".repeat(64),
+  views: 6, view_digest: "9".repeat(64),
+  policies: 150, policy_digest: "f".repeat(64),
   routines: 80, routine_digest: "e".repeat(64),
   constraints: 640, constraint_digest: "b".repeat(64), indexes: 260, index_digest: "c".repeat(64),
   rls_total: 72, rls_enforced: 72, rls_missing: [],
@@ -46,7 +48,7 @@ const good = () => ({
       extensions: { vector: { version: "0.8.0", schema: "extensions" }, pgcrypto: { version: "1.3", schema: "extensions" }, pg_trgm: { version: "1.6", schema: "extensions" } },
       roles: { worker_bypassrls: false, worker_login: true, postgres_bypassrls: true, legacy_roles: [] },
     },
-    schema_match: { tables: true, constraints: true, indexes: true, routines: true },
+    schema_match: { tables: true, constraints: true, indexes: true, routines: true, policies: true, views: true },
   },
 });
 const errorsOf = (result) => {
@@ -104,4 +106,12 @@ rejects("회원 본문 표 목록 변경", (o) => { o.contract.member_only_table
 rejects("관측 필드 추가", (o) => { o.local.extra = true; });
 rejects("observations 누락", (o) => { delete o.remote; });
 
+
+
+rejects("정책 누락을 같은 RLS로 표시", (o) => { o.remote.schema.policy_digest = "a".repeat(64); });
+rejects("정책 digest 누락", (o) => { delete o.remote.schema.policy_digest; });
+rejects("정책 비교를 false로 표시", (o) => { o.schema_match.policies = false; });
+
+rejects("진행 View 조건 누락", (o) => { o.remote.schema.view_digest = "a".repeat(64); });
+rejects("View digest 누락", (o) => { delete o.remote.schema.view_digest; });
 console.log(`B-SUPABASE-01 결과 정책 mutation test 통과: 합격 1건, 거부 ${rejected}건.`);
