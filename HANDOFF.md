@@ -16,6 +16,10 @@
 - 작업 기록: 커밋·squash·이슈·PR·직접 작성한 댓글은 한국어. 과거 SHA는 사용자 승인대로 보존하고 `docs/ops/korean-record-corrections.md`의 정정표를 따른다.
 - 로컬 설정: `docs/ops/local-environment.md`를 따른다. `.env.local` 부재는 GitHub Provider 시험의 장애 원인이 아니며 실제 전용 개발 DB 설정과 구분한다.
 
+## 2026-09-07 모델 재측정 결과 채택 준비
+
+- main run `34077370635`에서 합성 50건·실제 호출 100회와 결정적 장애 20건이 동일 정책을 통과했다. 별도 Adoption 검증 완료 전까지 부분 PASS를 복원하지 않는다.
+
 ## 2026-09-07 실행 의존성 사전등록
 
 - 격리 Parser와 요청에서 독립된 Job 검증을 위해 Sandbox·Workflow SDK 및 취약점 수정 의존성을 고정했다. 애플리케이션 기능 코드는 이 변경에 포함하지 않는다.
