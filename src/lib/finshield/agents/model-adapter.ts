@@ -53,6 +53,50 @@ const toolChoiceSchema = z.object({
   reason_masked: z.string().max(300),
 });
 
+/**
+ * 모델이 이번 호출에서 보지 못한 E번호를 구조적으로 만들지 못하게 한다.
+ * 응답 뒤 Citation Validator도 그대로 두어 권위·직접성·최신성을 다시 확인한다.
+ */
+export const citationReferenceSchema = (evidence: ToolEvidence[]) => {
+  const refs = [...new Set(evidence.map((item) => item.evidence_ref))];
+  if (refs.length === 0) return z.array(z.string()).max(0);
+  return z.array(z.enum(refs as [string, ...string[]])).max(refs.length);
+};
+
+export const domainOutputSchemaFor = (evidence: ToolEvidence[]) => domainAgentOutput.extend({
+  findings: z.array(domainAgentOutput.shape.findings.element.extend({
+    evidence_refs: citationReferenceSchema(evidence),
+  })),
+});
+
+export const coveOutputSchemaFor = (evidence: ToolEvidence[]) => coveOutput.extend({
+  results: z.array(coveOutput.shape.results.element.extend({
+    evidence_refs: citationReferenceSchema(evidence),
+  })),
+});
+
+export const redTeamOutputSchemaFor = (evidence: ToolEvidence[]) => redTeamOutput.extend({
+  results: z.array(redTeamOutput.shape.results.element.extend({
+    evidence_refs: citationReferenceSchema(evidence),
+  })),
+});
+
+export const judgeOutputSchemaFor = (evidence: ToolEvidence[]) => z.object({
+  schema_version: z.literal("out-v1"),
+  claim_results: z.array(z.object({
+    claim_ref: z.string(),
+    state: z.enum(["VERIFIED", "CONTRADICTED", "CONFLICT", "UNKNOWN", "NEED_MORE_INFORMATION", "WITHHELD"]),
+    evidence_refs: citationReferenceSchema(evidence),
+    withheld_reason: z.string().nullable(),
+    rationale_masked: z.string(),
+  })),
+  conflicts: z.array(z.object({
+    claim_ref: z.string(),
+    evidence_refs: citationReferenceSchema(evidence).min(2),
+    note_masked: z.string(),
+  })),
+});
+
 export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
   const usage = new Map<string, ModelUsage>();
   const usageFor = (code: string) => {
@@ -99,8 +143,8 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
         evidence: evidenceBrief(evidence),
         observations,
       }),
-      schema: input.agent_code === "COVE" ? coveOutput
-        : input.agent_code === "RED_TEAM" ? redTeamOutput : domainAgentOutput,
+      schema: input.agent_code === "COVE" ? coveOutputSchemaFor(evidence)
+        : input.agent_code === "RED_TEAM" ? redTeamOutputSchemaFor(evidence) : domainOutputSchemaFor(evidence),
       maxTokens: 1600, effort: "low", signal, maxRetries: 0,
       timeoutMs: input.agent_code === "COVE" || input.agent_code === "RED_TEAM"
         ? MODEL_TIMEOUTS.reviewDecisionMs : MODEL_TIMEOUTS.domainDecisionMs,
@@ -117,21 +161,7 @@ export const createJudgeModel = (context?: ModelBudgetContext): JudgeModel => {
       model: FINSHIELD_MODEL,
       system: `${JUDGE_SYSTEM}\n각 rationale_masked는 핵심 근거를 담은 40자 이내 한 문장이다. withheld_reason은 20자 이내다. 입력 Claim마다 정확히 한 결과를 낸다.`,
       user: JSON.stringify({ claims: claimBrief(claims), findings, evidence: evidenceBrief(evidence) }),
-      schema: z.object({
-        schema_version: z.literal("out-v1"),
-        claim_results: z.array(z.object({
-          claim_ref: z.string(),
-          state: z.enum(["VERIFIED", "CONTRADICTED", "CONFLICT", "UNKNOWN", "NEED_MORE_INFORMATION", "WITHHELD"]),
-          evidence_refs: z.array(z.string()),
-          withheld_reason: z.string().nullable(),
-          rationale_masked: z.string(),
-        })),
-        conflicts: z.array(z.object({
-          claim_ref: z.string(),
-          evidence_refs: z.array(z.string()),
-          note_masked: z.string(),
-        })),
-      }),
+      schema: judgeOutputSchemaFor(evidence),
       maxTokens: 1600, effort: "low", signal, maxRetries: 0, timeoutMs: MODEL_TIMEOUTS.judgeMs,
     }, context, usage);
   },
