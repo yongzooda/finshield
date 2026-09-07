@@ -1272,10 +1272,12 @@ Passport Commit과 Outbox INSERT는 같은 Transaction이다. Dispatcher 실패�
 |---|---|---|
 | `private.budget_limits` | `scope_type`, `provider`, `model`, `limit_microunits`, `policy_version`, `updated_at` | 범위별 상한 설정. 정확한 model 행이 없으면 `*` 행, 그것도 없으면 예약 거부(fail-closed) |
 | `private.usage_budget_counters` | `scope_type`, `scope_key`, `provider`, `model`, `period_start`, `period_end`, `limit_microunits`, `reserved_microunits`, `consumed_microunits`, `updated_at` | 호출 전 원자 예약, Cap 초과 0건. `scope_type`은 `GLOBAL_DAY|OWNER_DAY|CASE|RUN` |
-| `private.usage_reservations` | `id`, `run_id`, `agent_run_id`, `tool_run_id`, `provider`, `model`, `pricing_version`, `estimated_microunits`, `actual_microunits`, `status`, `reconcile_required`, token·elapsed·status category·retry·request ref, `expires_at`, `created_at`, `settled_at` | `RESERVED|SETTLED|RELEASED`, 실제 사용 정산. 사용량이 불명확하면 `RESERVED` 유지 + `reconcile_required` |
+| `private.usage_reservations` | `id`, `run_id`, `case_input_id`, `demo_run_id`, `agent_run_id`, `tool_run_id`, `provider`, `model`, `pricing_version`, `estimated_microunits`, `actual_microunits`, `status`, `reconcile_required`, token·elapsed·status category·retry·request ref, `expires_at`, `created_at`, `settled_at` | `RESERVED|SETTLED|RELEASED`, 실제 사용 정산. 사용량이 불명확하면 `RESERVED` 유지 + `reconcile_required` |
 | `private.usage_reservation_counters` | `reservation_id`, `counter_id`, `microunits` | 예약이 잡은 Counter 별 금액; 정산·해제가 되돌릴 대상 |
 | `private.rate_limit_buckets` | `scope_type`, `scope_key`, `operation`, `window_start`, `count`, `limit_value`, `updated_at` | 사용자·IP 보조정보·Case·Tool 다층 제한 |
 | `private.audit_events` | `id`, `correlation_id`, `event_code`, `actor_type`, `owner_ref`, `case_id`, `run_id`, `agent_run_id`, `tool_run_id`, `status_code`, `error_code`, `duration_ms`, `created_at` | 원문·PII·Secret 없는 운영 Trace |
+
+호출 문맥은 `run_id|case_input_id|demo_run_id` 중 정확히 하나다. Intake는 본인 `MASKED`·`ACTIVE` 입력, 회원 검증은 본인 진행 Run, 공개 체험은 만료되지 않은 Demo Run만 예약한다. Intake의 RUN counter key는 `input:<UUID>`, Demo의 OWNER_DAY·CASE key는 `demo:<session UUID>`, RUN key는 `demo:<run UUID>`로 구분한다. Demo 예약은 회원 Case·프로필을 만들지 않는다. 상한 미설정은 호출 전에 거부한다.
 
 `scope_key`와 `owner_ref`는 외부 노출하지 않는다. IP는 원문을 저장하지 않고 회전 Salt로 HMAC한 제한용 값만 짧게 보존한다. Budget 감소·삭제는 직접 Grant하지 않고 예약·정산 함수만 허용한다.
 
