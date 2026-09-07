@@ -229,3 +229,6 @@
 기록·삭제 목록에 50건 이후 Cursor 조회를 추가했다. 생성 시각의 microsecond와 ID 동점을 보존하고 계정 전환 시 과거 목록/지연 응답을 격리한다. 기본 573건·선택적 skip 96건과 빌드 통과이며 실제 다기기 대량 목록은 별도 검증이 필요하다.
 
 알림 INSERT·Outbox 완료의 원자성과 과거 PROCESSING 복구를 Migration 0040으로 추가했다. SQL 29파일·기본 572건·빌드가 통과했고 알림은 저장된 Job/Passport 판으로 이동한다. 전역 주기 Dispatcher·원격 적용·Live UI는 아직 검증하지 않았다. 별도 보호 Preview API에서 합성 Case 51개를 두 로그인 세션으로 페이지 조회하고 모두 삭제했다. 기록은 `evidence/development/notifications/`·`evidence/development/records/`를 따른다.
+## 2026-09-07 Fast 합성 개발 시험
+
+사용자 승인 범위의 개발 전용 실행 경로를 추가했다. `docs/ops/2026-09-07-rerank-fast-development.md`에 산식·개발 split·최대 USD 0.05·첫 dispatch/attempt·원장 보존을 사전등록했다. 제품 기능 Draft #192와 별도이며 기존 실패 Gate를 재평가하거나 제품 Rerank를 바꾸지 않는다. 현재 계약 시험·기본 449건과 빌드를 통과했고 선택적 85건은 건너뛰었다. 실제 Provider 결과는 실행 뒤 별도 기록한다.

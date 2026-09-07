@@ -1,0 +1,95 @@
+name: Rerank Fast Development
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: rerank-fast-development-20260907
+  cancel-in-progress: false
+
+jobs:
+  evidence:
+    name: 합성 Fast 개발 시험
+    if: github.ref == 'refs/heads/main'
+    environment: provider-spike
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_PASSWORD: baseline
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 20
+        ports:
+          - 5432:5432
+    steps:
+      - name: Checkout trusted harness
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: trusted
+          persist-credentials: false
+          ref: ${{ github.sha }}
+
+      - name: Set up Node 24
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+
+      - name: Install trusted validator dependencies
+        run: npm --prefix trusted ci --ignore-scripts
+
+      - name: Validate trusted main commit
+        env:
+          WORKFLOW_HEAD_SHA: ${{ github.sha }}
+        run: |
+          if [[ "${GITHUB_REF}" != "refs/heads/main" || ! "${WORKFLOW_HEAD_SHA}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::evidence must run from an immutable main commit"
+            exit 1
+          fi
+          test "$(git -C trusted rev-parse HEAD)" = "${WORKFLOW_HEAD_SHA}"
+
+      - name: 승인된 단일 실행 확인
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$GITHUB_RUN_ATTEMPT" = "1"
+          prior=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/rerank-fast-development.yml/runs?per_page=100" --jq "[.workflow_runs[] | select(.id != ($GITHUB_RUN_ID | tonumber))] | length")
+          test "$prior" = "0"
+
+      - name: 개발 계약 시험
+        run: node trusted/.github/scripts/test-rerank-fast-development.mjs
+
+      - name: Build baseline database
+        env:
+          PGPASSWORD: baseline
+        run: |
+          psql -h 127.0.0.1 -U postgres -c "create database finshield_eval"
+          psql -h 127.0.0.1 -U postgres -d finshield_eval -v ON_ERROR_STOP=1 -q -f trusted/supabase/tests/00_supabase_stub.sql
+          for file in $(ls trusted/supabase/migrations/[0-9][0-9][0-9][0-9]_*.sql | sort); do
+            psql -h 127.0.0.1 -U postgres -d finshield_eval -v ON_ERROR_STOP=1 -q -f "$file"
+          done
+          psql -h 127.0.0.1 -U postgres -d finshield_eval -Atc "select count(*) from pg_tables where schemaname in ('public','private','kb','demo')"
+
+      - name: 합성 개발 후보 실행
+        env:
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+          FINSHIELD_DATABASE_URL: ${{ secrets.FINSHIELD_DATABASE_URL }}
+          RETRIEVAL_DATABASE_URL: postgres://postgres:baseline@127.0.0.1:5432/finshield_eval
+          TRUSTED_REPOSITORY: ${{ github.workspace }}/trusted
+          PROBE_OUTPUT_PATH: ${{ github.workspace }}/probe-output/fast-development.json
+        run: node trusted/.github/scripts/rerank-fast-development.mjs
+
+      - name: 실패를 포함한 개발 원장 보존
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: fast-development-${{ github.sha }}
+          path: probe-output/
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 9
