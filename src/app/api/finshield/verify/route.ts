@@ -11,8 +11,8 @@ import { cleanupCaseFiles } from "@/lib/finshield/files/cleanup";
 import { ndjsonStream } from "@/lib/ops/ndjson";
 import { jsonNoStore, readJson } from "@/lib/ops/http";
 import { fsql } from "@/lib/finshield/db";
-import { resolveOwner, UnauthenticatedError } from "@/lib/finshield/auth";
-import { loadRunInput, maskSelection, prepareInitialVerificationStart, selectionSchema } from "@/lib/finshield/run-input";
+import { bearerToken, resolveOwner, UnauthenticatedError } from "@/lib/finshield/auth";
+import { loadInitialVerificationPreparation, loadRunInput, maskSelection, prepareInitialVerificationStart, selectionSchema } from "@/lib/finshield/run-input";
 import { loadManifest } from "@/lib/finshield/registry";
 import { runVerification, type RunProgress } from "@/lib/finshield/orchestrator";
 import { buildFinalClaims, finalizeRun } from "@/lib/finshield/finalize";
@@ -40,6 +40,8 @@ export async function POST(request: Request): Promise<Response> {
   const body = selectionSchema.safeParse(parsed.value);
   if (!body.success) return jsonNoStore({ error: "확인할 항목을 다시 선택해 주세요" }, 400);
   const caseId = body.data.case_id;
+  const token = bearerToken(request);
+  if (!token) return jsonNoStore({ error: "로그인이 필요합니다" }, 401);
   let selected: ReturnType<typeof maskSelection>;
   try { selected = maskSelection(body.data); }
   catch { return jsonNoStore({ error: "수정한 문장에서 개인정보를 지운 뒤 다시 확인해 주세요" }, 400); }
@@ -65,10 +67,11 @@ export async function POST(request: Request): Promise<Response> {
   const work = (async () => {
     try {
       const manifest = await loadManifest(fsql());
+      const preparation = await loadInitialVerificationPreparation(fsql(), token, caseId);
       const runId = await fsql().begin(async sql => {
         // 이전 Stream이 끊겨 화면이 실패를 확인했거나 deadline이 지난 Run만
         // 먼저 terminal로 만든다. 살아 있는 다른 Run은 DB가 거부한다.
-        await prepareInitialVerificationStart(sql,ownerId,caseId,body.data.replace_run_id);
+        await prepareInitialVerificationStart(sql,ownerId,caseId,body.data.replace_run_id,preparation);
         await sql`select private.confirm_case_claims(${ownerId}::uuid, ${caseId}::uuid,
           ${JSON.stringify(selected)}::text::jsonb)`;
         const run = await sql`select private.create_verification_run(${ownerId}::uuid, ${caseId}::uuid,
