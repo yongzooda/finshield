@@ -225,3 +225,5 @@
 사용자가 전체 P0 구현 우선 진행을 지시했고 Cohere 학습 사용 Off 및 Fast 합성 개발 시험 최대 USD 0.05를 승인했다. Off 변경과 별도 페이지 재확인을 완료했으며 아직 유료 Provider 호출은 하지 않았다. 계정 탈퇴의 API·화면·Workflow·DB 작업 차단·Auth 마지막 삭제를 기능 Draft에서 구현했다. 격리 SQL과 API 검증은 `evidence/development/deletion/2026-09-07-account-deletion.md`를 따른다. Migration 0038의 원격 적용·Live 파일/Auth/다기기 검증은 남아 있다. 0038로 기능 Draft의 DB 관련 다섯 증거는 STALE이며 Health도 기존 STALE이므로 7/20이다. main은 13/20을 유지한다. Implementation NO-GO·Release NOT-EVALUATED이며 Draft #192 전체를 병합하지 않는다.
 
 공용 KB 도구·Cohere 비용 경계도 구현했다. 상세 범위와 한계는 `evidence/development/retrieval/2026-09-07-public-kb-runtime.md`를 따른다. Migration 0039는 전체/Provider 합산 예약을 추가하며 상한을 자동 설정하지 않는다. PreCase의 고정 corpus 중 20문서·28청크를 로컬 격리 DB에서 검색·본문 복원했다. 참고용·UNKNOWN이며 원격 공식 KB 완성이나 Fast Live 성공은 아니다. 실제 Provider 호출은 아직 0건이다.
+
+기록·삭제 목록에 50건 이후 Cursor 조회를 추가했다. 생성 시각의 microsecond와 ID 동점을 보존하고 계정 전환 시 과거 목록/지연 응답을 격리한다. 기본 573건·선택적 skip 96건과 빌드 통과이며 실제 다기기 대량 목록은 별도 검증이 필요하다.

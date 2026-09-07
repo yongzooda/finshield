@@ -33,8 +33,8 @@ const ask = async <T,>(path: string, token: string): Promise<CaseFetch<T>> => {
 export const fetchCase = <T,>(caseId: string, token: string): Promise<CaseFetch<T>> =>
   ask<T>(`/api/finshield/cases/${encodeURIComponent(caseId)}`, token);
 
-export const fetchCases = <T,>(token: string): Promise<CaseFetch<T>> =>
-  ask<T>("/api/finshield/cases", token);
+export const fetchCases = <T,>(token: string, cursor?: string | null): Promise<CaseFetch<T>> =>
+  ask<T>(`/api/finshield/cases${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`, token);
 
 export const fetchNotifications = <T,>(token: string): Promise<CaseFetch<T>> =>
   ask<T>("/api/finshield/notifications", token);

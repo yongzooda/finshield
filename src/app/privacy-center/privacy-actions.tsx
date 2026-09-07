@@ -36,6 +36,9 @@ export function PrivacyActions() {
   const [token, setToken, ready] = useFsToken();
   const sessionKey = sessionIdentity(token);
   const [rows, setRows] = useState<CaseRow[] | null>(null);
+  const [loadedSession, setLoadedSession] = useState<string | null>(null);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [asking, setAsking] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -68,14 +71,27 @@ export function PrivacyActions() {
     if (!ready || !token || sessionIdentity(token) !== sessionKey) return;
     let alive = true;
     void (async () => {
-      const result = await fetchCases<{ cases: CaseRow[] }>(token);
-      if (!alive) return;
-      if (result.ok) { setRows(result.data.cases); setNotice(null); return; }
+      const result = await fetchCases<{ cases: CaseRow[]; next_cursor: string | null }>(token);
+      if (!alive || sessionIdentity(readSessionToken()) !== sessionKey) return;
+      if (result.ok) { setRows(result.data.cases); setCursor(result.data.next_cursor); setLoadedSession(sessionKey); setNotice(null); return; }
       if (result.status === 401) setToken(null);
       setNotice(result.error);
     })();
     return () => { alive = false; };
   }, [ready, sessionKey, setToken]);
+
+  const loadMore = async () => {
+    if (!token || !cursor || loadingMore || loadedSession !== sessionKey) return;
+    setLoadingMore(true); setNotice(null);
+    try {
+      const result = await fetchCases<{ cases: CaseRow[]; next_cursor: string | null }>(token, cursor);
+      if (sessionIdentity(readSessionToken()) !== sessionKey) return;
+      if (result.ok) {
+        setRows(previous => [...new Map([...(previous ?? []), ...result.data.cases].map(row => [row.id, row])).values()]);
+        setCursor(result.data.next_cursor);
+      } else setNotice(result.error);
+    } finally { setLoadingMore(false); }
+  };
 
   const requestDelete = async (caseId: string) => {
     if (!token) return;
@@ -144,7 +160,7 @@ export function PrivacyActions() {
       <FsCard>
         <h2 className="fs-h2">검증 기록 관리</h2>
         {notice ? <p className="fs-body mt-2">{notice}</p> : null}
-        {rows === null ? (
+        {rows === null || loadedSession !== sessionKey ? (
           <p className="fs-body mt-2">불러오는 중입니다.</p>
         ) : rows.length === 0 ? (
           <p className="fs-body mt-2">남아 있는 기록이 없습니다.</p>
@@ -203,6 +219,7 @@ export function PrivacyActions() {
             })}
           </ul>
         )}
+        {cursor && loadedSession === sessionKey ? <button type="button" className="fs-btn fs-btn--quiet mt-4" disabled={loadingMore || busy} onClick={() => void loadMore()}>{loadingMore ? "이전 기록을 불러오는 중" : "이전 기록 더 보기"}</button> : null}
       </FsCard>
     </>
   );
