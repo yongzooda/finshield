@@ -31,3 +31,5 @@ Rate·Consent는 외부 Provider를 호출하지 않는 격리 DB 계약이다. 
 첫 Storage 실행의 합성 Case 한 개는 Dashboard 파일 삭제가 남긴 `.emptyFolderPlaceholder` 때문에 최초 Purge가 false였고 CLEANING을 유지했다. 해당 Case 폴더 표식까지 제거한 뒤 Cleanup 5개와 물리 부재 Guard·Case Purge가 통과했다.
 
 최종 Storage 실행 `34119211665`의 Case도 생성 시각·소유자·시험 제목을 대조한 뒤 삭제 요청을 접수했다. 해당 Case 폴더를 Storage UI로 삭제하고 Cleanup 5개의 SUCCEEDED, 물리 부재 Guard와 Purge true를 확인했다. 다른 시험 Case를 정리 대상으로 추정하지 않았다. 이 운영 정리를 정식 Gate 관측값으로 덮어쓰지 않는다.
+
+두 번째 채택 CI `34120289550`은 최종 main과 일치했으나 채택 PR에 포함한 `docs/ops` 문서 두 개가 기존 allowlist 밖이라 거부했다. 운영 확인표 변경을 이 PR에서 제외하고 이 설명을 허용된 evidence 경로로 옮겼다. 원본 artifact·합격식·validator는 변경하지 않았다.
