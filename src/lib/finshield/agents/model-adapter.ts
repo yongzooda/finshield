@@ -16,10 +16,14 @@ import { callFinshieldModel, emptyModelUsage, type ModelBudgetContext, type Mode
 import type { AgentModel } from "./runner";
 import type { JudgeModel } from "../orchestrator";
 import { JUDGE_SYSTEM } from "./prompts";
-import { coveOutput, redTeamOutput, domainAgentOutput, type ToolEvidence } from "../schemas";
+import { coveOutput, redTeamOutput, domainAgentOutput, type ToolEvidence, type ConfirmedClaim } from "../schemas";
 import type { ClaimExtractor } from "../intake";
 
 const MAX_EXCERPT = 400;
+
+/** 모델 입력에는 표시용 참조만 쓴다. DB 행 ID·부가 속성을 직렬화하지 않는다. */
+export const claimBrief = (claims: ConfirmedClaim[]) => claims.map(({claim_ref,claim_type,statement_masked,materiality}) =>
+  ({claim_ref,claim_type,statement_masked,materiality}));
 
 /** 모델이 보는 근거 요약. 원문 전체가 아니라 인용에 필요한 만큼만 준다. */
 export const evidenceBrief = (evidence: ToolEvidence[]) => evidence.map((item) => ({
@@ -60,7 +64,7 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
       model: FINSHIELD_MODEL,
       system: `${system}\n\n지금은 도구를 고르는 단계다. 확인이 더 필요하면 부를 도구를 고르고,\n충분하거나 필요한 자료가 미연결·조회 실패 상태면 calls 를 빈 배열로 둔다. 같은 도구에 같은 입력을 반복하지 않는다. 목록에 없는 도구 이름을 쓰지 않는다. query에는 도구에 맞는 짧은 핵심어를 넣는다. 상품 조회는 상품명, 법령 조회는 법령명, 소비자 안내는 권유의 행동 요구를 쓴다. 이유는 20자 이내다.`,
       user: JSON.stringify({
-        claims: input.claims,
+        claims: claimBrief(input.claims),
         journey_stage: input.journey_stage,
         available_tools: availableTools.map((tool) => ({ code: tool.toolCode, purpose: tool.purposeCode })),
         evidence_so_far: evidenceBrief(evidence),
@@ -84,7 +88,7 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
       model: FINSHIELD_MODEL,
       system: `${system}\n\n지금은 판단하는 단계다. 아래 근거 목록의 ref 만 인용한다. summary_masked와 note_masked는 각각 40자 이내 한 문장으로 답한다. limits는 꼭 필요한 항목만 한 개 이하로 답한다.`,
       user: JSON.stringify({
-        claims: input.claims,
+        claims: claimBrief(input.claims),
         journey_stage: input.journey_stage,
         evidence: evidenceBrief(evidence),
         observations,
@@ -104,7 +108,7 @@ export const createJudgeModel = (context?: ModelBudgetContext): JudgeModel => {
     return callFinshieldModel({
       model: FINSHIELD_MODEL,
       system: `${JUDGE_SYSTEM}\n각 rationale_masked는 핵심 근거를 담은 40자 이내 한 문장이다. withheld_reason은 20자 이내다. 입력 Claim마다 정확히 한 결과를 낸다.`,
-      user: JSON.stringify({ claims, findings, evidence: evidenceBrief(evidence) }),
+      user: JSON.stringify({ claims: claimBrief(claims), findings, evidence: evidenceBrief(evidence) }),
       schema: z.object({
         schema_version: z.literal("out-v1"),
         claim_results: z.array(z.object({

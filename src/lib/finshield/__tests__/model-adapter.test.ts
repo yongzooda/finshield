@@ -1,7 +1,7 @@
 /** 모델에 넘기는 것은 인용에 필요한 만큼이다 */
 
 import { describe, expect, it } from "vitest";
-import { evidenceBrief } from "../agents/model-adapter";
+import { claimBrief, evidenceBrief } from "../agents/model-adapter";
 import type { ToolEvidence } from "../schemas";
 
 const evidence = (over: Partial<ToolEvidence> = {}): ToolEvidence => ({
@@ -27,6 +27,12 @@ const evidence = (over: Partial<ToolEvidence> = {}): ToolEvidence => ({
 });
 
 describe("근거 요약", () => {
+  it("Claim의 DB ID와 부가 속성을 모델 본문에 전달하지 않는다", () => {
+    const input = { claim_ref: "C1", claim_type: "PRODUCT_TERM", statement_masked: "연 금리 3%", materiality: "MATERIAL" as const,
+      claim_id: "private-row-id", claimId: "private-row-id", owner_id: "private-owner-id" };
+    expect(claimBrief([input])).toEqual([{ claim_ref: "C1", claim_type: "PRODUCT_TERM", statement_masked: "연 금리 3%", materiality: "MATERIAL" }]);
+    expect(JSON.stringify(claimBrief([input]))).not.toContain("private-");
+  });
   it("본문은 인용에 필요한 만큼만 넘긴다", () => {
     const [brief] = evidenceBrief([evidence()]);
     expect(brief.excerpt.length).toBe(400);
