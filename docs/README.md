@@ -27,3 +27,5 @@
 `adr/001-p0-provider-stack.md`는 구현에 사용할 조합과 Live 검증 계약을 정한다. Architecture 승인, 개발 착수용 Implementation Gate, 출시용 Release Gate는 별개이며 현재 값은 ADR metadata와 위 표를 따른다. Implementation `GO`에는 실제 키·쿼터·평가·RLS·삭제·재시도 증거가 필요하고, 전체 제품 E2E는 구현 뒤 별도 평가한다.
 
 과거 PreCase 요구사항·측정 원본의 정본은 [PreCase 저장소](https://github.com/yongzooda/precase)에 있다. FinShield와 충돌하는 기존 PreCase 문서를 이 저장소의 현재 요구사항으로 해석하지 않는다.
+
+- [저비용 Health 인프라와 증거 절차](ops/health-status-spike.md)
