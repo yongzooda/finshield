@@ -1,5 +1,7 @@
 "use client";
 
+import { readSessionToken, sessionIdentity } from "../session-client";
+
 /**
  * 내 Case 목록 (S-005).
  *
@@ -21,11 +23,13 @@ type CaseRow = {
 
 export function CaseList({ intent = "history" }: { intent?: "history" | "aftercare" }) {
   const [token, setToken, ready] = useFsToken();
+  const sessionKey = sessionIdentity(token);
   const [rows, setRows] = useState<CaseRow[] | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!ready || !token) return;
+    const token = readSessionToken();
+    if (!ready || !token || sessionIdentity(token) !== sessionKey) return;
     let alive = true;
     void (async () => {
       const result = await fetchCases<{ cases: CaseRow[] }>(token);
@@ -35,7 +39,7 @@ export function CaseList({ intent = "history" }: { intent?: "history" | "afterca
       setNotice(result.error);
     })();
     return () => { alive = false; };
-  }, [ready, token, setToken]);
+  }, [ready, sessionKey, setToken]);
 
   if (!ready) return null;
   if (!token) return <FsLoginCard onToken={setToken} title={intent === "aftercare" ? "가입 후 보호 시작하기" : "내 기록 보기"} />;

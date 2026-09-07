@@ -1,5 +1,7 @@
 "use client";
 
+import { sessionFetch } from "../../../session-client";
+
 /**
  * 재검증 비교 (S-014).
  *
@@ -40,7 +42,7 @@ export function RevalidateFlow({ caseId }: { caseId: string }) {
     if (!token) return;
     setNotice(null); setAgents([]); setStep("running");
     try {
-      const response = await fetch(`/api/finshield/cases/${caseId}/revalidate`, {
+      const response = await sessionFetch(`/api/finshield/cases/${caseId}/revalidate`, token, {
         method: "POST", headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok || !response.body) {

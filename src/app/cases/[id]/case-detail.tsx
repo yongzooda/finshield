@@ -1,5 +1,7 @@
 "use client";
 
+import { readSessionToken, sessionIdentity } from "../../session-client";
+
 /**
  * Case 상세 (S-011·S-013).
  *
@@ -46,6 +48,7 @@ type Detail = {
 
 export function CaseDetail({ caseId }: { caseId: string }) {
   const [token, setToken, ready] = useFsToken();
+  const sessionKey = sessionIdentity(token);
   const [detail, setDetail] = useState<Detail | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [opened, setOpened] = useState<Set<string>>(new Set());
@@ -53,7 +56,8 @@ export function CaseDetail({ caseId }: { caseId: string }) {
   // 로그인이 끝나면 token 이 바뀌고, 그때 다시 읽는다. 화면을 떠난 뒤 도착한
   // 응답은 버린다.
   useEffect(() => {
-    if (!ready || !token) return;
+    const token = readSessionToken();
+    if (!ready || !token || sessionIdentity(token) !== sessionKey) return;
     let alive = true;
     void (async () => {
       const result = await fetchCase<Detail>(caseId, token);
@@ -63,7 +67,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
       setNotice(result.error);
     })();
     return () => { alive = false; };
-  }, [ready, token, caseId, setToken]);
+  }, [ready, sessionKey, caseId, setToken]);
 
   if (!ready) return null;
   if (!token) return <FsLoginCard onToken={setToken} />;

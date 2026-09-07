@@ -3,8 +3,8 @@
 /**
  * 브라우저 세션.
  *
- * access token 은 탭이 닫히면 사라지는 자리에만 둔다. 서버는 세션을 저장하지
- * 않는다. 화면을 옮길 때마다 다시 로그인하지 않아도 되게 하려는 최소한의 장치다.
+ * Access Token은 탭 저장소, Refresh Token은 세션별 HttpOnly Cookie에 둔다.
+ * 갱신은 서버를 거치고 보호 요청을 보내기 전에 만료 여유를 확인한다.
  *
  * 이 값으로 남의 자료에 닿을 수는 없다. 소유권은 데이터베이스 정책이 정한다.
  *
@@ -17,52 +17,12 @@ import { useCallback, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { FsIcon } from "./fs-icon";
 import { FsCard } from "./fs-shell";
-
-const KEY = "finshield_token";
-
-const listeners = new Set<() => void>();
-let cached: string | null = null;
-let cacheFilled = false;
-
-const subscribe = (listener: () => void): (() => void) => {
-  listeners.add(listener);
-  return () => { listeners.delete(listener); };
-};
-
-const readToken = (): string | null => {
-  if (cacheFilled) return cached;
-  try {
-    cached = sessionStorage.getItem(KEY);
-  } catch {
-    // 저장을 막아 둔 브라우저에서는 매번 로그인한다.
-    cached = null;
-  }
-  cacheFilled = true;
-  return cached;
-};
-
-// 서버와 hydration 시점에는 아직 저장소를 읽을 수 없다. 그 사이에 로그인 화면을
-// 잘못 띄우지 않도록 `ready` 로 구분한다.
-const noToken = (): string | null => null;
-const onClient = (): boolean => true;
-const onServer = (): boolean => false;
-
-const writeToken = (value: string | null): void => {
-  cached = value;
-  cacheFilled = true;
-  try {
-    if (value === null) sessionStorage.removeItem(KEY);
-    else sessionStorage.setItem(KEY, value);
-  } catch {
-    // 저장에 실패해도 이 탭에서는 계속 쓴다.
-  }
-  for (const listener of [...listeners]) listener();
-};
+import { readSessionToken, subscribeSession, writeSessionToken } from "./session-client";
 
 export function useFsToken(): [string | null, (value: string | null) => void, boolean] {
-  const token = useSyncExternalStore(subscribe, readToken, noToken);
-  const ready = useSyncExternalStore(subscribe, onClient, onServer);
-  const update = useCallback((value: string | null) => { writeToken(value); }, []);
+  const token = useSyncExternalStore(subscribeSession, readSessionToken, () => null);
+  const ready = useSyncExternalStore(subscribeSession, () => true, () => false);
+  const update = useCallback((value: string | null) => { writeSessionToken(value); }, []);
   return [token, update, ready];
 }
 

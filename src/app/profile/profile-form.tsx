@@ -1,5 +1,7 @@
 "use client";
 
+import { sessionFetch, readSessionToken, sessionIdentity } from "../session-client";
+
 /**
  * 금융 프로필 온보딩·설정 (S-004).
  *
@@ -26,6 +28,7 @@ const COMPLETENESS: Record<string, string> = {
 
 export function ProfileForm() {
   const [token, setToken, ready] = useFsToken();
+  const sessionKey = sessionIdentity(token);
   const [values, setValues] = useState<ProfileValues>({ ...EMPTY_PROFILE });
   const [loaded, setLoaded] = useState(false);
   const [saved, setSaved] = useState<string | null>(null);
@@ -33,7 +36,8 @@ export function ProfileForm() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!ready || !token) return;
+    const token = readSessionToken();
+    if (!ready || !token || sessionIdentity(token) !== sessionKey) return;
     let alive = true;
     void (async () => {
       const response = await fetchProfile<{ profile: (ProfileValues & { updated_at?: string }) | null }>(token);
@@ -56,13 +60,13 @@ export function ProfileForm() {
       setLoaded(true);
     })();
     return () => { alive = false; };
-  }, [ready, token, setToken]);
+  }, [ready, sessionKey, setToken]);
 
   const save = async (next: ProfileValues) => {
     if (!token) return;
     setBusy(true); setNotice(null);
     try {
-      const response = await fetch("/api/finshield/profile", {
+      const response = await sessionFetch("/api/finshield/profile", token, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify(next),
