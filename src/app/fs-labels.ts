@@ -34,7 +34,7 @@ export const RELATION_LABEL: Record<string, string> = {
 };
 
 export const FRESHNESS_LABEL: Record<string, string> = {
-  FRESH: "현행", STALE: "오래됨", UNKNOWN: "현행 여부 불명",
+  FRESH: "최근 수집", STALE: "재확인 필요", UNKNOWN: "최신성 미확인",
 };
 
 export const DIRECTNESS_LABEL: Record<string, string> = {

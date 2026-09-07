@@ -178,7 +178,7 @@ export function PassportView({ caseId }: { caseId: string }) {
           <dt>쓴 근거</dt><dd>{used.length}건 · 독립 출처 {independentKeys.size}곳</dd>
           <dt>인용 가능 근거</dt><dd>{used.filter((row) => row.citable).length}건</dd>
           <dt>참고용 근거</dt><dd>{used.filter((row) => row.reference_only).length}건</dd>
-          <dt>현행 근거</dt><dd>{used.filter((row) => row.freshness_at_use === "FRESH").length}건</dd>
+          <dt>최근 수집한 근거</dt><dd>{used.filter((row) => row.freshness_at_use === "FRESH").length}건</dd>
           <dt>본문 해시</dt><dd className="break-all">{passport.payload_hash}</dd>
         </dl>
         <p className="fs-meta mt-4">
