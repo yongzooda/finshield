@@ -97,6 +97,45 @@ export const judgeOutputSchemaFor = (evidence: ToolEvidence[]) => z.object({
   })),
 });
 
+export const JUDGE_CLAIM_BATCH_SIZE = 4;
+
+export const buildJudgeBatches = (args: {
+  claims: ConfirmedClaim[];
+  findings: { claim_ref: string; evidence_refs: string[] }[];
+  evidence: ToolEvidence[];
+}) => {
+  const batches: {
+    claims: ConfirmedClaim[];
+    findings: typeof args.findings;
+    evidence: ToolEvidence[];
+  }[] = [];
+  for (let offset = 0; offset < args.claims.length; offset += JUDGE_CLAIM_BATCH_SIZE) {
+    const claims = args.claims.slice(offset, offset + JUDGE_CLAIM_BATCH_SIZE);
+    const claimRefs = new Set(claims.map((claim) => claim.claim_ref));
+    const findings = args.findings.filter((finding) => claimRefs.has(finding.claim_ref));
+    const evidenceRefs = new Set(findings.flatMap((finding) => finding.evidence_refs));
+    batches.push({
+      claims,
+      findings,
+      evidence: args.evidence.filter((item) => evidenceRefs.has(item.evidence_ref)),
+    });
+  }
+  return batches;
+};
+
+export const mergeJudgeBatchOutputs = (
+  claims: ConfirmedClaim[],
+  outputs: { claim_results: { claim_ref: string }[]; conflicts: unknown[] }[],
+) => {
+  const claimOrder = new Map(claims.map((claim, index) => [claim.claim_ref, index]));
+  const claimResults = outputs.flatMap((output) => output.claim_results)
+    .map((result, index) => ({ result, index }))
+    .sort((left, right) => (claimOrder.get(left.result.claim_ref) ?? claims.length)
+      - (claimOrder.get(right.result.claim_ref) ?? claims.length) || left.index - right.index)
+    .map(({ result }) => result);
+  return { claimResults, conflicts: outputs.flatMap((output) => output.conflicts) };
+};
+
 export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
   const usage = new Map<string, ModelUsage>();
   const usageFor = (code: string) => {
@@ -157,13 +196,20 @@ export const createJudgeModel = (context?: ModelBudgetContext): JudgeModel => {
  const usage = emptyModelUsage();
  return ({ usage: () => usage,
   async judge({ claims, findings, evidence, signal }) {
-    return callFinshieldModel({
-      model: FINSHIELD_MODEL,
-      system: `${JUDGE_SYSTEM}\n각 rationale_masked는 핵심 근거를 담은 40자 이내 한 문장이다. withheld_reason은 20자 이내다. 입력 Claim마다 정확히 한 결과를 낸다.`,
-      user: JSON.stringify({ claims: claimBrief(claims), findings, evidence: evidenceBrief(evidence) }),
-      schema: judgeOutputSchemaFor(evidence),
-      maxTokens: 1600, effort: "low", signal, maxRetries: 0, timeoutMs: MODEL_TIMEOUTS.judgeMs,
-    }, context, usage);
+    const batches = buildJudgeBatches({ claims, findings, evidence });
+    const outputs = await Promise.all(batches.map((batch) => callFinshieldModel({
+        model: FINSHIELD_MODEL,
+        system: `${JUDGE_SYSTEM}\n각 rationale_masked는 핵심 근거를 담은 40자 이내 한 문장이다. withheld_reason은 20자 이내다. 입력 Claim마다 정확히 한 결과를 낸다.`,
+        user: JSON.stringify({ claims: claimBrief(batch.claims), findings: batch.findings, evidence: evidenceBrief(batch.evidence) }),
+        schema: judgeOutputSchemaFor(batch.evidence),
+        maxTokens: 1600, effort: "low", signal, maxRetries: 0, timeoutMs: MODEL_TIMEOUTS.judgeMs,
+      }, context, usage)));
+    const merged = mergeJudgeBatchOutputs(claims, outputs);
+    return {
+      schema_version: "out-v1" as const,
+      claim_results: merged.claimResults,
+      conflicts: merged.conflicts,
+    };
   },
 });
 };
