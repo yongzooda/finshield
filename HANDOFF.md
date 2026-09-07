@@ -1,3 +1,7 @@
+## 2026-09-08 가입 후 계약 문서 DB 경계
+
+PC-008·PC-011의 Migration 0043과 격리 SQL 시험을 기능 Draft에서 분리했다. 동일 Case의 가입 후 문구는 전용 표에 저장하며 과거 Claim/Passport를 변경하지 않는다. 원격 적용 전 기록은 [검증 범위](docs/ops/aftercare-document-contracts.md)에 보존한다.
+
 ## 2026-09-08 가입 후 문서 입력 구현
 
 PC-008·PC-011의 동일 Case Image/PDF 입력·인식 문구 확인·이전 Claim 연결·원본 삭제·저장 복원을 기능 Draft에 추가했다. 거래 전 Claim/Passport는 유지한다. 원격 0043 적용과 배포 검증은 아직 전이며 [격리 구현 범위](docs/ops/aftercare-document-inputs.md)를 따른다. 한국어 기록 검사 PR #238은 main `486667b`에 병합됐고 원격 CI가 통과했다. 전체 Implementation NO-GO·Release NOT-EVALUATED를 유지한다.
