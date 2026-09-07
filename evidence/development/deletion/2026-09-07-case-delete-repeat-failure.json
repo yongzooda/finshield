@@ -1,0 +1,18 @@
+{
+  "kind": "development-protected-preview-synthetic-case-delete",
+  "sha": "5cd8462eee504c59b700e1e866f550531d340965",
+  "before_status": 200,
+  "deletes": [
+    {
+      "http_status": 200,
+      "status": "COMPLETED",
+      "deletion_request_id": "4fb7c426-8863-447f-896c-666fc1ddfd6f"
+    },
+    {
+      "http_status": 200,
+      "status": "PENDING",
+      "deletion_request_id": "4fb7c426-8863-447f-896c-666fc1ddfd6f"
+    }
+  ],
+  "after_status": 404
+}
