@@ -1,0 +1,72 @@
+name: Provider OCR Development Probe
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 합성 문서 3건 OCR 개발 진단이며 Gate 증거가 아님을 확인
+        required: true
+        type: choice
+        options:
+          - development-probe
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ocr-development-probe-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    name: ocr-development-probe
+    if: github.ref == 'refs/heads/main'
+    environment: provider-spike
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout trusted harness
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: trusted
+          persist-credentials: false
+          ref: ${{ github.sha }}
+
+      - name: Set up Node 24
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+
+      - name: Install trusted dependencies
+        run: npm --prefix trusted ci --ignore-scripts
+
+      - name: Validate trusted main commit
+        env:
+          WORKFLOW_HEAD_SHA: ${{ github.sha }}
+        run: |
+          if [[ "${GITHUB_REF}" != "refs/heads/main" || ! "${WORKFLOW_HEAD_SHA}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::development probe must run from an immutable main commit"
+            exit 1
+          fi
+          test "$(git -C trusted rev-parse HEAD)" = "${WORKFLOW_HEAD_SHA}"
+
+      - name: OCR 개발 진단 계약 시험
+        run: node trusted/.github/scripts/test-ocr-development-probe.mjs
+
+      - name: 합성 OCR 개발 진단 실행
+        env:
+          CLOVA_OCR_INVOKE_URL: ${{ secrets.CLOVA_OCR_INVOKE_URL }}
+          CLOVA_OCR_SECRET: ${{ secrets.CLOVA_OCR_SECRET }}
+          PROBE_OUTPUT_PATH: ${{ github.workspace }}/probe-output/ocr-development.json
+          TRUSTED_REPOSITORY: ${{ github.workspace }}/trusted
+        run: node trusted/.github/scripts/ocr-development-probe.mjs
+
+      - name: OCR 개발 진단 결과 업로드
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ocr-development-probe-${{ github.sha }}
+          path: probe-output/ocr-development.json
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 9
