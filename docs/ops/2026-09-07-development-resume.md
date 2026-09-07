@@ -182,3 +182,12 @@ Case/계정 삭제 503 설정 문제를 해결하고 교차 사용자 접근·�
 - D 등급을 C로 승격하지 않으며, 기관·상품 제목만 일치한 결과는 CONTEXT_ONLY·인용 불가로 둔다. 모델 입력에서 DB Claim ID와 부가 속성도 제거했다.
 - 관련 단위·실제 로컬 DB 시험 21건 통과. 전체 기본 시험은 437건 통과·86건 선택적 건너뜀이다.
 - 도구 동시 조회 뒤 복수 Claim 실측은 약 54초에 결과 저장됐지만 Product와 Fraud Agent가 8초 단계 제한에 걸렸다. 13회 USD 0.077362 정산, 2회 미확정 예약이며 Intake 비용은 별도다. 이 실행도 정상 전체 완료가 아니다. 단계 상한을 늘리지 않고 입력·출력량과 조회 경로를 줄인다.
+
+## 13시 파일·재검증 실제 연결 확인
+
+- 보호된 특정 Preview 브랜치에서 합성 회원만 허용해 실제 TUS·Storage·Sandbox·CLOVA·Sonnet 5·DB를 연결했다. Production의 파일 Gateway는 활성화하지 않았다.
+- PNG는 `c70f926`에서 처리 API 200, 12,495ms, 1쪽·8 Claim, 모델 1회 USD 0.008836이다. OCR 메모리 임시물과 원본 삭제 작업이 모두 SUCCEEDED이고 실제 Storage 객체도 없다. 메모리 임시물을 잘못된 `MASKING_COMPLETED` 사유로 예약하던 오류를 기존 `OBJECT_MISSING` 계약으로 수정했다. 중복 slot 소비와 처리 도중 제약 오류를 구분해 후자는 중단·원본 정리를 실행한다.
+- 같은 Preview의 10쪽 스캔 PDF는 OCR을 마쳤지만 반복 구절의 출처 페이지 모호성으로 422를 반환했다. 실패를 성공으로 세지 않는다. 임시물 10개와 원본 1개의 삭제 작업 및 객체 부재는 확인했다. 페이지가 명시된 마스킹 입력·추출 인용을 대조하도록 보완 중이다.
+- 재검증의 `PROGRESS` 이벤트가 DB의 이벤트 계약을 위반해 즉시 중단되는 문제를 `HEARTBEAT_PROGRESS`로 수정했다. 로컬 HTTP의 실제 Workflow Step·원격 DB·실제 모델로 단일 Claim 재검증을 마쳤다. 15회 호출 USD 0.073088 전부 정산, partial=false, NO_CHANGE이며 이전 Passport와 새 Passport ID가 서로 다르다. 새로고침 뒤 같은 결과·차이를 복원했다. 이는 실제 24시간 TTL·장애 복구 전체 Gate의 증거는 아니다.
+- 상세 개발 결과는 `evidence/development/files/2026-09-07-preview-*.json`과 `evidence/development/jobs/2026-09-07-browser-revalidation.json`에 본문·Secret 없이 보존한다. 실패한 실행도 보존한다.
+- Supabase 재측정·채택 PR #208을 필수 검사 뒤 병합했다. main 실행 `34081596101`도 통과했다. 현재 부분 PASS는 12개이며 Implementation NO-GO·Release NOT-EVALUATED는 유지한다. 사용자 변경이 없는 main·detached 로컬 폴더 5곳을 `ea78b5e`로 동기화했다.

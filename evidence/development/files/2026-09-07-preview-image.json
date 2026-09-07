@@ -1,0 +1,59 @@
+{
+  "mode": "isolated-preview-http-file-development",
+  "fixture": "image",
+  "sha": "c70f9269de0a818e96459e254d8828173c4fa903",
+  "steps": [
+    {
+      "path": "/api/finshield/session",
+      "status": 200,
+      "elapsed_ms": 938
+    },
+    {
+      "path": "/api/finshield/files/slot",
+      "status": 200,
+      "elapsed_ms": 1673
+    },
+    {
+      "path": "/api/finshield/files/process",
+      "status": 200,
+      "elapsed_ms": 12495
+    },
+    {
+      "path": "/api/finshield/cases/[case]/stop",
+      "status": 200,
+      "elapsed_ms": 330
+    }
+  ],
+  "fixture_sha256": "d240bec5f47b29eec05977addf1d2d0e8cea5d13a85762b2c8e5c15c67d898d0",
+  "upload_status": 204,
+  "pages": 1,
+  "claims": 8,
+  "ok": true,
+  "cleanup": {
+    "ok": true,
+    "cleanup_count": 1
+  },
+  "model_usage": {
+    "calls": 1,
+    "cost": 8836
+  },
+  "cleanup_jobs": [
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "INPUT_OBJECT"
+    }
+  ],
+  "ocr_authorization": [
+    {
+      "event_code": "EXTERNAL_OCR_RAW_AUTHORIZED",
+      "status_code": "AUTHORIZED"
+    }
+  ],
+  "raw_pending": false,
+  "storage_absent": true,
+  "storage_status": 400
+}
