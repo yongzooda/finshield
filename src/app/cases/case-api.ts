@@ -1,5 +1,7 @@
 "use client";
 
+import { sessionFetch } from "../session-client";
+
 /**
  * Case 읽기 요청.
  *
@@ -16,7 +18,7 @@ export type CaseFetch<T> =
 
 const ask = async <T,>(path: string, token: string): Promise<CaseFetch<T>> => {
   try {
-    const response = await fetch(path, { headers: { Authorization: `Bearer ${token}` } });
+    const response = await sessionFetch(path, token);
     const body = (await response.json().catch(() => null)) as { error?: unknown } | null;
     if (!response.ok || body === null) {
       const error = typeof body?.error === "string" ? body.error : "불러오지 못했습니다";

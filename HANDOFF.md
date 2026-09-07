@@ -1,7 +1,8 @@
-## 2026-09-07 세션 RLS 뒤 DB 증거 재채택
+## 2026-09-07 세션 갱신 보안 보완
 
-- 별도 PR #230에서 Migration 0037 뒤 main의 Supabase·Rate·Consent·Storage·Delete 다섯 원본을 채택한다. 이전 원본은 보존한다. [측정 범위](docs/ops/session-rls-adoption.md)를 따른다.
-- main의 부분 PASS는 13/20이며 Implementation NO-GO·Release NOT-EVALUATED를 유지한다. 기능 Draft의 Health 범위는 별도다.
+- `AUTH-002` 서버 Cookie 갱신과 보호 요청 전 갱신을 연결했다. 갱신·로그아웃·로그인 교체 경합과 저장하지 않은 입력 보존을 검증했다.
+- 기본 시험 449건 통과·선택적 85건 건너뜀, 타입·린트·빌드 통과다. 실제 Supabase 회전·동시 요청·응답 유실 복구와 로컬 Chrome 검증은 [세션 갱신 기록](docs/ops/session-refresh.md)을 따른다.
+- 실제 기본 1시간 만료 뒤 조회 거부·Cookie 갱신·조회 복구와 세션 정리가 통과했다. 전체 탈퇴·Gate·Release 완료가 아니다. 직접 RLS는 아래 별도 보안 검증을 따른다.
 
 ## 2026-09-07 직접 RLS 세션 경계 보완
 
