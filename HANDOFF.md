@@ -1,3 +1,7 @@
+## 계정 정리 보호 적용 뒤 DB 증거 재채택
+
+- Migration 0036을 실제 FinShield에 적용했다. 새 main에서 Supabase·Rate·Consent·Storage·Delete 측정 5종이 성공했고 별도 Adoption PR #220에 원본·scope·실행 출처를 등록했다. API 전체 계정 탈퇴나 Release 완료는 아니다.
+
 ## 계정 삭제 선행 정리 Guard
 
 - DB 명세 13.3의 Profile 삭제 Guard가 빠져 있었다. 미완료 ACCOUNT 삭제 요청을 남긴 채 Auth 삭제가 성공하는 경로를 로컬 Transaction에서 재현하고 Rollback했다.
@@ -42,7 +46,7 @@
 - 상위 기획: `docs/01-product-plan.md`
 - DB 구현 기준: `docs/03-database-spec.md`
 - Provider Stack ADR: `docs/adr/001-p0-provider-stack.md`
-- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`·`B-FILE-SAFETY`·`B-RUNTIME-01`·`B-LAW-01`·`B-HEALTH-01`이 `PASS`다.
+- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`·`B-FILE-SAFETY`·`B-RUNTIME-01`·`B-LAW-01`·`B-HEALTH-01`·`B-SUPABASE-01`·`B-RATE-01`·`B-CONSENT-01`·`B-STORAGE-01`·`B-DELETE-01`이 `PASS`다.
 - Migration `0025`가 들어와 `B-SUPABASE-01`·`B-RATE-01`·`B-CONSENT-01`·`B-STORAGE-01`·`B-DELETE-01`의 scope digest가 바뀌었다. 다섯을 다시 재서 채택한다.
 - Product Release Gate (`N-QLT-009`): `NOT-EVALUATED` — P0 기능 구현 뒤 평가한다. Claim 판정 품질 `B-CLAIM-01`을 포함해 4개다.
 - 배포: Vercel `finshield` Production 연결 완료 (`https://finshield-gamma.vercel.app`)
