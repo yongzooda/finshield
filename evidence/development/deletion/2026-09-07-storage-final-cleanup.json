@@ -1,0 +1,15 @@
+{
+  "schema_version": "storage-cleanup-development-v1",
+  "observed_at": "2026-09-07T12:07:46.627Z",
+  "run_id": 34119211665,
+  "scope": "정식 측정 이후 이번 합성 Case만 물리 정리",
+  "cleanup_jobs": [
+    "SUCCEEDED",
+    "SUCCEEDED",
+    "SUCCEEDED",
+    "SUCCEEDED",
+    "SUCCEEDED"
+  ],
+  "physical_absence_guard_and_purge": true,
+  "gate_measurement_modified": false
+}

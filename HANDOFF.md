@@ -2,8 +2,9 @@
 
 - main PR #224·#226의 Cookie 갱신·직접 세션 RLS를 기존 기능 Draft에 통합했다. 재검증 Job·중단 신호·서버 Claim·상세 Passport 계약은 보존했다.
 - 가입 후 점검과 재검증 조회는 세션 식별자를 사용해 갱신 시 재초기화하지 않는다. 파일 Slot·Process·중단과 TUS 시작·청크·복구 조회에 최신 세션을 적용했다.
-- 기본 시험 550건 통과·선택적 93건 건너뜀, 타입·린트 오류 0건·빌드 통과다. TUS 응답 유실·Offset 복원·취소·계정 교체 시험을 포함한다. 기존 린트 경고 2건은 유지한다.
+- 기본 시험 550건 통과·선택적 94건 건너뜀, 타입·린트 오류 0건·빌드 통과다. TUS 응답 유실·Offset 복원·취소·계정 교체 시험을 포함한다. 기존 린트 경고 2건은 유지한다.
 - main 배포의 실제 Cookie 갱신·로그아웃·다른 세션 유지와 정리를 확인했다. [원본](evidence/development/auth/2026-09-07-session-refresh-production.json)은 합성 API 경계이며 전체 파일 Live·Release 증거가 아니다.
+- 보호 Preview에서 합성 PNG의 Slot 예약·실제 TUS 시작/청크의 Cookie 회전 두 번·파일과 Case 삭제 COMPLETED·조회 404·세션 정리 200이 통과했다. OCR·모델은 호출하지 않았다.
 - 다섯 DB 증거의 재채택 전 현재 Draft PASS는 7/20이다. main은 8/20이며 Health 한 항목의 차이를 유지한다.
 
 ## 2026-09-07 세션 갱신 보안 보완

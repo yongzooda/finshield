@@ -1,0 +1,25 @@
+{
+  "schema_version": "auth-refresh-deployed-development-v1",
+  "observed_at": "2026-09-07T12:04:24.208Z",
+  "sha": "e3ecfba4427cf9655bedb81f8433a999f8415e8e",
+  "environment": "preview",
+  "scope": "실제 배포의 합성 새 세션·Cookie 회전·조회 복구·Origin·폐기, 자연 만료와 브라우저는 별도",
+  "checks": {
+    "login_0": 200,
+    "login_1": 200,
+    "foreign_origin": 403,
+    "refresh": 200,
+    "cookie_rotated": true,
+    "amr_unchanged": true,
+    "read_after_refresh": 200,
+    "signout": 200,
+    "revoked_refresh": 401,
+    "other_session_read": 200
+  },
+  "outcome": "PASS",
+  "deployment_id": "dpl_FFtzdnAc8Md18N5XXCxEiEJyi56Y",
+  "session_cleanup": [
+    "CONFIRMED",
+    "CONFIRMED"
+  ]
+}
