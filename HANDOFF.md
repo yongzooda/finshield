@@ -1,3 +1,9 @@
+## 2026-09-07 저비용 Health 실제 측정
+
+- main run `34084937234`에서 실제 Next HTTP 100회와 DB 장애 시험이 통과했다. 외부 fetch·HTTP·HTTPS 전송 시도는 정상·장애 모두 0회이며 계측 제어는 각각 1회다.
+- 보호 Preview와 Production에서도 DB 정상 응답을 확인했다. 미관측 Provider는 `unknown`·전체 `degraded`로 보존한다.
+- 별도 Adoption에서 B-HEALTH-01의 부분 PASS만 채택한다. Implementation은 NO-GO, Release는 NOT-EVALUATED다.
+
 # FinShield HANDOFF
 
 ## 저비용 Health 인프라와 증거 준비
@@ -25,7 +31,7 @@
 - 상위 기획: `docs/01-product-plan.md`
 - DB 구현 기준: `docs/03-database-spec.md`
 - Provider Stack ADR: `docs/adr/001-p0-provider-stack.md`
-- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`·`B-FILE-SAFETY`·`B-RUNTIME-01`·`B-LAW-01`·`B-RATE-01`·`B-CONSENT-01`·`B-STORAGE-01`·`B-DELETE-01`·`B-SUPABASE-01`이 `PASS`다.
+- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`·`B-FILE-SAFETY`·`B-RUNTIME-01`·`B-LAW-01`·`B-RATE-01`·`B-CONSENT-01`·`B-STORAGE-01`·`B-DELETE-01`·`B-SUPABASE-01`·`B-HEALTH-01`이 `PASS`다.
 - Migration `0025`가 들어와 `B-SUPABASE-01`·`B-RATE-01`·`B-CONSENT-01`·`B-STORAGE-01`·`B-DELETE-01`의 scope digest가 바뀌었다. 다섯을 다시 재서 채택한다.
 - Product Release Gate (`N-QLT-009`): `NOT-EVALUATED` — P0 기능 구현 뒤 평가한다. Claim 판정 품질 `B-CLAIM-01`을 포함해 4개다.
 - 배포: Vercel `finshield` Production 연결 완료 (`https://finshield-gamma.vercel.app`)
