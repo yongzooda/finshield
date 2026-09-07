@@ -2,7 +2,7 @@
 
 - main PR #222의 보안 수정을 통합했다. Production 합성 새 세션의 폐기·조회 네 경로 401·다른 세션 유지·시험 세션 정리를 확인했다.
 - 상세 Passport 조회 계약과 삭제 전 재인증을 보존하고 로그아웃과 재인증의 동시 실행을 막는다. 기본 시험 517건 통과·선택적 91건 건너뜀이다.
-- [실제 검증 기록](docs/ops/session-signout.md)에 새 브랜치 Preview 실패와 Production 성공을 분리했다. Draft 보호 Preview 재검증은 아직 남아 있다. Gate는 바꾸지 않는다.
+- [실제 검증 기록](docs/ops/session-signout.md)에 새 브랜치 Preview 실패와 Production 성공을 분리했다. 통합 Draft의 보호 Preview에서도 같은 인증 시험과 시험 세션 정리가 통과했다. Gate는 바꾸지 않는다.
 
 ## 기능 브랜치의 Health 재측정 경계
 
