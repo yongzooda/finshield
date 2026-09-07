@@ -11,7 +11,7 @@ import type { ModelUsage } from "./model-budget";
  */
 
 import "server-only";
-import { COVE_AGENT, DOMAIN_AGENTS, RED_TEAM_AGENT } from "./manifest";
+import { COVE_AGENT, DOMAIN_AGENTS, MODEL_TIMEOUTS, RED_TEAM_AGENT } from "./manifest";
 import { loadManifest } from "./registry";
 import {
   citationProblems, coveOutput, judgeOutput, redTeamOutput, type ConfirmedClaim,
@@ -53,6 +53,10 @@ export type OrchestratedRun = {
   /** 하나라도 Agent 가 온전히 끝나지 않았으면 참이다. 화면 맨 위에 알려야 한다 (RES-008). */
   partial: boolean;
 };
+
+export const judgeFailureReason = (error: unknown, deadlineSignal: AbortSignal): string =>
+  (error as { code?: string }).code === "MODEL_BUDGET_BLOCKED" ? "TOOL_BUDGET"
+    : deadlineSignal.aborted ? "JUDGE_DEADLINE_EXCEEDED" : "JUDGE_CALL_FAILED";
 
 export const runVerification = async (args: {
   ctx: ToolCallContext;
@@ -157,10 +161,10 @@ export const runVerification = async (args: {
   const judgeStartedAt = Date.now();
   let judged: JudgeOutput | null = null;
   let judgeReasonCode: string | null = null;
+  const judgeStageSignal = AbortSignal.timeout(MODEL_TIMEOUTS.judgeMs);
   try {
     // AI-013: Judge 에는 원문을 넣지 않는다. Agent 가 만든 구조와 근거만 넣는다.
-    const stageSignal = AbortSignal.timeout(8_000);
-    const signal = session.signal ? AbortSignal.any([session.signal, stageSignal]) : stageSignal;
+    const signal = session.signal ? AbortSignal.any([session.signal, judgeStageSignal]) : judgeStageSignal;
     signal.throwIfAborted();
     if (budgetExhausted) throw Object.assign(new Error("MODEL_BUDGET_BLOCKED"), {code:"MODEL_BUDGET_BLOCKED"});
     const raw = await args.judgeModel.judge({ claims: args.claims, findings, evidence, signal });
@@ -181,7 +185,7 @@ export const runVerification = async (args: {
       else judged = parsed.data;
     }
   } catch (error) {
-    judgeReasonCode = (error as {code?:string}).code === "MODEL_BUDGET_BLOCKED" ? "TOOL_BUDGET" : "JUDGE_CALL_FAILED";
+    judgeReasonCode = judgeFailureReason(error, judgeStageSignal);
   }
   await recordJudgeRun(session, { claims: args.claims, findings }, judged, judgeStartedAt, judgeReasonCode, args.judgeModel.usage?.());
   progress({ type: "judge_finished", status: judged ? "SUCCEEDED" : "FAILED" });

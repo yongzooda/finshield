@@ -11,7 +11,10 @@
 
 import "server-only";
 import type postgres from "postgres";
-import { AGENTS, DEFINITION_VERSION, MANIFEST_VERSION, FINSHIELD_MODEL, TOOLS, POLICY_VERSIONS } from "./manifest";
+import {
+  AGENTS, DEFINITION_VERSION, MANIFEST_VERSION, FINSHIELD_MODEL, MODEL_TIMEOUTS,
+  TOOLS, POLICY_VERSIONS,
+} from "./manifest";
 
 type Sql = ReturnType<typeof postgres>;
 
@@ -41,6 +44,10 @@ export const loadManifest = async (sql: Sql): Promise<ResolvedManifest> => {
   const bundle = manifests[0].model_bundle;
   if (bundle?.judgment_model !== FINSHIELD_MODEL || bundle?.domain_model !== FINSHIELD_MODEL) {
     throw new ManifestDriftError("Manifest 모델이 FinShield 기본 모델과 다르다");
+  }
+  const timeoutPolicy = bundle?.timeout_policy;
+  if (!timeoutPolicy || Object.entries(MODEL_TIMEOUTS).some(([key, value]) => timeoutPolicy[key] !== value)) {
+    throw new ManifestDriftError("Manifest 모델 시간 제한이 코드와 다르다");
   }
   const manifestId = manifests[0].id as string;
   const kbReleaseId = manifests[0].kb_release_id as string;
