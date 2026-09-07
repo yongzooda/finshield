@@ -4,7 +4,7 @@ import { loadManifest } from "../registry";
 import { loadRunInput } from "../run-input";
 import { runVerification } from "../orchestrator";
 import { createAgentModel, createJudgeModel } from "../agents/model-adapter";
-import { dispatchNotifications, failRevalidation, finalizeRevalidation, recordRevalidationProgress } from "../revalidate";
+import { confirmRevalidationTerminal, dispatchNotifications, failRevalidation, finalizeRevalidation, recordRevalidationProgress } from "../revalidate";
 
 type Context={owner_id:string;case_id:string;status:string;existing_run_id:string|null;leased_until:string|null;cancel_requested:boolean};
 export async function executeRevalidationStep(jobId:string) {
@@ -14,11 +14,11 @@ export async function executeRevalidationStep(jobId:string) {
   const context=row?.context as Context|null;
   if(!context)throw new FatalError("REVALIDATION_NOT_FOUND");
   // Step 결과 응답만 유실됐어도 DB의 완료 기록을 먼저 읽어 외부 호출을 반복하지 않는다.
-  if(!["QUEUED","RUNNING"].includes(context.status))return {job_id:jobId,status:context.status};
+  if(!["QUEUED","RUNNING"].includes(context.status))return {job_id:jobId,status:await confirmRevalidationTerminal(sql,jobId)};
   const [job]=await sql`select * from private.claim_case_revalidation_job(${context.owner_id}::uuid,${jobId}::uuid,'workflow',180)`;
   if(!job){
     const [fresh]=await sql`select private.revalidation_context(${jobId}::uuid) as context`;
-    if(fresh?.context && !["QUEUED","RUNNING"].includes(fresh.context.status))return {job_id:jobId,status:fresh.context.status};
+    if(fresh?.context && !["QUEUED","RUNNING"].includes(fresh.context.status))return {job_id:jobId,status:await confirmRevalidationTerminal(sql,jobId)};
     throw new RetryableError("REVALIDATION_LEASE_BUSY",{retryAfter:"30s"});
   }
   const lease=job.lease_token as string;
@@ -26,7 +26,6 @@ export async function executeRevalidationStep(jobId:string) {
   const [claimedContext]=await sql`select private.revalidation_context(${jobId}::uuid) as context`;
   const existingRunId=claimedContext?.context?.existing_run_id as string|null;
   if(existingRunId){
-    await sql`select id from private.fail_verification_run(${existingRunId}::uuid,'PROVIDER_RESULT_UNKNOWN',null)`.catch(()=>undefined);
     const status=await failRevalidation(sql,jobId,lease,"PROVIDER_RESULT_UNKNOWN");
     return {job_id:jobId,status};
   }
@@ -61,11 +60,9 @@ export async function executeRevalidationStep(jobId:string) {
     const saved=await finalizeRevalidation({sql,jobId,leaseToken:lease,runId,claims:input.claims,run:result,hasProfile:input.profile_completeness==="COMPLETE"});
     if(!saved.ok)throw new Error("FINALIZE_FAILED");
     await dispatchNotifications(sql).catch(()=>0);
-    const [completed]=await sql`select private.revalidation_context(${jobId}::uuid) as context`;
-    return {job_id:jobId,status:completed.context.status as string};
+    return {job_id:jobId,status:await confirmRevalidationTerminal(sql,jobId)};
   }catch{
     // 원문·Provider 응답·SQL 메시지 대신 고정된 실패 경계를 DB 작업 기록에 남긴다.
-    if(runId)await sql`select id from private.fail_verification_run(${runId}::uuid,'WORKFLOW_INTERRUPTED',null)`.catch(()=>undefined);
     const status=await failRevalidation(sql,jobId,lease,`WORKFLOW_${stage}_FAILED`);
     return {job_id:jobId,status};
   }finally{clearInterval(pulse);}

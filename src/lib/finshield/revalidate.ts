@@ -58,20 +58,46 @@ export const finalizeRevalidation = async (args: {
   }
 };
 
+/** 실패 Job에 연결된 활성 Run도 같은 트랜잭션 안에서 종결한다. */
+const failActiveRevalidationRuns = async (tx: postgres.TransactionSql, jobId: string, code: string) => {
+  const runs = await tx`select id from public.verification_runs
+    where revalidation_job_id=${jobId}::uuid and status in ('QUEUED','RUNNING') order by id`;
+  for (const run of runs) {
+    await tx`select id from private.fail_verification_run(${run.id as string}::uuid,${code},null)`;
+  }
+};
+
+/** 응답 유실과 과거의 분리 쓰기로 남은 Run을 복구한 뒤 종결을 확인한다. */
+export const confirmRevalidationTerminal = async (sql: Sql, jobId: string): Promise<string> => {
+  try {
+    return await sql.begin(async tx => {
+      const rows = await tx`select private.revalidation_context(${jobId}::uuid) as context`;
+      const status = rows[0]?.context?.status as unknown;
+      if (status !== "FAILED" && status !== "NO_CHANGE" && status !== "CHANGED") {
+        throw new Error("REVALIDATION_TERMINAL_UNCONFIRMED");
+      }
+      // FAILED는 최종 상태다. 과거 Job만 실패한 기록은 모델 재호출 없이 복구한다.
+      if (status === "FAILED") await failActiveRevalidationRuns(tx,jobId,"WORKFLOW_INTERRUPTED");
+      const active = await tx`select id from public.verification_runs
+        where revalidation_job_id=${jobId}::uuid and status in ('QUEUED','RUNNING') limit 1`;
+      if (active.length) throw new Error("REVALIDATION_TERMINAL_UNCONFIRMED");
+      return status;
+    });
+  } catch {
+    throw new Error("REVALIDATION_TERMINAL_UNCONFIRMED");
+  }
+};
+
 export const failRevalidation = async (
   sql: Sql, jobId: string, leaseToken: string, code: string,
 ): Promise<string> => {
-  // RPC 응답 유실·Lease 경합 때도 DB의 실제 종결 상태만 Step 결과로 남긴다.
-  // 실패 쓰기를 삼킨 뒤 FAILED를 반환하면 Workflow가 RUNNING Job을 재시도하지 않는다.
-  await sql`select private.fail_revalidation_job(${jobId}::uuid, ${leaseToken}::uuid, ${code})`
-    .catch(() => undefined);
-  const rows = await sql`select private.revalidation_context(${jobId}::uuid) as context`
-    .catch(() => { throw new Error("REVALIDATION_TERMINAL_UNCONFIRMED"); });
-  const status = rows[0]?.context?.status as unknown;
-  if (status !== "FAILED" && status !== "NO_CHANGE" && status !== "CHANGED") {
-    throw new Error("REVALIDATION_TERMINAL_UNCONFIRMED");
-  }
-  return status;
+  // Job 잠금·Lease 검사를 먼저 거친다. 만료 Worker가 다른 Run을 종결하면 안 된다.
+  // Run 쓰기 실패 시 Job·Lease 해제·실패 이벤트도 함께 rollback한다.
+  await sql.begin(async tx => {
+    await tx`select private.fail_revalidation_job(${jobId}::uuid,${leaseToken}::uuid,${code})`;
+    await failActiveRevalidationRuns(tx,jobId,code);
+  }).catch(() => undefined);
+  return await confirmRevalidationTerminal(sql,jobId);
 };
 
 /**
