@@ -1,0 +1,10 @@
+{
+  "schema_version": "auth-preview-development-v1",
+  "observed_at": "2026-09-07T10:14:03.822Z",
+  "sha": "2d91ec05d5ec221421da8842fe39bcb56352191c",
+  "deployment_id": "dpl_2gnGFAAy9wY5AUyRhoDxbSt6G6Wp",
+  "scope": "보호 Preview·실제 Supabase Auth·합성 세션·조회 API",
+  "checks": {},
+  "outcome": "FAIL",
+  "created_session_cleanup_statuses": []
+}

@@ -1,0 +1,14 @@
+{
+  "schema_version": "auth-read-development-v1",
+  "observed_date": "2026-09-07",
+  "scope": "로컬 Next HTTP·Chrome·실제 FinShield Supabase Auth와 RLS",
+  "outcome": "FAIL",
+  "checks": {
+    "browser_signout_confirmed": true,
+    "session_storage_token_absent": true,
+    "login_form_restored": true,
+    "before_cases_http_status": 200,
+    "revoked_token_cases_http_status": 200
+  },
+  "diagnosis": "조회 API 네 곳이 발급처의 세션 검증 없이 사용자 JWT를 RLS로 전달했다. 토큰 본문·Case 내용은 기록하지 않았다."
+}

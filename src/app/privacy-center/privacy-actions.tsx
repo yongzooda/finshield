@@ -36,6 +36,31 @@ export function PrivacyActions() {
   const [asking, setAsking] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [reauthCase, setReauthCase] = useState<string | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
+  const [sessionNotice, setSessionNotice] = useState<string | null>(null);
+
+  const signOut = async () => {
+    if (!token || signingOut || busy || reauthCase) return;
+    setSigningOut(true); setSessionNotice(null);
+    try {
+      const response = await fetch("/api/finshield/session", {
+        method: "DELETE", headers: { Authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(15_000),
+      });
+      const body = await response.json().catch(() => null);
+      if (response.ok && body?.status === "SIGNED_OUT") {
+        setRows(null); setAsking(null); setReauthCase(null); setNotice(null); setToken(null);
+        setSessionNotice("현재 로그인 세션을 종료했습니다.");
+      } else if (response.status === 401) {
+        setRows(null); setAsking(null); setReauthCase(null); setNotice(null); setToken(null);
+        setSessionNotice("이 탭의 로그인 정보를 지웠습니다. 서버 세션 종료는 확인하지 못했습니다.");
+      } else {
+        setSessionNotice("서버 로그아웃을 확인하지 못했습니다. 다시 시도해 주세요.");
+      }
+    } catch {
+      setSessionNotice("연결이 끊겨 로그아웃 결과를 확인하지 못했습니다. 다시 시도해 주세요.");
+    } finally { setSigningOut(false); }
+  };
 
   useEffect(() => {
     if (!ready || !token) return;
@@ -84,6 +109,7 @@ export function PrivacyActions() {
         <FsCard>
           <h2 className="fs-h2">로그인 관리</h2>
           <p className="fs-body mt-2">현재 로그인하지 않았습니다. 기록 관리는 로그인 후 이용할 수 있습니다.</p>
+          {sessionNotice ? <p role="status" className="fs-body mt-2">{sessionNotice}</p> : null}
         </FsCard>
         <FsLoginCard onToken={setToken} title="내 자료 관리" />
       </>
@@ -97,8 +123,9 @@ export function PrivacyActions() {
         <p className="fs-body mt-2">
           현재 탭에서 로그인 상태를 유지하고 있습니다.
         </p>
-        <button type="button" onClick={() => setToken(null)} className="fs-btn fs-btn--quiet mt-4">
-          이 브라우저에서 로그아웃
+        {sessionNotice ? <p role="status" className="fs-body mt-2">{sessionNotice}</p> : null}
+        <button type="button" disabled={signingOut || busy || Boolean(reauthCase)} onClick={() => void signOut()} className="fs-btn fs-btn--quiet mt-4">
+          {signingOut ? "로그아웃 확인 중" : "현재 세션 로그아웃"}
         </button>
       </FsCard>
 
@@ -147,7 +174,7 @@ export function PrivacyActions() {
                         이 기록을 지우면 확인 결과와 Evidence Passport 도 함께 사라집니다. 되돌릴 수 없습니다.
                       </p>
                       <div className="mt-3 flex flex-wrap gap-3">
-                        <button type="button" disabled={busy || Boolean(reauthCase)} onClick={() => void requestDelete(row.id)}
+                        <button type="button" disabled={busy || signingOut || Boolean(reauthCase)} onClick={() => void requestDelete(row.id)}
                           className="fs-btn fs-btn--primary !px-3 !text-[0.9rem]">
                           지우기 시작
                         </button>

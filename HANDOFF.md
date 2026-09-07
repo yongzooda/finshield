@@ -1,3 +1,9 @@
+## 2026-09-07 서버 로그아웃 보안 수정 통합
+
+- main PR #222의 보안 수정을 통합했다. Production 합성 새 세션의 폐기·조회 네 경로 401·다른 세션 유지·시험 세션 정리를 확인했다.
+- 상세 Passport 조회 계약과 삭제 전 재인증을 보존하고 로그아웃과 재인증의 동시 실행을 막는다. 기본 시험 517건 통과·선택적 91건 건너뜀이다.
+- [실제 검증 기록](docs/ops/session-signout.md)에 새 브랜치 Preview 실패와 Production 성공을 분리했다. Draft 보호 Preview 재검증은 아직 남아 있다. Gate는 바꾸지 않는다.
+
 ## 기능 브랜치의 Health 재측정 경계
 
 - main은 PR #212에서 B-HEALTH-01을 채택했다. 이 기능 브랜치는 `withWorkflow`와 파일 추적 설정이 있는 Next 설정을 사용하므로 main 측정의 build scope와 다르다.
@@ -46,6 +52,12 @@
 - main run `34084937234`에서 실제 Next HTTP 100회와 DB 장애 시험이 통과했다. 외부 fetch·HTTP·HTTPS 전송 시도는 정상·장애 모두 0회이며 계측 제어는 각각 1회다.
 - 보호 Preview와 Production에서도 DB 정상 응답을 확인했다. 미관측 Provider는 `unknown`·전체 `degraded`로 보존한다.
 - 별도 Adoption에서 B-HEALTH-01의 부분 PASS만 채택한다. Implementation은 NO-GO, Release는 NOT-EVALUATED다.
+
+## 2026-09-07 저녁 인증 보안 보완
+
+- 최신 재개 확인표는 [P0 남은 작업](docs/ops/2026-09-07-p0-remaining.md)이다. 기존 Draft #192와 기능 worktree는 보존한다.
+- `AUTH-001` 서버 로그아웃을 연결해 현재 Supabase 세션만 폐기하고 반복 요청을 복원한다. 실제 새 세션 두 개의 한쪽 폐기·refresh 거부·다른 쪽 보존을 확인했다. 최초 오류 응답 계약 실패도 보존했다.
+- [인증 검증 범위](docs/ops/session-signout.md)를 따른다. refresh 갱신·직접 RLS 세션 폐기·전체 탈퇴·Release는 완료가 아니다. 실제 KB 문서·청크·Embedding은 이번 조회에서도 각 0건이다. Gate metadata는 유지한다.
 
 ## 저비용 Health 인프라와 증거 준비
 

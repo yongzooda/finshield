@@ -25,9 +25,12 @@ export async function GET(request: Request): Promise<Response> {
   const token = bearerToken(request);
   if (!token) return jsonNoStore({ error: "로그인이 필요합니다" }, 401);
   try {
+    // RLS 소유권 검사와 별도로 발급처에서 현재 세션이 살아 있는지 확인한다.
+    await resolveOwner(request);
     const rows = await restSelect({ token, path: "financial_profiles", query: { select: SELECT, limit: "1" } });
     return jsonNoStore({ profile: rows[0] ?? null }, 200);
   } catch (error) {
+    if (error instanceof UnauthenticatedError) return jsonNoStore({ error: error.message }, 401);
     if (error instanceof RestError) return jsonNoStore({ error: error.message }, error.status);
     throw error;
   }
