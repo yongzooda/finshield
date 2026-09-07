@@ -612,10 +612,11 @@ PK는 `(verification_run_id, claim_id)`다. 선택한 Material Claim은 `claim_r
 | `result_code` | `text NN` | 실행 Manifest에 속한 축별 Code |
 | `summary_masked` | `text NN`, 최대 4KiB | 사용자용 근거 기반 요약 |
 | `limitation_codes` | `text[] NN` | 미확인·STALE·부분실패 |
+| `policy_evaluation` | `jsonb`, 최대 64KiB | `SUITABILITY`의 DB 결정 규칙·Run Profile ID/해시·상품 조건 Evidence·미확인 항목. 이전 정책은 null |
 | `content_hash` | `text NN check 64 hex` | 불변성 확인 |
 | `created_at` | `timestamptz NN` | 확정 시각 |
 
-`UQ(verification_run_id, axis)`다. 축별 Code는 정책 Registry에 있어야 하며 한 축 결과를 다른 축에 복사해 넣지 않는다.
+`UQ(verification_run_id, axis)`다. 축별 Code는 정책 Registry에 있어야 하며 한 축 결과를 다른 축에 복사해 넣지 않는다. Migration 0041의 Profile Policy v2는 최종 Claim 기록 뒤 실행 Snapshot과 유효한 상품 Evidence를 비교하며 전달된 적합성 확정값을 신뢰하지 않는다. Trace까지 포함한 축 해시를 Passport Manifest에 고정한다. 월 소득 구간으로 연소득 가입 요건·신용 승인을 추론하지 않는다.
 
 ### `public.agent_runs`
 
