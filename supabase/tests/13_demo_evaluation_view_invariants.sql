@@ -141,7 +141,7 @@ do $$
 declare v_case uuid := (select id from public.financial_cases where title_masked = '최종화 시험 Case'); n int; r record;
 begin
   set local role authenticated;
-  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a"}';
+  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a","session_id":"10000000-0000-4000-8000-00000000000a","exp":4102444800}';
   select * into r from public.case_list_v where id = v_case;
   if r.overall_result <> 'MATERIAL_RISK_FOUND' or r.latest_passport_id is null then raise exception '목록 View 값이 다릅니다'; end if;
   select * into r from public.case_detail_v where id = v_case;
@@ -170,7 +170,7 @@ do $$
 declare v_case uuid := (select id from public.financial_cases where title_masked = '최종화 시험 Case'); n int;
 begin
   set local role authenticated;
-  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000b"}';
+  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000b","session_id":"10000000-0000-4000-8000-00000000000b","exp":4102444800}';
   select count(*) into n from public.case_list_v where id = v_case;
   select count(*) + n into n from public.passport_v where case_id = v_case;
   if n <> 0 then raise exception '타인이 View 로 Case·Passport 를 봤습니다 (%)', n; end if;

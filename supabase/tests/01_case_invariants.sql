@@ -52,6 +52,11 @@ begin
 end
 $$;
 
+-- 기존 소유권 시험도 유효한 Auth 세션으로 수행한다. 부재·불일치는 26번에서 별도 검사한다.
+insert into auth.sessions(id, user_id) values
+ ('10000000-0000-4000-8000-00000000000a', '00000000-0000-4000-8000-00000000000a'),
+ ('10000000-0000-4000-8000-00000000000b', '00000000-0000-4000-8000-00000000000b');
+
 -- profiles 는 auth trigger 가 만든다.
 do $$
 begin
@@ -469,7 +474,7 @@ declare
   own_events int; other_events int;
 begin
   set local role authenticated;
-  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a"}';
+  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a","session_id":"10000000-0000-4000-8000-00000000000a","exp":4102444800}';
 
   select count(*) into own_cases from public.financial_cases
    where id = '00000000-0000-4000-8000-0000000000ca';
@@ -499,7 +504,7 @@ $$;
 do $$
 begin
   set local role authenticated;
-  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a"}';
+  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a","session_id":"10000000-0000-4000-8000-00000000000a","exp":4102444800}';
   perform fstest.expect_fail($sql$
     update public.financial_cases set title_masked = '직접 수정'
      where id = '00000000-0000-4000-8000-0000000000ca'
@@ -529,7 +534,7 @@ do $$
 declare visible_cases int; visible_inputs int; visible_events int;
 begin
   set local role authenticated;
-  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a"}';
+  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a","session_id":"10000000-0000-4000-8000-00000000000a","exp":4102444800}';
   select count(*) into visible_cases from public.financial_cases;
   select count(*) into visible_inputs from public.case_inputs;
   select count(*) into visible_events from public.case_events;

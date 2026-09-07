@@ -176,6 +176,8 @@ if (mode === "--run") {
           constraints: localSchema.constraint_digest === remote.schema.constraint_digest,
           indexes: localSchema.index_digest === remote.schema.index_digest,
           routines: localSchema.routine_digest === remote.schema.routine_digest,
+          views: localSchema.view_digest === remote.schema.view_digest,
+          policies: localSchema.policy_digest === remote.schema.policy_digest,
         },
       },
       environment: {

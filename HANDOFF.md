@@ -2,7 +2,13 @@
 
 - `AUTH-002` 서버 Cookie 갱신과 보호 요청 전 갱신을 연결했다. 갱신·로그아웃·로그인 교체 경합과 저장하지 않은 입력 보존을 검증했다.
 - 기본 시험 449건 통과·선택적 85건 건너뜀, 타입·린트·빌드 통과다. 실제 Supabase 회전·동시 요청·응답 유실 복구와 로컬 Chrome 검증은 [세션 갱신 기록](docs/ops/session-refresh.md)을 따른다.
-- 실제 기본 1시간 만료는 별도 준비해 대기 중이다. 직접 RLS 세션 폐기·전체 탈퇴·Gate·Release 완료가 아니다.
+- 실제 기본 1시간 만료는 별도 준비해 대기 중이다. 전체 탈퇴·Gate·Release 완료가 아니다. 직접 RLS는 아래 별도 보안 검증을 따른다.
+
+## 2026-09-07 직접 RLS 세션 경계 보완
+
+- 로그아웃 뒤 유효 JWT로 직접 PostgREST 개인정보 행을 읽는 문제를 실제 재현했다. 원본 실패를 보존한다.
+- Migration 0037은 회원 Base table·정의자 Helper·진행 View·Storage slot에서 활성 Auth 세션을 검사한다. 실제 원격 적용·폐기 JWT의 직접 조회·Storage/TUS 거부와 다른 세션 보존·합성 Case 정리를 확인했다. 세부 범위는 `docs/ops/session-rls.md`를 따른다.
+- Supabase·Rate·Consent·Storage·Delete의 기존 증거 5개는 DB scope 변경으로 STALE이다. Implementation은 NO-GO이며 새 main 측정과 별도 Adoption이 필요하다.
 
 ## OCR 정식 측정 실패 보존
 

@@ -175,13 +175,13 @@ do $$
 declare n int;
 begin
   set local role authenticated;
-  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a"}';
+  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a","session_id":"10000000-0000-4000-8000-00000000000a","exp":4102444800}';
   select count(*) into n from public.evidence_passports;
   if n <> 1 then raise exception '회원이 본인 Passport 를 읽지 못했습니다 (%)', n; end if;
   select count(*) into n from public.verification_axis_results;
   if n <> 2 then raise exception '회원이 본인 축 결과를 읽지 못했습니다 (%)', n; end if;
   raise notice '  허용 확인: 회원이 본인 Passport·축 결과·Guide 를 읽는다';
-  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000b"}';
+  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000b","session_id":"10000000-0000-4000-8000-00000000000b","exp":4102444800}';
   select count(*) into n from public.evidence_passports;
   if n <> 0 then raise exception '타인 Passport 가 보입니다 (%)', n; end if;
   raise notice '  허용 확인: 타인 Passport 차단';

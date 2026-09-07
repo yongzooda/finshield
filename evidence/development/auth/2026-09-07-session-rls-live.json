@@ -1,0 +1,113 @@
+{
+  "observed_at": "2026-09-07T11:18:32.427Z",
+  "scope": "합성 세션 DB·Storage 개발 검증, Gate 미채택",
+  "scenarios": [
+    {
+      "scenario": "정상 개인정보 조회",
+      "observed": 1,
+      "expected": 1
+    },
+    {
+      "scenario": "정상 TUS URL 발급",
+      "observed": 201,
+      "expected": 201
+    },
+    {
+      "scenario": "현재 세션 로그아웃",
+      "observed": 204,
+      "expected": 204
+    },
+    {
+      "scenario": "폐기 JWT 직접 profiles 조회",
+      "observed": 0,
+      "expected": 0
+    },
+    {
+      "scenario": "폐기 JWT 직접 financial_profiles 조회",
+      "observed": 0,
+      "expected": 0
+    },
+    {
+      "scenario": "폐기 JWT 직접 case_list_v 조회",
+      "observed": 0,
+      "expected": 0
+    },
+    {
+      "scenario": "폐기 JWT 직접 case_detail_v 조회",
+      "observed": 0,
+      "expected": 0
+    },
+    {
+      "scenario": "폐기 JWT 직접 run_progress_v 조회",
+      "observed": 0,
+      "expected": 0
+    },
+    {
+      "scenario": "폐기 JWT 직접 passport_v 조회",
+      "observed": 0,
+      "expected": 0
+    },
+    {
+      "scenario": "폐기 세션 활성 RPC",
+      "observed": false,
+      "expected": false
+    },
+    {
+      "scenario": "폐기 JWT case_runs_json HTTP",
+      "observed": 200,
+      "expected": 200
+    },
+    {
+      "scenario": "폐기 JWT case_runs_json 결과",
+      "observed": 0,
+      "expected": 0
+    },
+    {
+      "scenario": "폐기 JWT passport_claims_json HTTP",
+      "observed": 200,
+      "expected": 200
+    },
+    {
+      "scenario": "폐기 JWT passport_claims_json 결과",
+      "observed": 0,
+      "expected": 0
+    },
+    {
+      "scenario": "폐기 JWT guide_channels_json HTTP",
+      "observed": 200,
+      "expected": 200
+    },
+    {
+      "scenario": "폐기 JWT guide_channels_json 결과",
+      "observed": 0,
+      "expected": 0
+    },
+    {
+      "scenario": "폐기 JWT Storage 본문 쓰기",
+      "status": 400
+    },
+    {
+      "scenario": "폐기 JWT 기발급 TUS 본문 쓰기",
+      "status": 403
+    },
+    {
+      "scenario": "다른 정상 세션 개인정보 조회",
+      "observed": 1,
+      "expected": 1
+    },
+    {
+      "scenario": "다른 정상 세션 같은 경로 업로드",
+      "observed": 200,
+      "expected": 200
+    }
+  ],
+  "cleanup": {
+    "http_status": 200,
+    "status": "COMPLETED",
+    "case_rows": 0
+  },
+  "session_cleanup": [
+    403,
+    204
+  ]
+}
