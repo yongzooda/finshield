@@ -1,0 +1,44 @@
+{
+  "kind": "development-protected-preview-synthetic-aftercare",
+  "sha": "2a94daf6115fce211e3572502016bb61b08e0f19",
+  "case_id": "2f843145-e83c-4a65-934d-27e2ec4afa21",
+  "base_passport_id": "3f71005e-5599-4b02-9267-6bff185bd7ac",
+  "journey": "ENROLLED",
+  "assessment_id": "501e006b-4007-46b0-81da-ae4783b04420",
+  "result": "DISPUTE_PREPARATION",
+  "comparison": [
+    {
+      "claim_id": "d9195188-72d5-46f1-82d5-e849d3f7547f",
+      "before": "햇살론15 상품은 연 3% 고정금리이다.",
+      "contract": "합성 계약의 금리는 연 8.2%입니다.",
+      "result": "DIFFERENT_TEXT"
+    }
+  ],
+  "restore": {
+    "same_assessment": true,
+    "same_passport": true,
+    "same_comparison": true,
+    "answers": {
+      "EXPLAINED_RATE_AND_FEES": "PARTIAL",
+      "UNDERSTOOD_TERMS": "PARTIAL",
+      "HAS_CONTRACT_COPY": "YES"
+    },
+    "actions": [
+      {
+        "code": "KEEP_CONTRACT_AND_RECORDS",
+        "official_channel": null
+      },
+      {
+        "code": "ASK_OFFICIAL_CHANNEL",
+        "official_channel": "서민금융콜센터 1397 (국번 없이)"
+      },
+      {
+        "code": "REPORT_IMPERSONATION",
+        "official_channel": "서민금융 사칭 신고센터"
+      }
+    ]
+  },
+  "passport_preserved": true,
+  "no_model_call": true,
+  "scope_limit": "문구 비교·답변 규칙·DB 저장·API 복원이며 가입 후 Agent·법적 판단·브라우저 전체 증거가 아니다."
+}

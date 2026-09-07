@@ -166,10 +166,11 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     const answers: Record<string, string> = {};
     const comparison = [];
     for (const row of answerRows) {
-      if (String(row.question_code).startsWith("CONTRACT_")) {
+      // CONTRACT_MATCHES_EXPLANATION은 설문 답변이며 Claim 문구 비교가 아니다.
+      if (/^CONTRACT_[0-9A-F]{32}$/.test(row.question_code)) {
         try {
           const value = comparisonSchema.safeParse(JSON.parse(String(row.answer_text_masked)));
-          if (value.success) comparison.push(value.data);
+          if (value.success && row.question_code === `CONTRACT_${value.data.claim_id.replaceAll("-", "").toUpperCase()}`) comparison.push(value.data);
         } catch { /* 과거 형식의 본문을 추측해서 새 비교로 만들지 않는다. */ }
       } else answers[String(row.question_code)] = String(row.answer_code);
     }

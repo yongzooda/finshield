@@ -20,7 +20,8 @@ it("이전 점검의 기준 Passport·결과·비교를 재판정하지 않고 �
   if(path==="precase_assessments")return [{id:assessmentId,assessment_no:2,base_passport_id:passportId,
     result:"ADDITIONAL_EXPLANATION",summary_masked:"당시 저장된 판단 이유",finished_at:"2026-09-07T00:00:00Z",assessment_schema_version:"aftercare-v2"}];
   if(path==="precase_answers")return [{question_code:"UNDERSTOOD_TERMS",answer_code:"NO",answer_text_masked:null},
-    {question_code:"CONTRACT_X",answer_code:"DIFFERENT_TEXT",answer_text_masked:JSON.stringify({claim_id:claimId,before:"연 3%",contract:"연 15.9%",result:"DIFFERENT_TEXT"})}];
+    {question_code:"CONTRACT_MATCHES_EXPLANATION",answer_code:"DIFFERENT",answer_text_masked:null},
+    {question_code:`CONTRACT_${claimId.replaceAll("-", "").toUpperCase()}`,answer_code:"DIFFERENT_TEXT",answer_text_masked:JSON.stringify({claim_id:claimId,before:"연 3%",contract:"연 15.9%",result:"DIFFERENT_TEXT"})}];
   if(path==="action_checklists")return [{action_code:"REQUEST_WRITTEN_EXPLANATION",required_material_codes:["CONTRACT"],official_channel_registry_id:null}];
   throw new Error("예상하지 않은 최신 결과 조회");
  });mocks.sql.mockResolvedValue([]);
@@ -28,5 +29,7 @@ it("이전 점검의 기준 Passport·결과·비교를 재판정하지 않고 �
  const {assessment}=await response.json();
  expect(response.status).toBe(200);expect(assessment.base_passport_id).toBe(passportId);
  expect(assessment.result).toBe("ADDITIONAL_EXPLANATION");expect(assessment.reasons).toEqual(["당시 저장된 판단 이유"]);
- expect(assessment.comparison[0].contract).toBe("연 15.9%");expect(assessment.answers.UNDERSTOOD_TERMS).toBe("NO");
+ expect(assessment.comparison).toHaveLength(1);
+ expect(assessment.comparison[0].contract).toBe("연 15.9%");
+ expect(assessment.answers).toEqual({UNDERSTOOD_TERMS:"NO",CONTRACT_MATCHES_EXPLANATION:"DIFFERENT"});
 });
