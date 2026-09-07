@@ -1,5 +1,7 @@
 "use client";
 
+import { closeSession, sessionFetch, readSessionToken, sessionIdentity } from "../session-client";
+
 /**
  * 개인정보 설정에서 실제로 할 수 있는 것 (S-017).
  *
@@ -31,6 +33,7 @@ const DELETION_LABEL: Record<string, string> = {
 
 export function PrivacyActions() {
   const [token, setToken, ready] = useFsToken();
+  const sessionKey = sessionIdentity(token);
   const [rows, setRows] = useState<CaseRow[] | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [asking, setAsking] = useState<string | null>(null);
@@ -42,10 +45,7 @@ export function PrivacyActions() {
     if (!token || signingOut || busy) return;
     setSigningOut(true); setSessionNotice(null);
     try {
-      const response = await fetch("/api/finshield/session", {
-        method: "DELETE", headers: { Authorization: `Bearer ${token}` },
-        signal: AbortSignal.timeout(15_000),
-      });
+      const response = await closeSession(token);
       const body = await response.json().catch(() => null);
       if (response.ok && body?.status === "SIGNED_OUT") {
         setRows(null); setAsking(null); setNotice(null); setToken(null);
@@ -62,7 +62,8 @@ export function PrivacyActions() {
   };
 
   useEffect(() => {
-    if (!ready || !token) return;
+    const token = readSessionToken();
+    if (!ready || !token || sessionIdentity(token) !== sessionKey) return;
     let alive = true;
     void (async () => {
       const result = await fetchCases<{ cases: CaseRow[] }>(token);
@@ -72,13 +73,13 @@ export function PrivacyActions() {
       setNotice(result.error);
     })();
     return () => { alive = false; };
-  }, [ready, token, setToken]);
+  }, [ready, sessionKey, setToken]);
 
   const requestDelete = async (caseId: string) => {
     if (!token) return;
     setBusy(true); setNotice(null);
     try {
-      const response = await fetch(`/api/finshield/cases/${caseId}/delete`, {
+      const response = await sessionFetch(`/api/finshield/cases/${caseId}/delete`, token, {
         method: "POST", headers: { Authorization: `Bearer ${token}` },
       });
       const body = await response.json().catch(() => null);

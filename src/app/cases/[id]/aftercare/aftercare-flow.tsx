@@ -1,5 +1,7 @@
 "use client";
 
+import { sessionFetch } from "../../../session-client";
+
 /**
  * 가입 후 점검 (S-016).
  *
@@ -57,7 +59,7 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
     if (!token) return;
     setBusy(true); setNotice(null);
     try {
-      const response = await fetch(`/api/finshield/cases/${caseId}/aftercare`, {
+      const response = await sessionFetch(`/api/finshield/cases/${caseId}/aftercare`, token, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ answers }),

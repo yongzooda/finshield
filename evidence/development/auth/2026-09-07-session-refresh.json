@@ -1,0 +1,25 @@
+{
+  "schema_version": "auth-refresh-development-v1",
+  "observed_at": "2026-09-07T10:45:15.638Z",
+  "scope": "실제 Supabase·서버 Cookie 회전·합성 새 세션, 브라우저와 자연 만료는 별도",
+  "checks": {
+    "login_sessions_isolated": true,
+    "other_cookie_rejected": 401,
+    "foreign_origin_rejected": 403,
+    "concurrent_statuses": [
+      200,
+      200
+    ],
+    "rotation_cookie_changed": true,
+    "refresh_did_not_reauthenticate": true,
+    "lost_response_recovery_status": 200,
+    "signout_status": 200,
+    "revoked_refresh_status": 401,
+    "other_session_preserved": true
+  },
+  "outcome": "PASS",
+  "cleanup_statuses": [
+    200,
+    200
+  ]
+}

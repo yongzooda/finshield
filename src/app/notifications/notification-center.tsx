@@ -1,5 +1,7 @@
 "use client";
 
+import { sessionFetch, readSessionToken, sessionIdentity } from "../session-client";
+
 /**
  * 알림센터 (S-014).
  *
@@ -22,11 +24,13 @@ type Notification = {
 
 export function NotificationCenter() {
   const [token, setToken, ready] = useFsToken();
+  const sessionKey = sessionIdentity(token);
   const [rows, setRows] = useState<Notification[] | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!ready || !token) return;
+    const token = readSessionToken();
+    if (!ready || !token || sessionIdentity(token) !== sessionKey) return;
     let alive = true;
     void (async () => {
       const response = await fetchNotifications<{ notifications: Notification[] }>(token);
@@ -39,12 +43,12 @@ export function NotificationCenter() {
       setRows(response.data.notifications);
     })();
     return () => { alive = false; };
-  }, [ready, token, setToken]);
+  }, [ready, sessionKey, setToken]);
 
   const markRead = async (id: string) => {
     if (!token) return;
     try {
-    const response = await fetch("/api/finshield/notifications", {
+    const response = await sessionFetch("/api/finshield/notifications", token, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({ notification_id: id }),

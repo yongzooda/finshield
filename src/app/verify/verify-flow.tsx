@@ -1,5 +1,7 @@
 "use client";
 
+import { sessionFetch } from "../session-client";
+
 /**
  * 거래 전 검증 흐름 (S-006·S-008·S-009·S-010·S-011).
  *
@@ -82,9 +84,10 @@ export function VerifyFlow() {
   });
 
   const submitText = async () => {
+    if (!token) { setNotice("다시 로그인해 주세요"); return; }
     setBusy(true); setNotice(null); setStages([]); setStep("extracting");
     try {
-      const response = await fetch("/api/finshield/intake", {
+      const response = await sessionFetch("/api/finshield/intake", token, {
         method: "POST", headers: authed(), body: JSON.stringify({ text }),
       });
       if (!response.ok || !response.body) {
@@ -120,10 +123,11 @@ export function VerifyFlow() {
 
   /** 사용자가 중단하면 원본을 지우기 시작한다. 화면에서 물러나는 것이 아니다 (규칙 4). */
   const stopInput = async () => {
+    if (!token) { setNotice("다시 로그인해 주세요"); return; }
     if (!caseId || !inputId) { setStep("input"); return; }
     setBusy(true);
     try {
-      const response = await fetch(`/api/finshield/cases/${caseId}/stop`, {
+      const response = await sessionFetch(`/api/finshield/cases/${caseId}/stop`, token, {
         method: "POST", headers: authed(), body: JSON.stringify({ input_id: inputId }),
       });
       const body = await response.json().catch(() => null);
@@ -141,9 +145,10 @@ export function VerifyFlow() {
   };
 
   const startRun = async () => {
+    if (!token) { setNotice("다시 로그인해 주세요"); return; }
     setBusy(true); setNotice(null); setAgents([]); setStep("running");
     try {
-      const response = await fetch("/api/finshield/verify", {
+      const response = await sessionFetch("/api/finshield/verify", token, {
         method: "POST", headers: authed(),
         body: JSON.stringify({
           case_id: caseId,
