@@ -51,4 +51,5 @@ begin
     or has_function_privilege('anon','private.account_deletion_status(uuid,uuid)','EXECUTE') then raise exception '함수 권한 누출'; end if;
   raise notice '통과: 새 작업 차단·다른 회원 정상·Case/Storage 잔존 거부·Auth 실패 rollback·반복 완료·비식별 원장·교차 회원 거부';
 end $$;
+do $$ begin raise notice '27_account_deletion 시험을 모두 통과했습니다'; end $$;
 rollback;

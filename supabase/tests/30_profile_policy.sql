@@ -82,4 +82,5 @@ begin
  if (select profile_policy_version from private.execution_manifests where manifest_version='finshield-p0-loan-v2')<>'profile-policy-v1' then raise exception '과거 Manifest 변경';end if;
  raise notice '통과: 실제 최종화·자기신고 확정 거부·부담/기간/가입 분리·종료/다른 상품 제외·현재 프로필 변경 후 불변·교차 회원 거부·이전 Manifest 보존';
 end $$;
+do $$ begin raise notice '30_profile_policy 시험을 모두 통과했습니다'; end $$;
 rollback;

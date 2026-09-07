@@ -36,4 +36,5 @@ begin
   if not exists(select 1 from public.notifications where deduplication_key='notify-atomic-failure') then raise exception '실패 뒤 재시도 누락'; end if;
   raise notice '통과: 알림·Outbox 원자성·Orphan·동일 요청·소유자·삭제 작업 분리·실패 재시도';
 end $$;
+do $$ begin raise notice '29_notification_delivery 시험을 모두 통과했습니다'; end $$;
 rollback;

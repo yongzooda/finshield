@@ -40,4 +40,5 @@ begin
   perform fstest.expect_fail(format('select private.reserve_finshield_retrieval_usage(%L,%L,%L,%L,%L,1)',gen_random_uuid(),gen_random_uuid(),run_id,'embed-v4.0','synthetic-price'),'다른 소유자 검색 비용 예약');
   raise notice '통과: Provider 합산 상한·예약 rollback·양쪽 정산·미확정 유지·소유권';
 end $$;
+do $$ begin raise notice '28_shared_provider_budget 시험을 모두 통과했습니다'; end $$;
 rollback;
