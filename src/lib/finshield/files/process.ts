@@ -8,6 +8,11 @@ import { PII_POLICY_VERSION } from "../intake";
 import { parseIsolatedFile, type ParsedPage } from "./parser";
 import { readQuarantinedFile } from "./storage";
 import { extractWithOcr } from "./ocr";
+import { cleanupCaseFiles } from "./cleanup";
+
+export class FileInputConflictError extends Error {
+  constructor() { super("FILE_INPUT_CONFLICT"); }
+}
 
 type Sql = ReturnType<typeof postgres>;
 const hash = (text:string) => createHash("sha256").update(text).digest("hex");
@@ -41,6 +46,9 @@ export async function processFileInput(args: {sql:Sql;ownerId:string;caseId:stri
     await tx`select id from private.confirm_upload_slot(${file.object_id}::uuid,${magic})`;
     await tx`select id from private.advance_input_stage(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid,
       'VALIDATED',${JSON.stringify({detected_mime:parsed.mime,magic_signature:magic})}::text::jsonb)`;
+  }).catch(error => {
+    if (error.code === "23514") throw new FileInputConflictError();
+    throw error;
   });
   let pages=parsed.pages;
   if (parsed.needs_ocr) {
@@ -53,12 +61,13 @@ export async function processFileInput(args: {sql:Sql;ownerId:string;caseId:stri
     pages=await extractWithOcr({bytes,mime:parsed.mime,pageCount:pages.length,signal,
       authorize:async()=>{const [r]=await sql`select private.authorize_file_ocr(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid) as allowed`;return r.allowed===true;}});
   }
+  const ocrArtifactIds: string[] = [];
   const pageIds=await sql.begin(async tx=>{
     await tx`select private.register_input_pages(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid,${pages.length},'SUCCEEDED','v1')`;
     const ids=await tx`select * from private.input_page_ids(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid)`;
     if(parsed.needs_ocr) for(const page of ids) {
-      const [artifact]=await tx`select private.register_ocr_artifact(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid,${page.id}::uuid,'CLOVA',null,3600) as id`;
-      await tx`select private.enqueue_file_cleanup('OCR_ARTIFACT',${artifact.id}::uuid,'MASKING_COMPLETED')`;
+      const [artifact]=await tx`select private.register_ocr_artifact(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid,${page.id}::uuid,'NAVER_CLOVA_OCR',null,3600) as id`;
+      ocrArtifactIds.push(artifact.id);
     }
     return ids;
   });
@@ -71,6 +80,11 @@ export async function processFileInput(args: {sql:Sql;ownerId:string;caseId:stri
   // 더 이상 사용하지 않는 원본 Buffer와 페이지 참조를 모델 호출 전에 해제한다.
   bytes.fill(0);
   for(const page of pages) { page.text=""; page.words=[]; }
+  // OCR은 메모리에서만 처리한다. 원문 참조를 해제한 뒤 기존 부재 확인 계약으로 기록한다.
+  for (const artifactId of ocrArtifactIds) {
+    await sql`select private.enqueue_file_cleanup('OCR_ARTIFACT',${artifactId}::uuid,'OBJECT_MISSING')`;
+  }
+  if (ocrArtifactIds.length) await cleanupCaseFiles(sql,ownerId,caseId);
   if (!maskedText.trim()) throw new Error("FILE_TEXT_EMPTY");
   signal.throwIfAborted();
   await sql.begin(async tx=>{

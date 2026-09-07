@@ -2,7 +2,7 @@ import { z } from "zod";
 import { resolveOwner, UnauthenticatedError } from "@/lib/finshield/auth";
 import { fsql } from "@/lib/finshield/db";
 import { createClaimExtractor } from "@/lib/finshield/agents/model-adapter";
-import { processFileInput } from "@/lib/finshield/files/process";
+import { FileInputConflictError, processFileInput } from "@/lib/finshield/files/process";
 import { cleanupCaseFiles } from "@/lib/finshield/files/cleanup";
 import { jsonNoStore, readJson } from "@/lib/ops/http";
 
@@ -30,7 +30,7 @@ export async function POST(request:Request) {
   }catch(error){
     const code=String((error as {code?:string}).code??"");
     if(code==="42501")return jsonNoStore({error:"처리 가능한 본인 파일을 찾을 수 없습니다."},404);
-    if(code==="23514")return jsonNoStore({error:"이미 처리 중이거나 종료된 파일입니다. 내 기록에서 상태를 확인해 주세요."},409);
+    if(error instanceof FileInputConflictError)return jsonNoStore({error:"이미 처리 중이거나 종료된 파일입니다. 내 기록에서 상태를 확인해 주세요."},409);
     // 실패한 입력도 원본을 방치하지 않는다. 물리 삭제 실패는 DB 작업에 남아 재시도한다.
     await sql`select private.stop_case_input(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid,'FILE_PROCESS_FAILED')`.catch(()=>undefined);
     await cleanupCaseFiles(sql,ownerId,caseId).catch(()=>undefined);
