@@ -1,5 +1,9 @@
 # FinShield HANDOFF
 
+## 최신 Supabase 증거 재채택 준비
+
+- Migration 0035와 SQL 완료 표기를 반영한 main의 실제 Supabase 검증이 통과했다. 별도 Adoption으로 채택한다.
+
 ## DB 계약 변경 뒤 증거 재채택 준비
 
 - 새 main의 Rate·Consent·Storage·Delete 측정과 별도 artifact 채택을 진행했다. Migration 0035 기준이며 네 부분 PASS를 복구한다. Supabase 전체·나머지 blocker와 Release는 완료가 아니다.
