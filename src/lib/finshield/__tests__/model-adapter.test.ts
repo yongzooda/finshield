@@ -2,7 +2,8 @@
 
 import { describe, expect, it } from "vitest";
 import {
-  citationReferenceSchema, claimBrief, domainOutputSchemaFor, evidenceBrief, judgeOutputSchemaFor,
+  buildJudgeBatches, citationReferenceSchema, claimBrief, domainOutputSchemaFor, evidenceBrief, judgeOutputSchemaFor,
+  mergeJudgeBatchOutputs,
 } from "../agents/model-adapter";
 import type { ToolEvidence } from "../schemas";
 
@@ -86,5 +87,50 @@ describe("AI-017 모델 출력 Citation 목록", () => {
       claim_results: [{ claim_ref: "C1", state: "UNKNOWN", evidence_refs: ["E99"], withheld_reason: "합성 보류", rationale_masked: "합성 판단" }],
       conflicts: [],
     }).success).toBe(false);
+  });
+});
+
+describe("N-PERF-009 Evidence Judge Claim 배치", () => {
+  it("최대 여덟 Claim을 네 개 이하 두 묶음으로 제한한다", () => {
+    const inputClaims = Array.from({ length: 8 }, (_, index) => ({
+      claim_ref: `C${index + 1}`,
+      claim_type: "PRODUCT_TERM",
+      statement_masked: `합성 조건 ${index + 1}`,
+      materiality: "MATERIAL" as const,
+    }));
+    const batches = buildJudgeBatches({ claims: inputClaims, findings: [], evidence: [] });
+    expect(batches.map((batch) => batch.claims.length)).toEqual([4, 4]);
+    expect(batches.flatMap((batch) => batch.claims).map((claim) => claim.claim_ref))
+      .toEqual(inputClaims.map((claim) => claim.claim_ref));
+  });
+
+  it("각 묶음에는 해당 Claim이 실제 인용한 근거만 넣는다", () => {
+    const inputClaims = Array.from({ length: 6 }, (_, index) => ({
+      claim_ref: `C${index + 1}`,
+      claim_type: "PRODUCT_TERM",
+      statement_masked: `합성 조건 ${index + 1}`,
+      materiality: "MATERIAL" as const,
+    }));
+    const findings = inputClaims.map((claim, index) => ({
+      claim_ref: claim.claim_ref,
+      evidence_refs: [`E${index + 1}`],
+    }));
+    const evidences = inputClaims.map((_, index) => evidence({ evidence_ref: `E${index + 1}` }));
+    const batches = buildJudgeBatches({ claims: inputClaims, findings, evidence: evidences });
+    expect(batches.map((batch) => batch.claims.length)).toEqual([4, 2]);
+    expect(batches[0].evidence.map((item) => item.evidence_ref)).toEqual(["E1", "E2", "E3", "E4"]);
+    expect(batches[1].evidence.map((item) => item.evidence_ref)).toEqual(["E5", "E6"]);
+  });
+
+  it("동시에 끝난 묶음의 결과를 원래 Claim 순서로 합친다", () => {
+    const inputClaims = ["C1", "C2", "C3"].map((claim_ref) => ({
+      claim_ref, claim_type: "PRODUCT_TERM", statement_masked: `${claim_ref} 합성 조건`, materiality: "MATERIAL" as const,
+    }));
+    const merged = mergeJudgeBatchOutputs(inputClaims, [
+      { claim_results: [{ claim_ref: "C2" }, { claim_ref: "C1" }], conflicts: [{ claim_ref: "C2" }] },
+      { claim_results: [{ claim_ref: "C3" }], conflicts: [] },
+    ]);
+    expect(merged.claimResults.map((result) => result.claim_ref)).toEqual(["C1", "C2", "C3"]);
+    expect(merged.conflicts).toEqual([{ claim_ref: "C2" }]);
   });
 });
