@@ -6,11 +6,11 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
-import type { HealthReport } from "@/lib/ops/health";
+import type { HealthReport } from "@/lib/finshield/health-status.mjs";
 
 const report = vi.hoisted(() => ({ current: null as HealthReport | null }));
-vi.mock("@/lib/ops/health", () => ({
-  runHealthChecks: async () => report.current,
+vi.mock("@/lib/finshield/health-status.mjs", async importOriginal => ({
+  ...await importOriginal<object>(), checkHealth: async () => report.current,
 }));
 
 const { GET } = await import("../route");
