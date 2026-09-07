@@ -1,3 +1,7 @@
+## 2026-09-08 가입 후 DB 계약 main 통합
+
+분리 PR #236의 실제 merge candidate `6015fa9`와 CI `34139544176`이 통과해 main `dd203fd`로 squash merge됐다. 원격 DB는 0041이며 0042 적용을 준비 중이다. 기능 구현은 기존 Draft #192에 보존한다. main 부분 PASS 8/20·기능 Draft 7/20, Implementation NO-GO·Release NOT-EVALUATED를 유지한다.
+
 ## 2026-09-08 가입 후 Agent 실행 연결
 
 PC-005의 점검 전용 Job·Workflow에서 기존 Sales Conduct·Regulation & Dispute Runner와 Tool을 재사용하고 근거·실행·비용을 같은 점검에 귀속했다. 요청 복원·중복 억제·취소·기한·미확정 실행 실패·부분 결과와 과거 Passport 불변을 격리 검증했다. 0042 원격 적용과 새 Preview 검증, 가입 후 파일 입력과 품질 Gate는 남아 있다. [검증 범위](docs/ops/aftercare-agent-review.md)를 따른다.
@@ -23,6 +27,10 @@ PR #234를 main `2ae0230`으로 squash merge하고 원격에 0038~0041만 forwar
 - 실제 증거 채택은 merge candidate `72f6ed3`의 CI `34120542628`이 통과했다. 두 번의 채택 CI 거부 이력과 모든 원본은 보존했다.
 - 기본 시험 550건·선택적 94건 건너뜀, 별도 실제 TUS 갱신/삭제 1건 통과다. 코드·브라우저·자연 만료·배포 표본의 범위는 세션 갱신 기록을 따른다. 전체 P0·Release 완료가 아니다.
 - 계정 탈퇴 전체 흐름·OCR·검색·Workflow 장애·개인정보 계약·판정 품질은 남아 있다. Cohere 학습 설정 변경과 Rerank Fast 개발 후보는 사용자 결정 전 실행하지 않는다.
+
+## 2026-09-07 P0 DB 계약 분리
+
+Migration 0038~0041과 SQL 시험을 기능 Draft #192에서 분리했다. 새 작업 차단·Auth 마지막 삭제·합산 비용·알림 원자성·Profile Snapshot 비교를 격리 검증했다. 원격은 0037이며 별도 적용/검증이 필요하다. DB scope의 증거 5개를 STALE로 두어 main 부분 PASS는 8/20이다. Implementation NO-GO·Release NOT-EVALUATED를 유지한다. `docs/ops/p0-cleanup-profile-contracts.md`를 따른다.
 
 ## 2026-09-07 세션 보안 뒤 증거 재채택
 
