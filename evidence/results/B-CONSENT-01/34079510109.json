@@ -1,0 +1,147 @@
+{
+  "schema_version": 3,
+  "blocker_id": "B-CONSENT-01",
+  "requirements_blob_sha": "27ce706010344fbcedebe3abd707febff0f1dc26",
+  "adr_decision_sha256": "3c2a5e2dac9d626fdeea0b70eaa16454dd97688b54ad6d101b9b1d8dccdce736",
+  "code_under_test_sha": "0e70a893291d38b674a8d5c39e7033b8778c3069",
+  "workflow_head_sha": "0e70a893291d38b674a8d5c39e7033b8778c3069",
+  "scope_sha256": "c5a2e73eb09dae932a2386f0e400bf7641f55e85bc86e53d74b2688b19c91ab1",
+  "run": {
+    "id": 34079510109,
+    "attempt": 1
+  },
+  "observations": {
+    "contract": {
+      "formula_version": "consent-isolation-raw-transfer-v1",
+      "consent_type": "EXTERNAL_OCR_RAW_TRANSFER",
+      "scenarios": [
+        "absent",
+        "denied",
+        "revoked_after_granted",
+        "denied_after_granted",
+        "superseded_out_of_order",
+        "wrong_input",
+        "raw_deleted",
+        "granted"
+      ],
+      "block_reasons": [
+        "ABSENT",
+        "DENIED",
+        "REVOKED",
+        "SUPERSEDED",
+        "RAW_DELETED",
+        "WRONG_INPUT"
+      ],
+      "sent_event": "EXTERNAL_OCR_RAW_SENT",
+      "blocked_event": "EXTERNAL_OCR_RAW_BLOCKED",
+      "pii_fixtures": 132,
+      "clean_fixtures": 25
+    },
+    "scenarios": [
+      {
+        "scenario": "absent",
+        "expected_block": "ABSENT",
+        "sent": false,
+        "reason": "ABSENT",
+        "transmissions": 0,
+        "audit_events": [
+          "EXTERNAL_OCR_RAW_BLOCKED:BLOCKED:ABSENT"
+        ]
+      },
+      {
+        "scenario": "denied",
+        "expected_block": "DENIED",
+        "sent": false,
+        "reason": "DENIED",
+        "transmissions": 0,
+        "audit_events": [
+          "EXTERNAL_OCR_RAW_BLOCKED:BLOCKED:DENIED"
+        ]
+      },
+      {
+        "scenario": "revoked_after_granted",
+        "expected_block": "REVOKED",
+        "sent": false,
+        "reason": "REVOKED",
+        "transmissions": 0,
+        "audit_events": [
+          "EXTERNAL_OCR_RAW_BLOCKED:BLOCKED:REVOKED"
+        ]
+      },
+      {
+        "scenario": "denied_after_granted",
+        "expected_block": "DENIED",
+        "sent": false,
+        "reason": "DENIED",
+        "transmissions": 0,
+        "audit_events": [
+          "EXTERNAL_OCR_RAW_BLOCKED:BLOCKED:DENIED"
+        ]
+      },
+      {
+        "scenario": "superseded_out_of_order",
+        "expected_block": "SUPERSEDED",
+        "sent": false,
+        "reason": "SUPERSEDED",
+        "transmissions": 0,
+        "audit_events": [
+          "EXTERNAL_OCR_RAW_BLOCKED:BLOCKED:SUPERSEDED"
+        ]
+      },
+      {
+        "scenario": "wrong_input",
+        "expected_block": "WRONG_INPUT",
+        "sent": false,
+        "reason": "WRONG_INPUT",
+        "transmissions": 0,
+        "audit_events": [
+          "EXTERNAL_OCR_RAW_BLOCKED:BLOCKED:WRONG_INPUT"
+        ]
+      },
+      {
+        "scenario": "raw_deleted",
+        "expected_block": "RAW_DELETED",
+        "sent": false,
+        "reason": "RAW_DELETED",
+        "transmissions": 0,
+        "audit_events": [
+          "EXTERNAL_OCR_RAW_BLOCKED:BLOCKED:RAW_DELETED"
+        ]
+      },
+      {
+        "scenario": "granted",
+        "expected_block": null,
+        "sent": true,
+        "reason": null,
+        "transmissions": 1,
+        "audit_events": [
+          "EXTERNAL_OCR_RAW_SENT:OK:-"
+        ]
+      }
+    ],
+    "transfer": {
+      "denied_scenarios": 7,
+      "denied_transmissions": 0,
+      "granted_scenarios": 1,
+      "granted_transmissions": 1,
+      "total_received": 1,
+      "raw_marker_leaks": 0,
+      "audit_rows_missing": 0,
+      "wrong_audit_event": 0
+    },
+    "mask": {
+      "pii_fixtures": 132,
+      "sent_to_model": 117,
+      "blocked_by_residual": 15,
+      "passed_with_secret": 0,
+      "clean_fixtures": 25,
+      "clean_blocked": 0
+    }
+  },
+  "environment": {
+    "node_version": "v24.20.0",
+    "region": "github-hosted",
+    "transport": "postgres"
+  },
+  "redactions_applied": true
+}
