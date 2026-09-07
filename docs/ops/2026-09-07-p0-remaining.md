@@ -1,3 +1,5 @@
+현재 구현 추가: 전체 계정 탈퇴 API·진행 조회·화면·Workflow와 Migration 0038을 기능 Draft에 추가했다. 격리 DB의 신규 작업 차단·Auth 실패 rollback·반복 종결과 API 영수증/응답 유실 시험을 통과했다. 원격 적용과 배포 종단 검증은 남아 있다. 0038의 DB scope 변경으로 기능 Draft의 Supabase·Rate·Consent·Storage·Delete 증거도 STALE로 두며 부분 PASS는 7/20이다. main 13/20 채택에는 변경이 없다. Cohere 학습 사용 Off와 Fast 합성 시험 최대 USD 0.05는 승인됐고, 설정 Off를 새 페이지에서도 확인했다. Provider 시험 호출은 아직 0건이다.
+
 현재 추가 보안 작업: PR #224·#226의 세션 갱신·폐기 RLS와 PR #230의 별도 증거 채택이 main에 병합됐다. main 부분 PASS 13/20, 이 기능 Draft는 Health scope 차이로 12/20이다. Implementation NO-GO·Release NOT-EVALUATED를 유지한다. 실제 Production/Preview의 갱신·폐기·다른 세션 유지, 한 시간 자연 만료 복구, Preview TUS의 Cookie 회전·파일/Case 삭제를 각각 확인했다. 아래 최초 감사 기준선과 구분한다.
 
 # 2026-09-07 개발 재개 확인표
@@ -9,14 +11,14 @@
 | 요구사항·차단 항목 | 확인된 구현·검증 | 남은 작업·단계 |
 |---|---|---|
 | AUTH-001~002·AUTH-011 | 로그인 존재, Draft 삭제 재인증 실측, 서버 로그아웃·세션 격리·Cookie 회전·실제 만료 복구·직접 RLS 폐기 확인 | 전체 탈퇴 수명·배포 통합의 추가 검증은 별도이며 전체 AUTH 완료 아님 |
-| AUTH-005·D-014·SEC-PRI-005 | Migration 0036 선행 정리 Guard, Draft Case 삭제·반복 요청 실제 확인 | 전체 계정 탈퇴·신규 작업 경합·Auth 마지막 삭제 미구현·Live 미검증 |
+| AUTH-005·D-014·SEC-PRI-005 | Migration 0036 선행 정리 Guard, Draft Case 삭제·반복 요청 실제 확인 | 전체 계정 탈퇴·신규 작업 경합·Auth 마지막 삭제 구현 및 격리 검증, Live 미검증 |
 | INP-001~013·CLM-001~004·B-OCR-01 | Draft native PDF·PNG·10쪽 스캔의 실제 처리·물리 삭제 연결 | 정식 field F1 0.9791667 실패 유지, 개발 진단·새 가족 사전등록 평가·OCR 확인 UX 필요 |
 | AI-006~008·EV-002~009·B-RETRIEVAL-01 | 후보 생성 PASS, 종단 두 차례 미달. 이번 실제 worker 조회에서 KB 문서·청크·Embedding 각 0건 | 기존 gate 재측정 금지, 범위/Provider 별도 결정·공식 자료 적재·미연결 도구 필요 |
 | REV-001~007·N-PERF-005/009·B-JOB-01·B-DEADLINE-01 | Draft 실제 재검증 NO_CHANGE·과거 판 보존, 격리 DB 종결 rollback·중복 복구 | 실제 배포 장애 20종·Lease·취소 경합·기한·Orphan·TTL 검증 및 Gate 미채택 |
 | AI-009~021·EV-001~016·RES-001 | Draft 단일 Claim 실제 실행·저장과 실패 안전 상태 | 복수 Claim은 부분 결과, 독립 검토 품질·실질적 적합성·일반 상품 유효 시점 미완료 |
 | PC-001~011 | Draft 가입 사실·계약 문구·설문 4개 저장·복원 실제 확인 | Sales/Regulation Agent 재사용·가입 후 파일 경계·법적 표현 품질 미완료 |
 | PASS-002/004·CASE-004/006·REV-005 | Draft 이전 Passport·새 판·새로고침 복원 | 프로필 변경 불변성·다른 기기 완료 기록·50건 이후 목록·Outbox Orphan 검증 필요 |
-| SEC-PRI·SEC-AI-008·B-PROCESSOR-PRIVACY·B-PRIVACY-VERCEL | 합성 전용 조건, PII·동의·삭제 구성요소 검증 존재 | Cohere 학습 허용 On 관측, 설정 변경과 Rerank Fast 개발 후보 결정 대기. 나머지 계정 설정·DPA·보존·region·하위처리자·로그·PII 경계 미채택 |
+| SEC-PRI·SEC-AI-008·B-PROCESSOR-PRIVACY·B-PRIVACY-VERCEL | 합성 전용 조건, PII·동의·삭제 구성요소 검증 존재 | Cohere 학습 사용 Off 변경·새 페이지 확인, Rerank Fast 개발 후보 USD 0.05 승인. 나머지 계정 설정·DPA·보존·region·하위처리자·로그·PII 경계 미채택 |
 | N-OPS-002~004·B-HEALTH-01 | Draft 모델 비용 예약·실사용 정산·미확정 보존, main 저비용 Health PASS | OCR/Embedding 비용·사용량 대조·다중 인스턴스 실제 경로·Draft Health 재측정 필요 |
 | N-QLT-010·B-SPIKE-01 | NO-GO 허용 격리·보안 검증 단계 | 선행 blocker·사전등록 Claim 평가·실제 component vertical·구현/실패 안전성 검토 후 GO 판단 |
 | N-QLT-009·B-DEMO/E2E/BUILD/CLAIM | Release 미평가 | GO 이후 전체 수직 흐름·필수 Live skip 0·판정 품질 평가 필요 |

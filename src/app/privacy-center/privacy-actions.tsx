@@ -1,6 +1,7 @@
 "use client";
 
-import { closeSession, sessionFetch, readSessionToken, sessionIdentity } from "../session-client";
+import { AccountDeletion } from "./account-deletion";
+import { closeSession, sessionFetch, readSessionToken, sessionIdentity, sessionOwner } from "../session-client";
 
 /**
  * 개인정보 설정에서 실제로 할 수 있는 것 (S-017).
@@ -113,6 +114,7 @@ export function PrivacyActions() {
           {sessionNotice ? <p role="status" className="fs-body mt-2">{sessionNotice}</p> : null}
         </FsCard>
         <FsLoginCard onToken={setToken} title="내 자료 관리" />
+        <AccountDeletion key={sessionOwner(token) ?? "signed-out"} token={token} setToken={setToken} />
       </>
     );
   }
@@ -130,6 +132,7 @@ export function PrivacyActions() {
         </button>
       </FsCard>
 
+      <AccountDeletion key={sessionOwner(token) ?? "signed-out"} token={token} setToken={setToken} />
       {reauthCase ? <FsCard>
         <h2 className="fs-h2">삭제 전에 본인 확인</h2>
         <p className="fs-body mt-2">같은 계정으로 다시 로그인하면 선택한 기록의 삭제 확인으로 돌아갑니다.</p>

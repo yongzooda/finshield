@@ -15,11 +15,7 @@ export async function cleanupCaseFiles(sql: ReturnType<typeof postgres>, ownerId
       const target = row.target as { path: string | null; bucket: string | null };
       if (target.path) {
         if (target.bucket !== "finshield-quarantine") throw new Error("CLEANUP_BUCKET_REJECTED");
-        const response = await fetch(`${env.SUPABASE_URL}/storage/v1/object/${target.bucket}`, {
-          method: "DELETE", headers: { ...storageServiceHeaders(env.SUPABASE_SECRET_KEY), "Content-Type": "application/json" },
-          body: JSON.stringify({ prefixes: [target.path] }), signal: AbortSignal.timeout(5000), redirect: "error",
-        });
-        if (!response.ok) throw new Error("STORAGE_DELETE_FAILED");
+        await deleteQuarantineObject(target.path);
       }
       await sql`select id from private.finish_file_cleanup_job(${job.id}::uuid,${job.lease_token}::uuid,null)`;
       finished += 1;
@@ -28,4 +24,15 @@ export async function cleanupCaseFiles(sql: ReturnType<typeof postgres>, ownerId
     }
   }
   return { finished, pending: finished !== jobs.length || jobs.length === 20 };
+}
+
+/** 정확히 지정된 한 경로만 제거한다. 실제 부재와 완료는 호출자의 DB 함수가 확인한다. */
+export async function deleteQuarantineObject(path: string) {
+  const env = finshieldEnv();
+  if (!env.SUPABASE_URL || !env.SUPABASE_SECRET_KEY) throw new Error("CLEANUP_CONFIG_UNAVAILABLE");
+  const response = await fetch(`${env.SUPABASE_URL}/storage/v1/object/finshield-quarantine`, {
+    method: "DELETE", headers: { ...storageServiceHeaders(env.SUPABASE_SECRET_KEY), "Content-Type": "application/json" },
+    body: JSON.stringify({ prefixes: [path] }), signal: AbortSignal.timeout(5000), redirect: "error",
+  });
+  if (!response.ok) throw new Error("STORAGE_DELETE_FAILED");
 }

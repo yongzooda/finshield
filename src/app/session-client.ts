@@ -19,6 +19,9 @@ function claims(token: string | null): { session_id: string; sub: string; exp: n
 }
 
 /** 갱신마다 입력 화면을 다시 불러오지 않도록 세션 자체의 식별자를 반환한다. */
+/** 화면 상태 격리에만 사용한다. 서버 소유자 인증은 대체하지 않는다. */
+export const sessionOwner = (token: string | null): string | null => claims(token)?.sub ?? null;
+
 export const sessionIdentity = (token: string | null): string | null => claims(token)?.session_id ?? token;
 
 export function readSessionToken(): string | null {
