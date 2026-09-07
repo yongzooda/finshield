@@ -17,4 +17,5 @@ begin
  perform fstest.expect_fail(format('select private.reserve_finshield_model_usage(%L,%L,%L,null,null,%L,%L,100)',owner,c,inp,'claude-sonnet-5','sonnet5-usd-20260907'),'중단 뒤 모델 비용 예약 차단');
  raise notice '  통과: 마스킹 전·중단 뒤 Claim 기록과 후속 모델 예약 차단';
 end $$;
+do $$ begin raise notice '24_intake_stop 시험을 모두 통과했습니다'; end $$;
 rollback;
