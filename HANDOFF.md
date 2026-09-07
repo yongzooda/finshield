@@ -1,3 +1,8 @@
+## 2026-09-07 세션 보안 뒤 증거 재채택
+
+- 별도 PR #230에서 최종 main `72e5405`의 Supabase·Rate·Consent·Storage·Delete 원본을 채택한다. 첫 채택 CI 거부와 두 번의 원본을 모두 보존한다. [측정 범위](docs/ops/session-rls-adoption.md)를 따른다.
+- 부분 PASS는 main 13/20이며 Implementation NO-GO·Release NOT-EVALUATED다. 기능 Draft의 Health 범위는 별도다.
+
 ## 2026-09-07 세션 갱신 보안 보완
 
 - `AUTH-002` 서버 Cookie 갱신과 보호 요청 전 갱신을 연결했다. 갱신·로그아웃·로그인 교체 경합과 저장하지 않은 입력 보존을 검증했다.
