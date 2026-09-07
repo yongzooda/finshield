@@ -51,6 +51,8 @@ export async function POST(request: Request): Promise<Response> {
   const events: unknown[] = [];
   const waiters: (() => void)[] = [];
   let finished = false;
+  const abort = new AbortController();
+  const signal = AbortSignal.any([request.signal,abort.signal,AbortSignal.timeout(110_000)]);
   const wake = () => { while (waiters.length > 0) waiters.pop()?.(); };
   const push = (event: unknown) => { events.push(event); wake(); };
 
@@ -64,7 +66,7 @@ export async function POST(request: Request): Promise<Response> {
         claims: seed.claims,
         expires_at: session.expiresAt,
       });
-      const result = await runDemo({ sql, session, progress: (event) => push(event) });
+      const result = await runDemo({ sql, session, signal, progress: (event) => push(event) });
       push({ type: "done", mode: "LIVE", is_precomputed: false, ...result.manifest });
     } catch (error) {
       push({ type: "error", message: "실행을 끝내지 못했습니다", code: (error as { code?: string })?.code ?? null });
@@ -83,5 +85,5 @@ export async function POST(request: Request): Promise<Response> {
     await work;
   }
 
-  return ndjsonStream(stream());
+  return ndjsonStream(stream(),()=>abort.abort());
 }

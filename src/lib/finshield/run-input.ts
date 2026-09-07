@@ -6,11 +6,56 @@ import { confirmedClaim } from "./schemas";
 
 export const selectionSchema = z.object({
   case_id: z.uuid(),
+  replace_run_id: z.uuid().optional(),
   claims: z.array(z.object({
     claim_id: z.uuid(), statement_masked: z.string().trim().min(1).max(400).optional(),
     expected_revision_no: z.number().int().positive().optional(),
   })).min(1).max(8),
 });
+
+type Sql = ReturnType<typeof postgres> | postgres.TransactionSql;
+
+/**
+ * 초기 검증 시작 전 Case를 INPUT_REVIEW로 맞춘다. 0045가 적용된 DB에서는
+ * 원자 함수를 쓰고, 배포와 Migration 사이의 짧은 구간에는 기존 잠금 함수를
+ * 조합한다. 어느 경로도 타인·다른 Case의 Run ID로 실행을 끝내지 않는다.
+ */
+export async function prepareInitialVerificationStart(
+  sql: Sql, ownerId: string, caseId: string, replaceRunId?: string,
+): Promise<void> {
+  const [available] = await sql`
+    select to_regprocedure('private.prepare_initial_verification_retry(uuid,uuid,uuid)') is not null as ok`;
+  if (available?.ok) {
+    await sql`select private.prepare_initial_verification_retry(${ownerId}::uuid,${caseId}::uuid,
+      ${replaceRunId ?? null}::uuid)`;
+    return;
+  }
+
+  // 0045 전환 구간의 호환 경로다. 소유권과 Case를 먼저 좁힌 뒤 기존
+  // fail_verification_run이 다시 행을 잠그고 활성 상태인지 확인한다.
+  const active = await sql`
+    select id,deadline_at<=now() as expired from public.verification_runs
+     where owner_id=${ownerId}::uuid and case_id=${caseId}::uuid and kind='INITIAL'
+       and status in ('QUEUED','RUNNING') order by created_at desc limit 1`;
+  if (active.length) {
+    const exactRetry = replaceRunId === active[0].id;
+    if (!active[0].expired && !exactRetry) {
+      throw Object.assign(new Error("다른 초기 검증이 아직 실행 중이다"), { code: "23505" });
+    }
+    await sql`select private.fail_verification_run(${active[0].id}::uuid,
+      ${active[0].expired ? "DEADLINE_EXCEEDED" : "CLIENT_RETRY"},null)`;
+  }
+  const cases = await sql`
+    select lifecycle from public.financial_cases
+     where id=${caseId}::uuid and owner_id=${ownerId}::uuid and deleted_at is null`;
+  if (!cases.length) throw Object.assign(new Error("Case 접근 불가"), { code: "42501" });
+  if (cases[0].lifecycle === "DRAFT") {
+    await sql`select private.transition_financial_case(${ownerId}::uuid,${caseId}::uuid,
+      'INPUT_REVIEW'::public.case_lifecycle,'USER','CLAIMS_CONFIRMED')`;
+  } else if (cases[0].lifecycle !== "INPUT_REVIEW") {
+    throw Object.assign(new Error("초기 검증을 시작할 수 없는 상태다"), { code: "23514" });
+  }
+}
 
 export function maskSelection(input: z.infer<typeof selectionSchema>) {
   return input.claims.map(claim => {

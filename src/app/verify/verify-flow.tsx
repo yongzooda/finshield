@@ -66,6 +66,7 @@ export function VerifyFlow() {
   const [busy, setBusy] = useState(false);
   const [fileBusy, setFileBusy] = useState(false);
   const intakeAbort = useRef<AbortController | null>(null);
+  const [activeRunId, setActiveRunId] = useState<string | null>(null);
   useEffect(() => () => intakeAbort.current?.abort(), []);
   const [notice, setNotice] = useState<string | null>(null);
   const [text, setText] = useState("");
@@ -148,7 +149,7 @@ export function VerifyFlow() {
     } finally {
       setBusy(false);
       setClaims([]); setPicked(new Set()); setStages([]);
-      setCaseId(null); setInputId(null); masked.current = "";
+      setCaseId(null); setInputId(null); setActiveRunId(null); masked.current = "";
       setStep("input");
     }
   };
@@ -161,6 +162,7 @@ export function VerifyFlow() {
         method: "POST", headers: authed(),
         body: JSON.stringify({
           case_id: caseId,
+          ...(activeRunId ? { replace_run_id: activeRunId } : {}),
           claims: claims.filter((claim) => picked.has(claim.claim_id)),
         }),
       });
@@ -172,6 +174,7 @@ export function VerifyFlow() {
       await readRunStream(response, (line) => {
           const event = JSON.parse(line);
           if (event.type === "run_started" && event.claims) {
+            setActiveRunId(event.run_id as string);
             setClaims(event.claims);
           } else if (event.type === "agent_started") {
             setAgents((prev) => prev.some((a) => a.agentCode === event.agentCode)
@@ -193,6 +196,7 @@ export function VerifyFlow() {
             setClaimResults(merged);
             setEvidence(event.evidence);
             setPartial(event.partial);
+            setActiveRunId(null);
             setStep("result");
           } else if (event.type === "error") {
             setNotice(event.message); setStep("claims");
@@ -273,6 +277,7 @@ export function VerifyFlow() {
         <FsCard>
           <h2 className="fs-h2">무엇을 확인할까요</h2>
           <p className="fs-body mt-2">받은 권유와 같은 내용인지 확인하고 검증할 항목을 선택해 주세요. 입력과 다르게 추출됐다면 아래 문장을 직접 고쳐 주세요. 수정한 문장도 개인정보를 가린 뒤 기록합니다.</p>
+          {activeRunId ? <p className="fs-inline-notice mt-4">이전 검증이 중단되었습니다. 같은 항목으로 다시 시작할 수 있습니다.</p> : null}
           {filePages.length ? <details className="mt-4 rounded-lg border border-[var(--fs-line)] p-4">
             <summary className="cursor-pointer font-bold">페이지별 추출 내용과 대조하기</summary>
             {filePages.map(page=><section className="mt-4" key={page.page_no}><h3 className="font-bold">{page.page_no}쪽</h3>
@@ -306,7 +311,7 @@ export function VerifyFlow() {
           </ul>
           <div className="mt-5 flex flex-wrap gap-3">
             <button type="button" disabled={busy || picked.size === 0 || claims.some(claim => picked.has(claim.claim_id) && !claim.statement_masked.trim())} onClick={startRun}
-              className="fs-btn fs-btn--primary">선택한 항목 검증하기</button>
+              className="fs-btn fs-btn--primary">{activeRunId ? "같은 항목 다시 검증하기" : "선택한 항목 검증하기"}</button>
             <button type="button" disabled={busy} onClick={() => void stopInput()}
               className="fs-btn fs-btn--quiet">중단하고 다시 입력</button>
           </div>

@@ -21,9 +21,10 @@ describe('EV-008·AI-017 조회 실패와 검색 결과 없음 구분',()=>{
   expect(decide).toHaveBeenCalledWith(expect.objectContaining({observations:expect.arrayContaining([expect.objectContaining({tool_code:'search_consumer_warning',provenance_complete:false,error_code:'WARNING_CORPUS_NOT_LOADED'})])}));
  });
  it('정상 검색 0건은 실패로 만들지 않으면서 같은 입력의 반복 호출을 막는다',async()=>{
-  const tool=vi.fn(async()=>({items:[],provenanceComplete:true,candidateCount:0,reasonCode:'NO_MATCH'}));
-  const result=await runDomainAgent({session:makeSession(),agentCode:'FRAUD_CHANNEL',input:{...input,claims:[...input.claims]},model:{chooseTools:async()=>[{toolCode:'search_consumer_warning',input:{query:'합성 권유'}}],decide:async()=>output},impls:{search_consumer_warning:tool}});
-  expect(result.status).toBe('SUCCEEDED');expect(tool).toHaveBeenCalledTimes(1);
+ const tool=vi.fn(async()=>({items:[],provenanceComplete:true,candidateCount:0,reasonCode:'NO_MATCH'}));
+  const chooseTools=vi.fn(async()=>[{toolCode:'search_consumer_warning',input:{query:'합성 권유'}}]);
+  const result=await runDomainAgent({session:makeSession(),agentCode:'FRAUD_CHANNEL',input:{...input,claims:[...input.claims]},model:{chooseTools,decide:async()=>output},impls:{search_consumer_warning:tool}});
+  expect(result.status).toBe('SUCCEEDED');expect(tool).toHaveBeenCalledTimes(1);expect(chooseTools).toHaveBeenCalledOnce();
  });
 });
 

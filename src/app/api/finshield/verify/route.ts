@@ -12,7 +12,7 @@ import { ndjsonStream } from "@/lib/ops/ndjson";
 import { jsonNoStore, readJson } from "@/lib/ops/http";
 import { fsql } from "@/lib/finshield/db";
 import { resolveOwner, UnauthenticatedError } from "@/lib/finshield/auth";
-import { loadRunInput, maskSelection, selectionSchema } from "@/lib/finshield/run-input";
+import { loadRunInput, maskSelection, prepareInitialVerificationStart, selectionSchema } from "@/lib/finshield/run-input";
 import { loadManifest } from "@/lib/finshield/registry";
 import { runVerification, type RunProgress } from "@/lib/finshield/orchestrator";
 import { buildFinalClaims, finalizeRun } from "@/lib/finshield/finalize";
@@ -66,10 +66,11 @@ export async function POST(request: Request): Promise<Response> {
     try {
       const manifest = await loadManifest(fsql());
       const runId = await fsql().begin(async sql => {
+        // 이전 Stream이 끊겨 화면이 실패를 확인했거나 deadline이 지난 Run만
+        // 먼저 terminal로 만든다. 살아 있는 다른 Run은 DB가 거부한다.
+        await prepareInitialVerificationStart(sql,ownerId,caseId,body.data.replace_run_id);
         await sql`select private.confirm_case_claims(${ownerId}::uuid, ${caseId}::uuid,
           ${JSON.stringify(selected)}::text::jsonb)`;
-        await sql`select private.transition_financial_case(${ownerId}::uuid, ${caseId}::uuid,
-          'INPUT_REVIEW'::public.case_lifecycle, 'USER', 'CLAIMS_CONFIRMED')`;
         const run = await sql`select private.create_verification_run(${ownerId}::uuid, ${caseId}::uuid,
           ${manifest.manifestId}::uuid, ${`run-${randomUUID()}`}::text,
           ${createHash("sha256").update(JSON.stringify(selected)).digest("hex")}::text,
@@ -139,10 +140,15 @@ export async function POST(request: Request): Promise<Response> {
         })),
       });
     } catch (error) {
+      const errorName = (error as { name?: string })?.name;
+      const deadline = errorName === "AbortError" || errorName === "TimeoutError";
       if (activeRunId) await fsql()`select id from private.fail_verification_run(${activeRunId}::uuid,
-        ${signal.aborted ? "CLIENT_DISCONNECTED" : "VERIFICATION_FAILED"},null)`.catch(()=>undefined);
+        ${request.signal.aborted ? "CLIENT_DISCONNECTED" : deadline ? "DEADLINE_EXCEEDED" : "VERIFICATION_FAILED"},null)`.catch(()=>undefined);
       // 내부 사정을 화면에 흘리지 않는다. 무엇이 안 됐는지만 알린다.
-      push({ type: "error", message: "검증을 끝내지 못했습니다", code: (error as { code?: string })?.code ?? null });
+      push({ type: "error", message: deadline
+        ? "제한 시간 안에 검증을 끝내지 못했습니다. 같은 항목으로 다시 시도해 주세요."
+        : "검증을 끝내지 못했습니다. 같은 항목으로 다시 시도해 주세요.",
+        code: (error as { code?: string })?.code ?? null });
     } finally {
       clearInterval(heartbeat);
       finished = true;

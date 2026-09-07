@@ -23,7 +23,9 @@ import { systemPromptFor } from "./prompts";
 
 const digest = (value: unknown) => createHash("sha256").update(JSON.stringify(value), "utf8").digest("hex");
 
-export const MAX_TOOL_TURNS = 6;
+// P0는 한 Agent가 한 번에 고른 최대 3개 읽기 Tool만 실행한다. 다음 선택 턴을
+// 반복하면 같은 조회가 시간을 잠식해 최종 판단이 deadline 직전에 잘렸다.
+export const MAX_TOOL_TURNS = 1;
 
 export type Decoded = { ok: true; value: unknown } | { ok: false; reason: string };
 
@@ -97,7 +99,8 @@ export const runDomainAgent = async <T = DomainAgentOutput>(args: {
   const system = systemPromptFor(agentCode);
   const { sql, ownerId, caseId, runId } = session;
   const startedAt = Date.now();
-  const stageLimit = ["COVE", "RED_TEAM"].includes(agentCode) ? 12_000 : 8_000;
+  const reviewAgent = ["COVE", "RED_TEAM"].includes(agentCode);
+  const stageLimit = reviewAgent ? 15_000 : 12_000;
   const stageSignal = AbortSignal.timeout(stageLimit);
   const signal = session.signal ? AbortSignal.any([session.signal, stageSignal]) : stageSignal;
 
@@ -113,13 +116,14 @@ export const runDomainAgent = async <T = DomainAgentOutput>(args: {
     // 최소 6초를 남긴다. 전체 Run의 원래 deadline은 별도로 계속 적용된다.
     if (turn > 0 && Date.now() - startedAt >= stageLimit - 6_000) break;
     let choices: ToolChoice[];
+    const choiceSignal = AbortSignal.any([signal,AbortSignal.timeout(reviewAgent ? 6_000 : 5_000)]);
     try {
-      signal.throwIfAborted();
+      choiceSignal.throwIfAborted();
       choices = await model.chooseTools({
-        system, signal, input, evidence, observations, availableTools: [...spec.tools],
+        system, signal: choiceSignal, input, evidence, observations, availableTools: [...spec.tools],
       });
     } catch (error) {
-      reasonCode = (error as {code?:string}).code === "MODEL_BUDGET_BLOCKED" ? "TOOL_BUDGET" : signal.aborted ? "DEADLINE_EXCEEDED" : "TOOL_CHOICE_FAILED";
+      reasonCode = (error as {code?:string}).code === "MODEL_BUDGET_BLOCKED" ? "TOOL_BUDGET" : choiceSignal.aborted ? "DEADLINE_EXCEEDED" : "TOOL_CHOICE_FAILED";
       break;
     }
     if (choices.length > 3) { reasonCode = "TOOL_BATCH_LIMIT"; break; }
@@ -158,10 +162,11 @@ export const runDomainAgent = async <T = DomainAgentOutput>(args: {
 
   let output: T | null = null;
   let status: AgentRunResult["status"] = "SUCCEEDED";
+  const decisionSignal = AbortSignal.any([signal,AbortSignal.timeout(reviewAgent ? 8_000 : 7_000)]);
   try {
-    signal.throwIfAborted();
+    decisionSignal.throwIfAborted();
     if (reasonCode === "TOOL_BUDGET") throw Object.assign(new Error("MODEL_BUDGET_BLOCKED"), {code:"MODEL_BUDGET_BLOCKED"});
-    const raw = await model.decide({ system, signal, input, evidence, observations });
+    const raw = await model.decide({ system, signal: decisionSignal, input, evidence, observations });
     // 다른 Schema 로 받는 Agent 는 자기 해독기를 준다. 없으면 Domain Schema 로 받는다.
     const decoded = args.decodeOutput
       ? args.decodeOutput(raw, evidence)
@@ -174,7 +179,7 @@ export const runDomainAgent = async <T = DomainAgentOutput>(args: {
     }
   } catch (error) {
     status = "FAILED";
-    reasonCode = (error as {code?:string}).code === "MODEL_BUDGET_BLOCKED" ? "TOOL_BUDGET" : signal.aborted ? "DEADLINE_EXCEEDED" : "MODEL_CALL_FAILED";
+    reasonCode = (error as {code?:string}).code === "MODEL_BUDGET_BLOCKED" ? "TOOL_BUDGET" : decisionSignal.aborted ? "DEADLINE_EXCEEDED" : "MODEL_CALL_FAILED";
   }
 
   if (status === "SUCCEEDED" && reasonCode) status = "PARTIAL";

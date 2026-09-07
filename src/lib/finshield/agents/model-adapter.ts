@@ -74,7 +74,7 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
         observations,
       }),
       schema: toolChoiceSchema,
-      maxTokens: 1000, effort: "low", signal, maxRetries: 0, timeoutMs: 8_000,
+      maxTokens: 500, effort: "low", signal, maxRetries: 0, timeoutMs: 8_000,
     }, context, usageFor(input.agent_code));
     return result.calls.map((call) => ({
       toolCode: call.tool_code,
@@ -99,7 +99,7 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
       }),
       schema: input.agent_code === "COVE" ? coveOutput
         : input.agent_code === "RED_TEAM" ? redTeamOutput : domainAgentOutput,
-      maxTokens: 2400, effort: "low", signal, maxRetries: 0, timeoutMs: 12_000,
+      maxTokens: 1600, effort: "low", signal, maxRetries: 0, timeoutMs: 12_000,
     }, context, usageFor(input.agent_code));
   },
 });
@@ -128,7 +128,7 @@ export const createJudgeModel = (context?: ModelBudgetContext): JudgeModel => {
           note_masked: z.string(),
         })),
       }),
-      maxTokens: 2400, effort: "low", signal, maxRetries: 0, timeoutMs: 8_000,
+      maxTokens: 1600, effort: "low", signal, maxRetries: 0, timeoutMs: 8_000,
     }, context, usage);
   },
 });
