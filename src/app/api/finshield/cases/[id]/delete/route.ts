@@ -14,7 +14,8 @@ import { cleanupCaseFiles } from "@/lib/finshield/files/cleanup";
 import { createHash, createHmac } from "node:crypto";
 import { jsonNoStore } from "@/lib/ops/http";
 import { fsql } from "@/lib/finshield/db";
-import { bearerToken, resolveOwner, UnauthenticatedError } from "@/lib/finshield/auth";
+import { bearerToken, UnauthenticatedError } from "@/lib/finshield/auth";
+import { resolveRecentlyAuthenticatedOwner, ReauthenticationRequiredError, RequestOriginError } from "@/lib/finshield/reauthentication";
 import { restSelect } from "@/lib/finshield/rest";
 
 export const runtime = "nodejs";
@@ -30,8 +31,10 @@ export async function POST(
 ): Promise<Response> {
   let ownerId: string;
   try {
-    ownerId = await resolveOwner(request);
+    ownerId = await resolveRecentlyAuthenticatedOwner(request);
   } catch (error) {
+    if (error instanceof ReauthenticationRequiredError) return jsonNoStore({error:error.message,code:"REAUTHENTICATION_REQUIRED"},403);
+    if (error instanceof RequestOriginError) return jsonNoStore({error:error.message,code:"ORIGIN_REJECTED"},403);
     if (error instanceof UnauthenticatedError) return jsonNoStore({ error: error.message }, 401);
     throw error;
   }

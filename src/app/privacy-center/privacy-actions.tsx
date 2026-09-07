@@ -35,6 +35,7 @@ export function PrivacyActions() {
   const [notice, setNotice] = useState<string | null>(null);
   const [asking, setAsking] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [reauthCase, setReauthCase] = useState<string | null>(null);
 
   useEffect(() => {
     if (!ready || !token) return;
@@ -58,13 +59,19 @@ export function PrivacyActions() {
       });
       const body = await response.json().catch(() => null);
       if (!response.ok) {
+        if (response.status === 403 && body?.code === "REAUTHENTICATION_REQUIRED") setReauthCase(caseId);
         if (response.status === 401) setToken(null);
         setNotice(body?.error ?? "삭제를 시작하지 못했습니다");
         return;
       }
-      setRows((prev) => (prev ?? []).map((row) =>
-        row.id === caseId ? { ...row, deletion_status: "PENDING", deleted_at: new Date().toISOString() } : row));
-      setNotice("지우기를 시작했습니다. 원본이 실제로 사라진 것을 확인한 뒤에 완료로 기록됩니다.");
+      if (body?.status === "COMPLETED") {
+        setRows(prev => (prev ?? []).filter(row => row.id !== caseId));
+        setNotice("연결된 자료의 정리를 확인했고 이 검증 기록을 삭제했습니다.");
+      } else {
+        setRows((prev) => (prev ?? []).map((row) =>
+          row.id === caseId ? { ...row, deletion_status: "PENDING", deleted_at: new Date().toISOString() } : row));
+        setNotice("지우기를 시작했습니다. 원본이 실제로 사라진 것을 확인한 뒤에 완료로 기록됩니다.");
+      }
     } catch {
       setNotice("연결이 끊어졌습니다. 처리 결과를 확인한 뒤 다시 시도해 주세요.");
     } finally { setBusy(false); setAsking(null); }
@@ -95,6 +102,14 @@ export function PrivacyActions() {
         </button>
       </FsCard>
 
+      {reauthCase ? <FsCard>
+        <h2 className="fs-h2">삭제 전에 본인 확인</h2>
+        <p className="fs-body mt-2">같은 계정으로 다시 로그인하면 선택한 기록의 삭제 확인으로 돌아갑니다.</p>
+        <FsLoginCard title="비밀번호로 다시 로그인" onToken={nextToken => {
+          setRows(null); setToken(nextToken); setAsking(reauthCase); setReauthCase(null);
+        }} />
+        <button type="button" className="fs-btn fs-btn--quiet mt-3" onClick={() => setReauthCase(null)}>그만두기</button>
+      </FsCard> : null}
       <FsCard>
         <h2 className="fs-h2">검증 기록 관리</h2>
         {notice ? <p className="fs-body mt-2">{notice}</p> : null}
@@ -132,7 +147,7 @@ export function PrivacyActions() {
                         이 기록을 지우면 확인 결과와 Evidence Passport 도 함께 사라집니다. 되돌릴 수 없습니다.
                       </p>
                       <div className="mt-3 flex flex-wrap gap-3">
-                        <button type="button" disabled={busy} onClick={() => void requestDelete(row.id)}
+                        <button type="button" disabled={busy || Boolean(reauthCase)} onClick={() => void requestDelete(row.id)}
                           className="fs-btn fs-btn--primary !px-3 !text-[0.9rem]">
                           지우기 시작
                         </button>
@@ -146,7 +161,7 @@ export function PrivacyActions() {
                     <div className="mt-3 flex flex-wrap gap-3">
                       <Link href={`/cases/${row.id}`}
                         className="fs-btn fs-btn--quiet !px-3 !text-[0.9rem]">기록 열기</Link>
-                      <button type="button" onClick={() => setAsking(row.id)}
+                      <button type="button" disabled={Boolean(reauthCase)} onClick={() => setAsking(row.id)}
                         className="fs-btn fs-btn--quiet !px-3 !text-[0.9rem]">
                         이 기록 지우기
                       </button>
