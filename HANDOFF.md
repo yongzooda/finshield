@@ -22,6 +22,10 @@
 - 제출 확정 PDF는 `output/pdf/`에 보존했다. 상세 중단 기록은 [제출 우선 중단 기록](docs/ops/2026-09-07-submission-stop.md)을 따른다.
 - 13시 추가: 실제 회원 native PDF의 업로드·분석·저장·복원, 보호 Preview의 PNG OCR·8 Claim 추출·물리 삭제, 로컬 HTTP Workflow의 실제 재검증 NO_CHANGE·새 판 보존·새로고침 복원을 확인했다. 10쪽 스캔 인용 페이지 구분은 보완 후 재검증 중이다. 기본 시험 445건 통과·89건 선택적 건너뜀, 실제 로컬 DB 경계 7건 통과다.
 
+## OCR 정식 측정 실패 보존
+
+- 첫 main 실측은 112쪽 처리·숫자·부정 표현·지연 기준을 충족했으나 URL 필드 7개 차이로 F1 0.97917에 그쳐 실패했다. [실패 기록](docs/ops/ocr-quality-failure-20260907.md)과 원본을 보존했고 B-OCR-01은 해제하지 않는다.
+
 ## 계정 정리 보호 적용 뒤 DB 증거 재채택
 
 - Migration 0036을 실제 FinShield에 적용했다. 새 main에서 Supabase·Rate·Consent·Storage·Delete 측정 5종이 성공했고 별도 Adoption PR #220에 원본·scope·실행 출처를 등록했다. API 전체 계정 탈퇴나 Release 완료는 아니다.
