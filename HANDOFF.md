@@ -232,3 +232,5 @@
 ## 2026-09-07 Fast 합성 개발 시험
 
 사용자 승인 범위의 개발 전용 실행 경로를 추가했다. `docs/ops/2026-09-07-rerank-fast-development.md`에 산식·개발 split·최대 USD 0.05·첫 dispatch/attempt·원장 보존을 사전등록했다. 제품 기능 Draft #192와 별도이며 기존 실패 Gate를 재평가하거나 제품 Rerank를 바꾸지 않는다. 현재 계약 시험·기본 449건과 빌드를 통과했고 선택적 85건은 건너뛰었다. 실제 Provider 결과는 실행 뒤 별도 기록한다.
+
+Fast 실제 개발 시험은 main run 34128723611에서 완료했다. Embed 23회·Fast 20회, USD 0.040829, 미확정 0, Fast P95 382ms다. 개발 Case macro Recall/Precision은 동일 후보의 결정적 0.95 → Fast 1.00이며 위험·중복·독립 holdout 품질을 증명하지 않는다. 원본은 `evidence/development/retrieval/fast-34128723611/`에 보존했다. 운영 DB 원장 밖의 개발 비용이므로 다음 일일 예산 확인 때 별도 합산한다. PR #232만 main에 병합했고 main CI·배포 성공 뒤 clean 기준 폴더 8개를 origin/main 00b192a에 맞췄다. 기능 Draft #192는 보존한다.
