@@ -1,5 +1,9 @@
 # FinShield HANDOFF
 
+## DB 계약 변경 뒤 증거 재채택 준비
+
+- 새 main의 Rate·Consent·Storage 측정이 완료됐다. 별도 artifact 채택을 준비하며 metadata는 채택 시 갱신한다.
+
 ## 2026-09-07 입력·Worker 인프라 계약
 
 - Migration 0026~0035와 SQL 시험 19~24를 별도 인프라 변경으로 등록했다. 빈 로컬 DB에 전체 Migration·시험을 적용해 통과했다.
