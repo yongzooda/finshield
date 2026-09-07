@@ -1,3 +1,7 @@
+## 2026-09-08 가입 후 계약 문서 DB 경계
+
+PC-008·PC-011의 Migration 0043과 격리 SQL 시험을 기능 Draft에서 분리했다. 동일 Case의 가입 후 문구는 전용 표에 저장하며 과거 Claim/Passport를 변경하지 않는다. 동일 확인 재시도·원본 정리·문서 출처 고정을 검증했다. 원격은 0042이며 0043 적용·배포 검증은 후속이다. [검증 범위](docs/ops/aftercare-document-contracts.md)를 따른다. Implementation NO-GO·Release NOT-EVALUATED와 DB 증거 STALE를 유지한다.
+
 ## 2026-09-08 가입 후 실행 DB 계약
 
 기능 Draft #192에서 점검 Job·같은 Case의 Agent/Tool Trace·Lease·요청 복원·전용 비용 예약 계약을 분리했다. Migration 0042와 SQL 31파일을 격리 검증했다. 이 브랜치는 화면·모델 Adapter·Workflow 코드를 포함하지 않는다. 실제 원격은 0041이며 0042 적용·Preview 검증 전이다. 기존 다섯 DB Evidence의 STALE과 main 부분 PASS 8/20을 유지한다.
