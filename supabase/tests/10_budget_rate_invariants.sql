@@ -5,6 +5,8 @@
 -- ============================================================
 
 \echo '53. 준비: Case·Run·예산 상한'
+-- Migration의 운영 정책과 분리한 합성 Fixture를 사용한다.
+delete from private.budget_limits;
 insert into public.financial_cases (id, owner_id, scenario, title_masked, initial_profile_version_id)
 values ('00000000-0000-4000-8000-0000000000c8', '00000000-0000-4000-8000-00000000000a', 'LOAN', '예산 시험 Case',
         '00000000-0000-4000-8000-0000000000d1');

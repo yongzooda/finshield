@@ -1,3 +1,10 @@
+## 2026-09-08 심사 운영 예산 증액
+
+- 합성 개발 시험용 전체 일 USD 0.50·Case/Run USD 0.20을 심사 운영 상한으로 사용하지 않도록 Migration 0046을 추가했다. 전체 합산은 일 USD 20, 사용자·Case USD 3, Run USD 0.80이다.
+- Cohere `embed-v4.0`의 누락된 운영 예산을 추가했다. `rerank-v4.0-fast`는 운영 예산에 등록하지 않고 Production에서 호출을 코드로도 차단했다. 승인된 합성 Fast 개발 시험의 USD 0.05 상한은 그대다.
+- 기존 미확정 예약·사용량을 초기화하지 않고 현재 Counter를 증액한다. 더 높은 수동 상한은 낮추지 않으며 Worker에게는 변경 권한이 없다.
+- 격리 DB의 46개 Migration·전체 SQL 시험, Vitest 606건, 타입, 린트, Production build가 통과했다. 원격 DB 적용과 Production 재검증은 PR 병합 후 진행한다. Gate metadata는 변경하지 않았다.
+
 ## 2026-09-08 계약 PDF 수정 후 실측 완료·사용자 요청으로 작업 종료
 
 계약 문서 비용 거부를 PR #242로 수정해 main `d4a180f`에 병합했고 원격은 0044다. 구조 해시 6종 일치 후 보호 Preview의 native PDF 처리·문구 확인·두 세션 복원·동일 확인 재시도·과거 Claim 불변과 원본/Case 물리 삭제를 확인했다. 첫 실패와 추가 비용 USD 0.003914를 함께 보존했다. [실측](evidence/development/aftercare/2026-09-08-document-preview.md)을 따른다. 기본 602건 통과·선택적 96건 건너뜀, 44 Migration/SQL 32파일·타입·빌드 통과다. 사용자 요청에 따라 여기서 추가 P0 구현을 멈춘다. Implementation NO-GO·Release NOT-EVALUATED와 Draft #192를 유지한다.

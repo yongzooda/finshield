@@ -77,7 +77,7 @@ export async function embedQuery(query: string, ctx: ToolCallContext): Promise<n
 
 /** 승인된 Fast 개발 후보에만 사용한다. 제품 기본 Rerank를 조용히 바꾸지 않는다. */
 export async function rerankFast(query: string, documents: string[], ctx: ToolCallContext): Promise<number[]> {
-  if (process.env.FINSHIELD_RERANK_FAST_DEVELOPMENT !== "1" || !process.env.FINSHIELD_PROBE_OWNER_ID || ctx.ownerId !== process.env.FINSHIELD_PROBE_OWNER_ID) throw new RetrievalProviderError("RERANK_DEVELOPMENT_ONLY");
+  if (process.env.VERCEL_ENV === "production" || process.env.FINSHIELD_RERANK_FAST_DEVELOPMENT !== "1" || !process.env.FINSHIELD_PROBE_OWNER_ID || ctx.ownerId !== process.env.FINSHIELD_PROBE_OWNER_ID) throw new RetrievalProviderError("RERANK_DEVELOPMENT_ONLY");
   if (Buffer.byteLength(query) > 512 || documents.length < 1 || documents.length > 40 || documents.some(d => !d || Buffer.byteLength(d) > 3000)) throw new RetrievalProviderError("RERANK_INPUT_INVALID");
   const texts = documents.map(maskedQuery);
   const queryText = maskedQuery(query);
