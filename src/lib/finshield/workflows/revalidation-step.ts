@@ -4,7 +4,7 @@ import { loadManifest } from "../registry";
 import { loadRunInput } from "../run-input";
 import { runVerification } from "../orchestrator";
 import { createAgentModel, createJudgeModel } from "../agents/model-adapter";
-import { dispatchNotifications, failRevalidation, finalizeRevalidation } from "../revalidate";
+import { dispatchNotifications, failRevalidation, finalizeRevalidation, recordRevalidationProgress } from "../revalidate";
 
 type Context={owner_id:string;case_id:string;status:string;existing_run_id:string|null;leased_until:string|null;cancel_requested:boolean};
 export async function executeRevalidationStep(jobId:string) {
@@ -36,30 +36,37 @@ export async function executeRevalidationStep(jobId:string) {
     void sql`select private.heartbeat_revalidation_job(${jobId}::uuid,${lease}::uuid,180) as ok`
       .then(rows=>{if(!rows[0]?.ok)abort.abort();}).catch(()=>abort.abort()).finally(()=>{pulseBusy=false;});
   },2000);
+  let stage = "MANIFEST";
   try{
     const manifest=await loadManifest(sql);
+    stage = "CREATE_RUN";
     const [created]=await sql`select private.create_verification_run(${context.owner_id}::uuid,${context.case_id}::uuid,
       ${manifest.manifestId}::uuid,${`workflow-run:${jobId}`},${"0".repeat(64)},'REVALIDATION',${jobId}::uuid) as id`;
     runId=created.id as string;
+    stage = "START_RUN";
     await sql`select id from private.start_verification_run(${runId}::uuid)`;
+    stage = "LOAD_INPUT";
     const input=await loadRunInput(sql,context.owner_id,context.case_id,runId);
+    stage = "VERIFY";
     const result=await runVerification({ctx:{sql,ownerId:context.owner_id,caseId:context.case_id,runId,manifest,
       signal:AbortSignal.any([abort.signal,AbortSignal.timeout(Math.max(1,Date.parse(input.deadline_at)-Date.now()-6000))])},
       claims:input.claims,maskedIntake:"",journeyStage:input.journey_stage,agentModel:createAgentModel({sql,ownerId:context.owner_id,caseId:context.case_id,runId}),judgeModel:createJudgeModel({sql,ownerId:context.owner_id,caseId:context.case_id,runId}),
       progress:event=>{progressWrites=progressWrites.then(async()=>{
-        await sql`select private.append_revalidation_event(${jobId}::uuid,'PROGRESS',${JSON.stringify(event)}::text::jsonb)`;
+        await recordRevalidationProgress(sql,jobId,event);
       }).catch(()=>{abort.abort();});}});
     await progressWrites;abort.signal.throwIfAborted();
     const [beat]=await sql`select private.heartbeat_revalidation_job(${jobId}::uuid,${lease}::uuid,180) as ok`;
     if(!beat.ok)throw new Error("LEASE_LOST");
+    stage = "FINALIZE";
     const saved=await finalizeRevalidation({sql,jobId,leaseToken:lease,runId,claims:input.claims,run:result,hasProfile:input.profile_completeness==="COMPLETE"});
     if(!saved.ok)throw new Error("FINALIZE_FAILED");
     await dispatchNotifications(sql).catch(()=>0);
     const [completed]=await sql`select private.revalidation_context(${jobId}::uuid) as context`;
     return {job_id:jobId,status:completed.context.status as string};
   }catch{
+    // 원문·Provider 응답·SQL 메시지 대신 고정된 실패 경계를 DB 작업 기록에 남긴다.
     if(runId)await sql`select id from private.fail_verification_run(${runId}::uuid,'WORKFLOW_INTERRUPTED',null)`.catch(()=>undefined);
-    await failRevalidation(sql,jobId,lease,"WORKFLOW_INTERRUPTED");
+    await failRevalidation(sql,jobId,lease,`WORKFLOW_${stage}_FAILED`);
     return {job_id:jobId,status:"FAILED"};
   }finally{clearInterval(pulse);}
 }

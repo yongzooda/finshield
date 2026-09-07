@@ -11,11 +11,16 @@
 import "server-only";
 import type postgres from "postgres";
 import type { ConfirmedClaim } from "./schemas";
-import type { OrchestratedRun } from "./orchestrator";
+import type { OrchestratedRun, RunProgress } from "./orchestrator";
 import { buildActionGuide } from "./action-guide";
 import { buildAxisResults, buildFinalClaims } from "./finalize";
 
 type Sql = ReturnType<typeof postgres>;
+
+/** REV-001: 진행 정보는 기존 HEARTBEAT 이벤트 계약의 하위 유형으로 저장한다. */
+export async function recordRevalidationProgress(sql: Sql, jobId: string, event: Parameters<RunProgress>[0]) {
+  await sql`select private.append_revalidation_event(${jobId}::uuid,'HEARTBEAT_PROGRESS',${JSON.stringify(event)}::text::jsonb)`;
+}
 
 export type RevalidationClaim = ConfirmedClaim & { claimId: string };
 
