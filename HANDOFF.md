@@ -175,3 +175,7 @@
 - Vercel은 Hobby를 유지한다. DPA가 없으므로 제출 범위에서 실제 개인정보를 처리하지 않고, 자유 입력은 고지와 PII Gate로 강제한다. Fluid compute의 300초 상한은 Hobby에서도 그대로라 판단 예산에 영향이 없다.
 - GitHub의 Vercel success status는 Build/Deploy 성공이며 Provider 기능 성공 증거가 아니다.
 - main Ruleset의 required `check`는 strict·bypass 0·Actions retention 90일 기준을 충족한다. 저장소가 개인 소유이고 외부 Required Workflow·App attestation이 없다는 위험은 `B-CI-INTEGRITY = DEFERRED`로 보존하되 P0 Implementation·Release Gate를 차단하지 않는다. P0 증거는 외부 독립 보증이 아닌 `repository-controlled evidence`로만 표시한다.
+
+## 2026-09-07 Fast 합성 개발 시험
+
+사용자 승인 범위의 개발 전용 실행 경로를 추가했다. `docs/ops/2026-09-07-rerank-fast-development.md`에 산식·개발 split·최대 USD 0.05·첫 dispatch/attempt·원장 보존을 사전등록했다. 제품 기능 Draft #192와 별도이며 기존 실패 Gate를 재평가하거나 제품 Rerank를 바꾸지 않는다. 현재 계약 시험·기본 449건과 빌드를 통과했고 선택적 85건은 건너뛰었다. 실제 Provider 결과는 실행 뒤 별도 기록한다.
