@@ -17,7 +17,7 @@ it("만료 Lease를 되찾았지만 기존 Run의 Provider 성공 여부가 불�
  .mockResolvedValueOnce([{lease_token:"lease"}])
  .mockResolvedValueOnce([{context:{existing_run_id:"previous-run"}}])
  .mockResolvedValueOnce([]);
- mocks.fail.mockResolvedValue(undefined);
+ mocks.fail.mockResolvedValue("FAILED");
  await expect(executeRevalidationStep("job")).resolves.toMatchObject({status:"FAILED"});
  expect(mocks.run).not.toHaveBeenCalled();
  expect(mocks.fail).toHaveBeenCalledWith(mocks.sql,"job","lease","PROVIDER_RESULT_UNKNOWN");
@@ -26,5 +26,24 @@ it("Lease 선점 전에 취소된 작업은 Provider 없이 종료한다",async(
  mocks.sql.mockResolvedValueOnce([{context:{status:"QUEUED",owner_id:"owner",case_id:"case"}}])
  .mockResolvedValueOnce([]).mockResolvedValueOnce([{context:{status:"FAILED",reason_code:"USER_CANCELLED"}}]);
  await expect(executeRevalidationStep("job")).resolves.toMatchObject({status:"FAILED"});
+ expect(mocks.run).not.toHaveBeenCalled();
+});
+
+it("실패 쓰기 뒤에도 DB 종결을 확인하지 못하면 Step 성공으로 저장하지 않는다",async()=>{
+ mocks.sql.mockResolvedValueOnce([{context:{status:"RUNNING",owner_id:"owner",case_id:"case"}}])
+ .mockResolvedValueOnce([{lease_token:"lease"}])
+ .mockResolvedValueOnce([{context:{existing_run_id:"previous-run"}}])
+ .mockResolvedValueOnce([]);
+ mocks.fail.mockRejectedValueOnce(new Error("REVALIDATION_TERMINAL_UNCONFIRMED"));
+ await expect(executeRevalidationStep("job")).rejects.toThrow("REVALIDATION_TERMINAL_UNCONFIRMED");
+ expect(mocks.run).not.toHaveBeenCalled();
+});
+it("이전 완료와 실패 쓰기가 경합하면 실제 완료 상태를 보존한다",async()=>{
+ mocks.sql.mockResolvedValueOnce([{context:{status:"RUNNING",owner_id:"owner",case_id:"case"}}])
+ .mockResolvedValueOnce([{lease_token:"lease"}])
+ .mockResolvedValueOnce([{context:{existing_run_id:"previous-run"}}])
+ .mockResolvedValueOnce([]);
+ mocks.fail.mockResolvedValueOnce("NO_CHANGE");
+ await expect(executeRevalidationStep("job")).resolves.toMatchObject({status:"NO_CHANGE"});
  expect(mocks.run).not.toHaveBeenCalled();
 });

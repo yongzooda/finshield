@@ -60,9 +60,18 @@ export const finalizeRevalidation = async (args: {
 
 export const failRevalidation = async (
   sql: Sql, jobId: string, leaseToken: string, code: string,
-): Promise<void> => {
+): Promise<string> => {
+  // RPC 응답 유실·Lease 경합 때도 DB의 실제 종결 상태만 Step 결과로 남긴다.
+  // 실패 쓰기를 삼킨 뒤 FAILED를 반환하면 Workflow가 RUNNING Job을 재시도하지 않는다.
   await sql`select private.fail_revalidation_job(${jobId}::uuid, ${leaseToken}::uuid, ${code})`
     .catch(() => undefined);
+  const rows = await sql`select private.revalidation_context(${jobId}::uuid) as context`
+    .catch(() => { throw new Error("REVALIDATION_TERMINAL_UNCONFIRMED"); });
+  const status = rows[0]?.context?.status as unknown;
+  if (status !== "FAILED" && status !== "NO_CHANGE" && status !== "CHANGED") {
+    throw new Error("REVALIDATION_TERMINAL_UNCONFIRMED");
+  }
+  return status;
 };
 
 /**

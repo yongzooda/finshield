@@ -27,8 +27,8 @@ export async function executeRevalidationStep(jobId:string) {
   const existingRunId=claimedContext?.context?.existing_run_id as string|null;
   if(existingRunId){
     await sql`select id from private.fail_verification_run(${existingRunId}::uuid,'PROVIDER_RESULT_UNKNOWN',null)`.catch(()=>undefined);
-    await failRevalidation(sql,jobId,lease,"PROVIDER_RESULT_UNKNOWN");
-    return {job_id:jobId,status:"FAILED"};
+    const status=await failRevalidation(sql,jobId,lease,"PROVIDER_RESULT_UNKNOWN");
+    return {job_id:jobId,status};
   }
   const abort=new AbortController();let runId:string|null=null;let progressWrites=Promise.resolve();let pulseBusy=false;
   const pulse=setInterval(()=>{
@@ -66,8 +66,8 @@ export async function executeRevalidationStep(jobId:string) {
   }catch{
     // 원문·Provider 응답·SQL 메시지 대신 고정된 실패 경계를 DB 작업 기록에 남긴다.
     if(runId)await sql`select id from private.fail_verification_run(${runId}::uuid,'WORKFLOW_INTERRUPTED',null)`.catch(()=>undefined);
-    await failRevalidation(sql,jobId,lease,`WORKFLOW_${stage}_FAILED`);
-    return {job_id:jobId,status:"FAILED"};
+    const status=await failRevalidation(sql,jobId,lease,`WORKFLOW_${stage}_FAILED`);
+    return {job_id:jobId,status};
   }finally{clearInterval(pulse);}
 }
 executeRevalidationStep.maxRetries=8;
