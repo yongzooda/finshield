@@ -1,0 +1,10 @@
+{
+  "source_run": "34128723611",
+  "artifact_sha256": "8f201c77baa44e5c05ef955ee8a8626d8622d63f015540859f76a5a77f9c7012",
+  "settled_calls": 43,
+  "consumed_microunits": 40829,
+  "day_utc": "2026-09-07",
+  "scope": "GLOBAL_DAY only; isolated evaluation has no member Case",
+  "correlation_id": "efe39f94-e4d0-4d3f-95fa-b2ce468d58c4",
+  "note": "이 파일은 비용 출처 준비 기록이다. 실제 감사 이벤트 correlation_id는 shared-budget.json의 event를 따른다."
+}

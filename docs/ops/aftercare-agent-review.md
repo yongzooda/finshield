@@ -11,3 +11,5 @@
 격리 검증은 Migration 42개·SQL 31파일과 기본 시험 590건이다. 두 공통 Agent Runner 실행·다른 Allowlist Tool·PII/다른 Claim 거부·취소 전 Provider 0회·SQL 소유권·중복/응답 유실·잘못된 Lease·정상/부분 종결·결과 쓰기 실패 rollback·전체 비용 합산·미확정 예약 보존·과거 Passport 불변을 포함한다. 단위 시험의 모델·Tool은 합성이며 실제 Provider 품질 통과가 아니다. TypeScript·lint 오류 0건·빌드를 확인하고 기존 lint 경고 두 건을 유지한다. 선택적 시험 96건은 건너뛰었다.
 
 원격은 0041까지 적용된 상태에서 이 변경을 작성했다. 0042 원격 적용과 보호 Preview의 API·브라우저·실제 Provider 검증을 별도 기록한다. 가입 후 Image/PDF의 동일 Case 연결, 전체 장애 20종, 공식 자료 적재와 판단 품질 Gate는 아직 남았다. Implementation NO-GO·Release NOT-EVALUATED를 유지한다.
+
+2026-09-08 후속: 원격 0042 적용과 실제 Agent 점검의 부분 종결·정산·정리를 확인했다. Sales 인용 오류 및 공식 조회 0건은 실패 이력으로 보존한다. [실측 자료](../../evidence/development/aftercare/2026-09-08-agent-preview.md)를 따른다.

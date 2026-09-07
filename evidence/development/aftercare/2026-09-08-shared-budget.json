@@ -1,0 +1,35 @@
+{
+  "checked_at": "2026-09-07T15:50:54.290Z",
+  "limits": [
+    {
+      "scope_type": "CASE",
+      "provider": "all",
+      "limit_microunits": "200000"
+    },
+    {
+      "scope_type": "GLOBAL_DAY",
+      "provider": "all",
+      "limit_microunits": "500000"
+    },
+    {
+      "scope_type": "OWNER_DAY",
+      "provider": "all",
+      "limit_microunits": "300000"
+    },
+    {
+      "scope_type": "RUN",
+      "provider": "all",
+      "limit_microunits": "200000"
+    }
+  ],
+  "global": {
+    "limit_microunits": "500000",
+    "reserved_microunits": "0",
+    "consumed_microunits": "233177"
+  },
+  "event": {
+    "correlation_id": "86f4dffa-4a22-404f-a436-f4950bf3a59f",
+    "event_code": "FAST_DEV_34128723611_ACCOUNTED",
+    "status_code": "APPLIED"
+  }
+}

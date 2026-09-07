@@ -1,3 +1,7 @@
+## 2026-09-08 실제 가입 후 Agent·원격 0042 검증
+
+원격 0042의 해시 6종 일치와 보호 Preview 점검 접수·중복 방지·두 세션 복원·부분 저장·Case 삭제를 확인했다. Sales 인용 오류와 공식 조회 0건을 보존했으며 두 Agent 품질 성공은 아니다. 추가 비용 USD 0.024174, 합산 일일 사용 USD 0.257351이고 미확정 예약은 0이다. [실측 범위](evidence/development/aftercare/2026-09-08-agent-preview.md)를 따른다. 최신 기능 CI의 Git 메타데이터 검사 실패는 별도 수정 중이다. Gate는 NO-GO이며 과거 기록은 아래에 남긴다.
+
 ## 2026-09-08 가입 후 DB 계약 main 통합
 
 분리 PR #236의 실제 merge candidate `6015fa9`와 CI `34139544176`이 통과해 main `dd203fd`로 squash merge됐다. 원격 DB는 0041이며 0042 적용을 준비 중이다. 기능 구현은 기존 Draft #192에 보존한다. main 부분 PASS 8/20·기능 Draft 7/20, Implementation NO-GO·Release NOT-EVALUATED를 유지한다.

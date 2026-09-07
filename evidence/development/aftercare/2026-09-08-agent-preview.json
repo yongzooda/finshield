@@ -1,0 +1,288 @@
+{
+  "started_at": "2026-09-07T15:54:44.250Z",
+  "branch_sha": "8002d56265f911bc65d9d841ce4708be287a772a",
+  "deployment": "6ZyZHFJoJDpnVntPSLDtuQtx5eVY",
+  "base_fixture": "SQL synthetic UNKNOWN Passport, no pretransaction model calls",
+  "checks": {
+    "new_review_route_restores_empty_state": true,
+    "review_accepted": true,
+    "second_session_restores_same_job": true,
+    "repeated_request_same_job": true,
+    "review_terminal_with_saved_assessment": true,
+    "both_agents_recorded": true,
+    "base_passport_preserved": true,
+    "answers_and_comparison_restore": true,
+    "case_cleanup_completed": true,
+    "aftercare_case_absent": true,
+    "review_job_physically_absent": true
+  },
+  "cost_before": [
+    {
+      "provider": "all",
+      "reserved_microunits": "0",
+      "consumed_microunits": "233177"
+    },
+    {
+      "provider": "anthropic",
+      "reserved_microunits": "0",
+      "consumed_microunits": "192348"
+    }
+  ],
+  "latest_status": "PARTIAL",
+  "agent_statuses": [
+    {
+      "agent_code": "SALES_CONDUCT",
+      "status": "FAILED",
+      "reason_code": "CITATION_INVALID",
+      "tool_count": 2
+    },
+    {
+      "agent_code": "REGULATION_DISPUTE",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "tool_count": 2
+    }
+  ],
+  "final_response": {
+    "review_job": {
+      "id": "3e81b167-7f93-43e0-af77-0e590afa9eea",
+      "status": "PARTIAL",
+      "assessment_id": "59118713-3cfb-4510-be15-39e99c3fc0d6",
+      "base_passport_id": "9e73d59f-1b7b-49cd-b97e-a8e06f65ddbf",
+      "request_key": "07c64859-255f-45d8-a3d3-d8822c33b204",
+      "input_masked": {
+        "answers": [
+          {
+            "answer_code": "PARTIAL",
+            "question_code": "EXPLAINED_RATE_AND_FEES",
+            "question_version": "aftercare-v2"
+          },
+          {
+            "answer_code": "NO",
+            "question_code": "EXPLAINED_PENALTY",
+            "question_version": "aftercare-v2"
+          },
+          {
+            "answer_code": "PARTIAL",
+            "question_code": "UNDERSTOOD_TERMS",
+            "question_version": "aftercare-v2"
+          },
+          {
+            "answer_code": "DIFFERENT",
+            "question_code": "CONTRACT_MATCHES_EXPLANATION",
+            "question_version": "aftercare-v2"
+          },
+          {
+            "answer_code": "DIFFERENT_TEXT",
+            "question_code": "CONTRACT_76C29D916779448B880434E13F2A1698",
+            "question_version": "aftercare-v2",
+            "answer_text_masked": "{\"claim_id\":\"76c29d91-6779-448b-8804-34e13f2a1698\",\"before\":\"금리와 수수료를 계약 전에 설명합니다\",\"contract\":\"금리와 수수료는 계약 후에 안내합니다\",\"result\":\"DIFFERENT_TEXT\"}"
+          }
+        ],
+        "comparison": [
+          {
+            "before": "금리와 수수료를 계약 전에 설명합니다",
+            "result": "DIFFERENT_TEXT",
+            "claim_id": "76c29d91-6779-448b-8804-34e13f2a1698",
+            "contract": "금리와 수수료는 계약 후에 안내합니다"
+          }
+        ],
+        "schema_version": "aftercare-review-v1"
+      },
+      "agent_trace": [
+        {
+          "tools": [
+            {
+              "status": "SUCCEEDED",
+              "sources": [],
+              "version": "p0-v2",
+              "tool_code": "analyze_risk_pattern",
+              "error_code": null,
+              "started_at": "2026-09-07T15:58:10.898Z",
+              "finished_at": "2026-09-07T15:58:11.034Z",
+              "reason_code": "NO_DOCUMENT_MATCH",
+              "purpose_code": "ASSESS_CONDUCT",
+              "request_hash": "4909acda84299f11c742b6b64efc664a9e029f6021fa963c4f197a621f6e6fdf",
+              "provenance_complete": true
+            },
+            {
+              "status": "SUCCEEDED",
+              "sources": [],
+              "version": "p0-v2",
+              "tool_code": "check_documents",
+              "error_code": null,
+              "started_at": "2026-09-07T15:58:10.899Z",
+              "finished_at": "2026-09-07T15:58:11.034Z",
+              "reason_code": "NO_DOCUMENT_MATCH",
+              "purpose_code": "CHECK_DOCUMENTS",
+              "request_hash": "9e34c2876dd9723ec8b89c44e577fe887faf9a650804115e57f95b4db8fab083",
+              "provenance_complete": true
+            }
+          ],
+          "usage": {
+            "inputTokens": 4843,
+            "outputTokens": 266,
+            "unknownCalls": 0,
+            "costMicrounits": 12346
+          },
+          "output": null,
+          "status": "FAILED",
+          "version": "p0-v2",
+          "model_id": "claude-sonnet-5",
+          "agent_code": "SALES_CONDUCT",
+          "started_at": "2026-09-07T15:58:07.724Z",
+          "finished_at": "2026-09-07T15:58:14.620Z",
+          "reason_code": "CITATION_INVALID",
+          "input_digest": "5aa4151c8935d1603795ff613f8f64a68c28d32c7047dae3e3f68d1a364f747b",
+          "schema_version": "aftercare-agent-trace-v1",
+          "context_prompt_version": "aftercare-context-v1"
+        },
+        {
+          "tools": [
+            {
+              "status": "SUCCEEDED",
+              "sources": [],
+              "version": "p0-v2",
+              "tool_code": "lookup_statute",
+              "error_code": null,
+              "started_at": "2026-09-07T15:58:17.455Z",
+              "finished_at": "2026-09-07T15:58:17.759Z",
+              "reason_code": "NO_MATCH",
+              "purpose_code": "LOOKUP_STATUTE",
+              "request_hash": "5960020efe044c26be4b3fb81a643622707b650d19354aef1d82b9205c52f4ba",
+              "provenance_complete": true
+            },
+            {
+              "status": "SUCCEEDED",
+              "sources": [],
+              "version": "p0-v2",
+              "tool_code": "search_dispute_case",
+              "error_code": null,
+              "started_at": "2026-09-07T15:58:17.458Z",
+              "finished_at": "2026-09-07T15:58:17.471Z",
+              "reason_code": "NO_DOCUMENT_MATCH",
+              "purpose_code": "SEARCH_DISPUTE",
+              "request_hash": "6a4f7b84b9619b17e807ac5d4736b2b0f894a09e8393582e50a6155844a1385d",
+              "provenance_complete": true
+            }
+          ],
+          "usage": {
+            "inputTokens": 4514,
+            "outputTokens": 280,
+            "unknownCalls": 0,
+            "costMicrounits": 11828
+          },
+          "output": {
+            "findings": [
+              {
+                "state": "UNKNOWN",
+                "limits": [
+                  "근거 없음은 안전 확인이 아니며 공식 자료 재확인 필요"
+                ],
+                "relation": "CONTEXT",
+                "claim_ref": "C1",
+                "evidence_refs": [],
+                "summary_masked": "관련 법령·분쟁사례를 찾지 못했고, 계약서 문구가 이전 설명과 다름을 확인함"
+              }
+            ],
+            "schema_version": "out-v1",
+            "out_of_scope_claim_refs": []
+          },
+          "status": "SUCCEEDED",
+          "version": "p0-v2",
+          "model_id": "claude-sonnet-5",
+          "agent_code": "REGULATION_DISPUTE",
+          "started_at": "2026-09-07T15:58:14.631Z",
+          "finished_at": "2026-09-07T15:58:21.513Z",
+          "reason_code": null,
+          "input_digest": "ba4183765e2b56fa2fafe5d5bc669370492435949f3e407bb742e23f1a96857e",
+          "schema_version": "aftercare-agent-trace-v1",
+          "context_prompt_version": "aftercare-context-v1"
+        }
+      ],
+      "reason_code": null,
+      "deadline_at": "2026-09-07T16:00:02.173358+00:00"
+    },
+    "assessment": {
+      "assessment_id": "59118713-3cfb-4510-be15-39e99c3fc0d6",
+      "assessment_no": 1,
+      "finished_at": "2026-09-07T15:58:21.530665+00:00",
+      "base_passport_id": "9e73d59f-1b7b-49cd-b97e-a8e06f65ddbf",
+      "result": "DISPUTE_PREPARATION",
+      "reasons": [
+        "Agent 검토가 일부 미확인입니다. 계약서가 설명과 다른 부분이 있다고 답하셨습니다. 답하지 않은 항목은 확인하지 못한 것으로 남깁니다. 이 결과는 답하신 범위까지입니다. Agent 검토 중 일부 조회·판단을 확인하지 못했습니다."
+      ],
+      "answers": {
+        "EXPLAINED_RATE_AND_FEES": "PARTIAL",
+        "EXPLAINED_PENALTY": "NO",
+        "UNDERSTOOD_TERMS": "PARTIAL",
+        "CONTRACT_MATCHES_EXPLANATION": "DIFFERENT"
+      },
+      "comparison": [
+        {
+          "claim_id": "76c29d91-6779-448b-8804-34e13f2a1698",
+          "before": "금리와 수수료를 계약 전에 설명합니다",
+          "contract": "금리와 수수료는 계약 후에 안내합니다",
+          "result": "DIFFERENT_TEXT"
+        }
+      ],
+      "actions": [
+        {
+          "action_code": "KEEP_CONTRACT_AND_RECORDS",
+          "label": "계약서와 권유 기록을 모아 두세요",
+          "detail": "계약서 사본, 문자, 통화 기록, 상담 화면을 한곳에 모아 두세요. 나중에 설명이 달랐다고 말하려면 그때의 자료가 필요합니다. 저희 서버에 올리실 필요는 없습니다.",
+          "required_material_codes": [
+            "CONTRACT",
+            "SALES_RECORD"
+          ],
+          "official_channel": null
+        },
+        {
+          "action_code": "ASK_OFFICIAL_CHANNEL",
+          "label": "공식 상담 창구로 확인하세요",
+          "detail": "권유했던 사람의 번호가 아니라 아래 공식 번호로 거세요. 계약 번호와 다른 점을 정리해 두고 통화하시면 짧게 끝납니다.",
+          "required_material_codes": [
+            "CONTRACT"
+          ],
+          "institution_code": "INST_KINFA",
+          "channel_type": "PHONE",
+          "official_channel": "서민금융콜센터 1397 (국번 없이)"
+        },
+        {
+          "action_code": "REPORT_IMPERSONATION",
+          "label": "공식 신고 창구를 확인하세요",
+          "detail": "설명과 계약이 다르거나 사칭이 의심되면 아래 공식 신고 창구로 알리실 수 있습니다. 접수 전에 계약서와 권유 기록을 정리해 두세요.",
+          "required_material_codes": [
+            "CONTRACT",
+            "SALES_RECORD"
+          ],
+          "institution_code": "INST_KINFA",
+          "channel_type": "REPORTING",
+          "official_channel": "서민금융 사칭 신고센터"
+        },
+        {
+          "action_code": "REQUEST_WRITTEN_EXPLANATION",
+          "label": "설명받지 못한 부분을 서면으로 요청하세요",
+          "detail": "듣지 못한 항목을 적어 금융회사에 서면으로 요청하세요. 말로 다시 듣는 것보다 남는 기록이 됩니다.",
+          "required_material_codes": [
+            "CONTRACT"
+          ],
+          "official_channel": null
+        }
+      ]
+    }
+  },
+  "cost_after": [
+    {
+      "provider": "all",
+      "reserved_microunits": "0",
+      "consumed_microunits": "257351"
+    },
+    {
+      "provider": "anthropic",
+      "reserved_microunits": "0",
+      "consumed_microunits": "216522"
+    }
+  ],
+  "completed_at": "2026-09-07T16:00:12.297Z"
+}
