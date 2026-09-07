@@ -1,0 +1,15 @@
+{
+  "schema_version": "auth-natural-expiry-development-v1",
+  "started_at": "2026-09-07T10:46:07.727Z",
+  "observed_at": "2026-09-07T11:46:09.860Z",
+  "expires_at": "2026-09-07T11:46:07.000Z",
+  "scope": "발급처 설정·시계 변경 없는 실제 Access 만료와 앱 Handler·실제 Auth·RLS 복구",
+  "checks": {
+    "expired_read_status": 401,
+    "refresh_status": 200,
+    "restored_read_status": 200,
+    "password_auth_time_preserved": true,
+    "cleanup_status": 200
+  },
+  "outcome": "PASS"
+}

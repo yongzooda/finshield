@@ -15,8 +15,8 @@ React 조회 Effect는 JWT 문자열 대신 세션 식별자를 기준으로 실
 - 단위 시험: 동시 보호 요청 20개의 단일 갱신, 늦은 응답, 로그인 교체, 쓰기 미전송·자동 재시도 금지, Origin·Cookie 범위·발급처 장애·민감 Cookie 계약을 검증했다.
 - 실제 Supabase: 합성 새 세션 두 개에서 Cookie 회전, 동시 갱신 2건, 11초 뒤 부모 Token을 통한 응답 유실 복구, 비밀번호 재인증 시각 불변, 로그아웃 뒤 갱신 거부·다른 세션 보존과 시험 세션 정리가 통과했다.
 - 실제 Chrome: 로그인, 스크립트의 Refresh 접근 불가, PATCH 200·Access 교체, 저장하지 않은 프로필 선택 보존, 로그아웃을 확인했다. 이 시험은 갱신 일정만 앞당겼으며 실제 JWT 만료로 표시하지 않는다. 최초 fetch 계측의 this 바인딩 오류는 제품 오류와 구분한다.
-- 실제 기본 1시간 만료 표본은 별도 준비했다. `FINSHIELD_AUTH_NATURAL_EXPIRY=1` 시험은 발급된 만료 시각을 실제로 지난 뒤에만 실행한다. 이 문서 작성 시에는 대기 중이다.
+- 실제 기본 1시간 만료: 19시 46분 발급 표본을 20시 46분 만료 뒤 확인했다. 기존 Token 조회 401 → Cookie 갱신 200 → 새 Token 조회 200, 재인증 시각 불변·시험 세션 정리 200이 통과했다. 시계·Provider 수명은 바꾸지 않았다. `2026-09-07-session-natural-expiry.json`에 원본을 보존한다.
 
-원본은 `evidence/development/auth/2026-09-07-session-refresh*.json`이다. DB·Migration·package·Provider 설정·Gate를 바꾸지 않는다. 직접 PostgREST/Storage의 폐기 세션 차단과 전체 계정 탈퇴는 후속 보안 작업이다. 전체 AUTH·P0·Release 완료로 표시하지 않는다.
+원본은 `evidence/development/auth/2026-09-07-session-refresh*.json`이다. DB·Migration·package·Provider 설정·Gate를 바꾸지 않는다. 직접 PostgREST/Storage의 폐기 세션 차단은 별도 PR #226에서 실제 적용·검증했다. 전체 계정 탈퇴는 후속 보안 작업이다. 전체 AUTH·P0·Release 완료로 표시하지 않는다.
 
 근거: [Supabase 세션과 Refresh 재사용 예외](https://supabase.com/docs/guides/auth/sessions), [서버 세션·Cookie·Cache 경계](https://supabase.com/docs/guides/auth/server-side/advanced-guide). 공식 SDK의 클라이언트 Refresh 저장 방식 대신 현재 서버 Auth 중계에 Cookie 교환을 추가했으며 SDK 설치·Provider 정책 변경은 하지 않았다.
