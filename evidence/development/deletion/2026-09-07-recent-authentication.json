@@ -1,0 +1,42 @@
+{
+  "kind": "development-protected-preview-recent-authentication",
+  "sha": "2c0564eb5ce9a42f80949c4ec8eb9437e5b7807c",
+  "case_id": "7074d893-5a5d-472b-9cd0-c568735cf832",
+  "case_already_deleted": true,
+  "scenarios": [
+    {
+      "scenario": "missing_origin",
+      "http_status": 403,
+      "code": "ORIGIN_REJECTED",
+      "status": null
+    },
+    {
+      "scenario": "foreign_origin",
+      "http_status": 403,
+      "code": "ORIGIN_REJECTED",
+      "status": null
+    },
+    {
+      "scenario": "fresh_password",
+      "http_status": 200,
+      "code": null,
+      "status": "COMPLETED"
+    },
+    {
+      "scenario": "actual_session_after_five_minutes",
+      "elapsed_seconds": 346,
+      "read_before_status": 200,
+      "http_status": 403,
+      "code": "REAUTHENTICATION_REQUIRED",
+      "read_after_status": 200,
+      "case_list_unchanged": true
+    }
+  ],
+  "browser": {
+    "old_session_blocked": true,
+    "reauth_form_displayed": true,
+    "returned_to_original_confirmation": true,
+    "automatic_delete": false,
+    "case_rows_preserved": 4
+  }
+}
