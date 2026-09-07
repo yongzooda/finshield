@@ -100,3 +100,14 @@ alter table storage.objects enable row level security;
 grant usage on schema storage to anon, authenticated, service_role;
 grant all on storage.buckets to anon, authenticated, service_role;
 grant all on storage.objects to anon, authenticated, service_role;
+
+-- 직접 세션 RLS 시험용 최소 구조. 실제 Auth의 session_id·Owner·만료 계약만 표현한다.
+create table if not exists auth.sessions (
+  id uuid primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  not_after timestamptz
+);
+create or replace function auth.jwt() returns jsonb language sql stable as $$
+  select coalesce(nullif(current_setting('request.jwt.claims', true), '')::jsonb, '{}'::jsonb)
+$$;
+grant execute on function auth.jwt() to anon, authenticated, service_role;

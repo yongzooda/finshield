@@ -1,0 +1,32 @@
+{
+  "observed_at": "2026-09-07T11:18:07.315Z",
+  "scope": "격리 DB 개발 보안 검증, 정식 Gate 채택 아님",
+  "migrations": 37,
+  "sql_files_passed": 26,
+  "assertions_passed": 494,
+  "schema": {
+    "tracked_schemas": [
+      "public",
+      "private",
+      "kb",
+      "demo"
+    ],
+    "views": 6,
+    "view_digest": "95257070614290f73b4e8954dce09bd8e833dd75dbe8963648d03659fa70114b",
+    "policies": 188,
+    "policy_digest": "be4c879557c29657ed4ed948753421355ffa461bd50031ccb0d80dfd3a1ca85b",
+    "routines": 107,
+    "routine_digest": "7869c874af8ca79dd682d90b81055ab24db08ace915744520aab4ae4e076e504",
+    "tables": 81,
+    "tables_digest": "5ae0f6b22541320c231e6a913e29106c63fef4577cee655863450344a798d520",
+    "constraints": 741,
+    "constraint_digest": "c714ec4e8b73ce5a8685b64851e3d63954758828917208887cc5edeeb8a2c85a",
+    "indexes": 255,
+    "index_digest": "d4d4a0fe83d7dadbda088f92ec9218af954780ea0fe19145ab86916086580272",
+    "rls_total": 81,
+    "rls_enforced": 81,
+    "rls_missing": []
+  },
+  "policy_removal_detected": true,
+  "rollback_restored": true
+}

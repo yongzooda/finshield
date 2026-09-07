@@ -47,7 +47,7 @@ begin
     -- 회원 B: A 의 행 읽기
     begin
       set local role authenticated;
-      set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000b"}';
+      set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000b","session_id":"10000000-0000-4000-8000-00000000000b","exp":4102444800}';
       if has_owner then
         execute format('select count(*) from %I.%I where owner_id = %L', t.nspname, t.relname, owner_a) into n;
       else
@@ -70,7 +70,7 @@ begin
       -- 회원 B: A 의 행 수정
       begin
         set local role authenticated;
-        set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000b"}';
+        set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000b","session_id":"10000000-0000-4000-8000-00000000000b","exp":4102444800}';
         execute format('update %I.%I set owner_id = owner_id where owner_id = %L', t.nspname, t.relname, owner_a);
         get diagnostics n = row_count;
         execute 'reset role';
@@ -89,7 +89,7 @@ begin
       -- 회원 B: A 의 행 삭제
       begin
         set local role authenticated;
-        set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000b"}';
+        set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000b","session_id":"10000000-0000-4000-8000-00000000000b","exp":4102444800}';
         execute format('delete from %I.%I where owner_id = %L', t.nspname, t.relname, owner_a);
         get diagnostics n = row_count;
         execute 'reset role';
@@ -107,7 +107,7 @@ begin
       -- 회원 B: A 의 행을 자기 명의로 가져가기 (소유권 탈취)
       begin
         set local role authenticated;
-        set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000b"}';
+        set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000b","session_id":"10000000-0000-4000-8000-00000000000b","exp":4102444800}';
         execute format('update %I.%I set owner_id = %L where owner_id = %L', t.nspname, t.relname, owner_b, owner_a);
         get diagnostics n = row_count;
         execute 'reset role';
@@ -125,7 +125,7 @@ begin
       -- 회원 B: A 명의 삽입. 권한 오류만 거부로 세고 다른 오류는 판정 불가로 둔다.
       begin
         set local role authenticated;
-        set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000b"}';
+        set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000b","session_id":"10000000-0000-4000-8000-00000000000b","exp":4102444800}';
         execute format('insert into %I.%I (owner_id) values (%L)', t.nspname, t.relname, owner_a);
         execute 'reset role';
         unexpected := unexpected + 1;
@@ -196,7 +196,7 @@ begin
   for i in 1..20 loop
     begin
       set local role authenticated;
-      set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a"}';
+      set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a","session_id":"10000000-0000-4000-8000-00000000000a","exp":4102444800}';
       insert into storage.objects (bucket_id, name) values ('finshield-quarantine', v_path);
       execute 'reset role';
       raise exception '닫힌 slot 경로에 재업로드가 통과했다 (%)', i;
@@ -227,7 +227,7 @@ begin
   t0 := clock_timestamp();
   perform private.request_case_deletion('00000000-0000-4000-8000-00000000000a', v_case, 'matrix-del', repeat('a', 64), repeat('b', 64), 'k1', 'p1');
   set local role authenticated;
-  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a"}';
+  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a","session_id":"10000000-0000-4000-8000-00000000000a","exp":4102444800}';
   select count(*) into n from public.financial_cases where id = v_case;
   execute 'reset role';
   ms := extract(epoch from (clock_timestamp() - t0)) * 1000;

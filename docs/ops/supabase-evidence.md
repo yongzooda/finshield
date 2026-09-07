@@ -14,8 +14,8 @@
 |---|---|
 | 기준 DB | GitHub Actions service container `pgvector/pgvector:pg17`, `supabase/tests/00_supabase_stub.sql` 뒤 `supabase/migrations/*.sql` 전부를 순서대로 적용 |
 | 시험 | `supabase/tests/[0-9][0-9]_*.sql` 전부. 각 파일이 `통과했습니다`로 끝나야 한다 |
-| 산식 버전 | `supabase-migration-digest-rls-matrix-v1` |
-| 표·제약·인덱스·함수 digest | `public`·`private`·`kb`·`demo`의 모든 일반 표를 대상으로 `pg_get_constraintdef`·`pg_indexes.indexdef`·표 이름을, 함수는 `pg_get_functiondef`의 md5를 클라이언트에서 정렬해 SHA-256. 기준 DB와 운영 DB가 네 값 모두 같아야 한다. 함수 digest는 표를 바꾸지 않는 Migration이 운영에서 빠진 경우를 잡는다 |
+| 산식 버전 | `supabase-migration-policy-digest-rls-matrix-v2` |
+| 표·제약·인덱스·함수 digest | `public`·`private`·`kb`·`demo`의 모든 일반 표를 대상으로 `pg_get_constraintdef`·`pg_indexes.indexdef`·표 이름을, 함수는 `pg_get_functiondef`의 md5를 클라이언트에서 정렬해 SHA-256. 기준 DB와 운영 DB가 여섯 값 모두 같아야 한다. 함수 digest는 표를 바꾸지 않는 Migration이 운영에서 빠진 경우를 잡는다. v2는 같은 네 스키마 및 `storage.objects`의 정책 역할·명령·permissive·USING·WITH CHECK와 네 스키마 View 정의·옵션도 digest로 비교한다. 같은 RLS enable 값의 정책 누락과 정의자 View 우회를 검출한다 |
 | 교차 소유 행렬 | 카탈로그에서 읽은 모든 표에 대해 회원 B가 회원 A의 행을 읽기·수정·삭제·명의 삽입, 익명이 모든 표 조회, Worker가 모든 표 조회. 허용되어서는 안 되는 접근 0건, 교차 소유 거부 ≥200, 익명 거부 ≥60, Worker는 회원 본문 표 13개를 모두 거부 |
 | closed slot·token 재사용 | 닫힌 upload slot 경로 재업로드 20회와 접근 차단 객체의 Signed URL 허가 20회가 모두 거부 |
 | 접근 차단 | 삭제 요청 함수 뒤 같은 소유자의 Case 조회가 즉시 0건. DB 안 지연을 기록하며 앱 P95 ≤2초는 `B-DELETE-01`·`B-STORAGE-01`이 따로 측정한다 |
@@ -42,3 +42,7 @@ ADR 15.1의 Storage·RLS 행은 cross-owner/worker 200과 closed slot/token reus
 - 운영 DB에서 불변식 시험을 실행하지 않는다. 시험 데이터를 운영 표에 넣지 않는다.
 - `service_role`이나 Migration DSN을 harness에 주지 않는다.
 - 운영 관측이 실패해도 기준 DB 결과만으로 `PASS`를 만들지 않는다.
+
+## 2026-09-07 v2 사전등록
+
+Migration 0037의 폐기 세션 차단 검증부터 정책·View digest를 필수로 한다. 기존 v1 원본을 고치지 않으며 새 trusted SHA·scope와 main 실행으로만 채택한다. SQL 26번은 정상 세션 대조군, 폐기·누락·잘못된 ID·다른 Owner·JWT 만료·Auth 만료, 직접 읽기·수정·RPC·정의자 View·Storage INSERT를 검사한다. 합격 기준은 무효 세션의 허용 0건이며 유효한 다른 세션은 보존돼야 한다.
