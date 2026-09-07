@@ -40,4 +40,5 @@ begin
  end loop;
  raise notice '파일 입력: 교차 소유·중복·검사 전/중단 후 OCR 거부, 페이지 위치·삭제 임대 검증 통과';
 end $$;
+do $$ begin raise notice '20_file_processing 시험을 모두 통과했습니다'; end $$;
 rollback;
