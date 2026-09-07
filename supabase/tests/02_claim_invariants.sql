@@ -244,7 +244,7 @@ do $$
 declare own_claims int; other_claims int; own_revs int; own_consents int;
 begin
   set local role authenticated;
-  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a"}';
+  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a","session_id":"10000000-0000-4000-8000-00000000000a","exp":4102444800}';
   select count(*) into own_claims from public.claims;
   select count(*) into own_revs from public.claim_revisions;
   select count(*) into own_consents from public.processing_consents;
@@ -253,7 +253,7 @@ begin
   if own_consents <> 2 then raise exception '본인 동의 조회 실패 (%)', own_consents; end if;
   raise notice '  허용 확인: 본인 Claim·revision·동의 조회';
 
-  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000b"}';
+  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000b","session_id":"10000000-0000-4000-8000-00000000000b","exp":4102444800}';
   select count(*) into other_claims from public.claims;
   if other_claims <> 0 then raise exception '타인 Claim 이 보입니다 (%)', other_claims; end if;
   raise notice '  허용 확인: 타인 Claim 차단';
@@ -263,7 +263,7 @@ $$;
 do $$
 begin
   set local role authenticated;
-  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a"}';
+  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a","session_id":"10000000-0000-4000-8000-00000000000a","exp":4102444800}';
   perform fstest.expect_fail($sql$
     insert into public.claims
       (owner_id, case_id, origin, claim_type, source_locator, extraction_method)

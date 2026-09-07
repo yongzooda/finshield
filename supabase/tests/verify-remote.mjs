@@ -78,9 +78,34 @@ export const collectSchemaDigests = async (sql) => {
        where n.nspname = any(${TRACKED_SCHEMAS})
          and p.prokind in ('f', 'p')`;
   });
+  // 정책의 실제 USING/WITH CHECK와 permissive 구분도 비교한다. RLS enable만으로는 누락을 찾지 못한다.
+  const policies = await sql.begin(async (tx) => {
+    await tx.unsafe("set local search_path = pg_catalog");
+    return tx`
+      select n.nspname || '.' || c.relname || ' ' || p.polname || ' '
+             || p.polcmd::text || ' ' || p.polpermissive::text || ' '
+             || array_to_string(array(select case when r=0 then 'PUBLIC' else pg_get_userbyid(r)::text end
+                                      from unnest(p.polroles) r order by 1), ',') || ' '
+             || coalesce(pg_get_expr(p.polqual,p.polrelid),'') || ' '
+             || coalesce(pg_get_expr(p.polwithcheck,p.polrelid),'') as definition
+        from pg_policy p join pg_class c on c.oid=p.polrelid join pg_namespace n on n.oid=c.relnamespace
+        where n.nspname = any(${TRACKED_SCHEMAS}) or (n.nspname='storage' and c.relname='objects')`;
+  });
+  const views = await sql.begin(async (tx) => {
+    await tx.unsafe("set local search_path = pg_catalog");
+    return tx`
+      select n.nspname || '.' || c.relname || ' ' || pg_get_viewdef(c.oid, false)
+             || ' ' || coalesce(array_to_string(array(select unnest(c.reloptions) order by 1), ','),'') as definition
+      from pg_class c join pg_namespace n on n.oid=c.relnamespace
+      where n.nspname = any(${TRACKED_SCHEMAS}) and c.relkind='v'`;
+  });
   const names = tables.map((r) => r.name).sort();
   return {
     tracked_schemas: [...TRACKED_SCHEMAS],
+    views: views.length,
+    view_digest: constraintDigest(views.map((v) => v.definition)),
+    policies: policies.length,
+    policy_digest: constraintDigest(policies.map((p) => p.definition)),
     routines: routines.length,
     routine_digest: constraintDigest(routines.map((r) => r.definition)),
     tables: names.length,

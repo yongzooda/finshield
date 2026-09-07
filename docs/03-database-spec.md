@@ -1453,6 +1453,8 @@ Guide만 실패한 경우 Claim·Evidence·축 결과는 보존하고 Run을 `PA
 6. `service_role`은 RLS를 우회하므로 API·Worker 코드에서도 Owner·Case 조건을 필수로 건다.
 7. 운영자 Role은 매 보호 요청에서 DB 최신값을 조회한다. 오래된 JWT Claim만으로 권한을 부여하지 않는다.
 
+8. `AUTH-001`·`SEC-AUTH-002/003`: 회원 직접 접근은 JWT의 `session_id`·Owner·만료와 현재 `auth.sessions` 존재를 함께 확인한다. public Base table의 Restrictive 정책을 기존 Owner 정책과 AND로 적용하며 내부 Auth 표는 공개하지 않는다.
+
 ## 9.2 객체별 권한
 
 | 객체군 | 회원 | 운영자 | 서버·Worker |
@@ -1478,7 +1480,7 @@ Guide만 실패한 경우 Claim·Evidence·축 결과는 보존하고 Run을 `PA
 - `private.search_public_knowledge(...)`: Metadata·본문 크기·후보 수 상한을 적용하고 Provenance를 함께 반환한다.
 - `private.search_case_knowledge(...)`: 서버 전용, 요청 Owner·Case 고정 후 임시 Vector를 검색한다.
 
-View는 PostgreSQL 지원 범위에서 `security_invoker=true`를 사용하고 기반 RLS를 따른다. 그렇지 않으면 View를 Exposed Schema에 두지 않고 Owner 검증 RPC로 대체한다. 회원 SELECT 가 없는 Run·Agent·Tool·Evidence 표는 `public.case_runs_json`, `public.passport_claims_json`, `public.guide_channels_json` 같은 `auth.uid()` 검증 정의자 Helper 가 Sanitized 요약만 돌려주고, `run_progress_v` 는 소유자 조건을 직접 건 정의자 View 다. 신뢰센터 View 는 공개 행만 담는 정의자 View 다.
+View는 PostgreSQL 지원 범위에서 `security_invoker=true`를 사용하고 기반 RLS를 따른다. 그렇지 않으면 View를 Exposed Schema에 두지 않고 Owner 검증 RPC로 대체한다. 회원 SELECT 가 없는 Run·Agent·Tool·Evidence 표는 `public.case_runs_json`, `public.passport_claims_json`, `public.guide_channels_json` 같은 `auth.uid()` 검증 정의자 Helper 가 Sanitized 요약만 돌려주고, `run_progress_v` 는 소유자와 활성 세션 조건을 직접 건 정의자 View 다. 회원 정의자 Helper와 Storage slot Helper도 활성 세션을 검사한다. 신뢰센터 View 는 공개 행만 담는 정의자 View 다.
 
 ## 9.4 P1 Trusted Reviewer
 

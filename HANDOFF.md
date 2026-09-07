@@ -1,3 +1,9 @@
+## 2026-09-07 직접 RLS 세션 경계 보완
+
+- 로그아웃 뒤 유효 JWT로 직접 PostgREST 개인정보 행을 읽는 문제를 실제 재현했다. 원본 실패를 보존한다.
+- Migration 0037은 회원 Base table·정의자 Helper·진행 View·Storage slot에서 활성 Auth 세션을 검사한다. 실제 원격 적용·폐기 JWT의 직접 조회·Storage/TUS 거부와 다른 세션 보존·합성 Case 정리를 확인했다. 세부 범위는 `docs/ops/session-rls.md`를 따른다.
+- Supabase·Rate·Consent·Storage·Delete의 기존 증거 5개는 DB scope 변경으로 STALE이다. Implementation은 NO-GO이며 새 main 측정과 별도 Adoption이 필요하다.
+
 ## OCR 정식 측정 실패 보존
 
 - 첫 main 실측은 112쪽 처리·숫자·부정 표현·지연 기준을 충족했으나 URL 필드 7개 차이로 F1 0.97917에 그쳐 실패했다. [실패 기록](docs/ops/ocr-quality-failure-20260907.md)과 원본을 보존했고 B-OCR-01은 해제하지 않는다.

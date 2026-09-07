@@ -289,7 +289,7 @@ do $$
 declare n int;
 begin
   set local role authenticated;
-  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a"}';
+  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a","session_id":"10000000-0000-4000-8000-00000000000a","exp":4102444800}';
   select count(*) into n from public.notifications where read_at is null;
   if n <> 1 then raise exception '회원이 본인 알림을 읽지 못했습니다 (%)', n; end if;
   select count(*) into n from public.passport_diffs;
