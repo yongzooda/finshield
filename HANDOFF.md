@@ -1,3 +1,8 @@
+## 2026-09-07 세션 RLS 뒤 DB 증거 재채택
+
+- 별도 PR #230에서 Migration 0037 뒤 main의 Supabase·Rate·Consent·Storage·Delete 다섯 원본을 채택한다. 이전 원본은 보존한다. [측정 범위](docs/ops/session-rls-adoption.md)를 따른다.
+- main의 부분 PASS는 13/20이며 Implementation NO-GO·Release NOT-EVALUATED를 유지한다. 기능 Draft의 Health 범위는 별도다.
+
 ## 2026-09-07 직접 RLS 세션 경계 보완
 
 - 로그아웃 뒤 유효 JWT로 직접 PostgREST 개인정보 행을 읽는 문제를 실제 재현했다. 원본 실패를 보존한다.
