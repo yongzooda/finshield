@@ -216,3 +216,6 @@ export const decideAftercare = (args: {
   const summary = `${reasons[0]} 이 결과는 답하신 내용과 이미 확정된 검증 결과만 보고 정한 것입니다.`;
   return { result, summary_masked: summary.slice(0, 4000), actions, reasons };
 };
+
+/** 저장된 행동 코드를 표시 문구로 바꾼다. 과거 결과를 재판정하지 않는다. */
+export const aftercareAction = (code: string): PlannedAction | null => ACTIONS[code] ?? null;

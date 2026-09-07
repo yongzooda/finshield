@@ -59,12 +59,15 @@ function registeredOrigin(): string {
   );
 }
 
-async function once(url: string): Promise<unknown> {
+export type LawRequestOptions = { signal?: AbortSignal; timeoutMs?: number; maxRetries?: 0 | 1 };
+
+async function once(url: string, options: LawRequestOptions): Promise<unknown> {
+  options.signal?.throwIfAborted();
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+  const timer = setTimeout(() => ctrl.abort(), options.timeoutMs ?? TIMEOUT_MS);
   try {
     const res = await fetch(url, {
-      signal: ctrl.signal,
+      signal: options.signal ? AbortSignal.any([options.signal, ctrl.signal]) : ctrl.signal,
       headers: {
         // 이 한 줄이 인증의 절반이다 (위 주석 참조)
         Referer: registeredOrigin(),
@@ -96,6 +99,7 @@ async function once(url: string): Promise<unknown> {
     }
     return json;
   } catch (e) {
+    options.signal?.throwIfAborted();
     if (e instanceof LawApiError) throw e;
     if (e instanceof Error && e.name === "AbortError") {
       throw new LawApiError(`타임아웃 ${TIMEOUT_MS}ms 초과`, "TIMEOUT");
@@ -115,13 +119,14 @@ function build(path: string, params: Record<string, string | number>): string {
 }
 
 /** 조회는 멱등하므로 1회 재시도한다 (EC-1). 인증 실패는 재시도해도 같으므로 즉시 던진다 */
-async function call(path: string, params: Record<string, string | number>): Promise<unknown> {
+async function call(path: string, params: Record<string, string | number>, options: LawRequestOptions): Promise<unknown> {
   const url = build(path, params);
   try {
-    return await once(url);
+    return await once(url, options);
   } catch (e) {
-    if (e instanceof LawApiError && (e.kind === "AUTH" || e.kind === "SHAPE")) throw e;
-    return await once(url);
+    options.signal?.throwIfAborted();
+    if (options.maxRetries === 0 || (e instanceof LawApiError && (e.kind === "AUTH" || e.kind === "SHAPE"))) throw e;
+    return await once(url, options);
   }
 }
 
@@ -129,16 +134,18 @@ async function call(path: string, params: Record<string, string | number>): Prom
 export function lawSearch(
   target: LawApiTarget,
   params: Record<string, string | number>,
+  options: LawRequestOptions = {},
 ): Promise<unknown> {
-  return call("lawSearch.do", { target, ...params });
+  return call("lawSearch.do", { target, ...params }, options);
 }
 
 /** 본문 조회 */
 export function lawService(
   target: LawApiTarget,
   params: Record<string, string | number>,
+  options: LawRequestOptions = {},
 ): Promise<unknown> {
-  return call("lawService.do", { target, ...params });
+  return call("lawService.do", { target, ...params }, options);
 }
 
 /** 법제처 응답은 단건이면 객체, 복수면 배열로 온다 — 항상 배열로 맞춘다 */

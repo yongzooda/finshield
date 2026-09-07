@@ -73,6 +73,7 @@ export const runVerification = async (args: {
   const progress = args.progress ?? (() => {});
 
   for (const agent of DOMAIN_AGENTS) {
+    session.signal?.throwIfAborted();
     progress({ type: "agent_started", agentCode: agent.agentCode });
     const result = await runDomainAgent({
       session,
@@ -111,6 +112,7 @@ export const runVerification = async (args: {
 
   if (materialClaims.length > 0 && COVE_AGENT && RED_TEAM_AGENT) {
     for (const [agent, kind] of [[COVE_AGENT, "cove"], [RED_TEAM_AGENT, "red_team"]] as const) {
+      session.signal?.throwIfAborted();
       progress({ type: "agent_started", agentCode: agent.agentCode });
       const parse = (raw: unknown) => {
         const schema = kind === "cove" ? coveOutput : redTeamOutput;
@@ -130,8 +132,10 @@ export const runVerification = async (args: {
       });
       evidence.push(...result.evidence);
       for (const [ref, id] of result.evidenceIds) evidenceIds.set(ref, id);
-      if (kind === "cove") cove = (result.output as CoveOutput | null);
-      else redTeam = (result.output as RedTeamOutput | null);
+      // 조회 자체가 실패한 검토의 NONE_FOUND/CONFIRMED는 독립 검증 증거가 아니다.
+      const reviewed = result.status === "SUCCEEDED" ? result.output : null;
+      if (kind === "cove") cove = (reviewed as CoveOutput | null);
+      else redTeam = (reviewed as RedTeamOutput | null);
       agentResults.push({
         agentCode: agent.agentCode, status: result.status,
         reasonCode: result.reasonCode, toolCalls: result.toolCalls,
@@ -143,6 +147,7 @@ export const runVerification = async (args: {
     }
   }
 
+  session.signal?.throwIfAborted();
   progress({ type: "judge_started" });
   const judgeStartedAt = Date.now();
   let judged: JudgeOutput | null = null;

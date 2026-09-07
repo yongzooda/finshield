@@ -14,6 +14,7 @@
  */
 
 import { useRef, useState } from "react";
+import { FileIntake } from "./file-intake";
 import Link from "next/link";
 import { readRunStream } from "../run-stream";
 import { CLAIM_STATE_VIEW, FsCard, FsChip } from "../fs-shell";
@@ -24,7 +25,7 @@ import {
 
 type Claim = {
   claim_id: string; claim_ref: string; claim_type: string; expected_revision_no?: number;
-  statement_masked: string; materiality: string;
+  statement_masked: string; materiality: string; source_page_no?: number;
 };
 type Evidence = {
   ref: string; title: string; source: string; grade: string; official_id: string | null;
@@ -61,8 +62,10 @@ export function VerifyFlow() {
   const [step, setStep] = useState<"input" | "extracting" | "claims" | "running" | "result">("input");
   const [stages, setStages] = useState<{ stage: string; detail: string }[]>([]);
   const [busy, setBusy] = useState(false);
+  const [fileBusy, setFileBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [text, setText] = useState("");
+  const [filePages,setFilePages] = useState<{page_no:number;text:string}[]>([]);
   const [claims, setClaims] = useState<Claim[]>([]);
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [agents, setAgents] = useState<AgentLine[]>([]);
@@ -84,7 +87,7 @@ export function VerifyFlow() {
   });
 
   const submitText = async () => {
-    setBusy(true); setNotice(null); setStages([]); setStep("extracting");
+    setBusy(true); setNotice(null); setStages([]); setFilePages([]); setStep("extracting");
     try {
       const response = await fetch("/api/finshield/intake", {
         method: "POST", headers: authed(), body: JSON.stringify({ text }),
@@ -219,10 +222,15 @@ export function VerifyFlow() {
           <p className="fs-inline-notice mt-4">시험 서비스입니다. 실제 개인정보와 금융 서류는 입력하지 마세요.</p>
           <textarea id="statement" maxLength={4000} rows={7} value={text} onChange={(e) => setText(e.target.value)}
             className="fs-field mt-4" placeholder="예) 정부지원 햇살론15 승인 대상입니다. 연 3% 고정으로 2천만원까지 가능하고 오늘까지만 접수합니다." />
-          <button type="button" disabled={busy || text.trim().length === 0} onClick={submitText}
+          <button type="button" disabled={busy || fileBusy || text.trim().length === 0} onClick={submitText}
             className="fs-btn fs-btn--primary mt-4">
             {busy ? "정리하는 중" : "다음 · 확인 항목 선택"}
           </button>
+          <FileIntake token={token} onBusyChange={setFileBusy} onPrepared={result=>{
+            setClaims(result.claims);setPicked(new Set(result.claims.filter(c=>c.materiality==="MATERIAL").map(c=>c.claim_id)));
+            setCaseId(result.case_id);setInputId(result.input_id);masked.current=result.masked_text;
+            setFilePages(result.masked_pages);setNotice(null);setStep("claims");
+          }}/>
         </FsCard>
       ) : null}
 
@@ -256,6 +264,11 @@ export function VerifyFlow() {
         <FsCard>
           <h2 className="fs-h2">무엇을 확인할까요</h2>
           <p className="fs-body mt-2">받은 권유와 같은 내용인지 확인하고 검증할 항목을 선택해 주세요. 입력과 다르게 추출됐다면 아래 문장을 직접 고쳐 주세요. 수정한 문장도 개인정보를 가린 뒤 기록합니다.</p>
+          {filePages.length ? <details className="mt-4 rounded-lg border border-[var(--fs-line)] p-4">
+            <summary className="cursor-pointer font-bold">페이지별 추출 내용과 대조하기</summary>
+            {filePages.map(page=><section className="mt-4" key={page.page_no}><h3 className="font-bold">{page.page_no}쪽</h3>
+              <p className="fs-body mt-2 whitespace-pre-wrap">{page.text}</p></section>)}
+          </details> : null}
           <ul className="mt-5 space-y-2">
             {claims.map((claim) => (
               <li key={claim.claim_id}>
@@ -267,6 +280,7 @@ export function VerifyFlow() {
                       return next;
                     })} />
                   <span className="flex-1">
+                    {claim.source_page_no ? <span className="fs-meta">원문 {claim.source_page_no}쪽</span> : null}
                     <textarea aria-label={`${claim.claim_ref} 확인 문장 수정`} className="fs-field" rows={2}
                       maxLength={400} value={claim.statement_masked}
                       onChange={event => setClaims(prev => prev.map(item => item.claim_id === claim.claim_id

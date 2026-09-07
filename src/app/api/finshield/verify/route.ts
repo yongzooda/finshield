@@ -1,3 +1,4 @@
+import { cleanupCaseFiles } from "@/lib/finshield/files/cleanup";
 /**
  * POST /api/finshield/verify — 확정한 Claim 으로 검증을 실행한다.
  *
@@ -56,6 +57,10 @@ export async function POST(request: Request): Promise<Response> {
   };
   const progress: RunProgress = (event) => push(event);
 
+  const abort = new AbortController();
+  const signal = AbortSignal.any([request.signal, abort.signal]);
+  const heartbeat = setInterval(() => push({ type: "heartbeat" }), 8000);
+  let activeRunId: string | null = null;
   const work = (async () => {
     try {
       const manifest = await loadManifest(fsql());
@@ -70,6 +75,8 @@ export async function POST(request: Request): Promise<Response> {
           'INITIAL'::public.verification_run_kind, null) as id`;
         return run[0].id as string;
       });
+      activeRunId = runId;
+      await cleanupCaseFiles(fsql(),ownerId,caseId).catch(()=>undefined);
       const input = await loadRunInput(fsql(), ownerId, caseId, runId);
       const claims = input.claims;
       await fsql()`select id from private.start_verification_run(${runId}::uuid)`;
@@ -77,7 +84,7 @@ export async function POST(request: Request): Promise<Response> {
 
       const result = await runVerification({
         ctx: { sql: fsql(), ownerId, caseId, runId, manifest,
-          signal: AbortSignal.any([request.signal, AbortSignal.timeout(Math.max(1, Date.parse(input.deadline_at) - Date.now() - 6000))]) },
+          signal: AbortSignal.any([signal, AbortSignal.timeout(Math.max(1, Date.parse(input.deadline_at) - Date.now() - 6000))]) },
         claims: claims.map((claim) => ({
           claim_ref: claim.claim_ref, claim_type: claim.claim_type,
           statement_masked: claim.statement_masked, materiality: claim.materiality,
@@ -98,6 +105,7 @@ export async function POST(request: Request): Promise<Response> {
       const hasProfile = input.profile_completeness === "COMPLETE";
       const saved = await finalizeRun({ sql: fsql(), runId, claims: withIds, run: result, hasProfile });
 
+      if (!saved.ok) await fsql()`select id from private.fail_verification_run(${runId}::uuid,'FINALIZE_FAILED',${saved.reason})`;
       push({
         type: "done",
         guide: saved.ok ? saved.guide : null,
@@ -128,9 +136,12 @@ export async function POST(request: Request): Promise<Response> {
         })),
       });
     } catch (error) {
+      if (activeRunId) await fsql()`select id from private.fail_verification_run(${activeRunId}::uuid,
+        ${signal.aborted ? "CLIENT_DISCONNECTED" : "VERIFICATION_FAILED"},null)`.catch(()=>undefined);
       // 내부 사정을 화면에 흘리지 않는다. 무엇이 안 됐는지만 알린다.
       push({ type: "error", message: "검증을 끝내지 못했습니다", code: (error as { code?: string })?.code ?? null });
     } finally {
+      clearInterval(heartbeat);
       finished = true;
       wake();
     }
@@ -145,5 +156,5 @@ export async function POST(request: Request): Promise<Response> {
     await work;
   }
 
-  return ndjsonStream(stream());
+  return ndjsonStream(stream(), () => abort.abort());
 }

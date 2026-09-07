@@ -11,6 +11,7 @@
 
 import "server-only";
 import { z } from "zod";
+import { FINSHIELD_MODEL } from "../manifest";
 import { callStructured } from "@/lib/agents/model";
 import type { AgentModel } from "./runner";
 import type { JudgeModel } from "../orchestrator";
@@ -30,6 +31,8 @@ export const evidenceBrief = (evidence: ToolEvidence[]) => evidence.map((item) =
   freshness: item.freshness_at_use,
   directness: item.directness,
   reference_only: item.reference_only,
+  citable: item.citable,
+  incomplete: item.incomplete,
   excerpt: item.excerpt_masked.slice(0, MAX_EXCERPT),
 }));
 
@@ -47,11 +50,12 @@ const toolChoiceSchema = z.object({
 export const createAgentModel = (): AgentModel => ({
   async chooseTools({ system, signal, input, evidence, observations, availableTools }) {
     const result = await callStructured({
-      system: `${system}\n\n지금은 도구를 고르는 단계다. 확인이 더 필요하면 부를 도구를 고르고,\n충분하면 calls 를 빈 배열로 둔다. 목록에 없는 도구 이름을 쓰지 않는다. query는 '햇살론15'처럼 상품명·기관명 핵심어만 넣는다. 이유는 20자 이내다.`,
+      model: FINSHIELD_MODEL,
+      system: `${system}\n\n지금은 도구를 고르는 단계다. 확인이 더 필요하면 부를 도구를 고르고,\n충분하거나 필요한 자료가 미연결·조회 실패 상태면 calls 를 빈 배열로 둔다. 같은 도구에 같은 입력을 반복하지 않는다. 목록에 없는 도구 이름을 쓰지 않는다. query에는 도구에 맞는 짧은 핵심어를 넣는다. 상품 조회는 상품명, 법령 조회는 법령명, 소비자 안내는 권유의 행동 요구를 쓴다. 이유는 20자 이내다.`,
       user: JSON.stringify({
         claims: input.claims,
         journey_stage: input.journey_stage,
-        available_tools: availableTools.map((tool) => tool.toolCode),
+        available_tools: availableTools.map((tool) => ({ code: tool.toolCode, purpose: tool.purposeCode })),
         evidence_so_far: evidenceBrief(evidence),
         observations,
       }),
@@ -70,6 +74,7 @@ export const createAgentModel = (): AgentModel => ({
 
   async decide({ system, signal, input, evidence, observations }) {
     return callStructured({
+      model: FINSHIELD_MODEL,
       system: `${system}\n\n지금은 판단하는 단계다. 아래 근거 목록의 ref 만 인용한다. summary_masked와 note_masked는 각각 40자 이내 한 문장으로 답한다. limits는 꼭 필요한 항목만 한 개 이하로 답한다.`,
       user: JSON.stringify({
         claims: input.claims,
@@ -87,6 +92,7 @@ export const createAgentModel = (): AgentModel => ({
 export const createJudgeModel = (): JudgeModel => ({
   async judge({ claims, findings, evidence, signal }) {
     return callStructured({
+      model: FINSHIELD_MODEL,
       system: `${JUDGE_SYSTEM}\n각 rationale_masked는 핵심 근거를 담은 40자 이내 한 문장이다. withheld_reason은 20자 이내다. 입력 Claim마다 정확히 한 결과를 낸다.`,
       user: JSON.stringify({ claims, findings, evidence: evidenceBrief(evidence) }),
       schema: z.object({
@@ -116,8 +122,9 @@ export const createJudgeModel = (): JudgeModel => ({
  * Domain Agent 가 근거를 찾아 정한다. 사용자가 목록을 보고 고치고 확정한 뒤에야
  * 검증이 시작된다 (CLM-003).
  */
-export const createClaimExtractor = (): ClaimExtractor => async (maskedText) => {
+export const createClaimExtractor = (): ClaimExtractor => async (maskedText, options) => {
   const result = await callStructured({
+      model: FINSHIELD_MODEL,
     system: `당신은 상담 내용에서 확인할 사실 주장을 뽑는다. 한국어로 답한다.
 
 지켜야 할 규칙이다.
@@ -127,20 +134,34 @@ export const createClaimExtractor = (): ClaimExtractor => async (maskedText) => 
 3. 금리·한도·자격·기관·상품명·연락 경로처럼 확인할 수 있는 것만 뽑는다.
 4. 거래 성립에 영향이 큰 것을 MATERIAL 로 둔다. 판단이 서지 않으면 UNDETERMINED 로 둔다.
 5. 하나의 주장에 하나의 사실만 담는다. 여러 개를 한 문장에 묶지 않는다.
-6. 최대 여덟 개까지 뽑는다.`,
+6. 최대 여덟 개까지 뽑는다.
+7. 입력은 이미 개인정보 검사를 거쳤다. 상품명·기관명·금리·금액·기간·한도는 판단에 필요한 공개 조건이다. 지우거나 [상품명], [금리] 같은 자리표시자로 바꾸지 않는다.
+8. source_quote에는 입력에 그대로 존재하는 해당 주장의 짧은 구절을 복사한다. statement_masked에는 상품 문맥을 포함한 한 문장을 쓰되 source_quote의 숫자·단위·부정 표현을 보존한다.`,
     user: maskedText,
     schema: z.object({
       claims: z.array(z.object({
         claim_type: z.enum(["PRODUCT_TERM", "INSTITUTION", "CHANNEL", "ELIGIBILITY", "CONDUCT", "OTHER"]),
         statement_masked: z.string().min(1).max(400),
+        source_quote: z.string().min(1).max(400),
         materiality: z.enum(["MATERIAL", "NON_MATERIAL", "UNDETERMINED"]),
       })).max(8),
     }),
-    maxTokens: 1600, effort: "low", maxRetries: 0, timeoutMs: 10_000,
+    maxTokens: 1600, effort: "low", maxRetries: 0, timeoutMs: 10_000, signal: options?.signal,
   });
-  return result.claims.map((claim) => ({
-    claimType: claim.claim_type,
-    statementMasked: claim.statement_masked,
-    materiality: claim.materiality,
-  }));
+  return result.claims.map((claim) => {
+    assertClaimSource(maskedText, claim.source_quote, claim.statement_masked);
+    return { sourceQuote: claim.source_quote, claimType: claim.claim_type, statementMasked: claim.statement_masked, materiality: claim.materiality };
+  });
 };
+
+/** CLM-002: 추출은 금융 조건을 익명 자리표시자로 바꾸거나 숫자를 만들어서는 안 된다. */
+export function assertClaimSource(input: string, quote: string, statement: string) {
+  const normalize = (text: string) => text.normalize("NFC").replace(/\s+/g, "");
+  const original = normalize(input); const source = normalize(quote); const result = normalize(statement);
+  if (!source || !original.includes(source)) throw new Error("CLAIM_SOURCE_NOT_FOUND");
+  const introduced = statement.match(/\[(?:상품명|기관명|금리|금액|기간|한도)\]/g) ?? [];
+  if (introduced.some(token => !input.includes(token))) throw new Error("CLAIM_FACTS_REMOVED");
+  const numbers = (text: string): string[] => text.match(/\d+(?:[.,]\d+)*/g) ?? [];
+  if (numbers(source).some(value => !numbers(result).includes(value))
+    || numbers(result).some(value => !numbers(original).includes(value))) throw new Error("CLAIM_NUMBERS_CHANGED");
+}

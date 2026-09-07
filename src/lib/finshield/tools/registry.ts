@@ -176,7 +176,8 @@ export const verifyFinancialInstitution = async (input: unknown, ctx: ToolCallCo
  */
 export const notLoadedYet = (reasonCode: string) => async (): Promise<ToolOutcome> => ({
   items: [],
-  provenanceComplete: true,
+  errorCode: reasonCode,
+  provenanceComplete: false,
   candidateCount: 0,
   reasonCode,
 });

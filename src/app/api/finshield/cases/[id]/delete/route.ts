@@ -1,3 +1,4 @@
+import { cleanupCaseFiles } from "@/lib/finshield/files/cleanup";
 /**
  * POST /api/finshield/cases/[id]/delete — Case 삭제 요청 (S-017, AUTH-005).
  *
@@ -52,7 +53,9 @@ export async function POST(
       select private.request_case_deletion(${ownerId}::uuid, ${caseId}::uuid,
         ${idempotencyKey}::text, ${requestHash}::text, ${targetHmac}::text,
         ${KEY_VERSION}::text, ${POLICY_VERSION}::text) as id`;
-    return jsonNoStore({ deletion_request_id: rows[0].id, status: "PENDING" }, 200);
+    await cleanupCaseFiles(fsql(),ownerId,caseId).catch(()=>undefined);
+    const purged = await fsql()`select private.purge_case(${rows[0].id}::uuid) as ok`.catch(()=>[]);
+    return jsonNoStore({ deletion_request_id: rows[0].id, status: purged[0]?.ok ? "COMPLETED" : "PENDING" }, 200);
   } catch (error) {
     const code = String((error as { code?: string })?.code ?? "");
     if (code === "42501") return jsonNoStore({ error: "이 Case 를 찾을 수 없습니다" }, 404);

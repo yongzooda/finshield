@@ -40,6 +40,8 @@ export const toolEvidence = z.object({
   independence_key: z.string(),
   // EV-007: 유사 사례는 현재 거래의 위법·사기를 증명하지 않는다.
   reference_only: z.boolean(),
+  citable: z.boolean(),
+  incomplete: z.boolean(),
   freshness_at_use: freshness,
   directness: evidenceDirectness,
 });
@@ -133,6 +135,11 @@ export const citationProblems = (
   }
   if ((state === "VERIFIED" || state === "CONTRADICTED") && known.every((item) => item.reference_only)) {
     problems.push("참고용 자료만으로 확정 상태를 썼습니다.");
+  }
+  if ((state === "VERIFIED" || state === "CONTRADICTED") && !known.some(item =>
+    item.citable && !item.incomplete && !item.reference_only
+    && item.freshness_at_use === "FRESH" && item.directness === "DIRECT")) {
+    problems.push("완전하고 유효한 직접 판단 근거가 없습니다.");
   }
   return problems;
 };

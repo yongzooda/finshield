@@ -23,7 +23,7 @@ type Action = {
   action_code: string; label: string; detail: string;
   required_material_codes: string[]; official_channel: string | null;
 };
-type Result = { result: string; reasons: string[]; actions: Action[]; comparison?: ContractComparison[] };
+type Result = { assessment_no?: number; finished_at?: string; result: string; reasons: string[]; actions: Action[]; comparison?: ContractComparison[] };
 
 const RESULT_VIEW: Record<string, { label: string; state: string; tone: ChipTone; lead: string }> = {
   NORMAL_MANAGEMENT: {
@@ -55,20 +55,38 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
   const [basePassport, setBasePassport] = useState<string | null>(null);
   const [terms, setTerms] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+  const [loadedToken, setLoadedToken] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
 
   useEffect(() => {
     if (!token) return;
     let alive = true;
-    void fetchCase<{ passports: { id: string; verification_run_id: string }[];
-      final_claims: (PriorClaim & { verification_run_id: string })[] }>(caseId, token).then(response => {
-      if (!alive) return;
-      if (!response.ok) { setNotice(response.error); return; }
-      const passport = response.data.passports[0];
-      setBasePassport(passport?.id ?? null);
-      setPrior(response.data.final_claims.filter(claim => claim.verification_run_id === passport?.verification_run_id));
-    });
+    void (async () => {
+      try {
+        const [response, savedResponse] = await Promise.all([
+          fetchCase<{ passports: { id: string; verification_run_id: string }[];
+            final_claims: (PriorClaim & { verification_run_id: string })[] }>(caseId, token),
+          fetch(`/api/finshield/cases/${caseId}/aftercare`, { headers: { Authorization: `Bearer ${token}` } }),
+        ]);
+        const saved = await savedResponse.json();
+        if (!alive) return;
+        if (!response.ok) { setNotice(response.error); return; }
+        if (!savedResponse.ok) { setNotice(saved.error ?? "이전 점검 결과를 읽지 못했습니다"); return; }
+        const assessment = saved.assessment;
+        const passport = assessment
+          ? response.data.passports.find(row => row.id === assessment.base_passport_id)
+          : response.data.passports[0];
+        setBasePassport(passport?.id ?? null);
+        setPrior(response.data.final_claims.filter(claim => claim.verification_run_id === passport?.verification_run_id));
+        if (assessment) {
+          setAnswers(assessment.answers);
+          setTerms(Object.fromEntries(assessment.comparison.map((row: ContractComparison) => [row.claim_id, row.contract])));
+          setResult(assessment);
+        } else { setResult(null); setAnswers({}); setTerms({}); }
+      } catch { if (alive) setNotice("이전 기록을 읽지 못했습니다. 다시 열어 주세요."); }
+      finally { if (alive) setLoadedToken(token); }
+    })();
     return () => { alive = false; };
   }, [caseId, token]);
 
@@ -96,19 +114,22 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
   if (!ready) return null;
   if (!token) return <FsLoginCard onToken={setToken} title="가입 후 점검" />;
 
+  if (loadedToken !== token) return <FsCard><p className="fs-body">저장된 점검 기록을 읽고 있습니다.</p></FsCard>;
+
   if (result) {
     const view = RESULT_VIEW[result.result]
       ?? { label: result.result, state: result.result, tone: "neutral" as const, lead: "" };
     return (
       <>
         <header>
-          <p className="fs-eyebrow">가입 후 점검 결과</p>
+          <p className="fs-eyebrow">가입 후 점검 결과{result.assessment_no ? ` · ${result.assessment_no}번째 점검` : ""}</p>
           {/* RES-005: 결론보다 행동을 먼저 놓는다. */}
           <h1 className="fs-h1 mt-2">{view.label}</h1>
           <div className="mt-3"><FsChip tone={view.tone}>{view.state}</FsChip></div>
           <p className="fs-lead mt-3">{view.lead}</p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Link href={`/cases/${caseId}`} className="fs-btn fs-btn--quiet">기록으로 돌아가기</Link>
+            <button type="button" className="fs-btn fs-btn--quiet" onClick={() => setResult(null)}>답변을 보완해 새 점검 만들기</button>
           </div>
         </header>
 

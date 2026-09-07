@@ -1,3 +1,4 @@
+import { FINSHIELD_MODEL } from "../manifest";
 import "server-only";
 import { createHash } from "node:crypto";
 import { AGENTS } from "../manifest";
@@ -24,5 +25,5 @@ export async function recordJudgeRun(session: RunSession, input: unknown, output
       ${(attempts[0].n as number)+1},${status}::public.execution_status,${spec.inputSchemaVersion},${spec.outputSchemaVersion},
       ${spec.promptVersion},${digest(input)},${output ? digest(output) : null},
       ${sql.json({schema_version:"1",tool_calls:0,evidence_count:session.evidence.size})},
-      'anthropic',${process.env.ANTHROPIC_MODEL ?? null},0,0,0,${new Date(startedAt).toISOString()},now(),${Date.now()-startedAt},${reasonCode})`;
+      'anthropic',${FINSHIELD_MODEL},0,0,0,${new Date(startedAt).toISOString()},now(),${Date.now()-startedAt},${reasonCode})`;
 }

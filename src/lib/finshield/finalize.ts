@@ -28,7 +28,7 @@ export type FinalClaim = {
   cove_status: "CONFIRMED" | "CHALLENGED" | "UNRESOLVED" | "FAILED" | "NOT_REQUIRED";
   red_team_status: "COUNTER_EVIDENCE" | "SUPPORTED_INITIAL" | "UNRESOLVED" | "FAILED" | "NOT_REQUIRED";
   decision_summary_masked: string;
-  evidences: { evidence_id: string; relation: "SUPPORT" | "CONTRADICT" | "CONTEXT" }[];
+  evidences: { evidence_id: string; relation: "SUPPORT" | "CONTRADICT" | "CONTEXT"; is_independent?: boolean; policy_reason_code?: string }[];
 };
 
 /**
@@ -98,14 +98,25 @@ export const buildFinalClaims = (args: {
     ];
     for (const ref of reviewRefs) {
       const coveResult = run.cove?.results.find(entry => entry.claim_ref === claim.claim_ref && entry.evidence_refs.includes(ref));
+      const redResult = run.redTeam?.results.find(entry => entry.claim_ref === claim.claim_ref && entry.evidence_refs.includes(ref));
       relationOf.set(`${claim.claim_ref}:${ref}`, coveResult?.status === "CONFIRMED" ? "SUPPORT"
-        : coveResult?.status === "INCONCLUSIVE" ? "CONTEXT" : "CONTRADICT");
+        : coveResult?.status === "REFUTED" || redResult?.status === "COUNTER_EVIDENCE" ? "CONTRADICT" : "CONTEXT");
     }
     const refs = [...new Set([...(judged?.evidence_refs ?? []), ...reviewRefs])];
+    const seenSources = new Set<string>();
     const evidences = refs
       .map((ref) => ({ evidence_id: run.evidenceIds.get(ref), relation: relationOf.get(`${claim.claim_ref}:${ref}`) ?? "CONTEXT" }))
       .filter((entry): entry is { evidence_id: string; relation: "SUPPORT" | "CONTRADICT" | "CONTEXT" } =>
-        typeof entry.evidence_id === "string");
+        typeof entry.evidence_id === "string")
+      .map(entry => {
+        const source = run.evidence.find(item => run.evidenceIds.get(item.evidence_ref) === entry.evidence_id);
+        const eligible = entry.relation !== "CONTEXT" && source?.citable && !source.incomplete && !source.reference_only
+          && source.freshness_at_use === "FRESH" && source.directness === "DIRECT";
+        const independent = Boolean(eligible && source && !seenSources.has(source.independence_key));
+        if (independent && source) seenSources.add(source.independence_key);
+        return { ...entry, is_independent: independent,
+          policy_reason_code: independent ? "FIRST_CANONICAL_SOURCE" : eligible ? "DUPLICATE_CANONICAL_SOURCE" : "CONTEXT_ONLY_SOURCE" };
+      });
 
     return {
       claim_id: claim.claimId,

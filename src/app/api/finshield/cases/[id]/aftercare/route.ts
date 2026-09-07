@@ -15,7 +15,7 @@ import { fsql } from "@/lib/finshield/db";
 import { bearerToken, resolveOwner, UnauthenticatedError } from "@/lib/finshield/auth";
 import { loadManifest } from "@/lib/finshield/registry";
 import {
-  AFTERCARE_SCHEMA_VERSION, decideAftercare, normalizeAnswers,
+  AFTERCARE_SCHEMA_VERSION, aftercareAction, decideAftercare, normalizeAnswers,
 } from "@/lib/finshield/aftercare";
 
 import { z } from "zod";
@@ -140,3 +140,56 @@ export async function POST(
     throw error;
   }
 }
+
+
+/** PC-002: 최신 검증본이 바뀌어도 점검 당시의 기준 Passport·답변·문구 비교를 복원한다. */
+export async function GET(request: Request, context: { params: Promise<{ id: string }> }): Promise<Response> {
+  try {
+    await resolveOwner(request);
+    const { id } = await context.params;
+    if (!UUID.test(id)) return jsonNoStore({ error: "잘못된 주소입니다" }, 400);
+    const token = bearerToken(request)!;
+    const cases = await restSelect({ token, path: "financial_cases", query: { select: "id", id: `eq.${id}`, limit: "1" } });
+    if (!cases.length) return jsonNoStore({ error: "이 기록을 찾을 수 없습니다" }, 404);
+    const assessments = z.array(z.object({id:z.uuid(),assessment_no:z.number(),base_passport_id:z.uuid(),result:z.string(),summary_masked:z.string(),finished_at:z.string(),assessment_schema_version:z.string()})).parse(await restSelect({ token, path: "precase_assessments", query: {
+      select: "id,assessment_no,base_passport_id,result,summary_masked,finished_at,assessment_schema_version",
+      case_id: `eq.${id}`, status: "in.(COMPLETED,PARTIAL)", order: "assessment_no.desc", limit: "1",
+    } }));
+    const assessment = assessments[0];
+    if (!assessment) return jsonNoStore({ assessment: null });
+    const [answerRows, actionRows] = await Promise.all([
+      restSelect({ token, path: "precase_answers", query: { select: "question_code,answer_code,answer_text_masked",
+        precase_assessment_id: `eq.${assessment.id}`, order: "answer_version_no.asc" } }).then(rows => z.array(z.object({question_code:z.string(),answer_code:z.string().nullable(),answer_text_masked:z.string().nullable()})).parse(rows)),
+      restSelect({ token, path: "action_checklists", query: { select: "action_code,required_material_codes,official_channel_registry_id",
+        precase_assessment_id: `eq.${assessment.id}` } }).then(rows => z.array(z.object({action_code:z.string(),required_material_codes:z.array(z.string()),official_channel_registry_id:z.uuid().nullable()})).parse(rows)),
+    ]);
+    const answers: Record<string, string> = {};
+    const comparison = [];
+    for (const row of answerRows) {
+      if (String(row.question_code).startsWith("CONTRACT_")) {
+        try {
+          const value = comparisonSchema.safeParse(JSON.parse(String(row.answer_text_masked)));
+          if (value.success) comparison.push(value.data);
+        } catch { /* 과거 형식의 본문을 추측해서 새 비교로 만들지 않는다. */ }
+      } else answers[String(row.question_code)] = String(row.answer_code);
+    }
+    const channels = await fsql()`select id,display_value from kb.official_channel_registry
+      where id = any(${actionRows.map(row => row.official_channel_registry_id).filter((value): value is string => Boolean(value))}::uuid[])`;
+    return jsonNoStore({ assessment: {
+      assessment_id: assessment.id, assessment_no: assessment.assessment_no, finished_at: assessment.finished_at,
+      base_passport_id: assessment.base_passport_id, result: assessment.result,
+      reasons: [assessment.summary_masked], answers: normalizeAnswers(answers) ?? {}, comparison,
+      actions: actionRows.map(row => ({
+        ...(aftercareAction(String(row.action_code)) ?? { action_code: row.action_code, label: "저장된 점검 행동", detail: "" }),
+        required_material_codes: row.required_material_codes,
+        official_channel: channels.find(channel => channel.id === row.official_channel_registry_id)?.display_value ?? null,
+      })),
+    } });
+  } catch (error) {
+    if (error instanceof UnauthenticatedError) return jsonNoStore({ error: error.message }, 401);
+    return jsonNoStore({ error: "저장된 점검 결과를 읽지 못했습니다" }, 503);
+  }
+}
+
+const comparisonSchema = z.object({ claim_id: z.uuid(), before: z.string(), contract: z.string(),
+  result: z.enum(["SAME_TEXT", "DIFFERENT_TEXT", "NOT_PROVIDED"]) });

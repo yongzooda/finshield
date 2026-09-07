@@ -227,6 +227,8 @@ export const executeTool = async (
       excerpt_masked: item.excerptMasked,
       independence_key: item.fingerprint,
       reference_only: item.referenceOnly,
+      citable: item.isCitable && item.isComplete && !item.referenceOnly,
+      incomplete: !item.isComplete,
       freshness_at_use: item.freshness,
       directness: item.directness,
     };

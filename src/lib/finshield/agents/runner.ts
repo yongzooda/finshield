@@ -1,3 +1,4 @@
+import { FINSHIELD_MODEL } from "../manifest";
 /**
  * Domain Agent 한 번 실행.
  *
@@ -101,6 +102,7 @@ export const runDomainAgent = async <T = DomainAgentOutput>(args: {
   const evidence: ToolEvidence[] = [];
   const observations: Record<string, unknown>[] = [];
   const pendings: PendingToolRun[] = [];
+  const attempted = new Set<string>();
   let toolCalls = 0;
   let reasonCode: string | null = null;
 
@@ -119,6 +121,7 @@ export const runDomainAgent = async <T = DomainAgentOutput>(args: {
       break;
     }
     if (choices.length === 0) break;
+    let executedThisTurn = 0;
     for (const choice of choices) {
       if (signal.aborted) { reasonCode = "DEADLINE_EXCEEDED"; break; }
       const allowed = spec.tools.find((tool) => tool.toolCode === choice.toolCode);
@@ -126,13 +129,26 @@ export const runDomainAgent = async <T = DomainAgentOutput>(args: {
       if (!allowed) { reasonCode = "TOOL_NOT_ALLOWED"; continue; }
       const impl = impls[choice.toolCode];
       if (!impl) { reasonCode = "TOOL_NOT_IMPLEMENTED"; continue; }
+      const key = digest({ tool: choice.toolCode, input: choice.input });
+      if (attempted.has(key)) continue;
+      attempted.add(key);
+      executedThisTurn += 1;
       const result = await executeTool({ ...session, signal }, agentCode, choice.toolCode,
         allowed.purposeCode, choice.input, impl);
       toolCalls += 1;
       pendings.push(result.pending);
       evidence.push(...result.evidence);
+      observations.push({
+        kind: "tool_execution", tool_code: choice.toolCode, status: result.pending.status,
+        reason_code: result.pending.reasonCode, error_code: result.pending.errorCode,
+        provenance_complete: result.pending.provenanceComplete, evidence_count: result.evidence.length,
+      });
       if (result.pending.observations) observations.push(result.pending.observations);
+      if (result.pending.status !== "SUCCEEDED" || !result.pending.provenanceComplete) {
+        reasonCode ??= "TOOL_LOOKUP_FAILED";
+      }
     }
+    if (executedThisTurn === 0) break;
   }
 
   let output: T | null = null;
@@ -186,7 +202,7 @@ export const runDomainAgent = async <T = DomainAgentOutput>(args: {
             ${digest(input)}, ${output ? digest(output) : null},
             ${sql.json({ schema_version: "1", tool_calls: toolCalls, evidence_count: evidence.length,
                          finding_count: findingCount })},
-            'anthropic', ${process.env.ANTHROPIC_MODEL ?? null},
+            'anthropic', ${FINSHIELD_MODEL},
             ${args.usage?.inputTokens ?? 0}, ${args.usage?.outputTokens ?? 0},
             ${args.usage?.costMicrounits ?? 0},
             ${new Date(startedAt).toISOString()}, now(), ${Date.now() - startedAt}, ${reasonCode})

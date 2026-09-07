@@ -56,6 +56,7 @@ export type StructuredCallOptions<T extends z.ZodType> = {
   user: string;
   schema: T;
   maxTokens?: number;
+  model?: string;
   effort?: Effort;
   signal?: AbortSignal;
   timeoutMs?: number;
@@ -76,7 +77,7 @@ export type StructuredCallOptions<T extends z.ZodType> = {
  *
  * 캐시 읽기·쓰기 토큰도 입력에 더한다 — 과금 대상이다.
  */
-function meter(usage: Anthropic.Usage | null | undefined): void {
+function meter(usage: Anthropic.Usage | null | undefined, model = env.ANTHROPIC_MODEL): void {
   if (!usage) return;
   // 측정 러너(PRECASE_LIVE=1)의 사용량은 서비스 일 예산에 계상하지 않는다 (N-204).
   // 게이트는 이용자 트래픽의 지출을 끊는 장치인데, 러너는 게이트를 거치지 않고
@@ -88,14 +89,14 @@ function meter(usage: Anthropic.Usage | null | undefined): void {
     (usage.input_tokens ?? 0) +
     (usage.cache_creation_input_tokens ?? 0) +
     (usage.cache_read_input_tokens ?? 0);
-  void recordUsage(env.ANTHROPIC_MODEL, input, usage.output_tokens ?? 0);
+  void recordUsage(model, input, usage.output_tokens ?? 0);
 }
 
 export async function callStructured<T extends z.ZodType>(
   opts: StructuredCallOptions<T>,
 ): Promise<z.infer<T>> {
   const res = await anthropic.messages.parse({
-    model: env.ANTHROPIC_MODEL,
+    model: opts.model ?? env.ANTHROPIC_MODEL,
     max_tokens: opts.maxTokens ?? 8_000,
     system: opts.system,
     messages: [{ role: "user", content: opts.user }],
@@ -109,7 +110,7 @@ export async function callStructured<T extends z.ZodType>(
 
   // ⚠️ **계량이 결과 판정보다 먼저다** (N-204). 거절이든 토큰 상한이든 토큰은
   // 이미 쓰였다. 성공한 호출만 세면 실패가 잦을수록 쿼터가 실제보다 낮게 보인다.
-  meter(res.usage);
+  meter(res.usage, opts.model);
 
   // 안전 분류기가 거절하면 content가 비거나 부분적이다. 먼저 본다.
   if (res.stop_reason === "refusal") {

@@ -15,6 +15,7 @@ import {
   lookupOfficialChannel, notLoadedYet, searchFinancialProduct, verifyFinancialInstitution,
 } from "./registry";
 import { parseUrlHost } from "./url";
+import { searchOfficialWarning } from "./official-warning";
 
 export const TOOL_IMPLS: Record<string, ToolImpl> = {
   lookup_statute: lookupStatute,
@@ -25,8 +26,8 @@ export const TOOL_IMPLS: Record<string, ToolImpl> = {
   verify_financial_institution: verifyFinancialInstitution,
   // 아래는 자료 적재가 남았다. 부르면 그 사실이 실행 기록에 남는다.
   get_source_snapshot: notLoadedYet("SNAPSHOT_LOOKUP_NOT_IMPLEMENTED"),
-  search_consumer_warning: notLoadedYet("WARNING_CORPUS_NOT_LOADED"),
-  analyze_risk_pattern: notLoadedYet("CONDUCT_CORPUS_NOT_LOADED"),
+  search_consumer_warning: searchOfficialWarning,
+  analyze_risk_pattern: searchOfficialWarning,
   check_documents: notLoadedYet("TERMS_CORPUS_NOT_LOADED"),
   search_dispute_case: notLoadedYet("DISPUTE_CORPUS_NOT_LOADED"),
 };

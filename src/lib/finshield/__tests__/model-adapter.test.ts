@@ -19,6 +19,8 @@ const evidence = (over: Partial<ToolEvidence> = {}): ToolEvidence => ({
   excerpt_masked: "가".repeat(900),
   independence_key: "b".repeat(64),
   reference_only: false,
+  citable: true,
+  incomplete: false,
   freshness_at_use: "FRESH",
   directness: "DIRECT",
   ...over,

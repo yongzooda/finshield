@@ -13,7 +13,7 @@
 import "server-only";
 import { asArray, lawSearch, lawService } from "@/lib/tools/law_client";
 import { filterToolText } from "@/lib/tools/filter";
-import { sha256, type SourceItem, type ToolOutcome } from "./runtime";
+import { sha256, type SourceItem, type ToolOutcome, type ToolCallContext } from "./runtime";
 
 const MAX_BODY_FETCH = 2;
 const MAX_EXCERPT = 1200;
@@ -44,17 +44,18 @@ const bodyExcerpt = (payload: unknown): string | null => {
   return filterToolText(texts.join("\n").slice(0, MAX_EXCERPT)).text;
 };
 
-export const lookupStatute = async (input: unknown): Promise<ToolOutcome> => {
+export const lookupStatute = async (input: unknown, ctx?: ToolCallContext): Promise<ToolOutcome> => {
   const query = String((input as { query?: unknown })?.query ?? "").trim();
   if (query.length === 0) {
     return { items: [], provenanceComplete: true, candidateCount: 0, reasonCode: "EMPTY_QUERY" };
   }
 
-  const listed = await lawSearch("law", { query, display: 5, type: "JSON" });
+  const listed = await lawSearch("law", { query, display: 5, type: "JSON" }, { signal: ctx?.signal, maxRetries: 0 });
   const rows = asArray(((listed as { LawSearch?: { law?: LawRow | LawRow[] } })?.LawSearch?.law));
   const items: SourceItem[] = [];
 
   for (const [index, row] of rows.entries()) {
+    ctx?.signal?.throwIfAborted();
     const lawId = String(row.법령ID ?? "").trim();
     const name = String(row.법령명한글 ?? "").trim();
     if (lawId.length === 0 || name.length === 0) continue;
@@ -63,8 +64,9 @@ export const lookupStatute = async (input: unknown): Promise<ToolOutcome> => {
     let excerpt: string | null = null;
     if (index < MAX_BODY_FETCH) {
       try {
-        excerpt = bodyExcerpt(await lawService("law", { ID: lawId, type: "JSON" }));
+        excerpt = bodyExcerpt(await lawService("law", { ID: lawId, type: "JSON" }, { signal: ctx?.signal, maxRetries: 0 }));
       } catch {
+        ctx?.signal?.throwIfAborted();
         excerpt = null;
       }
     }
@@ -107,13 +109,13 @@ export const lookupStatute = async (input: unknown): Promise<ToolOutcome> => {
   };
 };
 
-export const searchPrecedent = async (input: unknown): Promise<ToolOutcome> => {
+export const searchPrecedent = async (input: unknown, ctx?: ToolCallContext): Promise<ToolOutcome> => {
   const query = String((input as { query?: unknown })?.query ?? "").trim();
   if (query.length === 0) {
     return { items: [], provenanceComplete: true, candidateCount: 0, reasonCode: "EMPTY_QUERY" };
   }
 
-  const listed = await lawSearch("prec", { query, display: 5, type: "JSON" });
+  const listed = await lawSearch("prec", { query, display: 5, type: "JSON" }, { signal: ctx?.signal, maxRetries: 0 });
   const rows = asArray(((listed as { PrecSearch?: { prec?: PrecRow | PrecRow[] } })?.PrecSearch?.prec));
   const items: SourceItem[] = rows.flatMap((row) => {
     const id = String(row.판례정보일련번호 ?? "").trim();

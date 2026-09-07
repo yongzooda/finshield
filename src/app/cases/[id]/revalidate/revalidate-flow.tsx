@@ -10,8 +10,7 @@
  * 진행은 실제 단계만 보여 준다. 백분율을 만들지 않는다 (S-009).
  */
 
-import { readRunStream } from "../../../run-stream";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FsCard, FsChip } from "../../../fs-shell";
 import { FsLoginCard, useFsToken } from "../../../fs-session";
@@ -36,40 +35,89 @@ export function RevalidateFlow({ caseId }: { caseId: string }) {
   const [notice, setNotice] = useState<string | null>(null);
   const [done, setDone] = useState<Done | null>(null);
 
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [queued, setQueued] = useState(false);
+  const [refresh, setRefresh] = useState(0);
+  const [requestKey, setRequestKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!token) return;
+    let active = true;
+    let timer: ReturnType<typeof setTimeout>;
+    const controller = new AbortController();
+    const poll = async () => {
+      try {
+        const response = await fetch(`/api/finshield/cases/${caseId}/revalidate`, {
+          headers: { Authorization: `Bearer ${token}` }, signal: controller.signal,
+        });
+        const body = await response.json();
+        if (!active) return;
+        if (!response.ok) {
+          if (response.status === 401) setToken(null);
+          throw new Error(body.error ?? "처리 상태를 읽지 못했습니다");
+        }
+        const job = body.job;
+        if (!job) return;
+        setJobId(job.job_id);
+        const lines: AgentLine[] = [];
+        for (const record of job.events ?? []) {
+          const event = record.payload;
+          if (event.type === "agent_started") lines.push({ agentCode: event.agentCode, status: "RUNNING" });
+          if (event.type === "agent_finished") {
+            const line = lines.find((entry) => entry.agentCode === event.agentCode);
+            if (line) { line.status = event.status; line.toolCalls = event.toolCalls; }
+          }
+        }
+        setAgents(lines);
+        setQueued(job.job_status === "QUEUED");
+        if (["QUEUED", "RUNNING"].includes(job.job_status)) {
+          setStep("running"); timer = setTimeout(() => void poll(), 2000);
+        } else if (["CHANGED", "NO_CHANGE"].includes(job.job_status)) {
+          setDone(job); setStep("done"); setRequestKey(null);
+        } else {
+          setStep("idle"); setRequestKey(null);
+          setNotice(job.reason_code === "USER_CANCELLED" ? "재검증을 중단했습니다. 이전 결과는 보관됩니다."
+            : "재검증을 완료하지 못했습니다. 이전 결과는 보관됩니다.");
+        }
+      } catch (error) {
+        if (!active) return;
+        setNotice(error instanceof Error ? error.message : "처리 상태를 읽지 못했습니다");
+        timer = setTimeout(() => void poll(), 5000);
+      }
+    };
+    void poll();
+    return () => { active = false; controller.abort(); clearTimeout(timer); };
+  }, [token, caseId, setToken, refresh]);
+
   const start = async () => {
     if (!token) return;
-    setNotice(null); setAgents([]); setStep("running");
+    const key = requestKey ?? crypto.randomUUID();
+    setRequestKey(key); setNotice(null); setAgents([]); setStep("running");
     try {
       const response = await fetch(`/api/finshield/cases/${caseId}/revalidate`, {
-        method: "POST", headers: { Authorization: `Bearer ${token}` },
+        method: "POST", headers: { Authorization: `Bearer ${token}`, "Idempotency-Key": key },
       });
-      if (!response.ok || !response.body) {
-        const body = await response.json().catch(() => null);
+      const body = await response.json();
+      if (body.job_id) setJobId(body.job_id);
+      if (!response.ok) {
         if (response.status === 401) setToken(null);
-        setNotice(body?.error ?? "다시 확인하지 못했습니다");
-        setStep("idle");
-        return;
+        setNotice(body.error ?? "다시 확인하지 못했습니다");
+        setStep(body.job_id ? "running" : "idle");
       }
-      await readRunStream(response, (line) => {
-          const event = JSON.parse(line);
-          if (event.type === "agent_started") {
-            setAgents((prev) => prev.some((a) => a.agentCode === event.agentCode)
-              ? prev : [...prev, { agentCode: event.agentCode, status: "RUNNING" }]);
-          } else if (event.type === "agent_finished") {
-            setAgents((prev) => prev.map((a) => a.agentCode === event.agentCode
-              ? { ...a, status: event.status, toolCalls: event.toolCalls } : a));
-          } else if (event.type === "done") {
-            setDone(event as Done);
-            setStep("done");
-          } else if (event.type === "error") {
-            setNotice(event.message);
-            setStep("idle");
-          }
+    } catch { setNotice("접수 상태를 확인 중입니다. 연결되면 저장된 진행 상태를 표시합니다."); }
+    setRefresh((value) => value + 1);
+  };
+
+  const cancel = async () => {
+    if (!token || !jobId) return;
+    try {
+      const response = await fetch(`/api/finshield/cases/${caseId}/revalidate?job_id=${jobId}`, {
+        method: "DELETE", headers: { Authorization: `Bearer ${token}` },
       });
-    } catch {
-      setNotice("완료 결과를 받지 못했습니다. 내 기록에서 처리 상태를 확인해 주세요.");
-      setStep("idle");
-    }
+      if (!response.ok) throw new Error("취소 요청을 전달하지 못했습니다");
+      setNotice("중단 요청을 전달했습니다. 진행 중인 처리를 정리하고 있습니다.");
+      setRefresh((value) => value + 1);
+    } catch { setNotice("취소 요청을 전달하지 못했습니다. 다시 시도해 주세요."); }
   };
 
   if (!ready) return null;
@@ -96,7 +144,7 @@ export function RevalidateFlow({ caseId }: { caseId: string }) {
         <FsCard className="mt-8">
           <h2 className="fs-h2">지금 다시 확인할까요</h2>
           <p className="fs-body mt-2">
-            확인에는 시간이 걸립니다. 창을 닫지 마세요. 끝나면 달라진 점을 이 화면에 적습니다.
+            확인에는 시간이 걸립니다. 창을 닫아도 처리는 계속되며, 다시 열면 진행 상태와 달라진 점을 확인할 수 있습니다.
           </p>
           <button type="button" onClick={() => void start()} className="fs-btn fs-btn--primary mt-4">
             다시 확인 시작
@@ -107,6 +155,11 @@ export function RevalidateFlow({ caseId }: { caseId: string }) {
       {step === "running" ? (
         <FsCard className="mt-8">
           <h2 className="fs-h2">다시 확인하는 중</h2>
+          <p className="fs-body mt-2">이 화면을 닫아도 처리는 계속됩니다.</p>
+          <div className="mt-4 flex gap-3">
+            <button type="button" className="fs-btn fs-btn--quiet" onClick={() => void cancel()}>재검증 중단</button>
+            {queued ? <button type="button" className="fs-btn fs-btn--quiet" onClick={() => void start()}>처리 연결 재시도</button> : null}
+          </div>
           <ul className="fs-steps mt-5" aria-live="polite">
             {agents.map((agent) => (
               <li key={agent.agentCode} data-state={agent.status === "RUNNING" ? "running" : "done"}>

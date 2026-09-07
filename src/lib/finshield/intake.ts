@@ -23,12 +23,13 @@ export const MAX_INPUT_BYTES = 10 * 1024 * 1024;
 export const PII_POLICY_VERSION = "pii-policy-v1";
 
 export type ExtractedClaim = {
+  sourceQuote?: string;
   claimType: string;
   statementMasked: string;
   materiality: "MATERIAL" | "NON_MATERIAL" | "UNDETERMINED";
 };
 
-export type ClaimExtractor = (maskedText: string) => Promise<ExtractedClaim[]>;
+export type ClaimExtractor = (maskedText: string, options?: { signal?: AbortSignal }) => Promise<ExtractedClaim[]>;
 
 export type IntakeBlocked = { ok: false; reason: "PII_RESIDUAL"; ask: string };
 export type IntakeAccepted = {

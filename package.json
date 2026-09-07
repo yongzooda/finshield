@@ -22,6 +22,7 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "server-only": "^0.0.1",
+    "workflow": "4.8.5",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -38,5 +39,16 @@
     "unified": "^11.0.5",
     "vitest": "^4.1.10",
     "yaml": "^2.8.1"
+  },
+  "overrides": {
+    "@workflow/core": {
+      "nanoid": "5.1.16"
+    },
+    "@workflow/world-local": {
+      "undici": "7.29.0"
+    },
+    "@workflow/world-vercel": {
+      "undici": "7.29.0"
+    }
   }
 }

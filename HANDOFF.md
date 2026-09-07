@@ -5,8 +5,8 @@
 - 사용자가 제출본 확정 후 커밋·푸시를 요청했고, 클로드 이동 요청을 취소한 뒤 현재 작업의 개발 계속을 요청했다.
 - 최신 작업 상태와 재개 지시는 [개발 재개 기록](docs/ops/2026-09-07-development-resume.md)를 우선 확인한다. 아래 과거 완료·다음 작업 목록은 기준선 이력이므로 현재 작업 브랜치 상태와 구분한다.
 - 작업 브랜치는 `codex/p0-audit-contract-spike`다. 서버 Claim 확정, Case 조회, 독립 검토 계약, 보류 결과 저장·수동 재검증을 보완했고 파일 파서·가입 후 비교 코드는 전체 연결 검증 전이다.
-- 실제 검증은 시간 초과로 보류됐다. 정상 근거 검증·파일/OCR 전체 흐름·요청과 독립적인 실행·가입 후 보호가 남았다. Production 반영 및 Release 완료 상태가 아니다.
-- FinShield DB에 0026~0028과 동등한 함수 변경이 적용됐다. ledger 동기화와 0029 적용·검증은 남았다. 관련 Evidence scope를 다시 검증해야 한다.
+- 초기 실제 회원 검증은 시간 초과로 보류됐다. 이후 합성 단일 Claim의 실제 Provider·공식 근거·로컬 worker 저장(약 47초)과 native PDF의 실제 파서·모델·로컬 저장(약 11초, Storage 대체)을 통과했다. 재검증/만료 정리 Workflow와 가입 후 점검 복원도 격리 구현·시험했다. 실제 Storage/OCR 전체 흐름과 Production 반영·Release는 미완료다.
+- FinShield DB에 0026~0028과 동등한 함수 변경이 적용됐다. ledger 동기화와 0029~0033 운영 적용은 남았다. 로컬 0001~0033/SQL 01~22는 통과했다. 관련 Evidence scope를 다시 검증해야 한다.
 - 제출 확정 PDF는 `output/pdf/`에 보존했다. 상세 중단 기록은 [제출 우선 중단 기록](docs/ops/2026-09-07-submission-stop.md)을 따른다.
 
 ## 현재 기준
@@ -17,7 +17,7 @@
 - 상위 기획: `docs/01-product-plan.md`
 - DB 구현 기준: `docs/03-database-spec.md`
 - Provider Stack ADR: `docs/adr/001-p0-provider-stack.md`
-- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`·`B-FILE-SAFETY`·`B-RUNTIME-01`·`B-LAW-01`이 `PASS`다.
+- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`·`B-FILE-SAFETY`·`B-RUNTIME-01`·`B-LAW-01`이 `PASS`다. B-MODEL-01은 의존성 변경으로 재측정 대기다.
 - Migration `0025`가 들어와 `B-SUPABASE-01`·`B-RATE-01`·`B-CONSENT-01`·`B-STORAGE-01`·`B-DELETE-01`의 scope digest가 바뀌었다. 다섯을 다시 재서 채택한다.
 - Product Release Gate (`N-QLT-009`): `NOT-EVALUATED` — P0 기능 구현 뒤 평가한다. Claim 판정 품질 `B-CLAIM-01`을 포함해 4개다.
 - 배포: Vercel `finshield` Production 연결 완료 (`https://finshield-gamma.vercel.app`)
