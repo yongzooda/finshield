@@ -11,7 +11,7 @@
 
 import "server-only";
 import { z } from "zod";
-import { FINSHIELD_MODEL } from "../manifest";
+import { FINSHIELD_MODEL, MODEL_TIMEOUTS } from "../manifest";
 import { callFinshieldModel, emptyModelUsage, type ModelBudgetContext, type ModelUsage } from "../model-budget";
 import type { AgentModel } from "./runner";
 import type { JudgeModel } from "../orchestrator";
@@ -74,7 +74,9 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
         observations,
       }),
       schema: toolChoiceSchema,
-      maxTokens: 500, effort: "low", signal, maxRetries: 0, timeoutMs: 8_000,
+      maxTokens: 500, effort: "low", signal, maxRetries: 0,
+      timeoutMs: input.agent_code === "COVE" || input.agent_code === "RED_TEAM"
+        ? MODEL_TIMEOUTS.reviewChoiceMs : MODEL_TIMEOUTS.domainChoiceMs,
     }, context, usageFor(input.agent_code));
     return result.calls.map((call) => ({
       toolCode: call.tool_code,
@@ -99,7 +101,9 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
       }),
       schema: input.agent_code === "COVE" ? coveOutput
         : input.agent_code === "RED_TEAM" ? redTeamOutput : domainAgentOutput,
-      maxTokens: 1600, effort: "low", signal, maxRetries: 0, timeoutMs: 12_000,
+      maxTokens: 1600, effort: "low", signal, maxRetries: 0,
+      timeoutMs: input.agent_code === "COVE" || input.agent_code === "RED_TEAM"
+        ? MODEL_TIMEOUTS.reviewDecisionMs : MODEL_TIMEOUTS.domainDecisionMs,
     }, context, usageFor(input.agent_code));
   },
 });
@@ -128,7 +132,7 @@ export const createJudgeModel = (context?: ModelBudgetContext): JudgeModel => {
           note_masked: z.string(),
         })),
       }),
-      maxTokens: 1600, effort: "low", signal, maxRetries: 0, timeoutMs: 8_000,
+      maxTokens: 1600, effort: "low", signal, maxRetries: 0, timeoutMs: MODEL_TIMEOUTS.judgeMs,
     }, context, usage);
   },
 });

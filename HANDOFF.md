@@ -1,3 +1,9 @@
+## 2026-09-08 공개 Demo 지연·최신성 후속
+
+- main `b05470d`와 원격 0047 적용 뒤 실제 공개 Demo는 60.933초에 부분 종결됐다. Product·Regulation·CoVe·Red Team과 Evidence 5건·Tool-Source 연결은 성공했지만 Sales 7초 판단 제한과 Judge 8초 제한이 만료돼 최종 Claim 다섯 건은 모두 `UNKNOWN`이었다.
+- 사칭 안내 재조회 사건이 Demo Seed가 고정한 Snapshot이 아닌 동일 본문 중복 행에 연결돼 `STALE`로 보이는 문제도 확인했다. Migration 0048은 검증된 같은 Hash의 재조회 사건을 Seed Snapshot에 연결하고, v5 Manifest에 Domain 15초·Review 15초·Judge 12초와 공개 Demo 110초 상한을 고정한다.
+- 격리·원격 적용과 실제 재실행 전 기록이다. Judge 없이 Domain 결론을 최종 결과로 승격하지 않으며 `B-DEMO-01`·Implementation·Release Gate는 변경하지 않는다. [상세 기록](docs/ops/demo-evidence-connection.md)을 따른다.
+
 ## 2026-09-08 공개 Demo 공식 근거 연결 보완
 
 - Production 공개 체험은 약 20~25초에 종결됐지만 Product·Fraud·CoVe·Red Team·Judge가 인용 검증에 실패해 다섯 Claim이 모두 `UNKNOWN`이었다. Tool 성공 원장에도 Source 연결이 0건이었다.

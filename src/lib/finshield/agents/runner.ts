@@ -1,5 +1,5 @@
 import type { ModelUsage } from "../model-budget";
-import { FINSHIELD_MODEL } from "../manifest";
+import { FINSHIELD_MODEL, MODEL_TIMEOUTS } from "../manifest";
 /**
  * Domain Agent 한 번 실행.
  *
@@ -100,7 +100,7 @@ export const runDomainAgent = async <T = DomainAgentOutput>(args: {
   const { sql, ownerId, caseId, runId } = session;
   const startedAt = Date.now();
   const reviewAgent = ["COVE", "RED_TEAM"].includes(agentCode);
-  const stageLimit = reviewAgent ? 15_000 : 12_000;
+  const stageLimit = reviewAgent ? MODEL_TIMEOUTS.reviewStageMs : MODEL_TIMEOUTS.domainStageMs;
   const stageSignal = AbortSignal.timeout(stageLimit);
   const signal = session.signal ? AbortSignal.any([session.signal, stageSignal]) : stageSignal;
 
@@ -112,11 +112,13 @@ export const runDomainAgent = async <T = DomainAgentOutput>(args: {
   let reasonCode: string | null = null;
 
   for (let turn = 0; turn < MAX_TOOL_TURNS; turn += 1) {
-    // 조회가 판단 시간을 모두 소비하지 않게 한다. 첫 조회 뒤에는 구조화 판단에
-    // 최소 6초를 남긴다. 전체 Run의 원래 deadline은 별도로 계속 적용된다.
+    // 조회가 판단 시간을 모두 소비하지 않게 한다. 전체 Run의 deadline은 별도로
+    // 계속 적용되고, 이 단계의 선택·판단 상한은 Manifest 값으로 고정한다.
     if (turn > 0 && Date.now() - startedAt >= stageLimit - 6_000) break;
     let choices: ToolChoice[];
-    const choiceSignal = AbortSignal.any([signal,AbortSignal.timeout(reviewAgent ? 6_000 : 5_000)]);
+    const choiceSignal = AbortSignal.any([signal, AbortSignal.timeout(
+      reviewAgent ? MODEL_TIMEOUTS.reviewChoiceMs : MODEL_TIMEOUTS.domainChoiceMs,
+    )]);
     try {
       choiceSignal.throwIfAborted();
       choices = await model.chooseTools({
@@ -162,7 +164,9 @@ export const runDomainAgent = async <T = DomainAgentOutput>(args: {
 
   let output: T | null = null;
   let status: AgentRunResult["status"] = "SUCCEEDED";
-  const decisionSignal = AbortSignal.any([signal,AbortSignal.timeout(reviewAgent ? 8_000 : 7_000)]);
+  const decisionSignal = AbortSignal.any([signal, AbortSignal.timeout(
+    reviewAgent ? MODEL_TIMEOUTS.reviewDecisionMs : MODEL_TIMEOUTS.domainDecisionMs,
+  )]);
   try {
     decisionSignal.throwIfAborted();
     if (reasonCode === "TOOL_BUDGET") throw Object.assign(new Error("MODEL_BUDGET_BLOCKED"), {code:"MODEL_BUDGET_BLOCKED"});

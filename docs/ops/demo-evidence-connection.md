@@ -36,3 +36,13 @@ Demo Recorder는 저장된 Snapshot ID를 직접 연결하고, 법령처럼 실�
 - 타입 검사 통과
 - Production 적용 전이므로 실제 Agent 결과·Claim별 인용·출처 원장·지연은 병합과 원격 Migration 뒤 다시 확인한다.
 - OCR·전체 Retrieval·Workflow 장애 20종·Claim 품질과 Release Gate는 이 변경으로 완료되지 않는다.
+
+## 2026-09-08 Production 재실행
+
+main `b05470d`와 원격 Migration 0047을 적용한 뒤 공개 Demo를 다시 실행했다. 60.933초에 `PARTIAL`로 종결됐고 Product·Regulation·CoVe·Red Team은 성공했다. 공식 상품·사칭 안내를 포함한 Evidence 5건과 Tool-Source 연결도 복원됐다.
+
+다만 Sales는 7초 판단 제한에서 `DEADLINE_EXCEEDED`, Judge는 8초 제한에서 `JUDGE_CALL_FAILED`로 끝났다. 두 호출은 Provider 결과 미확정 예약으로 보존됐다. Judge 결과가 없으므로 화면의 다섯 Claim은 안전하게 모두 `UNKNOWN`이었고, 이를 정상 판정으로 간주하지 않는다. 사칭 안내의 새 조회 사건은 동일 본문의 중복 Snapshot 중 Demo Seed가 고정하지 않은 행에 연결돼 화면에서 `STALE`로 평가됐다.
+
+후속 Migration 0048은 검증된 동일 Hash의 재조회 사건을 Seed Snapshot에 직접 연결하고, v5 Manifest에 모델 시간 제한을 고정한다. 실측 분포를 바탕으로 Domain 선택 4초·판단 9초·단계 15초, Review 선택 5초·판단 8초·단계 15초, Judge 12초를 사용한다. 네 Domain·두 Review·Judge의 순차 단계 상한 합은 102초로 공개 Demo의 110초 안에 8초 여유를 둔다. Judge 실패 시 Domain 결과만으로 최종 결론을 새로 만들지 않는 기존 실패 안전성은 유지한다.
+
+이 후속 변경도 원격 Migration·배포 뒤 실제 Demo를 다시 실행해 Judge 성공, Claim별 상태·인용, 전체 지연과 예약 정산을 확인하기 전에는 `B-DEMO-01` PASS가 아니다.

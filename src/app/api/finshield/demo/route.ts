@@ -18,6 +18,7 @@ import { fsql } from "@/lib/finshield/db";
 import {
   DemoUnavailableError, allowDemo, createSession, readSeed, runDemo,
 } from "@/lib/finshield/demo";
+import { MODEL_TIMEOUTS } from "@/lib/finshield/manifest";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -52,7 +53,7 @@ export async function POST(request: Request): Promise<Response> {
   const waiters: (() => void)[] = [];
   let finished = false;
   const abort = new AbortController();
-  const signal = AbortSignal.any([request.signal,abort.signal,AbortSignal.timeout(110_000)]);
+  const signal = AbortSignal.any([request.signal, abort.signal, AbortSignal.timeout(MODEL_TIMEOUTS.demoRunMs)]);
   const wake = () => { while (waiters.length > 0) waiters.pop()?.(); };
   const push = (event: unknown) => { events.push(event); wake(); };
 
