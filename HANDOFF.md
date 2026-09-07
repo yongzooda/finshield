@@ -1,3 +1,7 @@
+## 2026-09-07 P0 DB 계약 분리
+
+Migration 0038~0041과 SQL 시험을 기능 Draft #192에서 분리했다. 새 작업 차단·Auth 마지막 삭제·합산 비용·알림 원자성·Profile Snapshot 비교를 격리 검증했다. 원격은 0037이며 별도 적용/검증이 필요하다. DB scope의 증거 5개를 STALE로 두어 main 부분 PASS는 8/20이다. Implementation NO-GO·Release NOT-EVALUATED를 유지한다. `docs/ops/p0-cleanup-profile-contracts.md`를 따른다.
+
 ## 2026-09-07 세션 보안 뒤 증거 재채택
 
 - 별도 PR #230에서 최종 main `72e5405`의 Supabase·Rate·Consent·Storage·Delete 원본을 채택한다. 첫 채택 CI 거부와 두 번의 원본을 모두 보존한다. [측정 범위](evidence/adoption/2026-09-07-session-rls.md)를 따른다.
