@@ -22,6 +22,21 @@
 - 제출 확정 PDF는 `output/pdf/`에 보존했다. 상세 중단 기록은 [제출 우선 중단 기록](docs/ops/2026-09-07-submission-stop.md)을 따른다.
 - 13시 추가: 실제 회원 native PDF의 업로드·분석·저장·복원, 보호 Preview의 PNG OCR·8 Claim 추출·물리 삭제, 로컬 HTTP Workflow의 실제 재검증 NO_CHANGE·새 판 보존·새로고침 복원을 확인했다. 10쪽 스캔 인용 페이지 구분은 보완 후 재검증 중이다. 기본 시험 445건 통과·89건 선택적 건너뜀, 실제 로컬 DB 경계 7건 통과다.
 
+## 계정 정리 보호 적용 뒤 DB 증거 재채택
+
+- Migration 0036을 실제 FinShield에 적용했다. 새 main에서 Supabase·Rate·Consent·Storage·Delete 측정 5종이 성공했고 별도 Adoption PR #220에 원본·scope·실행 출처를 등록했다. API 전체 계정 탈퇴나 Release 완료는 아니다.
+
+## 계정 삭제 선행 정리 Guard
+
+- DB 명세 13.3의 Profile 삭제 Guard가 빠져 있었다. 미완료 ACCOUNT 삭제 요청을 남긴 채 Auth 삭제가 성공하는 경로를 로컬 Transaction에서 재현하고 Rollback했다.
+- Migration 0036과 SQL 시험 25번으로 Case·임시물·미완료 삭제가 있으면 Auth/Profile 삭제를 차단한다. 빈 로컬 기준 DB의 Migration 36개·SQL 시험 25개가 통과했다. 탈퇴 API·최근 재인증·최종 Worker 완료는 아니다.
+- DB scope 변경에 따라 Supabase·Rate·Consent·Storage·Delete를 NOT-EVALUATED로 되돌리고 과거 원본을 보존한다. 원격 적용과 새 main 측정·별도 Adoption이 필요하다. `docs/ops/account-deletion-guard.md`를 따른다.
+
+## OCR 품질 평가 사전등록
+
+- 8개 합성 가족의 Text·Image·digital/scanned PDF 32문서·112쪽과 페이지별 정답·hash 원장을 고정한다. 실제 16회 CLOVA 요청·88쪽을 main에서 측정하는 절차를 등록하며 B-OCR-01은 실제 측정·별도 Adoption 전까지 미평가다.
+- 숫자·부정 exact, 기관·상품·URL field F1, 지원 페이지 성공률, 10쪽 P95를 분리한다. 선명한 합성 인쇄 문서 중심이며 실제 사용자 파일·외부 블라인드 평가가 아니다. 자세한 경계는 `docs/ops/ocr-quality-spike.md`를 따른다.
+
 ## 2026-09-07 저비용 Health 실제 측정
 
 - main run `34084937234`에서 실제 Next HTTP 100회와 DB 장애 시험이 통과했다. 외부 fetch·HTTP·HTTPS 전송 시도는 정상·장애 모두 0회이며 계측 제어는 각각 1회다.
