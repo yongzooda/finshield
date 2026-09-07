@@ -9,7 +9,7 @@ import {finshieldEnv} from "@/lib/finshield/env";
 import {jsonNoStore,readJson} from "@/lib/ops/http";
 
 export const runtime="nodejs";
-const schema=z.object({mime:z.enum(["application/pdf","image/png","image/jpeg"]),size:z.number().int().min(1).max(10485760)});
+const schema=z.object({case_id:z.uuid().optional(),mime:z.enum(["application/pdf","image/png","image/jpeg"]),size:z.number().int().min(1).max(10485760)});
 export async function POST(request:Request) {
   try {
     const owner=await resolveOwner(request);
@@ -20,6 +20,12 @@ export async function POST(request:Request) {
       return jsonNoStore({error:"파일 처리 연결을 준비 중입니다. 텍스트로 입력해 주세요."},503);
     }
     const slot=await fsql().begin(async sql=>{
+      if (body.data.case_id) {
+        const caseId=body.data.case_id;
+        const rows=await sql`select * from private.open_aftercare_upload_slot(${owner}::uuid,${caseId}::uuid,
+          ${body.data.mime==='application/pdf'?'PDF':'IMAGE'}::public.case_input_type,${body.data.mime},${body.data.size}::bigint,1,86400)`;
+        return {case_id:caseId,input_id:rows[0].case_input_id,object_path:rows[0].object_path,expires_at:rows[0].expires_at};
+      }
       const requestKey=randomUUID();
       const created=await sql`select private.create_case(${owner}::uuid,'LOAN'::public.case_scenario,'파일 권유 검증',
         ${`file-${requestKey}`},${createHash("sha256").update(requestKey).digest("hex")}) as id`;
@@ -42,6 +48,9 @@ export async function POST(request:Request) {
     if(error instanceof Error && error.message === "ACCOUNT_DELETING") {
       return jsonNoStore({code:"ACCOUNT_DELETING",error:"계정 삭제가 진행 중입니다. 개인정보 관리 화면에서 진행 상태를 확인해 주세요."},409);
     }
+    const code=String((error as {code?:string}).code??"");
+    if(code==="42501")return jsonNoStore({error:"파일을 추가할 본인 Case를 찾을 수 없습니다."},404);
+    if(["23514","55000"].includes(code))return jsonNoStore({error:"가입 등록과 기존 문서 처리 상태를 확인해 주세요."},409);
     throw error;
   }
 }

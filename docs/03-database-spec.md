@@ -1896,3 +1896,12 @@ DB 구현 완료 조건:
 | v1.0.2 | 2026-09-03 | FS-REQ v1.0.2 우선순위 경계와 P0 고정 4개 Domain Agent Manifest를 반영 | Baseline |
 | v1.0.1 | 2026-09-03 | FS-REQ v1.0.1의 E-020 표기 경계를 반영하고 기존 Tool transport 저장 계약과 정합성 확인 | Baseline |
 | v1.0 | 2026-09-03 | FS-REQ v1.0을 기준으로 목표 Schema·ERD·상태·컬럼·제약·Index·RLS·Storage·RAG·보존·Migration·테스트 기준 확정 | Baseline |
+
+
+### `public.precase_document_terms`
+
+PC-008·PC-011의 Migration 0043은 `case_inputs.input_purpose`를 `PROPOSAL|AFTERCARE`로 고정한다. 기존 입력은 PROPOSAL이다. 가입 사실과 기준 Passport가 있는 동일 소유자 Case에 별도 `open_aftercare_upload_slot`을 제공한다. MIME·크기·24시간 TTL·격리 Bucket·OCR 동의·PII·비용·삭제는 기존 파일 처리 경계를 재사용한다. 거래 전 Case lifecycle을 입력 상태로 되돌리지 않는다.
+
+가입 후 추출 문구는 이 표에 저장하며 `claims`와 `claim_revisions`에 삽입하지 않는다. Case·Input·Page·기준 Passport·대상 Claim 복합 FK를 가진다. 최초 마스킹 인식 문구, 사용자 확인 문구, 실제 마스킹 페이지 위치와 확인 시각을 보존한다. RLS/FORCE RLS·활성 세션·계정 삭제 Guard·Case 삭제 Cascade를 적용하며 Worker의 직접 본문 접근을 거부한다.
+
+`confirm_aftercare_document`는 한 입력의 선택 문구 1~8개를 이전 Passport Claim에 일대일 연결한다. 수정 문구의 PII 검사는 서버 API에서 수행한다. 같은 내용 재요청은 기존 확인을 반환하고 바뀐 내용은 거부한다. 확인과 원본·OCR·Embedding 삭제 Job 예약이 한 트랜잭션이며 물리 삭제 결과는 원장에서 별도로 확인한다. 점검 요청의 `document_sources`는 실제 확인된 문구·위치·Case·Passport와 대조한 Snapshot만 저장한다. 문구를 직접 바꾸면 문서 연결을 해제해야 하며 문서 출처를 위조할 수 없다. 과거 Passport와 거래 전 Claim은 갱신하지 않는다.

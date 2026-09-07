@@ -39,7 +39,7 @@ export async function processFileInput(args: {sql:Sql;ownerId:string;caseId:stri
   const {sql,ownerId,caseId,inputId}=args;
   const signal=AbortSignal.any([AbortSignal.timeout(35000),...(args.signal?[args.signal]:[])]);
   const [row]=await sql`select private.file_input_context(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid) as context`;
-  const file=row.context as {object_id:string;object_path:string;declared_mime:string;size_bytes:number};
+  const file=row.context as {input_purpose?:string;object_id:string;object_path:string;declared_mime:string;size_bytes:number};
   // 선택 결과를 원본 확인 전에 입력에 고정한다. native PDF에는 외부 전송을 하지 않는다.
   await sql`select private.record_file_ocr_consent(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid,${args.ocrConsent})`;
   const bytes=await readQuarantinedFile(file.object_path,Number(file.size_bytes),signal);
@@ -117,5 +117,5 @@ export async function processFileInput(args: {sql:Sql;ownerId:string;caseId:stri
     }
     return results;
   });
-  return {case_id:caseId,input_id:inputId,claims,masked_pages:maskedPages,masked_text:maskedText};
+  return {case_id:caseId,input_id:inputId,input_purpose:file.input_purpose??"PROPOSAL",claims,masked_pages:maskedPages,masked_text:maskedText};
 }

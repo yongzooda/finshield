@@ -69,7 +69,7 @@ export async function POST(
   }
 
   const sql = fsql();
-  const body = parsed.value as { base_passport_id?: unknown; contract_terms?: unknown; request_key?: unknown };
+  const body = parsed.value as { base_passport_id?: unknown; contract_terms?: unknown; request_key?: unknown; document_links?: unknown };
   const requestKey = z.uuid().safeParse(body.request_key);
   if (!requestKey.success) return jsonNoStore({ error: "점검 요청을 새로 확인해 주세요" }, 400);
   const requestedPassport = z.uuid().safeParse(body.base_passport_id);
@@ -94,6 +94,22 @@ export async function POST(
     if (!gate.ok) return jsonNoStore({ error: "계약 문구에서 개인정보를 지운 뒤 다시 입력해 주세요" }, 400);
     terms[key] = gate.masked.text;
   }
+  const links=z.record(z.uuid(),z.uuid()).safeParse(body.document_links??{});
+  if(!links.success||Object.keys(links.data).some(key=>!passport.claims.some(c=>c.claim_id===key)))
+    return jsonNoStore({error:"문서 연결 항목을 다시 확인해 주세요."},400);
+  const documentSources=[];
+  if(Object.keys(links.data).length){
+    const documents=z.array(z.object({id:z.uuid(),case_input_id:z.uuid(),target_claim_id:z.uuid().nullable(),base_passport_id:z.uuid().nullable(),
+      statement_masked:z.string(),original_statement_masked:z.string(),source_locator:z.record(z.string(),z.unknown()),confirmed:z.boolean(),removed:z.boolean()})).parse(await restSelect({token:bearerToken(request)!,path:"precase_document_terms",query:{
+      select:"id,case_input_id,target_claim_id,base_passport_id,statement_masked,original_statement_masked,source_locator,confirmed,removed",
+      case_id:`eq.${id}`,id:`in.(${Object.values(links.data).join(",")})`,limit:"8"}}));
+    for(const [target,documentId] of Object.entries(links.data).sort(([a],[b])=>a.localeCompare(b))){
+      const document=documents.find(d=>d.id===documentId&&d.target_claim_id===target&&d.base_passport_id===passportId&&d.confirmed===true&&d.removed===false);
+      if(!document||document.statement_masked!==terms[target])return jsonNoStore({error:"확인한 문서 문구와 입력이 다릅니다. 문구를 다시 적용해 주세요."},409);
+      documentSources.push({id:document.id,input_id:document.case_input_id,target_claim_id:document.target_claim_id,
+        statement_masked:document.statement_masked,original_statement_masked:document.original_statement_masked,source_locator:document.source_locator});
+    }
+  }
   const comparison = compareContractText(passport.claims, terms);
   const storedAnswers = [
     ...Object.entries(answers).map(([code, value]) => ({
@@ -107,7 +123,7 @@ export async function POST(
   ];
 
   const manifest = await loadManifest(sql);
-  const input = { schema_version: "aftercare-review-v1", answers: storedAnswers, comparison };
+  const input = { schema_version: "aftercare-review-v1", answers: storedAnswers, comparison, ...(documentSources.length?{document_sources:documentSources}:{}) };
   const hash = createHash("sha256").update(JSON.stringify({ passportId, input, manifest: manifest.manifestId })).digest("hex");
   try {
     const [job] = await sql`select private.enqueue_precase_review(${ownerId}::uuid,${id}::uuid,${passportId}::uuid,

@@ -19,6 +19,7 @@ import { FsCard, FsChip, type ChipTone } from "../../../fs-shell";
 import { FsLoginCard, useFsToken } from "../../../fs-session";
 import { fetchCase } from "../../case-api";
 import type { ContractComparison, PriorClaim } from "@/lib/finshield/contract-comparison";
+import { AftercareDocuments } from "./aftercare-documents";
 import { QUESTIONS } from "@/lib/finshield/aftercare";
 
 type Action = {
@@ -60,6 +61,8 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
   const [prior, setPrior] = useState<PriorClaim[]>([]);
   const [basePassport, setBasePassport] = useState<string | null>(null);
   const [terms, setTerms] = useState<Record<string, string>>({});
+  const [documentLinks,setDocumentLinks]=useState<Record<string,string>>({});
+  const [fileBusy,setFileBusy]=useState(false);
   const [busy, setBusy] = useState(false);
   const [loadedSession, setLoadedSession] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -84,6 +87,7 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
         if (!savedResponse.ok) { setNotice(saved.error ?? "이전 점검 결과를 읽지 못했습니다"); return; }
         const assessment = saved.assessment;
         setReviewJob(saved.review_job ?? null);
+        setDocumentLinks(Object.fromEntries((saved.review_job?.input_masked?.document_sources??[]).map((s:{target_claim_id:string;id:string})=>[s.target_claim_id,s.id])));
         const passport = saved.review_job || assessment
           ? response.data.passports.find(row => row.id === (saved.review_job?.base_passport_id ?? assessment.base_passport_id))
           : response.data.passports[0];
@@ -147,7 +151,7 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
     if (!token) return;
     setBusy(true); setNotice(null);
     try {
-      const payload = JSON.stringify({ answers, base_passport_id: basePassport, contract_terms: terms });
+      const payload = JSON.stringify({ answers, base_passport_id: basePassport, contract_terms: terms, document_links: documentLinks });
       if (requestKey.current?.payload !== payload) requestKey.current = { payload, id: crypto.randomUUID() };
       const response = await sessionFetch(`/api/finshield/cases/${caseId}/aftercare`, token, {
         method: "POST",
@@ -288,8 +292,10 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
           <label className="fs-label" htmlFor={`contract-${claim.claim_id}`}>이전 권유: {claim.statement_masked}</label>
           <textarea id={`contract-${claim.claim_id}`} rows={2} maxLength={400} className="fs-field"
             value={terms[claim.claim_id] ?? ""} placeholder="계약서의 대응 문구를 입력하세요. 없으면 비워 두세요."
-            onChange={event => setTerms(prev => ({ ...prev, [claim.claim_id]: event.target.value }))} />
+            onChange={event => {setTerms(prev => ({ ...prev, [claim.claim_id]: event.target.value }));setDocumentLinks(prev=>{const next={...prev};delete next[claim.claim_id];return next;});}} />
         </div>)}</div>
+        {basePassport?<AftercareDocuments key={`${caseId}:${sessionKey}:${basePassport}`} token={token!} caseId={caseId} basePassport={basePassport} prior={prior}
+          onBusyChange={setFileBusy} onUse={(values,links)=>{setTerms(old=>({...old,...values}));setDocumentLinks(old=>({...old,...links}));}}/>:null}
       </FsCard>
       <FsCard className="mt-8">
         <ul className="space-y-7">
@@ -315,7 +321,7 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
         </ul>
 
         <div className="mt-8">
-          <button type="button" disabled={busy || answered === 0 || !basePassport} onClick={() => void submit()}
+          <button type="button" disabled={busy || fileBusy || answered === 0 || !basePassport} onClick={() => void submit()}
             className="fs-btn fs-btn--primary">
             {busy ? "정리하는 중" : "점검 결과 보기"}
           </button>

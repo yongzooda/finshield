@@ -1,3 +1,7 @@
+## 2026-09-08 가입 후 문서 입력 구현
+
+PC-008·PC-011의 동일 Case Image/PDF 입력·인식 문구 확인·이전 Claim 연결·원본 삭제·저장 복원을 기능 Draft에 추가했다. 거래 전 Claim/Passport는 유지한다. 원격 0043 적용과 배포 검증은 아직 전이며 [격리 구현 범위](docs/ops/aftercare-document-inputs.md)를 따른다. 한국어 기록 검사 PR #238은 main `486667b`에 병합됐고 원격 CI가 통과했다. 전체 Implementation NO-GO·Release NOT-EVALUATED를 유지한다.
+
 ## 2026-09-08 실제 가입 후 Agent·원격 0042 검증
 
 원격 0042의 해시 6종 일치와 보호 Preview 점검 접수·중복 방지·두 세션 복원·부분 저장·Case 삭제를 확인했다. Sales 인용 오류와 공식 조회 0건을 보존했으며 두 Agent 품질 성공은 아니다. 추가 비용 USD 0.024174, 합산 일일 사용 USD 0.257351이고 미확정 예약은 0이다. [실측 범위](evidence/development/aftercare/2026-09-08-agent-preview.md)를 따른다. 최신 기능 CI의 Git 메타데이터 검사 실패는 별도 수정 중이다. Gate는 NO-GO이며 과거 기록은 아래에 남긴다.
