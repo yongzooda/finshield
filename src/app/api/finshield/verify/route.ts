@@ -18,6 +18,7 @@ import { runVerification, type RunProgress } from "@/lib/finshield/orchestrator"
 import { buildAxisResults, buildFinalClaims, finalizeRun } from "@/lib/finshield/finalize";
 import { createAgentModel, createJudgeModel } from "@/lib/finshield/agents/model-adapter";
 import { createHash, randomUUID } from "node:crypto";
+import { dispatchNotifications } from "@/lib/finshield/revalidate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -106,6 +107,7 @@ export async function POST(request: Request): Promise<Response> {
       const saved = await finalizeRun({ sql: fsql(), runId, claims: withIds, run: result, hasProfile });
 
       if (!saved.ok) await fsql()`select id from private.fail_verification_run(${runId}::uuid,'FINALIZE_FAILED',${saved.reason})`;
+      else await dispatchNotifications(fsql()).catch(()=>0);
       push({
         type: "done",
         guide: saved.ok ? saved.guide : null,

@@ -80,8 +80,15 @@ export const dispatchNotifications = async (sql: Sql): Promise<number> => {
       continue;
     }
     const type = String(payload.notification_type ?? "");
-    const changed = type === "MATERIAL_CHANGE_DETECTED";
+    const copy = type === "VERIFICATION_COMPLETED"
+      ? {title:"검증 결과가 저장되었습니다",body:"판단과 확인 범위를 검증 기록에서 확인하세요."}
+      : type === "MATERIAL_CHANGE_DETECTED"
+      ? {title:"다시 확인했더니 달라진 것이 있습니다",body:"지난 판과 견주어 결과가 달라졌습니다. 무엇이 달라졌는지 기록에서 확인하세요."}
+      : type === "REVALIDATION_NO_CHANGE"
+      ? {title:"다시 확인했으나 달라진 것이 없습니다",body:"확인한 범위에서 중요한 변화가 없었습니다. 이전 기록과 새 기록을 함께 확인하세요."}
+      : null;
     try {
+      if (!copy) throw new Error("NOTIFICATION_TYPE_UNSUPPORTED");
       await sql`
         insert into public.notifications
           (owner_id, case_id, notification_type, revalidation_job_id, passport_diff_id, passport_id,
@@ -91,10 +98,7 @@ export const dispatchNotifications = async (sql: Sql): Promise<number> => {
                 ${(payload.passport_diff_id as string) ?? null}::uuid,
                 ${(payload.passport_id as string) ?? null}::uuid,
                 ${String(event.deduplication_key)},
-                ${changed ? "다시 확인했더니 달라진 것이 있습니다" : "다시 확인했으나 달라진 것이 없습니다"},
-                ${changed
-                  ? "지난 판과 견주어 결과가 달라졌습니다. 무엇이 달라졌는지 기록에서 확인하세요."
-                  : "지난 판과 견주어 달라진 것이 없습니다. 이전 판단은 그대로 둡니다."})
+                ${copy.title},${copy.body})
         on conflict (owner_id, channel, deduplication_key) do nothing`;
       await sql`select private.finish_outbox_event(${event.id as string}::uuid, null)`;
       made += 1;

@@ -65,3 +65,18 @@ describe("REV-001·N-AVL-005 Lease·Outbox 계약", () => {
     expect(finished).toEqual([]);
   });
 });
+it("초기 검증 알림을 재검증 변화 없음으로 바꾸지 않고 미지원 유형은 전달 실패로 남긴다",async()=>{
+ const inserts:unknown[][]=[],finishes:unknown[][]=[];
+ const sql=vi.fn(async(strings:TemplateStringsArray,...params:unknown[])=>{
+  const query=strings.join("");
+  if(query.includes("claim_notification_events"))return ["VERIFICATION_COMPLETED","REVALIDATION_NO_CHANGE","UNSUPPORTED_EVENT"].map((type,index)=>({id:`e${index}`,event_type:"NOTIFICATION_REQUESTED",deduplication_key:`k${index}`,payload:{notification_type:type,owner_id:"owner",case_id:"case"}}));
+  if(query.includes("insert into public.notifications"))inserts.push(params);
+  if(query.includes("finish_outbox_event"))finishes.push(params);
+  return [];
+ });
+ expect(await dispatchNotifications(sql as unknown as ReturnType<typeof postgres>)).toBe(2);
+ expect(inserts[0]).toContain("검증 결과가 저장되었습니다");
+ expect(inserts[0]).not.toContain("다시 확인했으나 달라진 것이 없습니다");
+ expect(inserts[1]).toContain("다시 확인했으나 달라진 것이 없습니다");
+ expect(finishes).toContainEqual(["e2","NOTIFY_FAILED"]);
+});
