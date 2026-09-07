@@ -63,6 +63,9 @@ jobs:
       - name: Provider ADR Validator Mutation Test
         run: node .github/scripts/test-provider-stack-adr-validator.mjs
 
+      - name: 격리 Preview 설정 계약 검증
+        run: node .github/scripts/test-configure-isolated-preview.mjs
+
       - name: CI Integrity Preflight Contract Test
         run: node .github/scripts/test-ci-integrity-preflight.mjs
 

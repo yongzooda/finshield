@@ -1,0 +1,40 @@
+name: 격리 Preview 서버 연결
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 고정 FinShield 실험 브랜치에만 서버 연결을 준비한다
+        required: true
+        type: choice
+        options: [configure-isolated-preview]
+permissions:
+  contents: read
+concurrency:
+  group: configure-isolated-preview
+  cancel-in-progress: false
+jobs:
+  configure:
+    if: github.ref == 'refs/heads/main'
+    environment: provider-spike
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+      - name: 설정 경계 계약 검증
+        run: node .github/scripts/test-configure-isolated-preview.mjs
+      - name: 보호된 실험 Preview에 연결 저장
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FINSHIELD_DATABASE_URL: ${{ secrets.FINSHIELD_DATABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          CLOVA_OCR_INVOKE_URL: ${{ secrets.CLOVA_OCR_INVOKE_URL }}
+          CLOVA_OCR_SECRET: ${{ secrets.CLOVA_OCR_SECRET }}
+        run: node .github/scripts/configure-isolated-preview.mjs
