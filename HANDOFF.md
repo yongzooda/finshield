@@ -2,7 +2,7 @@
 
 ## DB 계약 변경 뒤 증거 재채택 준비
 
-- 새 main의 Rate·Consent·Storage 측정이 완료됐다. 별도 artifact 채택을 준비하며 metadata는 채택 시 갱신한다.
+- 새 main의 Rate·Consent·Storage·Delete 측정과 별도 artifact 채택을 진행했다. Migration 0035 기준이며 네 부분 PASS를 복구한다. Supabase 전체·나머지 blocker와 Release는 완료가 아니다.
 
 ## 2026-09-07 입력·Worker 인프라 계약
 
@@ -17,7 +17,7 @@
 - 상위 기획: `docs/01-product-plan.md`
 - DB 구현 기준: `docs/03-database-spec.md`
 - Provider Stack ADR: `docs/adr/001-p0-provider-stack.md`
-- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`·`B-FILE-SAFETY`·`B-RUNTIME-01`·`B-LAW-01`이 `PASS`다.
+- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`·`B-FILE-SAFETY`·`B-RUNTIME-01`·`B-LAW-01`·`B-RATE-01`·`B-CONSENT-01`·`B-STORAGE-01`·`B-DELETE-01`이 `PASS`다.
 - Migration `0025`가 들어와 `B-SUPABASE-01`·`B-RATE-01`·`B-CONSENT-01`·`B-STORAGE-01`·`B-DELETE-01`의 scope digest가 바뀌었다. 다섯을 다시 재서 채택한다.
 - Product Release Gate (`N-QLT-009`): `NOT-EVALUATED` — P0 기능 구현 뒤 평가한다. Claim 판정 품질 `B-CLAIM-01`을 포함해 4개다.
 - 배포: Vercel `finshield` Production 연결 완료 (`https://finshield-gamma.vercel.app`)
