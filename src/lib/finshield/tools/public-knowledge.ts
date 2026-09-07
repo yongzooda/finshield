@@ -48,6 +48,7 @@ export async function searchPublicKnowledge(input: unknown, ctx: ToolCallContext
   if (!parsed.success) return { items: [], provenanceComplete: false, candidateCount: 0, errorCode: "TOOL_INPUT_INVALID" };
   ctx.signal?.throwIfAborted();
   const sql = ctx.sql;
+  const sourceScope = ctx.allowedSourceSnapshotIds ?? [];
   const [release] = await queryWithSignal(sql`select embedding_model,embedding_dimension,embedding_model_version,
     (select count(*)::int from kb.knowledge_documents where kb_release_id=r.id and document_type=any(${types}::text[])) as documents
     from kb.kb_releases r where id=${ctx.manifest.kbReleaseId}::uuid`, ctx.signal);
@@ -61,6 +62,7 @@ export async function searchPublicKnowledge(input: unknown, ctx: ToolCallContext
     with scoped as (
       select d.* from kb.knowledge_documents d where d.kb_release_id=${ctx.manifest.kbReleaseId}::uuid
         and d.document_type=any(${types}::text[]) and 'LOAN'=any(d.scenario_codes)
+        and (${sourceScope.length === 0} or d.source_snapshot_id=any(${sourceScope}::uuid[]))
         and (d.valid_from is null or d.valid_from<=${DAY()}::date) and (d.valid_to is null or d.valid_to>=${DAY()}::date)
         and not exists(select 1 from kb.knowledge_document_events e where e.knowledge_document_id=d.id and e.event_type in ('WITHDRAWN','SUPERSEDED'))
         and not exists(select 1 from kb.kb_release_events e where e.kb_release_id=d.kb_release_id and e.event_type in ('WITHDRAWN','RETIRED'))
@@ -96,6 +98,7 @@ export async function getSourceSnapshot(input: unknown, ctx: ToolCallContext): P
   if (!parsed.success || (!parsed.data.query && !parsed.data.values?.length)) return { items: [], provenanceComplete: false, candidateCount: 0, errorCode: "TOOL_INPUT_INVALID" };
   ctx.signal?.throwIfAborted();
   const sql = ctx.sql, values = parsed.data.values ?? [], query = parsed.data.query ?? "";
+  const sourceScope = ctx.allowedSourceSnapshotIds ?? [];
   const rows = await queryWithSignal(sql`
     select ${sql.unsafe(SNAPSHOT_FIELDS)},to_char(s.effective_to,'YYYY-MM-DD') as effective_to,
       c.id as chunk_id,c.chunk_text,c.source_locator,d.document_type,
@@ -106,6 +109,7 @@ export async function getSourceSnapshot(input: unknown, ctx: ToolCallContext): P
     from kb.knowledge_documents d join kb.knowledge_chunks c on c.knowledge_document_id=d.id and c.kb_release_id=d.kb_release_id
       join kb.source_snapshots s on s.id=d.source_snapshot_id ${sql.unsafe(FETCH_JOIN)}
     where d.kb_release_id=${ctx.manifest.kbReleaseId}::uuid and s.authority_level in ('A','B','C')
+      and (${sourceScope.length === 0} or d.source_snapshot_id=any(${sourceScope}::uuid[]))
       and (s.official_id=any(${values}::text[]) or s.id::text=any(${values}::text[]) or s.official_id=${query} or s.source_title=${query})
     order by s.id,c.chunk_no limit 10`, ctx.signal);
   ctx.signal?.throwIfAborted();

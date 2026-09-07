@@ -19,7 +19,7 @@ import { loadManifest } from "./registry";
 import { runVerification, type RunProgress } from "./orchestrator";
 import { createAgentModel, createJudgeModel } from "./agents/model-adapter";
 import { TOOLS } from "./manifest";
-import type { PendingToolRun, RunRecorder } from "./tools/runtime";
+import { recordSnapshot, type PendingToolRun, type RunRecorder } from "./tools/runtime";
 import type { ConfirmedClaim } from "./schemas";
 
 type Sql = ReturnType<typeof postgres>;
@@ -75,7 +75,7 @@ export const createSession = async (sql: Sql): Promise<DemoSession> => {
 
 export const readSeed = async (
   sql: Sql, seedVersionId: string,
-): Promise<{ maskedInput: string; version: string; claims: ConfirmedClaim[] }> => {
+): Promise<{ maskedInput: string; version: string; claims: ConfirmedClaim[]; sourceSnapshotIds: string[] }> => {
   const rows = await sql`
     select version, masked_input, expected_claim_manifest
       from demo.seed_versions where id = ${seedVersionId}::uuid`;
@@ -83,6 +83,14 @@ export const readSeed = async (
   if (!row) throw new DemoUnavailableError("Demo Seed 를 읽지 못했습니다");
   const manifest = row.expected_claim_manifest as { claims?: unknown };
   const claims = Array.isArray(manifest.claims) ? manifest.claims : [];
+  const sourceRows = await sql`
+    select source_snapshot_id
+      from demo.seed_sources
+     where seed_version_id = ${seedVersionId}::uuid
+     order by purpose_code, source_snapshot_id`;
+  if (sourceRows.length === 0) {
+    throw new DemoUnavailableError("Demo 공식 자료 연결을 확인하지 못했습니다");
+  }
   return {
     maskedInput: row.masked_input as string,
     version: row.version as string,
@@ -95,6 +103,7 @@ export const readSeed = async (
         materiality: String(value.materiality ?? "MATERIAL") as ConfirmedClaim["materiality"],
       };
     }),
+    sourceSnapshotIds: sourceRows.map((source) => source.source_snapshot_id as string),
   };
 };
 
@@ -104,7 +113,7 @@ export const readSeed = async (
  * 회원 표에는 한 줄도 쓰지 않는다. Tool 기록의 인용 이름은 그대로 되돌려 준다.
  * Demo 는 근거 행을 만들지 않고 결과 Snapshot 안에 근거를 함께 담기 때문이다.
  */
-const demoRecorder = (sql: Sql, demoRunId: string): RunRecorder => ({
+export const demoRecorder = (sql: Sql, demoRunId: string): RunRecorder => ({
   agentRun: async (args) => {
     const rows = await sql`
       insert into demo.agent_runs
@@ -134,13 +143,12 @@ const demoRecorder = (sql: Sql, demoRunId: string): RunRecorder => ({
       for (const item of pending.items) {
         // 인용 이름은 그대로 쓴다. Demo 는 근거 행 대신 Snapshot 에 근거를 담는다.
         ids.set(item.ref, item.ref);
-        const snapshotId = item.item.locator?.snapshot_id;
-        if (typeof snapshotId === "string") {
-          await sql`
-            insert into demo.tool_run_sources (demo_tool_run_id, source_snapshot_id)
-            values (${toolRunId}::uuid, ${snapshotId}::uuid)
-            on conflict do nothing`.catch(() => undefined);
-        }
+        const snapshotId = item.item.storedSnapshotId
+          ?? await recordSnapshot(sql, item.item, pending.toolCode, demoRunId);
+        await sql`
+          insert into demo.tool_run_sources (demo_tool_run_id, source_snapshot_id)
+          values (${toolRunId}::uuid, ${snapshotId}::uuid)
+          on conflict do nothing`;
       }
     }
     return ids;
@@ -174,6 +182,7 @@ export const runDemo = async (args: {
         manifest,
         signal: args.signal,
         recorder: demoRecorder(sql, demoRunId),
+        allowedSourceSnapshotIds: seed.sourceSnapshotIds,
       },
       claims: seed.claims,
       maskedIntake: seed.maskedInput,
