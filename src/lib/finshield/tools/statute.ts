@@ -20,6 +20,12 @@ const MAX_EXCERPT = 1200;
 
 type LawRow = { 법령명한글?: string; 법령ID?: string; 시행일자?: string; 공포일자?: string; 법령상세링크?: string };
 type PrecRow = { 사건명?: string; 판례정보일련번호?: string; 선고일자?: string; 법원명?: string; 판례상세링크?: string };
+type LawArticle = {
+  조문번호?: string | number;
+  조문가지번호?: string | number;
+  조문내용?: string;
+  항?: unknown;
+};
 
 const yyyymmdd = (value: unknown): string | null => {
   const text = String(value ?? "").replace(/[^0-9]/g, "");
@@ -32,16 +38,47 @@ const isEffective = (effectiveFrom: string | null): boolean => {
   return effectiveFrom <= new Date().toISOString().slice(0, 10);
 };
 
-/** 조문 본문에서 인용할 만큼만 잘라 온다. 외부 문자열은 그대로 모델에 넣지 않는다. */
-const bodyExcerpt = (payload: unknown): string | null => {
-  const article = (payload as { 법령?: { 조문?: { 조문단위?: unknown } } })?.법령?.조문?.조문단위;
-  const units = asArray(article as Record<string, unknown>[] | undefined);
-  const texts = units
-    .map((unit) => String(unit?.조문내용 ?? "").trim())
-    .filter((text) => text.length > 0);
-  if (texts.length === 0) return null;
-  // 외부 문자열의 명령문 패턴을 무해화한다. 원문은 보존되고 표기로 감싸진다.
-  return filterToolText(texts.join("\n").slice(0, MAX_EXCERPT)).text;
+const articleNo = (unit: LawArticle): string | null => {
+  const main = String(unit.조문번호 ?? "").replace(/[^0-9]/g, "");
+  const branch = String(unit.조문가지번호 ?? "").replace(/[^0-9]/g, "");
+  if (!main) return null;
+  return `제${Number(main)}조${branch && Number(branch) > 0 ? `의${Number(branch)}` : ""}`;
+};
+
+const articleText = (unit: LawArticle): string => {
+  const paragraphs = asArray(unit.항 as { 항내용?: string } | { 항내용?: string }[])
+    .map((paragraph) => String(paragraph?.항내용 ?? "").trim())
+    .filter(Boolean);
+  return [String(unit.조문내용 ?? "").trim(), ...paragraphs].filter(Boolean).join("\n");
+};
+
+/**
+ * LAW Snapshot은 DB 계약상 정확한 조문 번호가 필요하다. 검색어에 조문 번호가
+ * 있으면 그 조문을 고르고, 없으면 검색어와 가장 많이 겹치는 조문 하나만 고른다.
+ * 번호나 본문이 없는 목록 결과를 억지로 인용 가능한 LAW 근거로 만들지 않는다.
+ */
+const bodyEvidence = (payload: unknown, query: string): { articleNo: string; excerpt: string } | null => {
+  const raw = (payload as { 법령?: { 조문?: { 조문단위?: unknown } } })?.법령?.조문?.조문단위;
+  const units = asArray(raw as LawArticle | LawArticle[] | undefined)
+    .map((unit, index) => ({ unit, index, articleNo: articleNo(unit), text: articleText(unit) }))
+    .filter((entry): entry is { unit: LawArticle; index: number; articleNo: string; text: string } =>
+      Boolean(entry.articleNo && entry.text));
+  if (units.length === 0) return null;
+
+  const requested = query.match(/제\s*(\d+)\s*조(?:\s*의\s*(\d+))?/);
+  const requestedNo = requested
+    ? `제${Number(requested[1])}조${requested[2] ? `의${Number(requested[2])}` : ""}`
+    : null;
+  const tokens = [...new Set(query.split(/\s+/)
+    .map((token) => token.replace(/[^0-9A-Za-z가-힣]/g, ""))
+    .filter((token) => token.length >= 2 && !/^제\d+조/.test(token)))];
+  const selected = (requestedNo ? units.find((entry) => entry.articleNo === requestedNo) : null)
+    ?? [...units].sort((a, b) => {
+      const score = (entry: typeof a) => tokens.reduce((sum, token) => sum + (entry.text.includes(token) ? 1 : 0), 0);
+      return score(b) - score(a) || a.index - b.index;
+    })[0];
+  // 외부 문자열의 명령문 패턴을 무해화하고 한 조문 범위만 전달한다.
+  return { articleNo: selected.articleNo, excerpt: filterToolText(selected.text.slice(0, MAX_EXCERPT)).text };
 };
 
 export const lookupStatute = async (input: unknown, ctx?: ToolCallContext): Promise<ToolOutcome> => {
@@ -61,40 +98,44 @@ export const lookupStatute = async (input: unknown, ctx?: ToolCallContext): Prom
     if (lawId.length === 0 || name.length === 0) continue;
     const effectiveFrom = yyyymmdd(row.시행일자);
 
-    let excerpt: string | null = null;
+    let article: { articleNo: string; excerpt: string } | null = null;
     if (index < MAX_BODY_FETCH) {
       try {
-        excerpt = bodyExcerpt(await lawService("law", { ID: lawId, type: "JSON" }, { signal: ctx?.signal, maxRetries: 0 }));
+        article = bodyEvidence(
+          await lawService("law", { ID: lawId, type: "JSON" }, { signal: ctx?.signal, maxRetries: 0 }),
+          query,
+        );
       } catch {
         ctx?.signal?.throwIfAborted();
-        excerpt = null;
+        article = null;
       }
     }
+    if (!article) continue;
 
-    const canonical = JSON.stringify({ lawId, name, effectiveFrom, excerpt });
+    const canonical = JSON.stringify({ lawId, name, articleNo: article.articleNo, effectiveFrom, excerpt: article.excerpt });
     items.push({
       sourceType: "LAW",
       authorityGrade: "A",
       publisher: "법제처",
       title: name,
-      officialId: `law.go.kr:${lawId}`,
+      officialId: `law.go.kr:${lawId}:${article.articleNo}`,
       canonicalUrl: null,
       lawName: name,
-      articleNo: null,
+      articleNo: article.articleNo,
       publishedAt: null,
       effectiveFrom,
       sourceVersion: effectiveFrom ?? "unknown",
       contentHash: sha256(canonical),
       // 같은 법령의 같은 시행일은 어디서 받아도 같은 원문이다.
-      fingerprint: sha256(`law.go.kr:${lawId}:${effectiveFrom ?? "unknown"}`),
+      fingerprint: sha256(`law.go.kr:${lawId}:${article.articleNo}:${effectiveFrom ?? "unknown"}`),
       // 시행일이 지나지 않았으면 현행이 아니다. 최신으로 오인하지 않게 표시한다.
       freshness: isEffective(effectiveFrom) ? "FRESH" : "UNKNOWN",
       licenseCode: "LAW_GO_KR_PUBLIC",
-      isComplete: excerpt !== null,
-      isCitable: excerpt !== null && isEffective(effectiveFrom),
-      locator: { kind: "statute", law_id: lawId, effective_from: effectiveFrom },
-      excerptMasked: excerpt ?? `${name} (본문을 받지 못해 제목만 확인했습니다)`,
-      directness: excerpt !== null ? "DIRECT" : "INDIRECT",
+      isComplete: true,
+      isCitable: isEffective(effectiveFrom),
+      locator: { kind: "statute", law_id: lawId, article_no: article.articleNo, effective_from: effectiveFrom },
+      excerptMasked: article.excerpt,
+      directness: "DIRECT",
       referenceOnly: false,
       selectionReasonCode: "STATUTE_SEARCH_HIT",
     });
