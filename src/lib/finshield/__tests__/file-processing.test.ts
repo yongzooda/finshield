@@ -31,3 +31,11 @@ it("EV-009: 최신 표시만으로 불완전·인용 불가·간접 근거를 �
   expect(citationProblems(["E1"],"VERIFIED",new Map([["E1",{...item,...patch} as ToolEvidence]])).length).toBeGreaterThan(0);
  }
 });
+it("페이지를 명시한 인용도 해당 페이지에서만 검증하고 공백 변경 후 실제 위치를 보존한다",()=>{
+ const pages=[{page_no:1,text:"금리 연 3%\n 한도"},{page_no:2,text:"금리 연 3%\n 한도"},{page_no:3,text:"금리 연 5%"}];
+ expect(locateFileQuote(pages,"연 3% 한도",2)).toMatchObject({page_no:2,start:3,end:11});
+ expect(()=>locateFileQuote(pages,"연 3%",3)).toThrow();
+ expect(()=>locateFileQuote(pages,"연 3%",4)).toThrow();
+ expect(()=>locateFileQuote(pages,"연 3%")).toThrow("CLAIM_PAGE_AMBIGUOUS");
+ expect(()=>locateFileQuote([{page_no:1,text:"연 3% / 연 3%"}],"연 3%",1)).toThrow("CLAIM_PAGE_AMBIGUOUS");
+});

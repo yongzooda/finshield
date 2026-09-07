@@ -25,12 +25,14 @@ export const PII_POLICY_VERSION = "pii-policy-v1";
 
 export type ExtractedClaim = {
   sourceQuote?: string;
+  sourcePageNo?: number;
   claimType: string;
   statementMasked: string;
   materiality: "MATERIAL" | "NON_MATERIAL" | "UNDETERMINED";
 };
 
-export type ClaimExtractor = (maskedText: string, options?: { signal?: AbortSignal; budget?: ModelBudgetContext }) => Promise<ExtractedClaim[]>;
+export type ClaimExtractor = (maskedText: string, options?: { signal?: AbortSignal; budget?: ModelBudgetContext;
+  pages?: {page_no:number;text:string}[] }) => Promise<ExtractedClaim[]>;
 
 export type IntakeBlocked = { ok: false; reason: "PII_RESIDUAL"; ask: string };
 export type IntakeAccepted = {

@@ -18,11 +18,16 @@ type Sql = ReturnType<typeof postgres>;
 const hash = (text:string) => createHash("sha256").update(text).digest("hex");
 
 /** 마스킹한 페이지의 구절을 실제 위치로 연결한다. 모델의 좌표나 페이지 번호는 받지 않는다. */
-export function locateFileQuote(pages: Pick<ParsedPage,"page_no"|"text">[], quote: string) {
-  const matches = pages.flatMap(page => {
-    const start = page.text.indexOf(quote);
-    if (start >= 0 && page.text.indexOf(quote,start+1) >= 0) throw new Error("CLAIM_PAGE_AMBIGUOUS");
-    return start < 0 ? [] : [{schema_version:"v1",kind:"masked_text_span",page_no:page.page_no,start,end:start+quote.length}];
+export function locateFileQuote(pages: Pick<ParsedPage,"page_no"|"text">[], quote: string, pageNo?: number) {
+  const needle = quote.replace(/\s/g, "");
+  if (!needle) throw new Error("CLAIM_SOURCE_NOT_FOUND");
+  const matches = pages.filter(page => pageNo === undefined || page.page_no === pageNo).flatMap(page => {
+    // 모델이 줄바꿈을 공백으로 바꿔도 좌표는 실제 마스킹 페이지의 문자열 위치로 계산한다.
+    const offsets: number[] = []; let normalized = "";
+    for (let i=0;i<page.text.length;i++) if (!/\s/.test(page.text[i])) { normalized += page.text[i]; offsets.push(i); }
+    const at = normalized.indexOf(needle);
+    if (at >= 0 && normalized.indexOf(needle,at+1) >= 0) throw new Error("CLAIM_PAGE_AMBIGUOUS");
+    return at < 0 ? [] : [{schema_version:"v1",kind:"masked_text_span",page_no:page.page_no,start:offsets[at],end:offsets[at+needle.length-1]+1}];
   });
   if (matches.length !== 1) throw new Error("CLAIM_PAGE_AMBIGUOUS");
   return matches[0];
@@ -92,12 +97,12 @@ export async function processFileInput(args: {sql:Sql;ownerId:string;caseId:stri
     await tx`select id from private.advance_input_stage(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid,'MASKED',
       ${JSON.stringify({masked_text:maskedText,masked_text_hash:hash(maskedText),pii_policy_version:PII_POLICY_VERSION})}::text::jsonb)`;
   });
-  const extracted=await args.extractClaims(maskedText,{signal,budget:{sql,ownerId,caseId,inputId}});
+  const extracted=await args.extractClaims(maskedText,{signal,pages:maskedPages,budget:{sql,ownerId,caseId,inputId}});
   const located=extracted.map(claim=>{
     const gate=gateForModel(claim.statementMasked);
     if(!gate.ok)throw new Error("PII_RESIDUAL");
     if(!claim.sourceQuote)throw new Error("CLAIM_SOURCE_NOT_FOUND");
-    return {...claim,statementMasked:gate.masked.text,locator:locateFileQuote(maskedPages,claim.sourceQuote)};
+    return {...claim,statementMasked:gate.masked.text,locator:locateFileQuote(maskedPages,claim.sourceQuote,claim.sourcePageNo)};
   });
   if(!located.length)throw new Error("CLAIMS_NOT_FOUND");
   signal.throwIfAborted();
