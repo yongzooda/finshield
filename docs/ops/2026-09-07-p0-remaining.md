@@ -1,3 +1,5 @@
+추가 검색 구현: 공용 KB의 Snapshot·자료 준비·분쟁·위험패턴 도구, Metadata·실제 FTS·Vector·결정적 Rerank와 Cohere 비용 Adapter를 연결했다. Migration 0039로 전체/Provider 한도를 같은 원장에 예약한다. 로컬 참고 코퍼스 20문서·28청크의 검색과 DB 취소를 검증했으며 원격 공식 자료·Vector 적재·Fast 실측·품질 채택은 남아 있다.
+
 현재 구현 추가: 전체 계정 탈퇴 API·진행 조회·화면·Workflow와 Migration 0038을 기능 Draft에 추가했다. 격리 DB의 신규 작업 차단·Auth 실패 rollback·반복 종결과 API 영수증/응답 유실 시험을 통과했다. 원격 적용과 배포 종단 검증은 남아 있다. 0038의 DB scope 변경으로 기능 Draft의 Supabase·Rate·Consent·Storage·Delete 증거도 STALE로 두며 부분 PASS는 7/20이다. main 13/20 채택에는 변경이 없다. Cohere 학습 사용 Off와 Fast 합성 시험 최대 USD 0.05는 승인됐고, 설정 Off를 새 페이지에서도 확인했다. Provider 시험 호출은 아직 0건이다.
 
 현재 추가 보안 작업: PR #224·#226의 세션 갱신·폐기 RLS와 PR #230의 별도 증거 채택이 main에 병합됐다. main 부분 PASS 13/20, 이 기능 Draft는 Health scope 차이로 12/20이다. Implementation NO-GO·Release NOT-EVALUATED를 유지한다. 실제 Production/Preview의 갱신·폐기·다른 세션 유지, 한 시간 자연 만료 복구, Preview TUS의 Cookie 회전·파일/Case 삭제를 각각 확인했다. 아래 최초 감사 기준선과 구분한다.

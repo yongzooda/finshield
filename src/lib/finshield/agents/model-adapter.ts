@@ -31,6 +31,7 @@ export const evidenceBrief = (evidence: ToolEvidence[]) => evidence.map((item) =
   source: item.source_type,
   grade: item.authority_grade,
   title: item.title,
+  official_id: item.official_id,
   published_at: item.published_at,
   freshness: item.freshness_at_use,
   directness: item.directness,

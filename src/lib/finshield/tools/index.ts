@@ -12,9 +12,10 @@ import { TOOLS } from "../manifest";
 import type { ToolImpl } from "./runtime";
 import { lookupStatute, searchPrecedent } from "./statute";
 import {
-  lookupOfficialChannel, notLoadedYet, searchFinancialProduct, verifyFinancialInstitution,
+  lookupOfficialChannel, searchFinancialProduct, verifyFinancialInstitution,
 } from "./registry";
 import { parseUrlHost } from "./url";
+import { analyzeRiskPattern, checkDocuments, getSourceSnapshot, searchDisputeCase } from "./public-knowledge";
 import { searchOfficialWarning } from "./official-warning";
 
 export const TOOL_IMPLS: Record<string, ToolImpl> = {
@@ -24,12 +25,12 @@ export const TOOL_IMPLS: Record<string, ToolImpl> = {
   lookup_official_channel: lookupOfficialChannel,
   search_financial_product: searchFinancialProduct,
   verify_financial_institution: verifyFinancialInstitution,
-  // 아래는 자료 적재가 남았다. 부르면 그 사실이 실행 기록에 남는다.
-  get_source_snapshot: notLoadedYet("SNAPSHOT_LOOKUP_NOT_IMPLEMENTED"),
+  // 공용 KB는 Manifest Release와 실제 적재 범위 안에서 조회한다.
+  get_source_snapshot: getSourceSnapshot,
   search_consumer_warning: searchOfficialWarning,
-  analyze_risk_pattern: searchOfficialWarning,
-  check_documents: notLoadedYet("TERMS_CORPUS_NOT_LOADED"),
-  search_dispute_case: notLoadedYet("DISPUTE_CORPUS_NOT_LOADED"),
+  analyze_risk_pattern: analyzeRiskPattern,
+  check_documents: checkDocuments,
+  search_dispute_case: searchDisputeCase,
 };
 
 /** 구현이 빠진 Tool 이 없는지 시작할 때 확인한다. */

@@ -15,7 +15,7 @@ import { readOfficialProduct } from "./official-product";
 
 type Sql = ReturnType<typeof postgres>;
 
-type SnapshotRow = {
+export type SnapshotRow = {
   id: string; source_type: string; authority_level: "A" | "B" | "C" | "D";
   publisher_name: string; source_title: string; canonical_url: string | null;
   official_id: string | null; source_version: string | null; content_hash: string;
@@ -25,7 +25,7 @@ type SnapshotRow = {
   retrieved_at: string; fresh_until: string | null;
 };
 
-const toItem = (
+export const toSnapshotItem = (
   row: SnapshotRow,
   locator: Record<string, unknown>,
   excerpt: string,
@@ -83,13 +83,13 @@ export const normalizeChannelValue = (raw: string): string => {
 };
 
 // 과거 캐시 조회 도구가 남긴 fetch event는 외부 재수집 증거로 재사용하지 않는다.
-const FETCH_JOIN = `left join lateral (
+export const FETCH_JOIN = `left join lateral (
   select e.retrieved_at, e.fresh_until, e.freshness_status from kb.source_fetch_events e
    where e.source_snapshot_id = s.id and e.source_adapter not in
      ('lookup_official_channel','verify_financial_institution','search_financial_product','get_source_snapshot')
    order by e.retrieved_at desc limit 1
 ) f on true`;
-const SNAPSHOT_FIELDS = `s.id, s.source_type, s.authority_level::text as authority_level, s.publisher_name,
+export const SNAPSHOT_FIELDS = `s.id, s.source_type, s.authority_level::text as authority_level, s.publisher_name,
   s.source_title, s.canonical_url, s.official_id, s.source_version, s.content_hash, s.source_fingerprint,
   to_char(s.published_at, 'YYYY-MM-DD') as published_at, to_char(s.effective_from, 'YYYY-MM-DD') as effective_from,
   s.license_code, s.is_complete, s.is_citable,
@@ -123,7 +123,7 @@ export const lookupOfficialChannel = async (input: unknown, ctx: ToolCallContext
          or regexp_replace(r.normalized_value, '[^0-9]', '', 'g') = any(${normalized})
        )`;
 
-  const items = rows.filter(row => row.authority_level !== "D").map((row) => toItem(
+  const items = rows.filter(row => row.authority_level !== "D").map((row) => toSnapshotItem(
     row as unknown as SnapshotRow,
     { kind: "official_channel", institution_code: row.institution_code, channel_type: row.channel_type },
     `${row.institution_code} 의 공식 ${row.channel_type}: ${row.display_value}`,
@@ -161,7 +161,7 @@ const searchSnapshots = async (
        and s.source_title ilike ${`%${trimmed}%`}
      order by s.retrieved_at desc
      limit 10`;
-  const items = (rows as unknown as SnapshotRow[]).filter(row => row.authority_level !== "D").map((row) => toItem(
+  const items = (rows as unknown as SnapshotRow[]).filter(row => row.authority_level !== "D").map((row) => toSnapshotItem(
     row, { kind, official_id: row.official_id }, row.source_title, reason, "CONTEXT_ONLY",
   ));
   return {
