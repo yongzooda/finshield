@@ -8,7 +8,7 @@
 - 상위 기획: `docs/01-product-plan.md`
 - DB 구현 기준: `docs/03-database-spec.md`
 - Provider Stack ADR: `docs/adr/001-p0-provider-stack.md`
-- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`·`B-FILE-SAFETY`·`B-RUNTIME-01`·`B-LAW-01`이 `PASS`다.
+- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`·`B-FILE-SAFETY`·`B-RUNTIME-01`·`B-LAW-01`이 `PASS`다.
 - Migration `0025`가 들어와 `B-SUPABASE-01`·`B-RATE-01`·`B-CONSENT-01`·`B-STORAGE-01`·`B-DELETE-01`의 scope digest가 바뀌었다. 다섯을 다시 재서 채택한다.
 - Product Release Gate (`N-QLT-009`): `NOT-EVALUATED` — P0 기능 구현 뒤 평가한다. Claim 판정 품질 `B-CLAIM-01`을 포함해 4개다.
 - 배포: Vercel `finshield` Production 연결 완료 (`https://finshield-gamma.vercel.app`)
@@ -16,9 +16,11 @@
 - 작업 기록: 커밋·squash·이슈·PR·직접 작성한 댓글은 한국어. 과거 SHA는 사용자 승인대로 보존하고 `docs/ops/korean-record-corrections.md`의 정정표를 따른다.
 - 로컬 설정: `docs/ops/local-environment.md`를 따른다. `.env.local` 부재는 GitHub Provider 시험의 장애 원인이 아니며 실제 전용 개발 DB 설정과 구분한다.
 
-## 2026-09-07 모델 재측정 결과 채택 준비
+## 2026-09-07 모델 재측정 결과 채택
 
-- main run `34077370635`에서 합성 50건·실제 호출 100회와 결정적 장애 20건이 동일 정책을 통과했다. 별도 Adoption 검증 완료 전까지 부분 PASS를 복원하지 않는다.
+- main run `34078050277`과 artifact `10002820639`를 별도 Adoption PR #198에서 채택한다. 합성 50건·실제 호출 100회와 결정적 장애 20건이 동일 정책을 통과했다.
+- 직전 run `34077370635`도 통과했지만 OCR 진단 PR #196 병합으로 main이 바뀌어 최신 main에서 다시 측정했다. 두 원본 결과를 보존한다. 아래 재측정 대기 기록은 이 채택 전 이력이다.
+- 이 부분 PASS는 Agent 전체·TUS/Storage/OCR·금융 판단 품질의 성공이 아니다. Implementation은 NO-GO, Release는 NOT-EVALUATED를 유지한다.
 
 ## 2026-09-07 실행 의존성 사전등록
 

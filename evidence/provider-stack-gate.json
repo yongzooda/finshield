@@ -3,6 +3,25 @@
   "gate": "implementation",
   "requirements_blob_sha": "27ce706010344fbcedebe3abd707febff0f1dc26",
   "entries": {
+    "B-MODEL-01": {
+      "code_under_test_sha": "a6c01446b7daca01dfc1f488a50908507aaacb72",
+      "workflow_head_sha": "a6c01446b7daca01dfc1f488a50908507aaacb72",
+      "run_id": 34078050277,
+      "run_attempt": 1,
+      "workflow_id": 349337303,
+      "workflow_path": ".github/workflows/provider-spike-evidence.yml",
+      "workflow_blob_sha": "49f21b3aabe11f5c53e39f2a2e30cd857a549ca6",
+      "harness_blob_sha": "109c96b06dfc1c3eaa76d16f9c7d76d7b70ca93d",
+      "scope_sha256": "99db02c026f316bcd8128c235942cd420b8482a04d500610a1db5f95b5d6d5bf",
+      "job_name": "provider-evidence / B-MODEL-01",
+      "artifact_id": 10002820639,
+      "artifact_name": "provider-evidence-B-MODEL-01-a6c01446b7daca01dfc1f488a50908507aaacb72",
+      "artifact_digest": "sha256:651b005a37d228d64d60289cf80a5acc31d12ff56271fdbda38bfa1c0eb62759",
+      "result_path": "evidence/results/B-MODEL-01/34078050277.json",
+      "result_sha256": "da34ab6abb3dccbf0ffe669ea35642d1cdf29d249dde1f2901f19f93597fa74b",
+      "adoption_pr_number": 198,
+      "adopted_at": "2026-09-07T03:05:13Z"
+    },
     "B-EMBED-01": {
       "code_under_test_sha": "76cf8734d34634dceb7f6e7a639864f06dcd98ad",
       "workflow_head_sha": "76cf8734d34634dceb7f6e7a639864f06dcd98ad",
