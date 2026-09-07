@@ -1,3 +1,7 @@
+## 2026-09-08 가입 후 실행 DB 계약
+
+기능 Draft #192에서 점검 Job·같은 Case의 Agent/Tool Trace·Lease·요청 복원·전용 비용 예약 계약을 분리했다. Migration 0042와 SQL 31파일을 격리 검증했다. 이 브랜치는 화면·모델 Adapter·Workflow 코드를 포함하지 않는다. 실제 원격은 0041이며 0042 적용·Preview 검증 전이다. 기존 다섯 DB Evidence의 STALE과 main 부분 PASS 8/20을 유지한다.
+
 ## 2026-09-07 P0 DB 계약 분리
 
 Migration 0038~0041과 SQL 시험을 기능 Draft #192에서 분리했다. 새 작업 차단·Auth 마지막 삭제·합산 비용·알림 원자성·Profile Snapshot 비교를 격리 검증했다. 원격은 0037이며 별도 적용/검증이 필요하다. DB scope의 증거 5개를 STALE로 두어 main 부분 PASS는 8/20이다. Implementation NO-GO·Release NOT-EVALUATED를 유지한다. `docs/ops/p0-cleanup-profile-contracts.md`를 따른다.
