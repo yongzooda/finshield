@@ -1,3 +1,9 @@
+## 2026-09-08 심사 전 Production 핵심 흐름 확인
+
+- main `fee233f7` Production 공개 Demo를 API와 실제 브라우저로 실행해 각각 58.947초·60.714초에 성공 종결했다. 두 실행 모두 7개 Agent 성공, Claim 5건·Evidence 6건이며 비용 USD 0.107026·0.110488을 전액 정산했다. 처리 중 2단계로 돌아가는 현상은 공개 Demo에서 재현되지 않았고 결과 근거 펼치기·원문 링크도 동작했다.
+- Production 합성 회원가입 200·프로필 조회 200 뒤 계정 탈퇴 Workflow `COMPLETED`와 재로그인 401을 확인했다. 과거 가입 503과 현재 성공을 함께 보존했고 시험 계정은 삭제했다.
+- 앞선 v6의 법령 원장 `23514` 실패는 삭제하지 않고 수정 후 성공과 함께 [실측 기록](evidence/development/judge-readiness/2026-09-08-production-core-flow.md)에 남겼다. 회원 Text·Image·PDF 전체 E2E를 이번 표본으로 대체하지 않으며 Implementation `NO-GO`·Release `NOT-EVALUATED`를 유지한다.
+
 ## 2026-09-08 공개 Demo v5 실측과 Regulation 후속
 
 - main `2a86ba4`·원격 0048에서 공개 Demo는 55.354초에 종결됐다. Product·Fraud·Sales·CoVe·Red Team·Judge 성공, Claim `CONTRADICTED` 4건·`UNKNOWN` 1건, 권위 A·`FRESH`·`DIRECT` Evidence 5건과 Source 연결을 확인했다. 모델 12호출 USD 0.097440은 정산됐다.

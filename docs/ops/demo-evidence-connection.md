@@ -62,3 +62,11 @@ main `82e6cf3`과 원격 Migration 0049를 적용한 뒤 실행한 공개 Demo�
 원인은 `lookup_statute`가 여러 조문 본문을 한 excerpt로 합치면서 `article_no=null`인 LAW Snapshot을 만들었던 코드와, LAW 근거에 법령명·조문 번호를 모두 요구하는 DB 계약의 불일치다. 후속 수정은 검색어에 명시된 조문을 우선하고 그렇지 않으면 검색어와 가장 많이 겹치는 실제 조문 하나를 선택해 법령명·조문 번호·본문·Locator를 함께 고정한다. 번호나 본문을 확정하지 못하면 제목만으로 LAW 근거를 만들지 않는다. 배포 뒤 전체 Agent·Judge·Claim·근거·비용 원장을 다시 확인하기 전에는 완료로 표시하지 않는다.
 
 로컬 코드에서 실제 법제처 API에 `금융소비자 보호에 관한 법률 제19조`를 조회해 법률과 시행령의 `제19조` 본문을 각각 복원했다. 두 SourceItem은 실제 FinShield DB의 `record_source_snapshot` 함수와 LAW 제약을 트랜잭션 안에서 통과했고, 시험 쓰기는 전체 rollback했다. 조문 번호를 목록 검색어에서는 분리하고 본문 선택에는 유지해 API 0건 오류와 원장 식별자 누락을 함께 막는다. 이는 법령 도구·DB 계약의 연결 확인이며 전체 Demo 성공 증거는 아니다.
+
+## 2026-09-08 v6 수정 후 Production 성공
+
+main `fee233f7`의 Production 배포 `dpl_J5k1UZjDRkQ3WRsPRn5QB5sVMiCu`에서 공개 Demo를 API와 실제 브라우저로 각각 실행했다. API Run `8561b2b4-2dfa-4770-9563-b32c8be6e965`는 HTTP 200 스트림을 59.780초에 닫고 DB에서 58.947초에 `SUCCEEDED`로 종결됐다. 브라우저 Run `38f5a21d-a6e0-4e3c-a577-13b43471d186`도 60.714초에 `SUCCEEDED`로 종결됐다.
+
+두 실행 모두 Product·Fraud·Sales·Regulation·CoVe·Red Team·Evidence Judge 7개가 성공했고 Claim 5건·Evidence 6건을 반환했다. 비용은 각각 USD 0.107026과 USD 0.110488로 전액 정산됐고 미확정 예약은 없었다. 브라우저에서는 처리 중 화면이 유지된 뒤 결과 화면으로 전환됐으며 근거 펼치기와 원문 링크가 동작하고 Console 오류가 없었다.
+
+이 결과는 법령 원장 실패 수정 뒤 공개 Demo의 실제 성공 표본이다. 정식 Release harness와 Adoption 조건을 충족한 `B-DEMO-01` 평가는 아니므로 Implementation Gate `NO-GO`와 Release Gate `NOT-EVALUATED`를 유지한다. 회원 Text·Image·PDF 전체 E2E와 나머지 blocker도 이 표본으로 대체하지 않는다. [심사 전 Production 실측](../../evidence/development/judge-readiness/2026-09-08-production-core-flow.md)에 가입·탈퇴와 화면 확인 범위를 함께 기록했다.
