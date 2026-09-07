@@ -50,6 +50,9 @@ jobs:
 
       - run: npm ci --ignore-scripts
 
+      - name: 격리 Preview 설정 계약 검증
+        run: node .github/scripts/test-configure-isolated-preview.mjs
+
       - name: DB 명세 검증
         run: node .github/scripts/validate-database-spec.mjs
 
