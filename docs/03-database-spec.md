@@ -979,6 +979,14 @@ Worker는 `FOR UPDATE SKIP LOCKED`로 Job을 Claim한다. 최종화는 현재 `l
 
 `UQ(case_id, assessment_no)`다. Case가 `VERIFIED`가 아니어도 불변 `JOURNEY_ENROLLED` Event가 존재하고 `enrollment_confirmed_at is not null`이면 시작할 수 있다. 이후 Journey가 `FUNDS_SENT_OR_DAMAGE_SUSPECTED`로 전진해도 가입 확인은 유지된다. 피해 의심만 있고 가입 확인 Event가 없으면 가입으로 간주하지 않는다.
 
+### `public.precase_review_jobs`
+
+Migration 0042는 `public.precase_review_jobs`를 점검 실행 요청으로 둔다. `id`, `owner_id`, `case_id`, `base_passport_id`, `execution_manifest_id`, `request_key`와 `request_hash`를 고정하고, 마스킹 답변·계약 비교를 `input_masked`에 보존한다. `(owner_id, case_id, request_key)`가 유일하며 같은 key의 다른 본문은 거부한다. 상태는 `QUEUED|RUNNING|COMPLETED|PARTIAL|FAILED|CANCELLED`이며 성공·부분 결과의 `assessment_id`는 같은 Case·소유자 복합 FK를 가진다. 과거 거래 전 Run이나 Passport에 가입 후 실행을 덧붙이지 않는다.
+
+`agent_trace`는 두 Agent의 버전·모델·점검 문맥 Prompt 버전·시간·입력 Digest·정산 사용량·출력과 Tool별 목적·상태·요청 Hash·공식 Snapshot ID·Fingerprint·Locator·원문 위치를 담는 최대 256 KiB 배열이다. 기존 Sales Conduct·Regulation & Dispute Runner와 Tool 구현을 재사용하고, SQL에서도 Manifest·Agent 순서·Allowlist·Snapshot Hash를 검사한다. 다른 회원은 조회할 수 없고 Worker도 표를 직접 읽거나 쓰지 못한다. RLS·FORCE RLS·활성 세션·계정 삭제 차단을 적용하고 Case 삭제 시 같이 정리한다.
+
+Job은 120초 Deadline과 30초 Lease를 가진다. 갱신·취소·기한·Case 삭제를 실제 모델·조회 신호에 전달한다. Lease 만료 뒤 Provider 결과를 모르면 같은 Job에서 모델을 자동 재호출하지 않는다. 전용 정산 문맥은 `precase_review_job_id`이며 전체·소유자·Case·점검별 예산을 동일 예약 원장에서 제한한다. 완료·부분 점검은 한 트랜잭션에서 기존 `precase_assessments`·답변·행동과 연결한다. 일부 Agent 미확인 결과를 `NORMAL_MANAGEMENT`로 종결하지 않는다.
+
 ### `public.precase_answers`
 
 | 컬럼 | 타입·제약 | 설명 |
@@ -1273,12 +1281,12 @@ Passport Commit과 Outbox INSERT는 같은 Transaction이다. Dispatcher 실패�
 |---|---|---|
 | `private.budget_limits` | `scope_type`, `provider`, `model`, `limit_microunits`, `policy_version`, `updated_at` | 범위별 상한 설정. 정확한 model 행이 없으면 `*` 행, 그것도 없으면 예약 거부(fail-closed) |
 | `private.usage_budget_counters` | `scope_type`, `scope_key`, `provider`, `model`, `period_start`, `period_end`, `limit_microunits`, `reserved_microunits`, `consumed_microunits`, `updated_at` | 호출 전 원자 예약, Cap 초과 0건. `scope_type`은 `GLOBAL_DAY|OWNER_DAY|CASE|RUN` |
-| `private.usage_reservations` | `id`, `run_id`, `case_input_id`, `demo_run_id`, `agent_run_id`, `tool_run_id`, `provider`, `model`, `pricing_version`, `estimated_microunits`, `actual_microunits`, `status`, `reconcile_required`, token·elapsed·status category·retry·request ref, `expires_at`, `created_at`, `settled_at` | `RESERVED|SETTLED|RELEASED`, 실제 사용 정산. 사용량이 불명확하면 `RESERVED` 유지 + `reconcile_required` |
+| `private.usage_reservations` | `id`, `run_id`, `case_input_id`, `demo_run_id`, `precase_review_job_id`, `agent_run_id`, `tool_run_id`, `provider`, `model`, `pricing_version`, `estimated_microunits`, `actual_microunits`, `status`, `reconcile_required`, token·elapsed·status category·retry·request ref, `expires_at`, `created_at`, `settled_at` | `RESERVED|SETTLED|RELEASED`, 실제 사용 정산. 사용량이 불명확하면 `RESERVED` 유지 + `reconcile_required` |
 | `private.usage_reservation_counters` | `reservation_id`, `counter_id`, `microunits` | 예약이 잡은 Counter 별 금액; 정산·해제가 되돌릴 대상 |
 | `private.rate_limit_buckets` | `scope_type`, `scope_key`, `operation`, `window_start`, `count`, `limit_value`, `updated_at` | 사용자·IP 보조정보·Case·Tool 다층 제한 |
 | `private.audit_events` | `id`, `correlation_id`, `event_code`, `actor_type`, `owner_ref`, `case_id`, `run_id`, `agent_run_id`, `tool_run_id`, `status_code`, `error_code`, `duration_ms`, `created_at` | 원문·PII·Secret 없는 운영 Trace |
 
-호출 문맥은 `run_id|case_input_id|demo_run_id` 중 정확히 하나다. Intake는 본인 `MASKED`·`ACTIVE` 입력, 회원 검증은 본인 진행 Run, 공개 체험은 만료되지 않은 Demo Run만 예약한다. Intake의 RUN counter key는 `input:<UUID>`, Demo의 OWNER_DAY·CASE key는 `demo:<session UUID>`, RUN key는 `demo:<run UUID>`로 구분한다. Demo 예약은 회원 Case·프로필을 만들지 않는다. 상한 미설정은 호출 전에 거부한다.
+호출 문맥은 `run_id|case_input_id|demo_run_id|precase_review_job_id` 중 정확히 하나다. 가입 후 점검은 본인 Case의 진행 Job·유효 Lease·Deadline을 확인하며 RUN key를 `aftercare:<job UUID>`로 구분한다. Intake는 본인 `MASKED`·`ACTIVE` 입력, 회원 검증은 본인 진행 Run, 공개 체험은 만료되지 않은 Demo Run만 예약한다. Intake의 RUN counter key는 `input:<UUID>`, Demo의 OWNER_DAY·CASE key는 `demo:<session UUID>`, RUN key는 `demo:<run UUID>`로 구분한다. Demo 예약은 회원 Case·프로필을 만들지 않는다. 상한 미설정은 호출 전에 거부한다.
 
 `scope_key`와 `owner_ref`는 외부 노출하지 않는다. IP는 원문을 저장하지 않고 회전 Salt로 HMAC한 제한용 값만 짧게 보존한다. Budget 감소·삭제는 직접 Grant하지 않고 예약·정산 함수만 허용한다.
 
