@@ -1,3 +1,12 @@
+## 2026-09-08 회원 복수 Claim 심사 위험 보완
+
+- Production 가입 오류는 직접 가입 설정 복원 뒤 합성 회원가입 200·프로필 조회 200·탈퇴 완료·재로그인 401로 확인했다. 운영 Anthropic 상한은 전체 일 USD 20, 사용자·Case USD 3, Run USD 0.80이며 Cohere는 전체 일 USD 1, 사용자·Case USD 0.25, Run USD 0.10이다. Cohere 학습 사용은 Off다. `rerank-v4.0-fast`는 Production에서 차단하고 승인된 합성 개발 시험만 최대 USD 0.05로 유지한다.
+- 회원 `/api/finshield/verify`의 원격 0045 함수 부재 `42501`은 PR #259의 호환 경로로 보완했다. 같은 실패 Case 재시도가 결과로 종결됐다. 원격에는 0045가 아직 적용되지 않았으므로 Migration 완료로 기록하지 않는다.
+- PR #261은 Citation 실패를 해당 Claim에만 격리했고, PR #265는 모델 Schema가 실제 Evidence ref만 내도록 제한했다. PR #267은 5~8 Claim의 Evidence Judge를 최대 4개씩 배치 실행한다. main `ca513b9` Production 회원 6 Claim Run은 60.486초에 종결됐고 `JUDGE_DEADLINE_EXCEEDED` 없이 Claim 6건·Evidence 3건·Passport 1건을 저장했다.
+- 마지막 회원 Run은 Citation 정책 실패와 Product·Fraud·CoVe·Red Team 부분 상태 때문에 `PARTIAL`이다. 공식 근거 기준을 낮추지 않았으며 회원 정상 전체 성공 또는 Release 완료로 보지 않는다. 처리 중 2단계 회귀·Console 오류는 재현되지 않았고 PR #263의 같은 경로 `새 검증` 초기화도 Production에서 확인했다.
+- 이 실측에 쓴 합성 계정의 네 Case와 계정은 탈퇴 Workflow `COMPLETED` 뒤 재로그인 401로 정리했다. 합성 자격 파일과 브라우저 세션도 제거했다.
+- [Production 회원·공개 Demo 실측](evidence/development/judge-readiness/2026-09-08-production-core-flow.md)에 실패와 수정 순서를 보존한다. Implementation `NO-GO`, Release `NOT-EVALUATED`다.
+
 ## 2026-09-08 심사 전 Production 핵심 흐름 확인
 
 - main `fee233f7` Production 공개 Demo를 API와 실제 브라우저로 실행해 각각 58.947초·60.714초에 성공 종결했다. 두 실행 모두 7개 Agent 성공, Claim 5건·Evidence 6건이며 비용 USD 0.107026·0.110488을 전액 정산했다. 처리 중 2단계로 돌아가는 현상은 공개 Demo에서 재현되지 않았고 결과 근거 펼치기·원문 링크도 동작했다.

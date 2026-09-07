@@ -70,3 +70,9 @@ main `fee233f7`의 Production 배포 `dpl_J5k1UZjDRkQ3WRsPRn5QB5sVMiCu`에서 �
 두 실행 모두 Product·Fraud·Sales·Regulation·CoVe·Red Team·Evidence Judge 7개가 성공했고 Claim 5건·Evidence 6건을 반환했다. 비용은 각각 USD 0.107026과 USD 0.110488로 전액 정산됐고 미확정 예약은 없었다. 브라우저에서는 처리 중 화면이 유지된 뒤 결과 화면으로 전환됐으며 근거 펼치기와 원문 링크가 동작하고 Console 오류가 없었다.
 
 이 결과는 법령 원장 실패 수정 뒤 공개 Demo의 실제 성공 표본이다. 정식 Release harness와 Adoption 조건을 충족한 `B-DEMO-01` 평가는 아니므로 Implementation Gate `NO-GO`와 Release Gate `NOT-EVALUATED`를 유지한다. 회원 Text·Image·PDF 전체 E2E와 나머지 blocker도 이 표본으로 대체하지 않는다. [심사 전 Production 실측](../../evidence/development/judge-readiness/2026-09-08-production-core-flow.md)에 가입·탈퇴와 화면 확인 범위를 함께 기록했다.
+
+## 2026-09-08 회원 복수 Claim 후속 실측
+
+공개 Demo와 별개로 Production 회원 Text 입력 6 Claim을 main `ca513b9`에서 실행했다. Run `6b76dbc6-9528-43e6-825d-ad6e51223fb8`은 60.486초에 `PARTIAL`로 종결됐고 Evidence Judge 배치 실행은 12초 제한 안에서 끝났다. 최종 Claim 6건·Evidence 3건·Passport 1건이 저장됐고 처리 중 화면은 2단계로 돌아가지 않았다.
+
+`CITATION_INVALID`와 일부 Agent 부분 상태는 남아 있어 회원 정상 전체 성공으로 취급하지 않는다. 공개 Demo의 고정 Seed 성공과 회원 동적 Claim의 품질을 구분한다. [회원 실측과 실패 이력](../../evidence/development/judge-readiness/2026-09-08-production-core-flow.md)을 따른다.
