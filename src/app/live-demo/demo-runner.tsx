@@ -123,7 +123,7 @@ export function DemoRunner() {
       {step === "running" ? (
         <FsCard>
           <h2 className="fs-h2">확인하는 중</h2>
-          <p className="fs-body mt-2">공식 자료를 조회하고 근거를 검토하고 있습니다. 이 화면을 유지해 주세요.</p>
+          <p className="fs-body mt-2">공식 자료 조회와 독립 검토에 보통 약 1분이 걸립니다. 아래 단계가 계속 갱신됩니다.</p>
           <ul className="fs-steps mt-5" aria-live="polite">
             {agents.map((agent) => (
               <li key={agent.agentCode} data-state={agent.status === "RUNNING" ? "running" : "done"}>

@@ -1,3 +1,9 @@
+## 2026-09-08 공개 Demo v5 실측과 Regulation 후속
+
+- main `2a86ba4`·원격 0048에서 공개 Demo는 55.354초에 종결됐다. Product·Fraud·Sales·CoVe·Red Team·Judge 성공, Claim `CONTRADICTED` 4건·`UNKNOWN` 1건, 권위 A·`FRESH`·`DIRECT` Evidence 5건과 Source 연결을 확인했다. 모델 12호출 USD 0.097440은 정산됐다.
+- Regulation 도구 선택은 4초를 넘어 `PARTIAL`이었고 미확정 예약 1건을 보존했다. Migration 0049와 v6 Manifest는 Domain 선택 6초·단계 16초로 보정하며 순차 단계 상한 합은 106초다. 화면에는 약 1분 소요와 단계 갱신을 안내한다.
+- v6 원격 적용·재실행 전이며 `B-DEMO-01`·Implementation·Release Gate는 변경하지 않는다. [상세 기록](docs/ops/demo-evidence-connection.md)을 따른다.
+
 ## 2026-09-08 공개 Demo 지연·최신성 후속
 
 - main `b05470d`와 원격 0047 적용 뒤 실제 공개 Demo는 60.933초에 부분 종결됐다. Product·Regulation·CoVe·Red Team과 Evidence 5건·Tool-Source 연결은 성공했지만 Sales 7초 판단 제한과 Judge 8초 제한이 만료돼 최종 Claim 다섯 건은 모두 `UNKNOWN`이었다.

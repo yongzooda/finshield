@@ -46,3 +46,11 @@ main `b05470d`와 원격 Migration 0047을 적용한 뒤 공개 Demo를 다시 �
 후속 Migration 0048은 검증된 동일 Hash의 재조회 사건을 Seed Snapshot에 직접 연결하고, v5 Manifest에 모델 시간 제한을 고정한다. 실측 분포를 바탕으로 Domain 선택 4초·판단 9초·단계 15초, Review 선택 5초·판단 8초·단계 15초, Judge 12초를 사용한다. 네 Domain·두 Review·Judge의 순차 단계 상한 합은 102초로 공개 Demo의 110초 안에 8초 여유를 둔다. Judge 실패 시 Domain 결과만으로 최종 결론을 새로 만들지 않는 기존 실패 안전성은 유지한다.
 
 이 후속 변경도 원격 Migration·배포 뒤 실제 Demo를 다시 실행해 Judge 성공, Claim별 상태·인용, 전체 지연과 예약 정산을 확인하기 전에는 `B-DEMO-01` PASS가 아니다.
+
+## 2026-09-08 v5 Production 실측
+
+main `2a86ba4`와 원격 Migration 0048의 Production 공개 Demo는 55.354초에 종결됐다. Product·Fraud·Sales·CoVe·Red Team과 Judge가 성공했고, Claim은 `CONTRADICTED` 4건·`UNKNOWN` 1건으로 반환됐다. 공식 Evidence 5건은 모두 권위 A·`FRESH`·`DIRECT`였으며 Product 1건, Fraud 1건, CoVe 1건, Red Team 2건의 Source 연결을 확인했다. 12개 모델 호출 USD 0.097440은 정산됐다.
+
+Regulation은 4초 도구 선택 제한에서 `DEADLINE_EXCEEDED`였고 판단 결과만 남아 `PARTIAL`로 종결됐다. 해당 호출의 Provider 결과가 불명확해 예약 1건을 해제하지 않고 보존했다. Migration 0049와 v6 Manifest는 Domain 선택을 6초, 전체 Domain 단계를 16초로 조정한다. 단계 상한 합은 106초로 공개 Demo 110초를 넘지 않는다. 처리 화면에는 실제 실측에 맞춰 약 1분 소요와 단계 갱신을 안내한다.
+
+v6의 원격 적용·Production 재실행 전이므로 전체 성공과 `B-DEMO-01` PASS를 기록하지 않는다.
