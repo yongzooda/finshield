@@ -1,3 +1,7 @@
+## OCR 정식 측정 실패 보존
+
+- 첫 main 실측은 112쪽 처리·숫자·부정 표현·지연 기준을 충족했으나 URL 필드 7개 차이로 F1 0.97917에 그쳐 실패했다. [실패 기록](docs/ops/ocr-quality-failure-20260907.md)과 원본을 보존했고 B-OCR-01은 해제하지 않는다.
+
 ## 계정 삭제 선행 정리 Guard
 
 - DB 명세 13.3의 Profile 삭제 Guard가 빠져 있었다. 미완료 ACCOUNT 삭제 요청을 남긴 채 Auth 삭제가 성공하는 경로를 로컬 Transaction에서 재현하고 Rollback했다.
