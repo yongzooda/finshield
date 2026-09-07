@@ -62,7 +62,7 @@ do $$
 declare n int;
 begin
   set local role authenticated;
-  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a"}';
+  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a","session_id":"10000000-0000-4000-8000-00000000000a","exp":4102444800}';
   perform fstest.expect_fail($sql$
     insert into storage.objects (bucket_id, name)
     values ('finshield-quarantine', '00000000-0000-4000-8000-00000000000a/00000000-0000-4000-8000-0000000000c9/00000000-0000-4000-8000-0000000000e9/99999999-9999-4999-8999-999999999999.pdf')
@@ -89,7 +89,7 @@ $$;
 do $$
 begin
   set local role authenticated;
-  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000b"}';
+  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000b","session_id":"10000000-0000-4000-8000-00000000000b","exp":4102444800}';
   perform fstest.expect_fail($sql$
     insert into storage.objects (bucket_id, name)
     values ('finshield-quarantine', '00000000-0000-4000-8000-00000000000a/00000000-0000-4000-8000-0000000000c9/00000000-0000-4000-8000-0000000000e9/11111111-1111-4111-8111-111111111111.pdf')
@@ -111,7 +111,7 @@ update private.input_objects set slot_state = 'UPLOADED', uploaded_at = now()
 do $$
 begin
   set local role authenticated;
-  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a"}';
+  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a","session_id":"10000000-0000-4000-8000-00000000000a","exp":4102444800}';
   perform fstest.expect_fail($sql$
     insert into storage.objects (bucket_id, name)
     values ('finshield-quarantine', '00000000-0000-4000-8000-00000000000a/00000000-0000-4000-8000-0000000000c9/00000000-0000-4000-8000-0000000000e9/11111111-1111-4111-8111-111111111111.pdf')
@@ -333,7 +333,7 @@ do $$
 declare n int;
 begin
   set local role authenticated;
-  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a"}';
+  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a","session_id":"10000000-0000-4000-8000-00000000000a","exp":4102444800}';
   select count(*) into n from public.deletion_requests;
   if n <> 1 then raise exception '회원이 본인 삭제 요청을 읽지 못했습니다 (%)', n; end if;
   perform fstest.expect_fail($sql$

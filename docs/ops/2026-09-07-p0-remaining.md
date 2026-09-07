@@ -1,3 +1,5 @@
+현재 추가 보안 작업: Migration 0037의 직접 RLS 세션 차단을 실제 검증했다. DB scope 변경으로 Supabase·Rate·Consent·Storage·Delete는 재측정·별도 채택 전까지 STALE이며 이 브랜치의 현재 부분 PASS는 8/20이다. 아래 13/20은 기존 기준선 기록이다. 세션 갱신은 별도 Draft #224에서 실제 자연 만료 시험 중이다.
+
 # 2026-09-07 개발 재개 확인표
 
 원격 확인 기준은 main `6e096aa`, Draft #192 `e84b52a`다. Draft의 원격 CI `34091783329`와 Preview는 성공했고 기존 기능 worktree는 clean이었다. 현재 작업은 main에서 분리한 `fix/auth-session-logout`의 보안 수정이다. 기존 기능 브랜치를 강제 checkout하거나 제출 확정본을 수정하지 않았다.

@@ -334,7 +334,7 @@ $$;
 do $$
 begin
   set local role authenticated;
-  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a"}';
+  set local request.jwt.claims = '{"sub":"00000000-0000-4000-8000-00000000000a","session_id":"10000000-0000-4000-8000-00000000000a","exp":4102444800}';
   perform fstest.expect_fail($sql$
     select private.create_case('00000000-0000-4000-8000-00000000000a', 'LOAN', '직접', 'cc-9', repeat('1', 64))
   $sql$, '회원이 create_case 직접 호출');
