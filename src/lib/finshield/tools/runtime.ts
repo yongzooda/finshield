@@ -101,6 +101,8 @@ export type ToolCallContext = {
   manifest: ResolvedManifest;
   recorder?: RunRecorder;
   signal?: AbortSignal;
+  /** 전용 recorder와 함께 사용하며 거래 전 verification_run_id를 쓰지 않는다. */
+  aftercareJobId?: string;
 };
 
 export type RunSession = ToolCallContext & {
@@ -136,7 +138,7 @@ const assertAllowed = (agentCode: string, toolCode: string, purposeCode: string)
  * 조회한 출처를 Snapshot 으로 남긴다. kb 표는 적재 역할의 것이라 worker 가 직접
  * 쓰지 못하고 함수로만 쓴다. 외부 수집은 별도 fetch event를 남기고, 저장 자료 조회는 기존 ID를 쓴다.
  */
-const recordSnapshot = async (
+export const recordSnapshot = async (
   sql: Sql, item: SourceItem, toolCode: string, runId: string,
 ): Promise<string> => {
   if (item.storedSnapshotId) return item.storedSnapshotId;

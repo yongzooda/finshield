@@ -63,6 +63,11 @@ export const domainAgentInput = z.object({
   journey_stage: z.enum(["PRE_TRANSACTION", "ENROLLED", "FUNDS_SENT_OR_DAMAGE_SUSPECTED"]),
   claims: z.array(confirmedClaim).min(1),
   masked_intake: z.string(),
+  aftercare_context: z.object({
+    schema_version: z.literal("aftercare-review-v1"),
+    answers: z.record(z.string(), z.string()),
+    comparison: z.array(z.object({ claim_ref: z.string(), before: z.string(), contract: z.string(), result: z.string() })),
+  }).optional(),
 });
 export type DomainAgentInput = z.infer<typeof domainAgentInput>;
 

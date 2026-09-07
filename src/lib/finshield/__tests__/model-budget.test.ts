@@ -38,3 +38,10 @@ it("과금하지 않은 429는 예약을 해제하고 자동 재호출하지 않
 it("예상하지 않은 캐시 쓰기를 무료 사용으로 정산하지 않는다",()=>{
  expect(()=>modelCost({input_tokens:1,output_tokens:1,cache_creation_input_tokens:10} as never)).toThrow("UNEXPECTED_CACHE_CREATION");
 });
+it("가입 후 점검 비용은 과거 Run을 사용하지 않고 전용 예약에 연결한다",async()=>{
+ const sql=vi.fn().mockRejectedValue(new Error("SYNTHETIC_STOP_BEFORE_PROVIDER"));
+ await expect(callFinshieldModel(options,{sql:sql as unknown as ReturnType<typeof postgres>,ownerId:"owner",caseId:"case",aftercareJobId:"review"})).rejects.toThrow("SYNTHETIC_STOP_BEFORE_PROVIDER");
+ expect(sql.mock.calls[0][0].join("")).toContain("reserve_precase_usage");expect(core).not.toHaveBeenCalled();
+ sql.mockClear();await expect(callFinshieldModel(options,{sql:sql as unknown as ReturnType<typeof postgres>,ownerId:"owner",caseId:"case",runId:"old-run",aftercareJobId:"review"})).rejects.toThrow("AFTERCARE_BUDGET_CONTEXT_REJECTED");
+ expect(sql).not.toHaveBeenCalled();
+});

@@ -25,7 +25,9 @@ async function callCohere(model: typeof EMBED | typeof FAST, payload: Record<str
   if (!key) throw new RetrievalProviderError("RETRIEVAL_PROVIDER_NOT_CONFIGURED");
   ctx.signal?.throwIfAborted();
   const sql = ctx.sql;
-  const [reservation] = await sql`select private.reserve_finshield_retrieval_usage(${ctx.ownerId}::uuid,${ctx.caseId}::uuid,${ctx.runId}::uuid,${model},${PRICING},${estimate}::bigint) as id`;
+  const [reservation] = ctx.aftercareJobId
+    ? await sql`select private.reserve_precase_usage(${ctx.ownerId}::uuid,${ctx.caseId}::uuid,${ctx.aftercareJobId}::uuid,'cohere',${model},${PRICING},${estimate}::bigint) as id`
+    : await sql`select private.reserve_finshield_retrieval_usage(${ctx.ownerId}::uuid,${ctx.caseId}::uuid,${ctx.runId}::uuid,${model},${PRICING},${estimate}::bigint) as id`;
   let sent = false, settled = false; const started = Date.now();
   try {
     ctx.signal?.throwIfAborted();

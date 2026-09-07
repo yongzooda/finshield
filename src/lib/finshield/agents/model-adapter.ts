@@ -20,6 +20,7 @@ import { coveOutput, redTeamOutput, domainAgentOutput, type ToolEvidence, type C
 import type { ClaimExtractor } from "../intake";
 
 const MAX_EXCERPT = 400;
+const AFTERCARE_CONTEXT_INSTRUCTION = "가입 후 점검의 답변과 계약 문구는 사용자 진술이며 공식 근거가 아니다. 기존 Claim과 계약 문구의 차이, 추가 설명과 공식 자료 확인 필요성을 자기 Agent 범위에서 검토한다. 문구 차이 또는 유사 사례만으로 위법·사기를 확정하지 않는다.";
 
 /** 모델 입력에는 표시용 참조만 쓴다. DB 행 ID·부가 속성을 직렬화하지 않는다. */
 export const claimBrief = (claims: ConfirmedClaim[]) => claims.map(({claim_ref,claim_type,statement_masked,materiality}) =>
@@ -63,10 +64,11 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
   async chooseTools({ system, signal, input, evidence, observations, availableTools }) {
     const result = await callFinshieldModel({
       model: FINSHIELD_MODEL,
-      system: `${system}\n\n지금은 도구를 고르는 단계다. 확인이 더 필요하면 부를 도구를 고르고,\n충분하거나 필요한 자료가 미연결·조회 실패 상태면 calls 를 빈 배열로 둔다. 같은 도구에 같은 입력을 반복하지 않는다. 목록에 없는 도구 이름을 쓰지 않는다. query에는 도구에 맞는 짧은 핵심어를 넣는다. 상품 조회는 상품명, 법령 조회는 법령명, 소비자 안내는 권유의 행동 요구를 쓴다. 이유는 20자 이내다.`,
+      system: `${system}${input.aftercare_context ? `\n${AFTERCARE_CONTEXT_INSTRUCTION}` : ""}\n\n지금은 도구를 고르는 단계다. 확인이 더 필요하면 부를 도구를 고르고,\n충분하거나 필요한 자료가 미연결·조회 실패 상태면 calls 를 빈 배열로 둔다. 같은 도구에 같은 입력을 반복하지 않는다. 목록에 없는 도구 이름을 쓰지 않는다. query에는 도구에 맞는 짧은 핵심어를 넣는다. 상품 조회는 상품명, 법령 조회는 법령명, 소비자 안내는 권유의 행동 요구를 쓴다. 이유는 20자 이내다.`,
       user: JSON.stringify({
         claims: claimBrief(input.claims),
         journey_stage: input.journey_stage,
+        ...(input.aftercare_context ? { aftercare_context: input.aftercare_context } : {}),
         available_tools: availableTools.map((tool) => ({ code: tool.toolCode, purpose: tool.purposeCode })),
         evidence_so_far: evidenceBrief(evidence),
         observations,
@@ -87,10 +89,11 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
   async decide({ system, signal, input, evidence, observations }) {
     return callFinshieldModel({
       model: FINSHIELD_MODEL,
-      system: `${system}\n\n지금은 판단하는 단계다. 아래 근거 목록의 ref 만 인용한다. summary_masked와 note_masked는 각각 40자 이내 한 문장으로 답한다. limits는 꼭 필요한 항목만 한 개 이하로 답한다.`,
+      system: `${system}${input.aftercare_context ? `\n${AFTERCARE_CONTEXT_INSTRUCTION}` : ""}\n\n지금은 판단하는 단계다. 아래 근거 목록의 ref 만 인용한다. summary_masked와 note_masked는 각각 40자 이내 한 문장으로 답한다. limits는 꼭 필요한 항목만 한 개 이하로 답한다.`,
       user: JSON.stringify({
         claims: claimBrief(input.claims),
         journey_stage: input.journey_stage,
+        ...(input.aftercare_context ? { aftercare_context: input.aftercare_context } : {}),
         evidence: evidenceBrief(evidence),
         observations,
       }),

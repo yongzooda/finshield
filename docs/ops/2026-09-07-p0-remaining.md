@@ -1,3 +1,5 @@
+2026-09-08 가입 후 추가: 점검 전용 Job·Workflow·기존 Sales/Regulation Agent·Tool·근거 Trace·전용 비용 예약을 연결했다. 기본 시험 590건과 격리 SQL 31파일을 통과했다. 0042 원격 적용·보호 Preview·실제 Provider·가입 후 파일 연결은 후속 검증이며 `docs/ops/aftercare-agent-review.md`를 따른다.
+
 2026-09-08 최신 추가: 원격 DB 0041 적용과 실제 Preview 계정 탈퇴를 확인했다. 첫 응답 유실·다른 세션 복원·작업 차단·실제 TUS 파일 및 Auth 삭제·완료 원장 1건을 검증하고 기존 Preview 시험 계정을 복원했다. 상세는 `evidence/development/deletion/2026-09-08-account-preview.md`를 따른다. 현재 main 부분 PASS 8/20·Draft 7/20, Implementation NO-GO·Release NOT-EVALUATED다. 아래 항목은 시간순 과거 기록이다.
 
 추가 적합성 구현: Migration 0041의 Profile Policy v2를 연결했다. 부담·목적·기간 주의사항과 가입/상환 정보 부족을 구분하며 현재 Profile 변경 후 이전 Passport 불변을 실제 격리 DB에서 확인했다. 일반 상품 조건·원격 적용·Live UI·판정 품질 Gate는 남아 있다. 상세는 `evidence/development/profile/2026-09-07-profile-policy.md`를 따른다.

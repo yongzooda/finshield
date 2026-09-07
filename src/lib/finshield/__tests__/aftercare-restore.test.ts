@@ -17,6 +17,7 @@ it("회원 RLS가 Case를 숨기면 점검 답변 조회를 진행하지 않는�
 it("이전 점검의 기준 Passport·결과·비교를 재판정하지 않고 복원한다",async()=>{
  mocks.rest.mockImplementation(async({path}:{path:string})=>{
   if(path==="financial_cases")return [{id:caseId}];
+  if(path==="precase_review_jobs")return [];
   if(path==="precase_assessments")return [{id:assessmentId,assessment_no:2,base_passport_id:passportId,
     result:"ADDITIONAL_EXPLANATION",summary_masked:"당시 저장된 판단 이유",finished_at:"2026-09-07T00:00:00Z",assessment_schema_version:"aftercare-v2"}];
   if(path==="precase_answers")return [{question_code:"UNDERSTOOD_TERMS",answer_code:"NO",answer_text_masked:null},

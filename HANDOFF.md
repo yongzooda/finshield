@@ -1,3 +1,7 @@
+## 2026-09-08 가입 후 Agent 실행 연결
+
+PC-005의 점검 전용 Job·Workflow에서 기존 Sales Conduct·Regulation & Dispute Runner와 Tool을 재사용하고 근거·실행·비용을 같은 점검에 귀속했다. 요청 복원·중복 억제·취소·기한·미확정 실행 실패·부분 결과와 과거 Passport 불변을 격리 검증했다. 0042 원격 적용과 새 Preview 검증, 가입 후 파일 입력과 품질 Gate는 남아 있다. [검증 범위](docs/ops/aftercare-agent-review.md)를 따른다.
+
 ## 2026-09-08 실제 계정 탈퇴 검증
 
 별도 합성 계정의 Case·실제 TUS PNG에서 보호 Preview 계정 탈퇴 Workflow를 완료했다. 첫 응답 유실 후 다른 세션 복원·접수 후 새 작업 차단·중복 요청·Auth 마지막 삭제·영수증만으로 완료 조회를 확인했다. Auth/Profile/Case/Storage 부재와 완료 원장 1건을 별도 SQL로 확인했다. 기존 시험 계정은 보존하고 임시 Preview 허용 값을 복원했다. [검증 범위](evidence/development/deletion/2026-09-08-account-preview.md)를 따른다. 신규 Slot 차단의 500은 409 안내로 수정했고 전체 장애·Live OCR 파생물 삭제·Release 완료는 아니다.

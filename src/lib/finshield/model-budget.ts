@@ -7,7 +7,7 @@ import { callStructured, type StructuredCallOptions, type ModelUsageReceipt } fr
 import { FINSHIELD_MODEL } from "./manifest";
 
 export type ModelBudgetContext = { sql: ReturnType<typeof postgres>; ownerId?: string; caseId?: string;
-  runId?: string; inputId?: string; demoRunId?: string };
+  runId?: string; inputId?: string; demoRunId?: string; aftercareJobId?: string };
 export type ModelUsage = { inputTokens: number; outputTokens: number; costMicrounits: number; unknownCalls: number };
 export const emptyModelUsage = (): ModelUsage => ({ inputTokens: 0, outputTokens: 0, costMicrounits: 0, unknownCalls: 0 });
 
@@ -33,10 +33,17 @@ export async function callFinshieldModel<T extends z.ZodType>(opts: StructuredCa
   const estimated = estimatedInput * 2 + (opts.maxTokens ?? 8000) * 10;
   opts.signal?.throwIfAborted();
   const { sql } = context;
-  const [reserved] = await sql`select private.reserve_finshield_model_usage(
+  if (context.aftercareJobId && (!context.ownerId || !context.caseId || context.runId || context.inputId || context.demoRunId)) {
+    throw new Error("AFTERCARE_BUDGET_CONTEXT_REJECTED");
+  }
+  const reservation = context.aftercareJobId
+    ? sql`select private.reserve_precase_usage(${context.ownerId ?? null}::uuid,${context.caseId ?? null}::uuid,${context.aftercareJobId}::uuid,
+        'anthropic',${FINSHIELD_MODEL},${MODEL_PRICING_VERSION},${estimated}::bigint) as id`
+    : sql`select private.reserve_finshield_model_usage(
     ${context.ownerId ?? null}::uuid,${context.caseId ?? null}::uuid,${context.inputId ?? null}::uuid,
     ${context.runId ?? null}::uuid,${context.demoRunId ?? null}::uuid,
-    ${FINSHIELD_MODEL},${MODEL_PRICING_VERSION},${estimated}::bigint) as id`.catch(error => {
+    ${FINSHIELD_MODEL},${MODEL_PRICING_VERSION},${estimated}::bigint) as id`;
+  const [reserved] = await reservation.catch(error => {
       if (["BUDGET_EXCEEDED", "BUDGET_LIMIT_MISSING"].includes(String(error.hint))) {
         throw Object.assign(new Error("MODEL_BUDGET_BLOCKED"), { code: "MODEL_BUDGET_BLOCKED" });
       }
