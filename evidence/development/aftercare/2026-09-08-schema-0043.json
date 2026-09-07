@@ -1,0 +1,126 @@
+{
+  "checked_at": "2026-09-07T16:26:35.998Z",
+  "project": "exarejrwvjochjdminzo",
+  "expected_migration": "0043",
+  "main_sha": "7b3c29c6f4b6541abf66ccac69797864ed8b674a",
+  "matches": {
+    "tables_digest": true,
+    "constraint_digest": true,
+    "index_digest": true,
+    "routine_digest": true,
+    "view_digest": true,
+    "policy_digest": true
+  },
+  "preflight_failures": [],
+  "local": {
+    "tracked_schemas": [
+      "public",
+      "private",
+      "kb",
+      "demo"
+    ],
+    "views": 6,
+    "view_digest": "1b2bad8eb7129587715934ba5292773adffe1fa43dd08dfd7d8bedc2796b6870",
+    "policies": 192,
+    "policy_digest": "ccfdd5edbc107e02d2bf0b9b594a065b79081d535327d34044db1b7e7a2ea710",
+    "routines": 133,
+    "routine_digest": "6d66f17f30ec6c34b8b30addd758e8600a1c683844c107683685ad7274ae32be",
+    "tables": 83,
+    "tables_digest": "7f38c882d03ecc8389970a969ff1ddcbf4f75c8723e473165ecb13f6d4024fbe",
+    "constraints": 767,
+    "constraint_digest": "8c528bcbe73c8553338ddbcf218cda6d3f0c110247dccb0a30abe6d214de7e57",
+    "indexes": 261,
+    "index_digest": "64b62bfa2d17559c62d672cea9b2d15c84b142119cedf9df7af066ff7e703d46",
+    "rls_total": 83,
+    "rls_enforced": 83,
+    "rls_missing": []
+  },
+  "remote": {
+    "host_role": "finshield_worker",
+    "pooler_port": 6543,
+    "schema": {
+      "tracked_schemas": [
+        "public",
+        "private",
+        "kb",
+        "demo"
+      ],
+      "views": 6,
+      "view_digest": "1b2bad8eb7129587715934ba5292773adffe1fa43dd08dfd7d8bedc2796b6870",
+      "policies": 192,
+      "policy_digest": "ccfdd5edbc107e02d2bf0b9b594a065b79081d535327d34044db1b7e7a2ea710",
+      "routines": 133,
+      "routine_digest": "6d66f17f30ec6c34b8b30addd758e8600a1c683844c107683685ad7274ae32be",
+      "tables": 83,
+      "tables_digest": "7f38c882d03ecc8389970a969ff1ddcbf4f75c8723e473165ecb13f6d4024fbe",
+      "constraints": 767,
+      "constraint_digest": "8c528bcbe73c8553338ddbcf218cda6d3f0c110247dccb0a30abe6d214de7e57",
+      "indexes": 261,
+      "index_digest": "64b62bfa2d17559c62d672cea9b2d15c84b142119cedf9df7af066ff7e703d46",
+      "rls_total": 83,
+      "rls_enforced": 83,
+      "rls_missing": []
+    },
+    "anon_leaks": [],
+    "exposed_grants": [],
+    "worker_denied_tables": [
+      "private.input_objects",
+      "private.ocr_artifacts",
+      "public.case_events",
+      "public.case_input_findings",
+      "public.case_input_pages",
+      "public.case_inputs",
+      "public.claim_revisions",
+      "public.claims",
+      "public.financial_cases",
+      "public.financial_profile_versions",
+      "public.financial_profiles",
+      "public.processing_consents",
+      "public.profiles"
+    ],
+    "worker_allowed_tables": [],
+    "storage": {
+      "buckets": [
+        {
+          "id": "finshield-kb",
+          "is_public": false,
+          "file_size_limit": null
+        },
+        {
+          "id": "finshield-quarantine",
+          "is_public": false,
+          "file_size_limit": 10485760
+        }
+      ],
+      "member_policies": [
+        {
+          "name": "finshield_quarantine__insert_open_slot",
+          "cmd": "INSERT",
+          "roles": [
+            "authenticated"
+          ]
+        }
+      ]
+    },
+    "extensions": {
+      "pgcrypto": {
+        "version": "1.3",
+        "schema": "extensions"
+      },
+      "vector": {
+        "version": "0.8.2",
+        "schema": "extensions"
+      },
+      "pg_trgm": {
+        "version": "1.6",
+        "schema": "extensions"
+      }
+    },
+    "roles": {
+      "worker_bypassrls": false,
+      "worker_login": true,
+      "postgres_bypassrls": true,
+      "legacy_roles": []
+    }
+  }
+}

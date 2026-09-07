@@ -10,6 +10,11 @@ import { readQuarantinedFile } from "./storage";
 import { extractWithOcr } from "./ocr";
 import { cleanupCaseFiles } from "./cleanup";
 
+export class FileInputAccessError extends Error {
+  readonly code = "42501";
+  constructor() { super("FILE_INPUT_NOT_ACCESSIBLE"); }
+}
+
 export class FileInputConflictError extends Error {
   constructor() { super("FILE_INPUT_CONFLICT"); }
 }
@@ -38,7 +43,10 @@ export async function processFileInput(args: {sql:Sql;ownerId:string;caseId:stri
   ocrConsent:boolean;extractClaims:ClaimExtractor;signal?:AbortSignal}) {
   const {sql,ownerId,caseId,inputId}=args;
   const signal=AbortSignal.any([AbortSignal.timeout(35000),...(args.signal?[args.signal]:[])]);
-  const [row]=await sql`select private.file_input_context(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid) as context`;
+  const [row]=await sql`select private.file_input_context(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid) as context`.catch(error => {
+    if (error.code === "42501") throw new FileInputAccessError();
+    throw error;
+  });
   const file=row.context as {input_purpose?:string;object_id:string;object_path:string;declared_mime:string;size_bytes:number};
   // 선택 결과를 원본 확인 전에 입력에 고정한다. native PDF에는 외부 전송을 하지 않는다.
   await sql`select private.record_file_ocr_consent(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid,${args.ocrConsent})`;
