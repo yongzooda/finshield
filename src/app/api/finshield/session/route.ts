@@ -10,9 +10,12 @@
 
 import { jsonNoStore, readJson, str } from "@/lib/ops/http";
 import { finshieldEnv } from "@/lib/finshield/env";
+import { signOutSession } from "@/lib/finshield/signout";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+export const DELETE = signOutSession;
 
 export async function POST(request: Request): Promise<Response> {
   

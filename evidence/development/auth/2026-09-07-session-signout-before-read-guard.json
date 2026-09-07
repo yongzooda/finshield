@@ -1,0 +1,26 @@
+{
+  "schema_version": "auth-signout-development-v1",
+  "observed_at": "2026-09-07T10:03:02.898Z",
+  "scope": "실제 Supabase Auth와 앱 DELETE·resolveOwner, HTTP 배포·RLS 직접 접근·전체 인증 수명 Gate 제외",
+  "checks": {
+    "before_statuses": [
+      200,
+      200
+    ],
+    "origin_rejected": 403,
+    "signout_status": 200,
+    "after_statuses": [
+      403,
+      200
+    ],
+    "app_owner_rejected": true,
+    "revoked_refresh_status": 400,
+    "repeat_status": 200,
+    "other_session_preserved": true
+  },
+  "outcome": "PASS",
+  "created_session_cleanup_statuses": [
+    200,
+    200
+  ]
+}

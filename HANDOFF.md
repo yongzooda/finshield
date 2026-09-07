@@ -25,6 +25,12 @@
 
 # FinShield HANDOFF
 
+## 2026-09-07 저녁 인증 보안 보완
+
+- 최신 재개 확인표는 [P0 남은 작업](docs/ops/2026-09-07-p0-remaining.md)이다. 기존 Draft #192와 기능 worktree는 보존한다.
+- `AUTH-001` 서버 로그아웃을 연결해 현재 Supabase 세션만 폐기하고 반복 요청을 복원한다. 실제 새 세션 두 개의 한쪽 폐기·refresh 거부·다른 쪽 보존을 확인했다. 최초 오류 응답 계약 실패도 보존했다.
+- [인증 검증 범위](docs/ops/session-signout.md)를 따른다. refresh 갱신·직접 RLS 세션 폐기·전체 탈퇴·Release는 완료가 아니다. 실제 KB 문서·청크·Embedding은 이번 조회에서도 각 0건이다. Gate metadata는 유지한다.
+
 ## 저비용 Health 인프라와 증거 준비
 
 - N-AVL-001에 맞춰 외부 Provider 조회를 Health 요청에서 제거하고 FinShield DB·최근 상태 Cache로 분리한다. 실제 Next HTTP 100회·DB 장애·전송 계측을 같은 main SHA로 측정하는 절차를 등록한다. B-HEALTH-01은 별도 실제 실행·Adoption 전까지 NOT-EVALUATED다.
