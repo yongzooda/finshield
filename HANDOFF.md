@@ -1,5 +1,10 @@
 # FinShield HANDOFF
 
+## 2026-09-07 입력·Worker 인프라 계약
+
+- Migration 0026~0035와 SQL 시험 19~24를 별도 인프라 변경으로 등록했다. 빈 로컬 DB에 전체 Migration·시험을 적용해 통과했다.
+- 새 기능의 Runtime·운영 DB 적용·Live 검증 완료는 아니다. `docs/ops/input-worker-contract-spike.md`에 적용 경계를 기록한다.
+
 ## 현재 기준
 
 - 저장소: `yongzooda/finshield`
