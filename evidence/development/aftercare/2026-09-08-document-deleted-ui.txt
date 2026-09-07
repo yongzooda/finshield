@@ -1,0 +1,28 @@
+The following is a diff from the previous accessibility tree for Window: "Untitled query | SQL Editor | finshield | yongju | Supabase" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 187-188
+~								129 버튼 Run
++										187 버튼 1 row(Limited to only 100 rows)
++											188 container
++												189 text 1  row (Limited to only 100 rows)
+~										157 팝업 버튼 Export
++									190 표
++										191 row cases_remaining terms_remaining inputs_remaining raw_remaining
++											192 열 헤더
++												193 텍스트 cases_remaining
++											194 열 헤더
++												195 텍스트 terms_remaining
++											196 열 헤더
++												197 텍스트 inputs_remaining
++											198 열 헤더
++												199 텍스트 raw_remaining
++										200 row 0 0 0 0
++											201 셀
++												202 텍스트 0
++											203 셀
++												204 텍스트 0
++											205 셀
++												206 텍스트 0
++											207 셀
++												208 텍스트 0
+The focused UI element is 131 editor (settable) Description: Editor content, Value: 9103-b0341f71d2db','synthetic-id-1')) as inputs_remaining,
+ (select count(*) from storage.objects where bucket_id='finshield-quarantine' and name in ('synthetic-id-7/synthetic-id-8/synthetic-id-9/synthetic-id-10.pdf','synthetic-id-7/synthetic-id-1/synthetic-id-2/synthetic-id-6.pdf')) as raw_remaining;

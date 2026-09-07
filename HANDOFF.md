@@ -1,3 +1,7 @@
+## 2026-09-08 계약 PDF 수정 후 실측 완료·사용자 요청으로 작업 종료
+
+계약 문서 비용 거부를 PR #242로 수정해 main `d4a180f`에 병합했고 원격은 0044다. 구조 해시 6종 일치 후 보호 Preview의 native PDF 처리·문구 확인·두 세션 복원·동일 확인 재시도·과거 Claim 불변과 원본/Case 물리 삭제를 확인했다. 첫 실패와 추가 비용 USD 0.003914를 함께 보존했다. [실측](evidence/development/aftercare/2026-09-08-document-preview.md)을 따른다. 기본 602건 통과·선택적 96건 건너뜀, 44 Migration/SQL 32파일·타입·빌드 통과다. 사용자 요청에 따라 여기서 추가 P0 구현을 멈춘다. Implementation NO-GO·Release NOT-EVALUATED와 Draft #192를 유지한다.
+
 ## 2026-09-08 가입 후 PDF 실측 실패와 비용 경계 수정
 
 PR #240은 main `7b3c29c`로 병합됐고 원격 CI가 통과했다. 원격 0043의 구조 해시 6종 일치, RLS/FORCE 83개·anon 누출 0건을 확인했다. 실제 계약 PDF는 마스킹 뒤 비용 예약에서 실패했고 추가 과금은 없었다. 실패 Case는 삭제했다. Migration 0044와 처리 실패 정리를 보완했으며 [실패와 검증 범위](docs/ops/aftercare-input-budget.md)를 따른다. 전체 P0·Gate 완료는 아니다.

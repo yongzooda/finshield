@@ -1,0 +1,158 @@
+{
+  "started_at": "2026-09-07T16:39:53.262Z",
+  "branch_sha": "da43afe9eb06b209ab3f211b99623b9a79fae2a2",
+  "deployment": "9njbomrbKMoxR4EZQ8oWPhYwBkqe",
+  "base_fixture": "SQL synthetic UNKNOWN Passport, no pretransaction model calls",
+  "checks": {
+    "new_review_route_restores_empty_state": true,
+    "same_case_slot": true,
+    "tus_started": true,
+    "tus_uploaded": true,
+    "aftercare_native_pdf_processed": true,
+    "second_session_restores_unconfirmed_document": true,
+    "document_confirmed": true,
+    "confirmation_response_loss_retry": true,
+    "confirmed_document_restored": true,
+    "input_raw_delete_succeeded": true,
+    "cleanup_ledger_not_pending": true,
+    "raw_object_not_available": true,
+    "original_claim_snapshot_unchanged": true,
+    "case_cleanup_completed": true,
+    "aftercare_case_absent": true,
+    "document_case_absent": true
+  },
+  "cost_before": [
+    {
+      "provider": "all",
+      "reserved_microunits": "0",
+      "consumed_microunits": "257351"
+    },
+    {
+      "provider": "anthropic",
+      "reserved_microunits": "0",
+      "consumed_microunits": "216522"
+    }
+  ],
+  "process": {
+    "status": 200,
+    "elapsed_ms": 8285,
+    "body": {
+      "case_id": "synthetic-id-1",
+      "input_id": "synthetic-id-2",
+      "input_purpose": "AFTERCARE",
+      "claims": [
+        {
+          "claim_id": "synthetic-id-3",
+          "claim_ref": "C1",
+          "claim_type": "PRODUCT_TERM",
+          "statement_masked": "본 상품의 연 금리는 7%이다.",
+          "materiality": "MATERIAL",
+          "expected_revision_no": 1,
+          "source_page_no": 1
+        }
+      ],
+      "masked_pages": [
+        {
+          "page_no": 1,
+          "text": "Synthetic contract - not a real product. Annual interest rate is 7%."
+        }
+      ],
+      "masked_text": "Synthetic contract - not a real product. Annual interest rate is 7%."
+    }
+  },
+  "documents_before": {
+    "inputs": [
+      {
+        "id": "synthetic-id-2",
+        "input_stage": "MASKED",
+        "input_outcome": "ACTIVE",
+        "raw_delete_status": "PENDING",
+        "raw_expires_at": "2026-09-08T16:43:35.459113+00:00"
+      }
+    ],
+    "terms": [
+      {
+        "id": "synthetic-id-3",
+        "case_input_id": "synthetic-id-2",
+        "statement_masked": "본 상품의 연 금리는 7%이다.",
+        "original_statement_masked": "본 상품의 연 금리는 7%이다.",
+        "source_locator": {
+          "end": 68,
+          "kind": "masked_text_span",
+          "start": 41,
+          "page_no": 1,
+          "schema_version": "v1"
+        },
+        "confirmed": false,
+        "removed": false,
+        "base_passport_id": null,
+        "target_claim_id": null
+      }
+    ]
+  },
+  "documents_after": {
+    "inputs": [
+      {
+        "id": "synthetic-id-2",
+        "input_stage": "RAW_DELETED",
+        "input_outcome": "ACTIVE",
+        "raw_delete_status": "SUCCEEDED",
+        "raw_expires_at": "2026-09-08T16:43:35.459113+00:00"
+      }
+    ],
+    "terms": [
+      {
+        "id": "synthetic-id-3",
+        "case_input_id": "synthetic-id-2",
+        "statement_masked": "본 상품의 연 금리는 7%이다.",
+        "original_statement_masked": "본 상품의 연 금리는 7%이다.",
+        "source_locator": {
+          "end": 68,
+          "kind": "masked_text_span",
+          "start": 41,
+          "page_no": 1,
+          "schema_version": "v1"
+        },
+        "confirmed": true,
+        "removed": false,
+        "base_passport_id": "synthetic-id-4",
+        "target_claim_id": "synthetic-id-5"
+      }
+    ]
+  },
+  "storage_after_status": 400,
+  "cost_after": [
+    {
+      "provider": "all",
+      "reserved_microunits": "0",
+      "consumed_microunits": "261265"
+    },
+    {
+      "provider": "anthropic",
+      "reserved_microunits": "0",
+      "consumed_microunits": "220436"
+    }
+  ],
+  "completed_at": "2026-09-07T16:44:51.891Z",
+  "admin_observations": {
+    "after_confirm": {
+      "raw_objects": 0,
+      "confirmed_terms": 1,
+      "original_claims": 1,
+      "ocr_artifacts": 0
+    },
+    "after_both_cases_deleted": {
+      "cases_remaining": 0,
+      "terms_remaining": 0,
+      "inputs_remaining": 0,
+      "raw_remaining": 0
+    }
+  },
+  "scope_limitations": [
+    "Single native PDF synthetic API sample; not OCR quality evaluation",
+    "Two authenticated sessions, not browser UI verification",
+    "Pretransaction Passport created by SQL fixture; no new aftercare review Agent call",
+    "Original failed attempt retained separately",
+    "UI read-only final query had an empty-editor error before successful retry"
+  ]
+}
