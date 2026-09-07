@@ -106,41 +106,7 @@ export const failRevalidation = async (
  * 최종화는 알림을 직접 만들지 않고 Outbox 만 남긴다. 그래야 알림 실패가 결과
  * 저장을 되돌리지 않는다. 재검증 Workflow의 최종화 뒤에 옮긴다.
  */
-export const dispatchNotifications = async (sql: Sql): Promise<number> => {
-  const events = await sql`select * from private.claim_notification_events(20)`;
-  let made = 0;
-  for (const event of events) {
-    const payload = event.payload as Record<string, unknown>;
-    if (event.event_type !== "NOTIFICATION_REQUESTED") {
-      continue;
-    }
-    const type = String(payload.notification_type ?? "");
-    const copy = type === "VERIFICATION_COMPLETED"
-      ? {title:"검증 결과가 저장되었습니다",body:"판단과 확인 범위를 검증 기록에서 확인하세요."}
-      : type === "MATERIAL_CHANGE_DETECTED"
-      ? {title:"다시 확인했더니 달라진 것이 있습니다",body:"지난 판과 견주어 결과가 달라졌습니다. 무엇이 달라졌는지 기록에서 확인하세요."}
-      : type === "REVALIDATION_NO_CHANGE"
-      ? {title:"다시 확인했으나 달라진 것이 없습니다",body:"확인한 범위에서 중요한 변화가 없었습니다. 이전 기록과 새 기록을 함께 확인하세요."}
-      : null;
-    try {
-      if (!copy) throw new Error("NOTIFICATION_TYPE_UNSUPPORTED");
-      await sql`
-        insert into public.notifications
-          (owner_id, case_id, notification_type, revalidation_job_id, passport_diff_id, passport_id,
-           deduplication_key, title, body_masked)
-        values (${payload.owner_id as string}::uuid, ${payload.case_id as string}::uuid, ${type},
-                ${(payload.revalidation_job_id as string) ?? null}::uuid,
-                ${(payload.passport_diff_id as string) ?? null}::uuid,
-                ${(payload.passport_id as string) ?? null}::uuid,
-                ${String(event.deduplication_key)},
-                ${copy.title},${copy.body})
-        on conflict (owner_id, channel, deduplication_key) do nothing`;
-      await sql`select private.finish_outbox_event(${event.id as string}::uuid, null)`;
-      made += 1;
-    } catch {
-      await sql`select private.finish_outbox_event(${event.id as string}::uuid, 'NOTIFY_FAILED')`
-        .catch(() => undefined);
-    }
-  }
-  return made;
+export const dispatchNotifications = async (sql: Sql, ownerId: string | null = null): Promise<number> => {
+  const [row] = await sql`select private.deliver_notification_batch(${ownerId}::uuid,20) as result`;
+  return Number(row?.result?.delivered ?? 0);
 };

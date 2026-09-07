@@ -52,31 +52,10 @@ describe("REV-001·N-AVL-005 Lease·Outbox 계약", () => {
     await expect(heartbeat(sql as unknown as ReturnType<typeof postgres>, "job", "lease")).rejects.toThrow();
   });
 
-  it("알림 처리기가 RAW_DELETE_REQUESTED 작업을 종결하지 않는다", async () => {
-    const finished: string[] = [];
-    const sql = vi.fn(async (strings: TemplateStringsArray, ...params: unknown[]) => {
-      if (strings.join("").includes("claim_notification_events")) {
-        return [{ id: "cleanup-event", event_type: "RAW_DELETE_REQUESTED", payload: { input_id: "synthetic-input" } }];
-      }
-      if (strings.join("").includes("finish_outbox_event")) finished.push(String(params[0]));
-      return [];
-    });
-    await dispatchNotifications(sql as unknown as ReturnType<typeof postgres>);
-    expect(finished).toEqual([]);
+  it("알림 복구는 제한된 DB 배치에 소유자를 전달하고 생성 수를 반환한다", async () => {
+    const sql = vi.fn<(...args: unknown[]) => Promise<unknown[]>>(async () => [{ result: { delivered: 2, failed: 1 } }]);
+    expect(await dispatchNotifications(sql as unknown as ReturnType<typeof postgres>, "owner")).toBe(2);
+    expect(sql).toHaveBeenCalledOnce();
+    expect(sql.mock.calls[0]).toContain("owner");
   });
-});
-it("초기 검증 알림을 재검증 변화 없음으로 바꾸지 않고 미지원 유형은 전달 실패로 남긴다",async()=>{
- const inserts:unknown[][]=[],finishes:unknown[][]=[];
- const sql=vi.fn(async(strings:TemplateStringsArray,...params:unknown[])=>{
-  const query=strings.join("");
-  if(query.includes("claim_notification_events"))return ["VERIFICATION_COMPLETED","REVALIDATION_NO_CHANGE","UNSUPPORTED_EVENT"].map((type,index)=>({id:`e${index}`,event_type:"NOTIFICATION_REQUESTED",deduplication_key:`k${index}`,payload:{notification_type:type,owner_id:"owner",case_id:"case"}}));
-  if(query.includes("insert into public.notifications"))inserts.push(params);
-  if(query.includes("finish_outbox_event"))finishes.push([...params,query.includes("'NOTIFY_FAILED'")]);
-  return [];
- });
- expect(await dispatchNotifications(sql as unknown as ReturnType<typeof postgres>)).toBe(2);
- expect(inserts[0]).toContain("검증 결과가 저장되었습니다");
- expect(inserts[0]).not.toContain("다시 확인했으나 달라진 것이 없습니다");
- expect(inserts[1]).toContain("다시 확인했으나 달라진 것이 없습니다");
- expect(finishes).toContainEqual(["e2",true]);
 });

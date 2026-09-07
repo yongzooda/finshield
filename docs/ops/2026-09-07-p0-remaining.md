@@ -1,3 +1,5 @@
+추가 알림 구현: Migration 0040의 알림·Outbox 원자성, 과거 PROCESSING 복구·중복 방지·소유자별 조회 복구를 연결했다. 실제 격리 SQL 29파일·기본 572건·빌드를 통과했다. 알림의 저장된 판 이동도 구현했으며 원격 적용·Live UI·전역 주기 Dispatcher는 남았다. 기록 페이지는 보호 Preview에서 합성 Case 51개를 별도 두 로그인 세션으로 누락/중복 없이 조회하고 전부 삭제했다.
+
 추가 기록 구현: CASE-004·CASE-006의 생성 시각/ID Cursor로 50건 이후 기록을 이어 조회한다. 기록·삭제 화면은 계정 전환 시 이전 목록을 숨기고 늦게 도착한 다른 세션 응답을 폐기한다. 기본 573건·선택적 skip 96건, TypeScript·lint·build를 통과했다. 실제 다기기 51건 조회는 아직 검증하지 않았다.
 
 추가 검색 구현: 공용 KB의 Snapshot·자료 준비·분쟁·위험패턴 도구, Metadata·실제 FTS·Vector·결정적 Rerank와 Cohere 비용 Adapter를 연결했다. Migration 0039로 전체/Provider 한도를 같은 원장에 예약한다. 로컬 참고 코퍼스 20문서·28청크의 검색과 DB 취소를 검증했으며 원격 공식 자료·Vector 적재·Fast 실측·품질 채택은 남아 있다.

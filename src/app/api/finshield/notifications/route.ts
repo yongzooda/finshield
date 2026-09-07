@@ -6,6 +6,7 @@
  */
 
 import { jsonNoStore, readJson, str } from "@/lib/ops/http";
+import { dispatchNotifications } from "@/lib/finshield/revalidate";
 import { fsql } from "@/lib/finshield/db";
 import { bearerToken, resolveOwner, UnauthenticatedError } from "@/lib/finshield/auth";
 import { restSelect, RestError } from "@/lib/finshield/rest";
@@ -20,12 +21,14 @@ export async function GET(request: Request): Promise<Response> {
   if (!token) return jsonNoStore({ error: "로그인이 필요합니다" }, 401);
   try {
     // RLS 소유권 검사와 별도로 발급처에서 현재 세션이 살아 있는지 확인한다.
-    await resolveOwner(request);
+    const ownerId = await resolveOwner(request);
+    // 최초 전달 장애·구형 PROCESSING 고아는 다음 조회에서도 소유자 범위로 복구한다.
+    await dispatchNotifications(fsql(), ownerId).catch(() => 0);
     const rows = await restSelect({
       token,
       path: "notifications",
       query: {
-        select: "id,case_id,notification_type,title,body_masked,read_at,created_at,passport_diff_id",
+        select: "id,case_id,notification_type,title,body_masked,read_at,created_at,passport_diff_id,revalidation_job_id,passport_id",
         order: "created_at.desc",
         limit: "50",
       },

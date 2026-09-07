@@ -41,12 +41,13 @@ type Detail = {
   passports: Passport[];
 };
 
-export function PassportView({ caseId }: { caseId: string }) {
+export function PassportView({ caseId, requestedPassport = null }: { caseId: string; requestedPassport?: string | null }) {
   const [token, setToken, ready] = useFsToken();
   const sessionKey = sessionIdentity(token);
   const [detail, setDetail] = useState<Detail | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
+  const [selectedVersion, setSelectedVersion] = useState<string | null>(requestedPassport);
+  const [loadedSession, setLoadedSession] = useState<string | null>(null);
 
   useEffect(() => {
     const token = readSessionToken();
@@ -54,8 +55,8 @@ export function PassportView({ caseId }: { caseId: string }) {
     let alive = true;
     void (async () => {
       const result = await fetchCase<Detail>(caseId, token);
-      if (!alive) return;
-      if (result.ok) { setDetail(result.data); setNotice(null); return; }
+      if (!alive || sessionIdentity(readSessionToken()) !== sessionKey) return;
+      if (result.ok) { setDetail(result.data); setLoadedSession(sessionKey); setNotice(null); return; }
       if (result.status === 401) setToken(null);
       setNotice(result.error);
     })();
@@ -64,9 +65,10 @@ export function PassportView({ caseId }: { caseId: string }) {
 
   if (!ready) return null;
   if (!token) return <FsLoginCard onToken={setToken} />;
-  if (!detail) return <FsCard className="mt-8"><p className="fs-body">{notice ?? "불러오는 중입니다."}</p></FsCard>;
+  if (!detail || loadedSession !== sessionKey) return <FsCard className="mt-8"><p className="fs-body">{notice ?? "불러오는 중입니다."}</p></FsCard>;
 
-  const passport = detail.passports.find((row) => row.id === selectedVersion) ?? detail.passports[0];
+  const passport = selectedVersion ? detail.passports.find((row) => row.id === selectedVersion) : detail.passports[0];
+  if (selectedVersion && !passport) return <FsCard className="mt-8"><p className="fs-body">요청한 검증 기록을 찾을 수 없습니다.</p><Link href={`/cases/${caseId}/passport`} className="fs-btn fs-btn--quiet mt-4">검증 기록 목록으로</Link></FsCard>;
   if (!passport) {
     return (
       <FsCard className="mt-8">

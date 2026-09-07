@@ -30,7 +30,7 @@ type Done = {
   diff: Diff | null; claims: { claim_id: string; statement_masked: string }[];
 };
 
-export function RevalidateFlow({ caseId }: { caseId: string }) {
+export function RevalidateFlow({ caseId, requestedJob = null }: { caseId: string; requestedJob?: string | null }) {
   const [token, setToken, ready] = useFsToken();
   const sessionKey = sessionIdentity(token);
   const [step, setStep] = useState<"idle" | "running" | "done">("idle");
@@ -39,6 +39,8 @@ export function RevalidateFlow({ caseId }: { caseId: string }) {
   const [done, setDone] = useState<Done | null>(null);
 
   const [jobId, setJobId] = useState<string | null>(null);
+  const [viewJobId, setViewJobId] = useState<string | null>(requestedJob);
+  const [loadedSession, setLoadedSession] = useState<string | null>(null);
   const [queued, setQueued] = useState(false);
   const [refresh, setRefresh] = useState(0);
   const [requestKey, setRequestKey] = useState<string | null>(null);
@@ -51,17 +53,18 @@ export function RevalidateFlow({ caseId }: { caseId: string }) {
     const controller = new AbortController();
     const poll = async () => {
       try {
-        const response = await sessionFetch(`/api/finshield/cases/${caseId}/revalidate`, token, {
+        const response = await sessionFetch(`/api/finshield/cases/${caseId}/revalidate${viewJobId ? `?job_id=${encodeURIComponent(viewJobId)}` : ""}`, token, {
           headers: { Authorization: `Bearer ${token}` }, signal: controller.signal,
         });
         const body = await response.json();
-        if (!active) return;
+        if (!active || sessionIdentity(readSessionToken()) !== sessionKey) return;
         if (!response.ok) {
           if (response.status === 401) setToken(null);
           throw new Error(body.error ?? "처리 상태를 읽지 못했습니다");
         }
         const job = body.job;
-        if (!job) return;
+        setLoadedSession(sessionKey);
+        if (!job) { setDone(null); setStep("idle"); if (viewJobId) setNotice("요청한 재검증 기록을 찾을 수 없습니다."); return; }
         setJobId(job.job_id);
         const lines: AgentLine[] = [];
         for (const record of job.events ?? []) {
@@ -84,14 +87,14 @@ export function RevalidateFlow({ caseId }: { caseId: string }) {
             : "재검증을 완료하지 못했습니다. 이전 결과는 보관됩니다.");
         }
       } catch (error) {
-        if (!active) return;
+        if (!active || sessionIdentity(readSessionToken()) !== sessionKey) return;
         setNotice(error instanceof Error ? error.message : "처리 상태를 읽지 못했습니다");
         timer = setTimeout(() => void poll(), 5000);
       }
     };
     void poll();
     return () => { active = false; controller.abort(); clearTimeout(timer); };
-  }, [ready, sessionKey, caseId, setToken, refresh]);
+  }, [ready, sessionKey, caseId, setToken, refresh, viewJobId]);
 
   const start = async () => {
     if (!token) return;
@@ -102,7 +105,8 @@ export function RevalidateFlow({ caseId }: { caseId: string }) {
         method: "POST", headers: { Authorization: `Bearer ${token}`, "Idempotency-Key": key },
       });
       const body = await response.json();
-      if (body.job_id) setJobId(body.job_id);
+      if (sessionIdentity(readSessionToken()) !== sessionKey) return;
+      if (body.job_id) { setJobId(body.job_id); setViewJobId(body.job_id); }
       if (!response.ok) {
         if (response.status === 401) setToken(null);
         setNotice(body.error ?? "다시 확인하지 못했습니다");
@@ -127,7 +131,10 @@ export function RevalidateFlow({ caseId }: { caseId: string }) {
   if (!ready) return null;
   if (!token) return <FsLoginCard onToken={setToken} title="다시 확인하기" />;
 
-  const diff = done?.diff ?? null;
+  if (loadedSession !== sessionKey) return <FsCard className="mt-8"><p className="fs-body">{notice ?? "재검증 기록을 불러오는 중입니다."}</p></FsCard>;
+
+  const visibleDone = loadedSession === sessionKey ? done : null;
+  const diff = visibleDone?.diff ?? null;
   const statementOf = (claimId: string) =>
     done?.claims.find((claim) => claim.claim_id === claimId)?.statement_masked ?? claimId;
 
