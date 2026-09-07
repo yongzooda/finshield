@@ -16,6 +16,7 @@ import { validateConsentEvidenceResult } from "./consent-evidence-policy.mjs";
 import { validateStorageEvidenceResult } from "./storage-evidence-policy.mjs";
 import { validateDeleteEvidenceResult } from "./delete-evidence-policy.mjs";
 import { validateHealthEvidenceResult } from "./health-evidence-policy.mjs";
+import { validateOcrEvidenceResult } from "./ocr-evidence-policy.mjs";
 import { validateRuntimeEvidenceResult } from "./runtime-evidence-policy.mjs";
 import { validateLawEvidenceResult } from "./law-evidence-policy.mjs";
 
@@ -701,7 +702,105 @@ const healthEvidencePolicy = {
   validate: validateHealthEvidenceResult,
 };
 
+// B-OCR-01: 합성 32문서·112쪽의 Parser·CLOVA와 페이지 token 원장을 고정한다.
+const ocrEvidencePolicy = {
+  gate: "implementation", workflowName: "OCR Evidence",
+  workflowPath: ".github/workflows/ocr-evidence.yml",
+  workflowBlobSha: "865703f12a16392e819c603614541e50454ded92",
+  harnessPath: ".github/scripts/run-ocr-evidence.mjs",
+  harnessBlobSha: "81a7175dadc00b681f8aac9c3a3a02652f666aaa",
+  trustedExecutionFiles: Object.freeze([
+  {
+    "path": ".github/workflows/ocr-evidence.yml",
+    "blobSha": "865703f12a16392e819c603614541e50454ded92"
+  },
+  {
+    "path": ".github/scripts/run-ocr-evidence.mjs",
+    "blobSha": "81a7175dadc00b681f8aac9c3a3a02652f666aaa"
+  },
+  {
+    "path": ".github/scripts/ocr-evidence-policy.mjs",
+    "blobSha": "a1120970955cf72c905a95bb382cf040ec6258f2"
+  },
+  {
+    "path": ".github/scripts/ocr-quality-spike.mjs",
+    "blobSha": "496bfa85b72493db163091c83cacfcdc0c9785df"
+  },
+  {
+    "path": ".github/scripts/ocr-quality-text.mjs",
+    "blobSha": "4d53c89a1f96010812606f4ef3780977fe816383"
+  },
+  {
+    "path": ".github/scripts/ocr-quality-worker.mjs",
+    "blobSha": "d12e04c08b4a2b6e47f64db511bf0e5410cc4b02"
+  },
+  {
+    "path": ".github/fixtures/ocr-quality-v1/manifest.json",
+    "blobSha": "810ce1badf56d9e59f3aafc93309828516cd497a"
+  },
+  {
+    "path": ".github/scripts/provider-adr-digest.mjs",
+    "blobSha": "a0d89bbd01fcdd4cc2659afb29d243ba2bdfc099"
+  }
+]),
+  jobName: "ocr-evidence / B-OCR-01",
+  scopePaths: Object.freeze([
+  ".github/scripts/provider-adr-digest.mjs",
+  ".github/scripts/ocr-quality-spike.mjs",
+  ".github/scripts/ocr-quality-text.mjs",
+  ".github/scripts/ocr-quality-worker.mjs",
+  ".github/scripts/ocr-evidence-policy.mjs",
+  ".github/scripts/run-ocr-evidence.mjs",
+  ".github/scripts/test-ocr-quality.mjs",
+  ".github/workflows/ocr-evidence.yml",
+  ".github/scripts/file-safety-spike.mjs",
+  ".github/scripts/file-safety-fixtures.mjs",
+  ".github/scripts/file-safety-inspector.mjs",
+  ".github/scripts/file-safety-guard.mjs",
+  ".github/scripts/file-safety-policy.mjs",
+  ".github/fixtures/file-safety-parser/package.json",
+  ".github/fixtures/file-safety-parser/package-lock.json",
+  ".github/fixtures/ocr-quality-v1/manifest.json",
+  ".github/fixtures/ocr-quality-v1/generate.py",
+  "docs/ops/ocr-quality-spike.md",
+  ".github/fixtures/ocr-quality-v1/refinance-text.txt",
+  ".github/fixtures/ocr-quality-v1/refinance-image.png",
+  ".github/fixtures/ocr-quality-v1/refinance-digital.pdf",
+  ".github/fixtures/ocr-quality-v1/refinance-scanned.pdf",
+  ".github/fixtures/ocr-quality-v1/living-text.txt",
+  ".github/fixtures/ocr-quality-v1/living-image.png",
+  ".github/fixtures/ocr-quality-v1/living-digital.pdf",
+  ".github/fixtures/ocr-quality-v1/living-scanned.pdf",
+  ".github/fixtures/ocr-quality-v1/institution-text.txt",
+  ".github/fixtures/ocr-quality-v1/institution-image.png",
+  ".github/fixtures/ocr-quality-v1/institution-digital.pdf",
+  ".github/fixtures/ocr-quality-v1/institution-scanned.pdf",
+  ".github/fixtures/ocr-quality-v1/channel-text.txt",
+  ".github/fixtures/ocr-quality-v1/channel-image.png",
+  ".github/fixtures/ocr-quality-v1/channel-digital.pdf",
+  ".github/fixtures/ocr-quality-v1/channel-scanned.pdf",
+  ".github/fixtures/ocr-quality-v1/withdrawal-text.txt",
+  ".github/fixtures/ocr-quality-v1/withdrawal-image.png",
+  ".github/fixtures/ocr-quality-v1/withdrawal-digital.pdf",
+  ".github/fixtures/ocr-quality-v1/withdrawal-scanned.pdf",
+  ".github/fixtures/ocr-quality-v1/fee-text.txt",
+  ".github/fixtures/ocr-quality-v1/fee-image.png",
+  ".github/fixtures/ocr-quality-v1/fee-digital.pdf",
+  ".github/fixtures/ocr-quality-v1/fee-scanned.pdf",
+  ".github/fixtures/ocr-quality-v1/overdue-text.txt",
+  ".github/fixtures/ocr-quality-v1/overdue-image.png",
+  ".github/fixtures/ocr-quality-v1/overdue-digital.pdf",
+  ".github/fixtures/ocr-quality-v1/overdue-scanned.pdf",
+  ".github/fixtures/ocr-quality-v1/repayment-text.txt",
+  ".github/fixtures/ocr-quality-v1/repayment-image.png",
+  ".github/fixtures/ocr-quality-v1/repayment-digital.pdf",
+  ".github/fixtures/ocr-quality-v1/repayment-scanned.pdf"
+]),
+  validate: validateOcrEvidenceResult,
+};
+
 export const evidencePolicies = Object.freeze({
+  "B-OCR-01": ocrEvidencePolicy,
   "B-HEALTH-01": healthEvidencePolicy,
   "B-MODEL-01": modelEvidencePolicy,
   "B-EMBED-01": embedEvidencePolicy,

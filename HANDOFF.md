@@ -1,3 +1,8 @@
+## OCR 품질 평가 사전등록
+
+- 8개 합성 가족의 Text·Image·digital/scanned PDF 32문서·112쪽과 페이지별 정답·hash 원장을 고정한다. 실제 16회 CLOVA 요청·88쪽을 main에서 측정하는 절차를 등록하며 B-OCR-01은 실제 측정·별도 Adoption 전까지 미평가다.
+- 숫자·부정 exact, 기관·상품·URL field F1, 지원 페이지 성공률, 10쪽 P95를 분리한다. 선명한 합성 인쇄 문서 중심이며 실제 사용자 파일·외부 블라인드 평가가 아니다. 자세한 경계는 `docs/ops/ocr-quality-spike.md`를 따른다.
+
 ## 2026-09-07 저비용 Health 실제 측정
 
 - main run `34084937234`에서 실제 Next HTTP 100회와 DB 장애 시험이 통과했다. 외부 fetch·HTTP·HTTPS 전송 시도는 정상·장애 모두 0회이며 계측 제어는 각각 1회다.
