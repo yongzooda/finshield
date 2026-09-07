@@ -1,5 +1,9 @@
 -- PC-008: 같은 Case 문서·확인·원본 정리·Passport 불변의 실제 격리 DB 시험.
 begin;
+-- 격리 Fixture의 과거 비용 원장을 시험 트랜잭션 안에서만 비운다.
+delete from private.usage_reservations;
+delete from private.usage_budget_counters;
+delete from private.budget_limits;
 create function fstest.profile_policy_probe(p_owner uuid,p_mode text,p_statement text default '햇살론15 대출기간 안내')
 returns uuid language plpgsql as $$
 declare cid uuid; inp uuid; claim uuid; run uuid; man uuid; ar uuid; tr uuid; snap uuid; ev uuid;
@@ -48,7 +52,7 @@ end $$;
 do $$
 declare owner uuid:='00000000-0000-4000-8000-00000000000a'; other_owner uuid:='00000000-0000-4000-8000-00000000000b';
  p uuid; cid uuid; target uuid; man uuid; slot record; page uuid; term uuid; sel jsonb; source jsonb; job_input jsonb;
- before_hash text; before_claims integer; before_lifecycle public.case_lifecycle; old_input uuid; job uuid;
+ before_hash text; before_claims integer; before_lifecycle public.case_lifecycle; old_input uuid; job uuid; reservation uuid;
 begin
  p:=fstest.profile_policy_probe(owner,'NONE');
  select case_id,execution_manifest_id,payload_hash into cid,man,before_hash from public.evidence_passports where id=p;
@@ -71,12 +75,26 @@ begin
  select id into page from public.case_input_pages where case_input_id=old_input;
  perform private.advance_input_stage(owner,cid,old_input,'EXTRACTED','{}');
  perform private.advance_input_stage(owner,cid,old_input,'MASKED','{"masked_text":"기간은 36개월입니다","masked_text_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","pii_policy_version":"v1"}');
+ -- 실제 파서 뒤 모델 비용 예약도 같은 완료 Case를 허용해야 한다.
+ insert into private.budget_limits(scope_type,provider,model,limit_microunits,policy_version)
+ select scope,provider,model,1000000,'isolated-aftercare-budget-test'
+ from unnest(array['GLOBAL_DAY','OWNER_DAY','CASE','RUN']) scope
+ cross join (values ('anthropic','claude-sonnet-5'),('all','*')) providers(provider,model)
+ on conflict(scope_type,provider,model) do update set limit_microunits=excluded.limit_microunits;
+ perform fstest.expect_fail(format('select private.reserve_finshield_model_usage(%L,%L,%L,null,null,%L,%L,100)',other_owner,cid,old_input,'claude-sonnet-5','test'),'타인 계약 문서 예약 거부');
+ reservation:=private.reserve_finshield_model_usage(owner,cid,old_input,null,null,'claude-sonnet-5','test',100);
+ if (select count(*) from private.usage_reservation_counters where reservation_id=reservation)<>8 then raise exception '개별·합산 8범위 예약 누락';end if;
+ perform private.settle_usage_budget(reservation,40,'{"input_tokens":10,"output_tokens":2}');
+ if exists(select 1 from private.usage_reservation_counters rc join private.usage_budget_counters b on b.id=rc.counter_id
+   where rc.reservation_id=reservation and (b.reserved_microunits<>0 or b.consumed_microunits<40)) then raise exception '가입 후 예약 정산 실패';end if;
+ perform fstest.expect_fail(format('select private.reserve_finshield_model_usage(%L,%L,%L,null,null,%L,%L,1000001)',owner,cid,old_input,'claude-sonnet-5','test'),'가입 후 상한 초과 거부');
  term:=private.record_file_claim(owner,cid,old_input,page,'PRODUCT_TERM','기간은 36개월입니다','NON_MATERIAL','{"schema_version":"v1","kind":"masked_text_span","page_no":1,"start":0,"end":12}');
  if exists(select 1 from public.claims where id=term) then raise exception '계약 문구가 거래 전 Claim에 혼입';end if;
  sel:=jsonb_build_array(jsonb_build_object('id',term,'target_claim_id',target,'statement_masked','기간은 60개월입니다'));
  perform fstest.expect_fail(format('select private.confirm_aftercare_document(%L,%L,%L,%L,%L)',other_owner,cid,old_input,p,sel),'타인 문서 확인 거부');
  perform private.confirm_aftercare_document(owner,cid,old_input,p,sel);
  perform private.confirm_aftercare_document(owner,cid,old_input,p,sel);
+ perform fstest.expect_fail(format('select private.reserve_finshield_model_usage(%L,%L,%L,null,null,%L,%L,100)',owner,cid,old_input,'claude-sonnet-5','test'),'확인 완료 문서 재호출 예약 거부');
  if (select original_statement_masked from public.precase_document_terms where id=term)<>'기간은 36개월입니다'
   or (select statement_masked from public.precase_document_terms where id=term)<>'기간은 60개월입니다' then raise exception '인식 원문·사용자 수정 이력 유실';end if;
  perform fstest.expect_fail(format('select private.confirm_aftercare_document(%L,%L,%L,%L,%L)',owner,cid,old_input,p,
