@@ -34,3 +34,14 @@ it("발급처가 거부한 JWT의 인증 시각은 읽지 않는다",async()=>{
 it.each([null,"broken","a.not-json.b"])("깨진 Token %s는 재인증을 요구한다",async value=>{
  mocks.token.mockReturnValue(value);await expect(resolveRecentlyAuthenticatedOwner(request())).rejects.toBeInstanceOf(ReauthenticationRequiredError);
 });
+
+it("Next의 내부 localhost URL과 달라도 실제 Host와 Origin이 같으면 허용한다",async()=>{
+ mocks.token.mockReturnValue(token({sub:owner,is_anonymous:false,amr:[{method:"password",timestamp:now}]}));
+ const req=new Request("http://localhost:3107/delete",{method:"POST",headers:{host:"127.0.0.1:3107",origin:"http://127.0.0.1:3107"}});
+ await expect(resolveRecentlyAuthenticatedOwner(req)).resolves.toBe(owner);
+});
+it("실제 Host가 있으면 내부 URL에 맞춘 다른 Origin도 거부한다",async()=>{
+ const req=new Request("http://localhost:3107/delete",{method:"POST",headers:{host:"127.0.0.1:3107",origin:"http://localhost:3107"}});
+ await expect(resolveRecentlyAuthenticatedOwner(req)).rejects.toBeInstanceOf(RequestOriginError);
+ expect(mocks.owner).not.toHaveBeenCalled();
+});

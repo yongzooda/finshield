@@ -7,7 +7,10 @@ export const RECENT_AUTH_SECONDS = 300;
 
 /** AUTH-011·DB 13.2: Token 발급·갱신 시각 대신 검증된 비밀번호 인증 시각을 본다. */
 export async function resolveRecentlyAuthenticatedOwner(request: Request): Promise<string> {
-  if (request.headers.get("origin") !== new URL(request.url).origin) {
+  const target = new URL(request.url);
+  // Next 개발 서버는 URL의 host를 localhost로 바꿀 수 있다. 실제 요청 Host를 비교한다.
+  const expectedOrigin = `${target.protocol}//${request.headers.get("host") ?? target.host}`;
+  if (request.headers.get("origin") !== expectedOrigin) {
     throw new RequestOriginError("이 화면에서 삭제를 다시 요청해 주세요");
   }
   // 반드시 발급처 검증을 먼저 끝낸다. 아래 Payload 파싱은 서명 검증의 대체가 아니다.
