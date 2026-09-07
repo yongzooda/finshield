@@ -1,3 +1,15 @@
+## 2026-09-07 최종 통합 상태
+
+- 보안 PR #224·#226과 별도 증거 채택 PR #230이 main에 병합됐다. main은 `5498a6d`, 기능 Draft #192의 부분 PASS는 12/20이다. main의 13/20과 Health 측정 범위 차이를 유지한다.
+- 실제 증거 채택은 merge candidate `72f6ed3`의 CI `34120542628`이 통과했다. 두 번의 채택 CI 거부 이력과 모든 원본은 보존했다.
+- 기본 시험 550건·선택적 94건 건너뜀, 별도 실제 TUS 갱신/삭제 1건 통과다. 코드·브라우저·자연 만료·배포 표본의 범위는 세션 갱신 기록을 따른다. 전체 P0·Release 완료가 아니다.
+- 계정 탈퇴 전체 흐름·OCR·검색·Workflow 장애·개인정보 계약·판정 품질은 남아 있다. Cohere 학습 설정 변경과 Rerank Fast 개발 후보는 사용자 결정 전 실행하지 않는다.
+
+## 2026-09-07 세션 보안 뒤 증거 재채택
+
+- 별도 PR #230에서 최종 main `72e5405`의 Supabase·Rate·Consent·Storage·Delete 원본을 채택한다. 첫 채택 CI 거부와 두 번의 원본을 모두 보존한다. [측정 범위](evidence/adoption/2026-09-07-session-rls.md)를 따른다.
+- 부분 PASS는 main 13/20이며 Implementation NO-GO·Release NOT-EVALUATED다. 기능 Draft의 Health 범위는 별도다.
+
 ## 2026-09-07 갱신 보안의 기능 Draft 통합
 
 - main PR #224·#226의 Cookie 갱신·직접 세션 RLS를 기존 기능 Draft에 통합했다. 재검증 Job·중단 신호·서버 Claim·상세 Passport 계약은 보존했다.
