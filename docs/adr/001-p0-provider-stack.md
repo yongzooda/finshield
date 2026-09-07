@@ -603,7 +603,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `EVID-DOC-01` | Provider 공개 기술 문서 | DOCUMENTED | Anthropic·Cohere·Supabase·CLOVA·Vercel 공개 문서의 명시된 모델 ID·기술 제한·API 동작을 2026-09-03 확인; DPA·보존·리전·계약 승인이 아님 |
 | `EVID-LAW-01` | Law 등록 IP 위험 | DOCUMENTED | 공식 공지에서 OC 등록 IP와 요청 IP 불일치 오류 가능성 확인 |
 | `EVID-LAW-02` | 법제처 OC·등록 도메인 Referer·응답 원장과 Snapshot 해시 | PASS | main run `34045798279`, artifact `9993055183`. Preview 와 Production 배포 안의 관측 endpoint 로 법제처를 15회 두드렸다. 등록 도메인을 Referer 로 보내면 양쪽에서 통했고, 헤더를 빼거나 배포 고유 주소나 미등록 도메인을 보내면 여섯 건 모두 막혔다. 요청이 어디서 나갔는지가 아니라 무엇을 보냈는지가 기준이므로 Preview 배포도 등록 도메인을 보내면 통한다. 고정 질의의 본문 해시는 세 번 모두 같았다. 일자별 조문 개정 조회는 어제와 사흘 전 모두 답했고 어제 자는 목록이 비어 와 D+1 반영과 어긋나지 않는다. 429 와 5xx 와 시간 초과는 0건이고 가장 느린 응답이 1,166ms 다. 결과에는 요청 주소와 OC 와 본문 원문을 담지 않았다 공식 공지가 말한 등록 IP 불일치는 실제 제약이 아니었고 등록 도메인 대조가 실제 제약이다 |
-| `EVID-MODEL-01` | Anthropic Sonnet 5 Live Spike | STALE | Claim 단위 ADR 변경 뒤 main run `33956322908`, artifact `9966535003`로 재측정; 합성 50건·100 live request·결정적 fault 20건에서 schema·strict tool·P95·비용 policy 합격. 무효가 된 run `33783765337`·`33883439885`·`33912191567`의 결과 파일도 이력으로 보존한다 package.json·package-lock.json 변경으로 기존 실행 scope와 달라졌다. 같은 기준으로 main 재측정 후 별도 채택한다. |
+| `EVID-MODEL-01` | Anthropic Sonnet 5 Live Spike | PASS | 실행 의존성 재등록 뒤 main run `34078050277`, artifact `10002820639`. 합성 50건·100 live request·결정적 fault 20건이 동일 schema·strict tool·P95·비용 policy를 통과했다. 이전 run `34077370635`도 통과했으나 OCR 진단 PR 병합으로 main이 바뀌어 최신 main에서 다시 측정했다. 과거 결과는 이력으로 보존한다 |
 | `EVID-EMBED-01` | Cohere embed-v4.0 Claim 단위 1차 후보 생성 Live Spike | PASS | 사전등록 7절 구성(Metadata Filter → Claim 단위 Exact KNN, 후보 풀 20)으로 v5 평가셋을 main run `33956964817`, artifact `9966699530`에서 측정. Claim별 Recall@20 1.00, Case 합집합 Recall 1.00, 위험 핵심 Recall 1.00, 전량 회수 100/100, 최악 minimum_k 13, Query P95 559ms. 문단 단위였던 v3 run `33954521524`(0.902)·v4 run `33955613801`(0.970)은 이력으로 보존 |
 | `EVID-SOURCE-02` | 공공데이터포털 금융위·진흥원 API key·quota·license Live Snapshot | PASS | main run `33981225371`, artifact `9973809814`. 두 API 결과 코드 `00`, serviceKey 인증 성공, 금융위 총건수 19를 1 page 로 전량 수신, 개발계정 트래픽 10,000회, 라이선스 `이용허락범위 제한 없음`(2026-09-05 확인)을 source registry 관측으로 보존. serviceKey 는 결과·로그·URL 기록에서 지움 |
 | `EVID-SOURCE-03` | Demo `햇살론15` 상품·취급기관 Snapshot | PASS | main run `33981161310`, artifact `9973794051`. 금융위 `햇살론15` 레코드 19건(기준년월 이력, 현재 기준월 `202602` 1건, 47 필드), 진흥원 취급기관 16개(상품명 join 16/16, 은행 16 대 금융위 표기 "대출협약은행 12개"), 공식 상품 페이지 200·제목·1397, 사칭 신고센터 200·1397·사칭·중개수수료 표지. 이용안내 페이지는 실행 환경에서 기본 틀만 돌려줘 수수료 미요구 문구 Snapshot 은 아직 없음 |
@@ -622,7 +622,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 
 | 차단 ID | 실제로 필요한 증거 | 현재 상태 | 해제 조건 |
 |---|---|---|---|
-| `B-MODEL-01` | Anthropic Sonnet 5 auth·quota·structured output·strict tool·P95·cost | NOT-EVALUATED | §15.1 Model schema·policy·비용 합격 + sanitized artifact |
+| `B-MODEL-01` | Anthropic Sonnet 5 auth·quota·structured output·strict tool·P95·cost | PASS | §15.1 Model schema·policy·비용 합격 + sanitized artifact |
 | `B-EMBED-01` | Cohere Claim 단위 1차 후보 생성 Recall@20·P95·cost | PASS | §15.1 후보 생성 합격 + versioned raw metric artifact |
 | `B-RETRIEVAL-01` | Metadata Filter·Keyword FTS·Vector·Rerank 종단 top 5 품질 | NOT-EVALUATED | §15.1 종단 Retrieval 합격 + query별 단계 원장; `B-SUPABASE-01` 선행 |
 | `B-OCR-01` | PDF.js·CLOVA 한국어 숫자·부정어·기관명·URL·표 Fixture | NOT-EVALUATED | §15.1 OCR·Parser 합격 + page별 diff |
