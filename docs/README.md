@@ -31,3 +31,5 @@
 - [저비용 Health 인프라와 증거 절차](ops/health-status-spike.md)
 
 - [계정 삭제 선행 정리 Guard](ops/account-deletion-guard.md)
+
+- [OCR 합성 품질 평가와 증거 절차](ops/ocr-quality-spike.md)
