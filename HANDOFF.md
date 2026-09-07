@@ -1,3 +1,9 @@
+## 2026-09-07 저비용 Health 실제 측정
+
+- main run `34084937234`에서 실제 Next HTTP 100회와 DB 장애 시험이 통과했다. 외부 fetch·HTTP·HTTPS 전송 시도는 정상·장애 모두 0회이며 계측 제어는 각각 1회다.
+- 보호 Preview와 Production에서도 DB 정상 응답을 확인했다. 미관측 Provider는 `unknown`·전체 `degraded`로 보존한다.
+- 별도 Adoption에서 B-HEALTH-01의 부분 PASS만 채택한다. Implementation은 NO-GO, Release는 NOT-EVALUATED다.
+
 # FinShield HANDOFF
 
 ## 저비용 Health 인프라와 증거 준비
