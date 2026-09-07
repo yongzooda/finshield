@@ -191,3 +191,11 @@ Case/계정 삭제 503 설정 문제를 해결하고 교차 사용자 접근·�
 - 재검증의 `PROGRESS` 이벤트가 DB의 이벤트 계약을 위반해 즉시 중단되는 문제를 `HEARTBEAT_PROGRESS`로 수정했다. 로컬 HTTP의 실제 Workflow Step·원격 DB·실제 모델로 단일 Claim 재검증을 마쳤다. 15회 호출 USD 0.073088 전부 정산, partial=false, NO_CHANGE이며 이전 Passport와 새 Passport ID가 서로 다르다. 새로고침 뒤 같은 결과·차이를 복원했다. 이는 실제 24시간 TTL·장애 복구 전체 Gate의 증거는 아니다.
 - 상세 개발 결과는 `evidence/development/files/2026-09-07-preview-*.json`과 `evidence/development/jobs/2026-09-07-browser-revalidation.json`에 본문·Secret 없이 보존한다. 실패한 실행도 보존한다.
 - Supabase 재측정·채택 PR #208을 필수 검사 뒤 병합했다. main 실행 `34081596101`도 통과했다. 현재 부분 PASS는 12개이며 Implementation NO-GO·Release NOT-EVALUATED는 유지한다. 사용자 변경이 없는 main·detached 로컬 폴더 5곳을 `ea78b5e`로 동기화했다.
+
+### 스캔 PDF 재검증 결과
+
+- `8dc04f4`의 보호 Preview에서 같은 10쪽 스캔 PDF를 다시 처리했다. 실제 TUS 업로드·Sandbox·CLOVA·페이지별 마스킹·모델 인용 대조·DB 저장까지 API 200, 29,080ms, 10쪽·8 Claim이다. 모델 1회 USD 0.013308이며 OCR 임시물 10개·원본 1개 작업이 모두 SUCCEEDED이고 실제 객체 부재를 확인했다.
+- 반복 구절에 대해 모델이 인용 페이지를 명시하고 서버가 해당 페이지의 실제 구절과 대조한다. 없는 페이지·다른 페이지의 구절·한 페이지 안의 중복 구절은 거부한다. 공백·줄바꿈을 정규화해 비교하되 저장하는 Locator는 실제 마스킹 페이지의 문자열 offset이다.
+- 이전 스캔 실패 기록을 삭제하지 않았다. 전체 OCR 정확도 Gate·실제 개인정보 처리 허용이나 금융 판단 품질의 성공으로 확대하지 않는다.
+- 실제 알림 화면에서 초기 검증 완료도 ‘재검증 변화 없음’으로 표시되는 오류를 발견했다. 초기 완료·변경 발견·변화 없음의 문구를 분리하고, 지원하지 않는 유형은 전달 실패로 남긴다. 초기 검증의 완료 직후에도 Outbox 알림을 처리하도록 연결했다.
+- Case 삭제 503을 확인하기 위한 보호 Preview 브랜치 전용 삭제 원장 키를 설정했다. 다른 브랜치·Production 키는 변경하지 않았다. 삭제 완료는 실제 API·부재 확인 뒤 별도로 기록한다.
