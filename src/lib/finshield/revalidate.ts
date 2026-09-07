@@ -15,6 +15,7 @@ import { createHash, randomUUID } from "node:crypto";
 import type postgres from "postgres";
 import type { ConfirmedClaim } from "./schemas";
 import type { OrchestratedRun } from "./orchestrator";
+import { buildActionGuide } from "./action-guide";
 import { buildAxisResults, buildFinalClaims } from "./finalize";
 
 type Sql = ReturnType<typeof postgres>;
@@ -67,7 +68,7 @@ export const startRevalidation = async (args: {
 
   const claimed = await sql`
     select job_id, lease_token, owner_id, base_passport_id
-      from private.claim_revalidation_job(${`web:${token.slice(0, 8)}`}, 600)`;
+      from private.claim_case_revalidation_job(${ownerId}::uuid, ${jobId}::uuid, ${`web:${token.slice(0, 8)}`}, 600)`;
   const row = claimed[0];
   if (!row || row.job_id !== jobId || row.owner_id !== ownerId) {
     // 다른 Job 이 앞에 있었다. 그 Job 은 건드리지 않고 Lease 가 풀리길 기다린다.
@@ -81,9 +82,8 @@ export const startRevalidation = async (args: {
 };
 
 export const heartbeat = async (sql: Sql, jobId: string, leaseToken: string): Promise<void> => {
-  // 실행이 길어져도 Lease 가 끊기지 않게 한다. 실패해도 실행은 계속한다.
-  await sql`select private.heartbeat_revalidation_job(${jobId}::uuid, ${leaseToken}::uuid, 600)`
-    .catch(() => undefined);
+  // Lease 를 잃으면 호출자에게 실패를 전달한다.
+  await sql`select private.heartbeat_revalidation_job(${jobId}::uuid, ${leaseToken}::uuid, 600)`;
 };
 
 export const finalizeRevalidation = async (args: {
@@ -101,10 +101,11 @@ export const finalizeRevalidation = async (args: {
     .filter((entry) => entry.status !== "SUCCEEDED")
     .map((entry) => entry.reasonCode ?? "AGENT_PARTIAL");
   try {
+    const guide = await buildActionGuide(args.sql);
     await args.sql`
       select private.finalize_revalidation(${args.jobId}::uuid, ${args.leaseToken}::uuid,
         ${args.runId}::uuid, ${JSON.stringify(finals)}::text::jsonb,
-        ${JSON.stringify(axes)}::text::jsonb, null,
+        ${JSON.stringify(axes)}::text::jsonb, ${JSON.stringify(guide.stored)}::text::jsonb,
         ${partialReasons}::text[], 'p1') as id`;
     return { ok: true };
   } catch (error) {
@@ -128,12 +129,11 @@ export const failRevalidation = async (
  * 옮긴다.
  */
 export const dispatchNotifications = async (sql: Sql): Promise<number> => {
-  const events = await sql`select * from private.claim_outbox_events(20)`;
+  const events = await sql`select * from private.claim_notification_events(20)`;
   let made = 0;
   for (const event of events) {
     const payload = event.payload as Record<string, unknown>;
     if (event.event_type !== "NOTIFICATION_REQUESTED") {
-      await sql`select private.finish_outbox_event(${event.id as string}::uuid, 'UNSUPPORTED_EVENT')`;
       continue;
     }
     const type = String(payload.notification_type ?? "");

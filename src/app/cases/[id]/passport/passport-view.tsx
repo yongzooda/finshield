@@ -13,12 +13,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CLAIM_STATE_VIEW, FsCard, FsChip } from "../../../fs-shell";
 import { FsLoginCard, useFsToken } from "../../../fs-session";
+import { OfficialActions, type StoredGuide } from "../../../official-actions";
+import { EvidenceCitation, type EvidenceCitationData } from "../../../evidence-citation";
 import { fetchCase } from "../../case-api";
 import {
   AXIS_LABEL, axisResultOf, coveLabel, overallResultOf, partialLabel, reasonLabel, runStatusLabel,
 } from "../../../fs-labels";
 
 type Passport = {
+  guide?: StoredGuide | null;
   id: string; verification_run_id: string; passport_version_no: number;
   overall_result: string; coverage_satisfied: boolean;
   passport_schema_version: string; manifest: Record<string, unknown>;
@@ -29,11 +32,10 @@ type Detail = {
   runs: { id: string; run_no: number; status: string; partial_reason_codes: string[] | null;
     finished_at: string | null }[];
   final_claims: { id: string; verification_run_id: string; status: string; reason_code: string;
-    cove_status: string; red_team_status: string; is_material: boolean; decision_summary_masked: string }[];
+    cove_status: string; red_team_status: string; is_material: boolean; statement_masked: string; decision_summary_masked: string }[];
   axes: { verification_run_id: string; axis: string; result_code: string; summary_masked: string }[];
   claim_evidences: { final_claim_version_id: string; evidence_id: string; relation: string; is_independent: boolean }[];
-  evidences: { id: string; content_hash: string; independence_key: string; freshness_at_use: string;
-    citable: boolean; reference_only: boolean }[];
+  evidences: (EvidenceCitationData & { independence_key: string; citable: boolean })[];
   passports: Passport[];
 };
 
@@ -119,6 +121,7 @@ export function PassportView({ caseId }: { caseId: string }) {
         </FsCard>
       ) : null}
 
+      <OfficialActions guide={passport.guide} />
       <FsCard className="mt-8">
         <h2 className="fs-h2">세 가지 확인 결과</h2>
         <ul className="mt-4 space-y-3">
@@ -146,15 +149,20 @@ export function PassportView({ caseId }: { caseId: string }) {
             return (
               <li key={row.id} className="border-t border-[var(--fs-line)] pt-4 first:border-0 first:pt-0">
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <p className="max-w-xl leading-relaxed">{row.decision_summary_masked}</p>
+                  <p className="max-w-xl font-semibold leading-relaxed">{row.statement_masked}</p>
                   <FsChip tone={view.tone}>{view.label}</FsChip>
                 </div>
+                <p className="fs-body mt-2">{row.decision_summary_masked}</p>
                 <p className="fs-meta mt-1">
                   이렇게 정한 이유: {reasonLabel(row.reason_code)} · 근거 {links.length}건
                   (독립 {links.filter((l) => l.is_independent).length}건)
                   {row.cove_status !== "NOT_REQUIRED" ? ` · 독립 재확인 ${coveLabel(row.cove_status)}` : ""}
                   {row.red_team_status === "COUNTER_EVIDENCE" ? " · 반대 근거 있음" : ""}
                 </p>
+                <ul className="mt-3 space-y-2">{links.map(link => {
+                  const evidence = detail.evidences.find(item => item.id === link.evidence_id);
+                  return evidence ? <li key={evidence.id}><EvidenceCitation evidence={evidence} /></li> : null;
+                })}</ul>
               </li>
             );
           })}

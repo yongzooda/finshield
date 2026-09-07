@@ -98,6 +98,9 @@ export const startIntake = async (args: {
   const extracted = await args.extractClaims(maskedText);
   const claims: (ConfirmedClaim & { claimId: string })[] = [];
   for (const [index, claim] of extracted.entries()) {
+    const claimGate = gateForModel(claim.statementMasked);
+    if (!claimGate.ok) return { ok: false, reason: "PII_RESIDUAL", ask: claimGate.ask };
+    claim.statementMasked = claimGate.masked.text;
     const row = await sql`
       select private.record_extracted_claim(${ownerId}::uuid, ${caseId}::uuid, ${inputId}::uuid, null,
         ${claim.claimType}, ${claim.statementMasked}, ${claim.materiality}, 'MODEL') as id`;

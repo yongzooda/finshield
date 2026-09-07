@@ -20,9 +20,11 @@ import { createRunSession, type ToolCallContext } from "./tools/runtime";
 import { TOOL_IMPLS, assertToolsImplemented } from "./tools";
 import { runDomainAgent, runReviewAgent, type AgentModel } from "./agents/runner";
 import { assertPromptsComplete } from "./agents/prompts";
+import { recordJudgeRun } from "./agents/judge-record";
 
 export type JudgeModel = {
   judge: (args: {
+    signal?: AbortSignal;
     claims: ConfirmedClaim[];
     findings: (DomainFinding & { agent_code: string })[];
     evidence: ToolEvidence[];
@@ -126,6 +128,8 @@ export const runVerification = async (args: {
             || entry.status === "COUNTER_EVIDENCE",
         })),
       });
+      evidence.push(...result.evidence);
+      for (const [ref, id] of result.evidenceIds) evidenceIds.set(ref, id);
       if (kind === "cove") cove = (result.output as CoveOutput | null);
       else redTeam = (result.output as RedTeamOutput | null);
       agentResults.push({
@@ -140,16 +144,25 @@ export const runVerification = async (args: {
   }
 
   progress({ type: "judge_started" });
+  const judgeStartedAt = Date.now();
   let judged: JudgeOutput | null = null;
   let judgeReasonCode: string | null = null;
   try {
     // AI-013: Judge 에는 원문을 넣지 않는다. Agent 가 만든 구조와 근거만 넣는다.
-    const raw = await args.judgeModel.judge({ claims: args.claims, findings, evidence });
+    const stageSignal = AbortSignal.timeout(8_000);
+    const signal = session.signal ? AbortSignal.any([session.signal, stageSignal]) : stageSignal;
+    signal.throwIfAborted();
+    const raw = await args.judgeModel.judge({ claims: args.claims, findings, evidence, signal });
     const parsed = judgeOutput.safeParse(raw);
     if (!parsed.success) {
       judgeReasonCode = "JUDGE_SCHEMA_INVALID";
     } else {
       const problems: string[] = [];
+      const requested = new Set(args.claims.map(claim => claim.claim_ref));
+      const returned = parsed.data.claim_results.map(claim => claim.claim_ref);
+      if (new Set(returned).size !== requested.size || returned.length !== requested.size || returned.some(ref => !requested.has(ref))) {
+        problems.push("CLAIM_COVERAGE_INVALID");
+      }
       for (const result of parsed.data.claim_results) {
         problems.push(...citationProblems(result.evidence_refs, result.state, session.evidence));
       }
@@ -159,6 +172,7 @@ export const runVerification = async (args: {
   } catch {
     judgeReasonCode = "JUDGE_CALL_FAILED";
   }
+  await recordJudgeRun(session, { claims: args.claims, findings }, judged, judgeStartedAt, judgeReasonCode);
   progress({ type: "judge_finished", status: judged ? "SUCCEEDED" : "FAILED" });
 
   return {

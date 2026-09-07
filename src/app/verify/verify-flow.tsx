@@ -19,11 +19,11 @@ import { readRunStream } from "../run-stream";
 import { CLAIM_STATE_VIEW, FsCard, FsChip } from "../fs-shell";
 import { FsLoginCard, useFsToken } from "../fs-session";
 import {
-  AGENT_LABEL, DIRECTNESS_LABEL, FRESHNESS_LABEL, coveLabel, nextAction,
+  AGENT_LABEL, AXIS_LABEL, axisResultOf, DIRECTNESS_LABEL, FRESHNESS_LABEL, coveLabel, nextAction,
 } from "../fs-labels";
 
 type Claim = {
-  claim_id: string; claim_ref: string; claim_type: string;
+  claim_id: string; claim_ref: string; claim_type: string; expected_revision_no?: number;
   statement_masked: string; materiality: string;
 };
 type Evidence = {
@@ -68,6 +68,8 @@ export function VerifyFlow() {
   const [agents, setAgents] = useState<AgentLine[]>([]);
   const [claimResults, setClaimResults] = useState<ClaimResult[]>([]);
   const [evidence, setEvidence] = useState<Evidence[]>([]);
+  const [officialChannels, setOfficialChannels] = useState<{ display_value: string }[]>([]);
+  const [axes, setAxes] = useState<{ axis: string; result_code: string; summary_masked: string }[]>([]);
   const [partial, setPartial] = useState(false);
   const [saved, setSaved] = useState(true);
   const [opened, setOpened] = useState<Set<string>>(new Set());
@@ -147,8 +149,6 @@ export function VerifyFlow() {
         method: "POST", headers: authed(),
         body: JSON.stringify({
           case_id: caseId,
-          masked_text: masked.current,
-          journey_stage: "PRE_TRANSACTION",
           claims: claims.filter((claim) => picked.has(claim.claim_id)),
         }),
       });
@@ -159,7 +159,9 @@ export function VerifyFlow() {
       }
       await readRunStream(response, (line) => {
           const event = JSON.parse(line);
-          if (event.type === "agent_started") {
+          if (event.type === "run_started" && event.claims) {
+            setClaims(event.claims);
+          } else if (event.type === "agent_started") {
             setAgents((prev) => prev.some((a) => a.agentCode === event.agentCode)
               ? prev : [...prev, { agentCode: event.agentCode, status: "RUNNING" }]);
           } else if (event.type === "agent_finished") {
@@ -167,11 +169,14 @@ export function VerifyFlow() {
               ? { ...a, status: event.status, findings: event.findings, toolCalls: event.toolCalls } : a));
           } else if (event.type === "done") {
             // 독립 검증까지 반영한 최종 상태를 쓴다. 저장된 값과 화면이 같아야 한다.
-            const finals = (event.final_claims ?? []) as ClaimResult[];
-            const merged = (event.claim_results as ClaimResult[]).map((base) => {
-              const settled = finals.find((entry) => entry.claim_ref === base.claim_ref);
-              return settled ? { ...base, ...settled } : base;
+            const finals = (event.final_claims ?? []) as (Omit<ClaimResult, "evidence_refs" | "withheld_reason" | "rationale_masked"> & { summary_masked: string })[];
+            const merged = finals.map((settled) => {
+              const base = (event.claim_results as ClaimResult[]).find(entry => entry.claim_ref === settled.claim_ref);
+              return { evidence_refs: base?.evidence_refs ?? [], withheld_reason: base?.withheld_reason ?? null,
+                ...settled, rationale_masked: settled.summary_masked };
             });
+            setAxes(event.axes ?? []);
+            setOfficialChannels(event.guide?.channels ?? []);
             setSaved(event.saved !== false);
             setClaimResults(merged);
             setEvidence(event.evidence);
@@ -250,31 +255,34 @@ export function VerifyFlow() {
       {step === "claims" ? (
         <FsCard>
           <h2 className="fs-h2">무엇을 확인할까요</h2>
-          <p className="fs-body mt-2">받은 권유와 같은 내용인지 확인하고 검증할 항목을 선택해 주세요. 입력과 다르게 추출됐다면 다시 입력해 주세요.</p>
+          <p className="fs-body mt-2">받은 권유와 같은 내용인지 확인하고 검증할 항목을 선택해 주세요. 입력과 다르게 추출됐다면 아래 문장을 직접 고쳐 주세요. 수정한 문장도 개인정보를 가린 뒤 기록합니다.</p>
           <ul className="mt-5 space-y-2">
             {claims.map((claim) => (
               <li key={claim.claim_id}>
-                <label className="flex cursor-pointer items-start gap-3 rounded-[10px] border border-[var(--fs-line)] px-4 py-3">
-                  <input type="checkbox" className="mt-1.5" checked={picked.has(claim.claim_id)}
+                <div className="flex items-start gap-3 rounded-[10px] border border-[var(--fs-line)] px-4 py-3">
+                  <input type="checkbox" aria-label={`${claim.claim_ref} 검증 대상으로 선택`} className="mt-1.5" checked={picked.has(claim.claim_id)}
                     onChange={(e) => setPicked((prev) => {
                       const next = new Set(prev);
                       if (e.target.checked) next.add(claim.claim_id); else next.delete(claim.claim_id);
                       return next;
                     })} />
                   <span className="flex-1">
-                    <span className="block leading-relaxed">{claim.statement_masked}</span>
+                    <textarea aria-label={`${claim.claim_ref} 확인 문장 수정`} className="fs-field" rows={2}
+                      maxLength={400} value={claim.statement_masked}
+                      onChange={event => setClaims(prev => prev.map(item => item.claim_id === claim.claim_id
+                        ? { ...item, statement_masked: event.target.value } : item))} />
                     <span className="mt-1.5 inline-block">
                       <FsChip tone={claim.materiality === "MATERIAL" ? "caution" : "neutral"}>
                         {claim.materiality === "MATERIAL" ? "거래에 영향이 큼" : "참고 항목"}
                       </FsChip>
                     </span>
                   </span>
-                </label>
+                </div>
               </li>
             ))}
           </ul>
           <div className="mt-5 flex flex-wrap gap-3">
-            <button type="button" disabled={busy || picked.size === 0} onClick={startRun}
+            <button type="button" disabled={busy || picked.size === 0 || claims.some(claim => picked.has(claim.claim_id) && !claim.statement_masked.trim())} onClick={startRun}
               className="fs-btn fs-btn--primary">선택한 항목 검증하기</button>
             <button type="button" disabled={busy} onClick={() => void stopInput()}
               className="fs-btn fs-btn--quiet">중단하고 다시 입력</button>
@@ -327,8 +335,19 @@ export function VerifyFlow() {
             <p className="fs-eyebrow">지금 하실 일</p>
             <h2 className="fs-h2 mt-2">{action.title}</h2>
             <p className="fs-body mt-2">{action.detail}</p>
+            {officialChannels.map(channel => <p key={channel.display_value} className="fs-body mt-3 font-semibold">공식 확인 창구: {channel.display_value}</p>)}
           </FsCard>
 
+          <FsCard>
+            <h2 className="fs-h2">세 가지 확인 결과</h2>
+            <div className="mt-4 grid gap-4 md:grid-cols-3">
+              {axes.map(axis => <section key={axis.axis}>
+                <h3 className="font-bold">{AXIS_LABEL[axis.axis]}</h3>
+                <FsChip tone={axisResultOf(axis.result_code).tone}>{axisResultOf(axis.result_code).label}</FsChip>
+                <p className="fs-meta mt-2">{axis.summary_masked}</p>
+              </section>)}
+            </div>
+          </FsCard>
           <FsCard>
             <h2 className="fs-h2">항목별 확인 결과</h2>
             <ul className="mt-5 space-y-5">

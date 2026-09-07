@@ -15,7 +15,7 @@ import { callStructured } from "@/lib/agents/model";
 import type { AgentModel } from "./runner";
 import type { JudgeModel } from "../orchestrator";
 import { JUDGE_SYSTEM } from "./prompts";
-import type { ToolEvidence } from "../schemas";
+import { coveOutput, redTeamOutput, domainAgentOutput, type ToolEvidence } from "../schemas";
 import type { ClaimExtractor } from "../intake";
 
 const MAX_EXCERPT = 400;
@@ -45,9 +45,9 @@ const toolChoiceSchema = z.object({
 });
 
 export const createAgentModel = (): AgentModel => ({
-  async chooseTools({ system, input, evidence, observations, availableTools }) {
+  async chooseTools({ system, signal, input, evidence, observations, availableTools }) {
     const result = await callStructured({
-      system: `${system}\n\n지금은 도구를 고르는 단계다. 확인이 더 필요하면 부를 도구를 고르고,\n충분하면 calls 를 빈 배열로 둔다. 목록에 없는 도구 이름을 쓰지 않는다.`,
+      system: `${system}\n\n지금은 도구를 고르는 단계다. 확인이 더 필요하면 부를 도구를 고르고,\n충분하면 calls 를 빈 배열로 둔다. 목록에 없는 도구 이름을 쓰지 않는다. query는 '햇살론15'처럼 상품명·기관명 핵심어만 넣는다. 이유는 20자 이내다.`,
       user: JSON.stringify({
         claims: input.claims,
         journey_stage: input.journey_stage,
@@ -56,7 +56,7 @@ export const createAgentModel = (): AgentModel => ({
         observations,
       }),
       schema: toolChoiceSchema,
-      maxTokens: 2000,
+      maxTokens: 1000, effort: "low", signal, maxRetries: 0, timeoutMs: 8_000,
     });
     return result.calls.map((call) => ({
       toolCode: call.tool_code,
@@ -68,37 +68,26 @@ export const createAgentModel = (): AgentModel => ({
     }));
   },
 
-  async decide({ system, input, evidence, observations }) {
+  async decide({ system, signal, input, evidence, observations }) {
     return callStructured({
-      system: `${system}\n\n지금은 판단하는 단계다. 아래 근거 목록의 ref 만 인용한다.`,
+      system: `${system}\n\n지금은 판단하는 단계다. 아래 근거 목록의 ref 만 인용한다. summary_masked와 note_masked는 각각 40자 이내 한 문장으로 답한다. limits는 꼭 필요한 항목만 한 개 이하로 답한다.`,
       user: JSON.stringify({
         claims: input.claims,
         journey_stage: input.journey_stage,
         evidence: evidenceBrief(evidence),
         observations,
       }),
-      // Schema 는 호출부가 다시 검사한다. 여기서는 모델이 형태를 맞추게만 한다.
-      schema: z.object({
-        schema_version: z.literal("out-v1"),
-        findings: z.array(z.object({
-          claim_ref: z.string(),
-          state: z.enum(["VERIFIED", "CONTRADICTED", "CONFLICT", "UNKNOWN", "NEED_MORE_INFORMATION", "WITHHELD"]),
-          relation: z.enum(["SUPPORT", "CONTRADICT", "CONTEXT"]),
-          evidence_refs: z.array(z.string()),
-          summary_masked: z.string(),
-          limits: z.array(z.string()),
-        })),
-        out_of_scope_claim_refs: z.array(z.string()),
-      }),
-      maxTokens: 6000,
+      schema: input.agent_code === "COVE" ? coveOutput
+        : input.agent_code === "RED_TEAM" ? redTeamOutput : domainAgentOutput,
+      maxTokens: 2400, effort: "low", signal, maxRetries: 0, timeoutMs: 12_000,
     });
   },
 });
 
 export const createJudgeModel = (): JudgeModel => ({
-  async judge({ claims, findings, evidence }) {
+  async judge({ claims, findings, evidence, signal }) {
     return callStructured({
-      system: JUDGE_SYSTEM,
+      system: `${JUDGE_SYSTEM}\n각 rationale_masked는 핵심 근거를 담은 40자 이내 한 문장이다. withheld_reason은 20자 이내다. 입력 Claim마다 정확히 한 결과를 낸다.`,
       user: JSON.stringify({ claims, findings, evidence: evidenceBrief(evidence) }),
       schema: z.object({
         schema_version: z.literal("out-v1"),
@@ -115,7 +104,7 @@ export const createJudgeModel = (): JudgeModel => ({
           note_masked: z.string(),
         })),
       }),
-      maxTokens: 6000,
+      maxTokens: 2400, effort: "low", signal, maxRetries: 0, timeoutMs: 8_000,
     });
   },
 });
@@ -147,7 +136,7 @@ export const createClaimExtractor = (): ClaimExtractor => async (maskedText) => 
         materiality: z.enum(["MATERIAL", "NON_MATERIAL", "UNDETERMINED"]),
       })).max(8),
     }),
-    maxTokens: 3000,
+    maxTokens: 1600, effort: "low", maxRetries: 0, timeoutMs: 10_000,
   });
   return result.claims.map((claim) => ({
     claimType: claim.claim_type,

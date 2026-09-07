@@ -57,6 +57,9 @@ export type StructuredCallOptions<T extends z.ZodType> = {
   schema: T;
   maxTokens?: number;
   effort?: Effort;
+  signal?: AbortSignal;
+  timeoutMs?: number;
+  maxRetries?: number;
 };
 
 /**
@@ -100,6 +103,8 @@ export async function callStructured<T extends z.ZodType>(
       format: zodOutputFormat(opts.schema),
       ...(opts.effort ? { effort: opts.effort } : {}),
     },
+  }, {
+    signal: opts.signal, timeout: opts.timeoutMs, maxRetries: opts.maxRetries,
   });
 
   // ⚠️ **계량이 결과 판정보다 먼저다** (N-204). 거절이든 토큰 상한이든 토큰은

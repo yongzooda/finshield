@@ -12,11 +12,18 @@
 
 import { jsonNoStore, readJson } from "@/lib/ops/http";
 import { fsql } from "@/lib/finshield/db";
-import { resolveOwner, UnauthenticatedError } from "@/lib/finshield/auth";
+import { bearerToken, resolveOwner, UnauthenticatedError } from "@/lib/finshield/auth";
 import { loadManifest } from "@/lib/finshield/registry";
 import {
   AFTERCARE_SCHEMA_VERSION, decideAftercare, normalizeAnswers,
 } from "@/lib/finshield/aftercare";
+
+import { z } from "zod";
+import { restSelect } from "@/lib/finshield/rest";
+import { gateForModel } from "@/lib/agents/pii";
+import { compareContractText, type PriorClaim } from "@/lib/finshield/contract-comparison";
+
+const contractSchema = z.record(z.uuid(), z.string().trim().max(400));
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -46,26 +53,43 @@ export async function POST(
   }
 
   const sql = fsql();
-  // 이 Case 의 가장 최근 Passport 를 딛는다. 없으면 점검할 자리가 없다.
-  const passports = await sql`
-    select id from public.evidence_passports
-     where owner_id = ${ownerId}::uuid and case_id = ${id}::uuid
-     order by passport_version_no desc limit 1`;
-  if (passports.length === 0) {
-    return jsonNoStore({ error: "먼저 거래 전 확인을 끝내야 점검할 수 있습니다" }, 409);
+  const body = parsed.value as { base_passport_id?: unknown; contract_terms?: unknown };
+  const requestedPassport = z.uuid().safeParse(body.base_passport_id);
+  if (body.base_passport_id !== undefined && !requestedPassport.success) {
+    return jsonNoStore({ error: "이전 검증 기록을 다시 선택해 주세요" }, 400);
   }
-  const passportId = passports[0].id as string;
-
-  // 거래 전 확인에서 사실과 다르다고 확정된 항목 수. 규칙이 이 값을 본다.
-  const contradicted = await sql`
-    select count(*)::int as n from public.final_claim_versions f
-     where f.owner_id = ${ownerId}::uuid and f.case_id = ${id}::uuid
-       and f.verification_run_id = (select verification_run_id from public.evidence_passports
-                                     where id = ${passportId}::uuid)
-       and f.status = 'CONTRADICTED'`;
+  const passports = await restSelect({ token: bearerToken(request)!, path: "passport_v", query: {
+    select: "passport_id,claims", case_id: `eq.${id}`, order: "passport_version_no.desc", limit: "1",
+    ...(requestedPassport.success ? { passport_id: `eq.${requestedPassport.data}` } : {}),
+  } });
+  if (!passports.length) return jsonNoStore({ error: "먼저 거래 전 확인을 끝내야 점검할 수 있습니다" }, 409);
+  const passport = passports[0] as { passport_id: string; claims: (PriorClaim & { status: string })[] };
+  const passportId = passport.passport_id;
+  const parsedTerms = contractSchema.safeParse(body.contract_terms ?? {});
+  if (!parsedTerms.success || Object.keys(parsedTerms.data).some(key => !passport.claims.some(claim => claim.claim_id === key))) {
+    return jsonNoStore({ error: "이 기록에 없는 계약 항목이거나 문장이 너무 깁니다" }, 400);
+  }
+  const terms: Record<string, string> = {};
+  for (const [key, text] of Object.entries(parsedTerms.data)) {
+    const gate = gateForModel(text);
+    if (!gate.ok) return jsonNoStore({ error: "계약 문구에서 개인정보를 지운 뒤 다시 입력해 주세요" }, 400);
+    terms[key] = gate.masked.text;
+  }
+  const comparison = compareContractText(passport.claims, terms);
   const decision = decideAftercare({
-    answers, contradictedClaims: Number(contradicted[0]?.n ?? 0),
+    answers, contradictedClaims: passport.claims.filter(claim => claim.status === "CONTRADICTED").length,
+    contractTextDifferences: comparison.filter(row => row.result === "DIFFERENT_TEXT").length,
   });
+  const storedAnswers = [
+    ...Object.entries(answers).map(([code, value]) => ({
+      question_code: code, question_version: AFTERCARE_SCHEMA_VERSION, answer_code: value,
+    })),
+    ...comparison.map(row => ({
+      question_code: `CONTRACT_${row.claim_id.replaceAll("-", "").toUpperCase()}`,
+      question_version: AFTERCARE_SCHEMA_VERSION, answer_code: row.result,
+      answer_text_masked: JSON.stringify(row),
+    })),
+  ];
 
   // 공식 창구는 Registry 에서 찾는다. 없으면 붙이지 않고 없다고 적는다.
   const institutions = [...new Set(
@@ -94,13 +118,12 @@ export async function POST(
       select private.record_precase_assessment(${ownerId}::uuid, ${id}::uuid,
         ${passportId}::uuid, ${manifest.manifestId}::uuid,
         ${decision.result}::public.aftercare_result, ${decision.summary_masked}::text,
-        ${JSON.stringify(Object.entries(answers).map(([code, value]) => ({
-          question_code: code, question_version: AFTERCARE_SCHEMA_VERSION, answer_code: value,
-        })))}::text::jsonb,
+        ${JSON.stringify(storedAnswers)}::text::jsonb,
         ${JSON.stringify(actionRows)}::text::jsonb,
         ${AFTERCARE_SCHEMA_VERSION}) as id`;
     return jsonNoStore({
       assessment_id: rows[0].id,
+      base_passport_id: passportId, comparison,
       result: decision.result,
       reasons: decision.reasons,
       actions: decision.actions.map((action) => ({

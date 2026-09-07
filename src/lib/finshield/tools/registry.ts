@@ -12,6 +12,7 @@
 import "server-only";
 import type postgres from "postgres";
 import type { SourceItem, ToolCallContext, ToolOutcome } from "./runtime";
+import { readOfficialProduct } from "./official-product";
 
 type Sql = ReturnType<typeof postgres>;
 
@@ -158,7 +159,9 @@ const searchSnapshots = async (
 };
 
 export const searchFinancialProduct = async (input: unknown, ctx: ToolCallContext): Promise<ToolOutcome> =>
-  searchSnapshots(ctx.sql as Sql, "PRODUCT", String((input as { query?: unknown })?.query ?? ""),
+  /햇살론\s*15/i.test(String((input as { query?: unknown })?.query ?? ""))
+    ? readOfficialProduct(input,ctx)
+    : searchSnapshots(ctx.sql as Sql, "PRODUCT", String((input as { query?: unknown })?.query ?? ""),
     "PRODUCT_SNAPSHOT_MATCH", "financial_product");
 
 export const verifyFinancialInstitution = async (input: unknown, ctx: ToolCallContext): Promise<ToolOutcome> =>

@@ -16,7 +16,12 @@ describe("독립 검증 반영", () => {
 
   it("재확인이 반대로 말하면 한쪽으로 정하지 않는다", () => {
     expect(applyIndependentChecks("VERIFIED", true, "REFUTED", "NONE_FOUND").state).toBe("CONFLICT");
-    expect(applyIndependentChecks("CONTRADICTED", true, "REFUTED", "NONE_FOUND").state).toBe("CONFLICT");
+    expect(applyIndependentChecks("CONTRADICTED", true, "CONFIRMED", "NONE_FOUND").state).toBe("CONFLICT");
+  });
+
+  it("Judge와 독립 검색이 모두 Claim을 반증하면 반증 판정을 보존한다", () => {
+    expect(applyIndependentChecks("CONTRADICTED", true, "REFUTED", "COUNTER_EVIDENCE"))
+      .toEqual({ state: "CONTRADICTED", reasonCode: "COVE_CONFIRMED" });
   });
 
   it("반대 근거를 찾으면 확정 대신 엇갈림으로 둔다", () => {

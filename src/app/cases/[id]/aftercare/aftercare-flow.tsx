@@ -11,17 +11,19 @@
  * (RES-007).
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FsCard, FsChip, type ChipTone } from "../../../fs-shell";
 import { FsLoginCard, useFsToken } from "../../../fs-session";
+import { fetchCase } from "../../case-api";
+import type { ContractComparison, PriorClaim } from "@/lib/finshield/contract-comparison";
 import { QUESTIONS } from "@/lib/finshield/aftercare";
 
 type Action = {
   action_code: string; label: string; detail: string;
   required_material_codes: string[]; official_channel: string | null;
 };
-type Result = { result: string; reasons: string[]; actions: Action[] };
+type Result = { result: string; reasons: string[]; actions: Action[]; comparison?: ContractComparison[] };
 
 const RESULT_VIEW: Record<string, { label: string; state: string; tone: ChipTone; lead: string }> = {
   NORMAL_MANAGEMENT: {
@@ -49,9 +51,26 @@ const MATERIAL_LABEL: Record<string, string> = {
 export function AftercareFlow({ caseId }: { caseId: string }) {
   const [token, setToken, ready] = useFsToken();
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [prior, setPrior] = useState<PriorClaim[]>([]);
+  const [basePassport, setBasePassport] = useState<string | null>(null);
+  const [terms, setTerms] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
+
+  useEffect(() => {
+    if (!token) return;
+    let alive = true;
+    void fetchCase<{ passports: { id: string; verification_run_id: string }[];
+      final_claims: (PriorClaim & { verification_run_id: string })[] }>(caseId, token).then(response => {
+      if (!alive) return;
+      if (!response.ok) { setNotice(response.error); return; }
+      const passport = response.data.passports[0];
+      setBasePassport(passport?.id ?? null);
+      setPrior(response.data.final_claims.filter(claim => claim.verification_run_id === passport?.verification_run_id));
+    });
+    return () => { alive = false; };
+  }, [caseId, token]);
 
   const submit = async () => {
     if (!token) return;
@@ -60,7 +79,7 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
       const response = await fetch(`/api/finshield/cases/${caseId}/aftercare`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ answers }),
+        body: JSON.stringify({ answers, base_passport_id: basePassport, contract_terms: terms }),
       });
       const body = await response.json().catch(() => null);
       if (!response.ok) {
@@ -93,6 +112,19 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
           </div>
         </header>
 
+        {(result.comparison ?? []).length > 0 ? <FsCard className="mt-8">
+          <h2 className="fs-h2">이전 권유와 계약 문구 비교</h2>
+          <p className="fs-meta mt-2">입력한 문구의 차이입니다. 조건 변경이나 위법 여부의 확정 판단은 아닙니다.</p>
+          <div className="mt-4 space-y-4">{result.comparison!.map(row => <section key={row.claim_id} className="border-t border-[var(--fs-line)] pt-3">
+            <FsChip tone={row.result === "DIFFERENT_TEXT" ? "caution" : "neutral"}>
+              {row.result === "DIFFERENT_TEXT" ? "문구 차이 · 확인 필요" : row.result === "SAME_TEXT" ? "입력 문구 일치" : "계약 문구 미입력"}
+            </FsChip>
+            <div className="mt-2 grid gap-3 md:grid-cols-2">
+              <p className="fs-body"><strong>이전 권유</strong><br />{row.before}</p>
+              <p className="fs-body"><strong>입력한 계약 문구</strong><br />{row.contract || "확인하지 못했습니다."}</p>
+            </div>
+          </section>)}</div>
+        </FsCard> : null}
         <FsCard className="mt-8">
           <h2 className="fs-h2">지금 하실 일</h2>
           <ul className="mt-4 space-y-5">
@@ -143,6 +175,16 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
       {notice ? <FsCard className="mt-8"><p className="fs-body">{notice}</p></FsCard> : null}
 
       <FsCard className="mt-8">
+        <h2 className="fs-h2">실제 계약서에 적힌 조건</h2>
+        <p className="fs-body mt-2">이전 검증 기록의 문장과 비교할 계약 문구를 입력하세요. 시험용 합성 계약만 사용하고, 이름·계좌번호는 넣지 마세요.</p>
+        <div className="mt-4 space-y-4">{prior.map(claim => <div key={claim.claim_id}>
+          <label className="fs-label" htmlFor={`contract-${claim.claim_id}`}>이전 권유: {claim.statement_masked}</label>
+          <textarea id={`contract-${claim.claim_id}`} rows={2} maxLength={400} className="fs-field"
+            value={terms[claim.claim_id] ?? ""} placeholder="계약서의 대응 문구를 입력하세요. 없으면 비워 두세요."
+            onChange={event => setTerms(prev => ({ ...prev, [claim.claim_id]: event.target.value }))} />
+        </div>)}</div>
+      </FsCard>
+      <FsCard className="mt-8">
         <ul className="space-y-7">
           {QUESTIONS.map((question) => (
             <li key={question.code}>
@@ -166,7 +208,7 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
         </ul>
 
         <div className="mt-8">
-          <button type="button" disabled={busy || answered === 0} onClick={() => void submit()}
+          <button type="button" disabled={busy || answered === 0 || !basePassport} onClick={() => void submit()}
             className="fs-btn fs-btn--primary">
             {busy ? "정리하는 중" : "점검 결과 보기"}
           </button>

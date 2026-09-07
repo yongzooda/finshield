@@ -68,6 +68,7 @@ export async function POST(request: Request): Promise<Response> {
         masked_text: result.maskedText,
         claims: result.claims.map((claim) => ({
           claim_id: claim.claimId,
+          expected_revision_no: 1,
           claim_ref: claim.claim_ref,
           claim_type: claim.claim_type,
           statement_masked: claim.statement_masked,

@@ -97,6 +97,7 @@ export type ToolCallContext = {
   runId: string;
   manifest: ResolvedManifest;
   recorder?: RunRecorder;
+  signal?: AbortSignal;
 };
 
 export type RunSession = ToolCallContext & {

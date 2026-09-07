@@ -52,6 +52,7 @@ export type ToolChoice = { toolCode: string; input: unknown };
 export type AgentModel = {
   chooseTools: (args: {
     system: string;
+    signal?: AbortSignal;
     input: DomainAgentInput;
     evidence: ToolEvidence[];
     observations: Record<string, unknown>[];
@@ -59,15 +60,16 @@ export type AgentModel = {
   }) => Promise<ToolChoice[]>;
   decide: (args: {
     system: string;
+    signal?: AbortSignal;
     input: DomainAgentInput;
     evidence: ToolEvidence[];
     observations: Record<string, unknown>[];
   }) => Promise<unknown>;
 };
 
-export type AgentRunResult = {
+export type AgentRunResult<T = DomainAgentOutput> = {
   agentRunId: string;
-  output: DomainAgentOutput | null;
+  output: T | null;
   evidence: ToolEvidence[];
   /** 인용 이름과 저장된 근거 행의 연결. 최종 확정이 이 식별자로 근거를 건다. */
   evidenceIds: Map<string, string>;
@@ -76,7 +78,7 @@ export type AgentRunResult = {
   toolCalls: number;
 };
 
-export const runDomainAgent = async (args: {
+export const runDomainAgent = async <T = DomainAgentOutput>(args: {
   session: RunSession;
   agentCode: string;
   input: DomainAgentInput;
@@ -84,14 +86,17 @@ export const runDomainAgent = async (args: {
   impls: Record<string, ToolImpl>;
   usage?: { inputTokens: number; outputTokens: number; costMicrounits: number };
   /** 다른 Schema 로 받는 Agent 를 위한 자리. 없으면 Domain Schema 로 받는다. */
-  decodeOutput?: (raw: unknown) => Decoded;
-}): Promise<AgentRunResult> => {
+  decodeOutput?: (raw: unknown, evidence: ToolEvidence[]) => Decoded;
+}): Promise<AgentRunResult<T>> => {
   const { session, agentCode, input, model, impls } = args;
   const spec = AGENTS.find((agent) => agent.agentCode === agentCode);
   if (!spec) throw new Error(`Manifest 에 없는 Agent 다: ${agentCode}`);
   const system = systemPromptFor(agentCode);
   const { sql, ownerId, caseId, runId } = session;
   const startedAt = Date.now();
+  const stageLimit = ["COVE", "RED_TEAM"].includes(agentCode) ? 12_000 : 8_000;
+  const stageSignal = AbortSignal.timeout(stageLimit);
+  const signal = session.signal ? AbortSignal.any([session.signal, stageSignal]) : stageSignal;
 
   const evidence: ToolEvidence[] = [];
   const observations: Record<string, unknown>[] = [];
@@ -100,23 +105,28 @@ export const runDomainAgent = async (args: {
   let reasonCode: string | null = null;
 
   for (let turn = 0; turn < MAX_TOOL_TURNS; turn += 1) {
+    // 조회가 판단 시간을 모두 소비하지 않게 한다. 첫 조회 뒤에는 구조화 판단에
+    // 최소 6초를 남긴다. 전체 Run의 원래 deadline은 별도로 계속 적용된다.
+    if (turn > 0 && Date.now() - startedAt >= stageLimit - 6_000) break;
     let choices: ToolChoice[];
     try {
+      signal.throwIfAborted();
       choices = await model.chooseTools({
-        system, input, evidence, observations, availableTools: [...spec.tools],
+        system, signal, input, evidence, observations, availableTools: [...spec.tools],
       });
     } catch {
-      reasonCode = "TOOL_CHOICE_FAILED";
+      reasonCode = signal.aborted ? "DEADLINE_EXCEEDED" : "TOOL_CHOICE_FAILED";
       break;
     }
     if (choices.length === 0) break;
     for (const choice of choices) {
+      if (signal.aborted) { reasonCode = "DEADLINE_EXCEEDED"; break; }
       const allowed = spec.tools.find((tool) => tool.toolCode === choice.toolCode);
       // Allowlist 밖을 고르면 부르지 않고 그 사실만 남긴다. 모델의 요청은 허가가 아니다.
       if (!allowed) { reasonCode = "TOOL_NOT_ALLOWED"; continue; }
       const impl = impls[choice.toolCode];
       if (!impl) { reasonCode = "TOOL_NOT_IMPLEMENTED"; continue; }
-      const result = await executeTool(session, agentCode, choice.toolCode,
+      const result = await executeTool({ ...session, signal }, agentCode, choice.toolCode,
         allowed.purposeCode, choice.input, impl);
       toolCalls += 1;
       pendings.push(result.pending);
@@ -125,33 +135,37 @@ export const runDomainAgent = async (args: {
     }
   }
 
-  let output: DomainAgentOutput | null = null;
+  let output: T | null = null;
   let status: AgentRunResult["status"] = "SUCCEEDED";
   try {
-    const raw = await model.decide({ system, input, evidence, observations });
+    signal.throwIfAborted();
+    const raw = await model.decide({ system, signal, input, evidence, observations });
     // 다른 Schema 로 받는 Agent 는 자기 해독기를 준다. 없으면 Domain Schema 로 받는다.
     const decoded = args.decodeOutput
-      ? args.decodeOutput(raw)
-      : decodeDomainOutput(raw, session);
+      ? args.decodeOutput(raw, evidence)
+      : decodeDomainOutput(raw, { ...session, evidence: new Map(evidence.map((entry) => [entry.evidence_ref, entry])) });
     if (!decoded.ok) {
       status = "FAILED";
       reasonCode = decoded.reason;
     } else {
-      output = decoded.value as DomainAgentOutput;
+      output = decoded.value as T;
     }
   } catch {
     status = "FAILED";
-    reasonCode = "MODEL_CALL_FAILED";
+    reasonCode = signal.aborted ? "DEADLINE_EXCEEDED" : "MODEL_CALL_FAILED";
   }
 
   if (status === "SUCCEEDED" && reasonCode) status = "PARTIAL";
+
+  const summary = output as { findings?: unknown[]; results?: unknown[] } | null;
+  const findingCount = summary?.findings?.length ?? summary?.results?.length ?? 0;
 
   // 남기는 자리가 다를 수 있다. 판단은 위에서 이미 끝났고 여기서는 기록만 한다.
   if (session.recorder) {
     const agentRunId = await session.recorder.agentRun({
       agentCode: spec.agentCode, version: spec.version, logicalKey: spec.logicalKey, status,
       startedAt, finishedAt: Date.now(), reasonCode, toolCalls,
-      evidenceCount: evidence.length, findingCount: output?.findings.length ?? 0,
+      evidenceCount: evidence.length, findingCount: findingCount,
     });
     const evidenceIds = await session.recorder.toolRuns(agentRunId, pendings);
     return { agentRunId, output, evidence, evidenceIds, status, reasonCode, toolCalls };
@@ -171,7 +185,7 @@ export const runDomainAgent = async (args: {
             ${spec.inputSchemaVersion}, ${spec.outputSchemaVersion}, ${spec.promptVersion},
             ${digest(input)}, ${output ? digest(output) : null},
             ${sql.json({ schema_version: "1", tool_calls: toolCalls, evidence_count: evidence.length,
-                         finding_count: output?.findings.length ?? 0 })},
+                         finding_count: findingCount })},
             'anthropic', ${process.env.ANTHROPIC_MODEL ?? null},
             ${args.usage?.inputTokens ?? 0}, ${args.usage?.outputTokens ?? 0},
             ${args.usage?.costMicrounits ?? 0},
@@ -201,8 +215,8 @@ export const runReviewAgent = async <T>(args: {
   impls: Record<string, ToolImpl>;
   parse: (raw: unknown) => { ok: true; value: T } | { ok: false };
   refsOf: (value: T) => { refs: string[]; confirmed: boolean }[];
-}): Promise<{ agentRunId: string; output: T | null; status: AgentRunResult["status"]; reasonCode: string | null; toolCalls: number }> => {
-  const result = await runDomainAgent({
+}): Promise<AgentRunResult<T>> => {
+  const result = await runDomainAgent<T>({
     session: args.session,
     agentCode: args.agentCode,
     input: {
@@ -217,20 +231,17 @@ export const runReviewAgent = async <T>(args: {
     model: args.model,
     impls: args.impls,
     // Domain 출력 Schema 대신 이 Agent 의 Schema 로 받는다.
-    decodeOutput: (raw) => {
+    decodeOutput: (raw, evidence) => {
       const parsed = args.parse(raw);
       if (!parsed.ok) return { ok: false, reason: "OUTPUT_SCHEMA_INVALID" };
       const problems: string[] = [];
       for (const entry of args.refsOf(parsed.value)) {
-        problems.push(...citationProblems(entry.refs, entry.confirmed ? "VERIFIED" : "UNKNOWN", args.session.evidence));
+        problems.push(...citationProblems(entry.refs, entry.confirmed ? "VERIFIED" : "UNKNOWN", new Map(evidence.map((entry) => [entry.evidence_ref, entry]))));
       }
       return problems.length > 0
         ? { ok: false, reason: "CITATION_INVALID" }
         : { ok: true, value: parsed.value as unknown };
     },
-  }) as unknown as AgentRunResult & { output: T | null };
-  return {
-    agentRunId: result.agentRunId, output: result.output,
-    status: result.status, reasonCode: result.reasonCode, toolCalls: result.toolCalls,
-  };
+  });
+  return result;
 };

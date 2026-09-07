@@ -8,44 +8,23 @@
  */
 
 import { ndjsonStream } from "@/lib/ops/ndjson";
-import { jsonNoStore, readJson, str } from "@/lib/ops/http";
+import { jsonNoStore, readJson } from "@/lib/ops/http";
 import { fsql } from "@/lib/finshield/db";
-import { bearerToken, resolveOwner, UnauthenticatedError } from "@/lib/finshield/auth";
-import { restSelect } from "@/lib/finshield/rest";
-import { confirmClaims } from "@/lib/finshield/intake";
+import { resolveOwner, UnauthenticatedError } from "@/lib/finshield/auth";
+import { loadRunInput, maskSelection, selectionSchema } from "@/lib/finshield/run-input";
 import { loadManifest } from "@/lib/finshield/registry";
 import { runVerification, type RunProgress } from "@/lib/finshield/orchestrator";
-import { buildFinalClaims, finalizeRun } from "@/lib/finshield/finalize";
+import { buildAxisResults, buildFinalClaims, finalizeRun } from "@/lib/finshield/finalize";
 import { createAgentModel, createJudgeModel } from "@/lib/finshield/agents/model-adapter";
-import type { ConfirmedClaim } from "@/lib/finshield/schemas";
+import { createHash, randomUUID } from "node:crypto";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
-const STAGES = ["PRE_TRANSACTION", "ENROLLED", "FUNDS_SENT_OR_DAMAGE_SUSPECTED"] as const;
 
-/**
- * 적합성을 볼 수 있는 프로필이 있는지 (AUTH-007).
- *
- * 프로필은 사용자 소유 표라 worker 가 읽지 못한다. 사용자의 token 으로 묻는다.
- * 읽지 못했으면 있다고 보지 않는다. 없는 쪽으로 미루는 편이 안전하다.
- */
-const profileUsable = async (token: string): Promise<boolean> => {
-  if (!token) return false;
-  try {
-    const rows = await restSelect({
-      token, path: "financial_profiles", query: { select: "completeness", limit: "1" },
-    });
-    const completeness = (rows[0] as { completeness?: unknown } | undefined)?.completeness;
-    return typeof completeness === "string" && completeness !== "SKIPPED";
-  } catch {
-    return false;
-  }
-};
 
 export async function POST(request: Request): Promise<Response> {
-  const token = bearerToken(request) ?? "";
   let ownerId: string;
   try {
     ownerId = await resolveOwner(request);
@@ -56,17 +35,12 @@ export async function POST(request: Request): Promise<Response> {
 
   const parsed = await readJson(request);
   if (!parsed.ok) return jsonNoStore({ error: "요청 형식이 올바르지 않습니다" }, 400);
-  const body = parsed.value as { case_id?: unknown; claims?: unknown; journey_stage?: unknown; masked_text?: unknown };
-  const caseId = str(body, "case_id");
-  if (!caseId) return jsonNoStore({ error: "Case 를 지정해 주세요" }, 400);
-  const stage = STAGES.includes(body.journey_stage as (typeof STAGES)[number])
-    ? (body.journey_stage as (typeof STAGES)[number]) : "PRE_TRANSACTION";
-  const selected = Array.isArray(body.claims) ? body.claims : [];
-  const claims = selected.filter((claim): claim is { claim_id: string } & ConfirmedClaim =>
-    typeof (claim as { claim_id?: unknown })?.claim_id === "string"
-    && typeof (claim as { claim_ref?: unknown })?.claim_ref === "string");
-  if (claims.length === 0) return jsonNoStore({ error: "확인할 Claim 을 하나 이상 골라 주세요" }, 400);
-  const maskedText = (str(body, "masked_text") ?? "").slice(0, 4000);
+  const body = selectionSchema.safeParse(parsed.value);
+  if (!body.success) return jsonNoStore({ error: "확인할 항목을 다시 선택해 주세요" }, 400);
+  const caseId = body.data.case_id;
+  let selected: ReturnType<typeof maskSelection>;
+  try { selected = maskSelection(body.data); }
+  catch { return jsonNoStore({ error: "수정한 문장에서 개인정보를 지운 뒤 다시 확인해 주세요" }, 400); }
 
   // 진행 이벤트를 큐에 쌓고 소비자가 깨어나면 흘린다. 가짜 백분율 대신
   // 실제로 일어난 단계만 보낸다.
@@ -84,28 +58,32 @@ export async function POST(request: Request): Promise<Response> {
 
   const work = (async () => {
     try {
-      await confirmClaims({ sql: fsql(), ownerId, caseId, claimIds: claims.map((claim) => claim.claim_id) });
-      await fsql()`select private.transition_financial_case(${ownerId}::uuid, ${caseId}::uuid,
-        'INPUT_REVIEW'::public.case_lifecycle, 'USER', 'CLAIMS_CONFIRMED') as ok`;
       const manifest = await loadManifest(fsql());
-      const run = await fsql()`
-        select private.create_verification_run(${ownerId}::uuid, ${caseId}::uuid,
-          ${manifest.manifestId}::uuid, ${`run-${caseId}-${Date.now()}`}::text,
-          ${"0".repeat(64)}::text, 'INITIAL'::public.verification_run_kind, null) as id`;
-      const runId = run[0].id as string;
+      const runId = await fsql().begin(async sql => {
+        await sql`select private.confirm_case_claims(${ownerId}::uuid, ${caseId}::uuid,
+          ${JSON.stringify(selected)}::text::jsonb)`;
+        await sql`select private.transition_financial_case(${ownerId}::uuid, ${caseId}::uuid,
+          'INPUT_REVIEW'::public.case_lifecycle, 'USER', 'CLAIMS_CONFIRMED')`;
+        const run = await sql`select private.create_verification_run(${ownerId}::uuid, ${caseId}::uuid,
+          ${manifest.manifestId}::uuid, ${`run-${randomUUID()}`}::text,
+          ${createHash("sha256").update(JSON.stringify(selected)).digest("hex")}::text,
+          'INITIAL'::public.verification_run_kind, null) as id`;
+        return run[0].id as string;
+      });
+      const input = await loadRunInput(fsql(), ownerId, caseId, runId);
+      const claims = input.claims;
       await fsql()`select id from private.start_verification_run(${runId}::uuid)`;
-      push({ type: "run_started", run_id: runId });
+      push({ type: "run_started", run_id: runId, claims });
 
       const result = await runVerification({
-        ctx: { sql: fsql(), ownerId, caseId, runId, manifest },
+        ctx: { sql: fsql(), ownerId, caseId, runId, manifest,
+          signal: AbortSignal.any([request.signal, AbortSignal.timeout(Math.max(1, Date.parse(input.deadline_at) - Date.now() - 6000))]) },
         claims: claims.map((claim) => ({
           claim_ref: claim.claim_ref, claim_type: claim.claim_type,
           statement_masked: claim.statement_masked, materiality: claim.materiality,
         })),
-        // 접수 단계에서 Gate 를 지난 문장이다. 브라우저가 이미 들고 있는 값이라
-        // 새로 드러나는 것이 없다. Judge 에는 넘어가지 않고 Domain Agent 만 본다.
-        maskedIntake: maskedText,
-        journeyStage: stage,
+        maskedIntake: "",
+        journeyStage: input.journey_stage,
         agentModel: createAgentModel(),
         judgeModel: createJudgeModel(),
         progress,
@@ -117,11 +95,13 @@ export async function POST(request: Request): Promise<Response> {
         statement_masked: claim.statement_masked, materiality: claim.materiality,
       }));
       const finals = buildFinalClaims({ claims: withIds, run: result });
-      const hasProfile = await profileUsable(token);
+      const hasProfile = input.profile_completeness === "COMPLETE";
       const saved = await finalizeRun({ sql: fsql(), runId, claims: withIds, run: result, hasProfile });
 
       push({
         type: "done",
+        guide: saved.ok ? saved.guide : null,
+        axes: buildAxisResults(finals, hasProfile),
         saved: saved.ok,
         save_reason: saved.ok ? null : saved.reason,
         // 독립 검증이 상태를 낮췄으면 그 결과를 보여 준다. 화면과 저장이 같은 값을 쓴다.
