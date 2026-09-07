@@ -8,13 +8,19 @@
 - 상위 기획: `docs/01-product-plan.md`
 - DB 구현 기준: `docs/03-database-spec.md`
 - Provider Stack ADR: `docs/adr/001-p0-provider-stack.md`
-- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`·`B-FILE-SAFETY`·`B-RUNTIME-01`·`B-LAW-01`이 `PASS`다.
+- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`·`B-FILE-SAFETY`·`B-RUNTIME-01`·`B-LAW-01`이 `PASS`다.
 - Migration `0025`가 들어와 `B-SUPABASE-01`·`B-RATE-01`·`B-CONSENT-01`·`B-STORAGE-01`·`B-DELETE-01`의 scope digest가 바뀌었다. 다섯을 다시 재서 채택한다.
 - Product Release Gate (`N-QLT-009`): `NOT-EVALUATED` — P0 기능 구현 뒤 평가한다. Claim 판정 품질 `B-CLAIM-01`을 포함해 4개다.
 - 배포: Vercel `finshield` Production 연결 완료 (`https://finshield-gamma.vercel.app`)
 - 기존 PreCase 저장소·배포: 유지
 - 작업 기록: 커밋·squash·이슈·PR·직접 작성한 댓글은 한국어. 과거 SHA는 사용자 승인대로 보존하고 `docs/ops/korean-record-corrections.md`의 정정표를 따른다.
 - 로컬 설정: `docs/ops/local-environment.md`를 따른다. `.env.local` 부재는 GitHub Provider 시험의 장애 원인이 아니며 실제 전용 개발 DB 설정과 구분한다.
+
+## 2026-09-07 실행 의존성 사전등록
+
+- 격리 Parser와 요청에서 독립된 Job 검증을 위해 Sandbox·Workflow SDK 및 취약점 수정 의존성을 고정했다. 애플리케이션 기능 코드는 이 변경에 포함하지 않는다.
+- 패키지 실행 scope가 바뀌어 `B-MODEL-01`을 `NOT-EVALUATED`, 과거 증거를 `STALE`로 되돌렸다. 아래 모델 측정 완료 항목은 과거 이력이다. 새 main 측정과 별도 Adoption PR을 거쳐야 현재 부분 PASS가 된다.
+- 합격식·모델·Fixture·실행 권한·검사 조건을 유지한다. 상세는 `docs/ops/provider-model-spike.md`를 따른다.
 
 ## 2026-09-07 제품 점검과 화면 개편
 
@@ -66,7 +72,7 @@
 ## 다음 작업 순서
 
 1. `N-QLT-010` Live Spike 증거 확보와 Implementation `NO-GO` 차단 해제
-   - `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`은 채택됐다. `B-EMBED-01` v1·v2 실패 이력(run `33861971976`·`33870910880`, issue #29)은 회귀셋으로 보존하고 재실행하지 않는다.
+   - `B-MODEL-01`은 의존성 변경 뒤 재측정한다. `B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`은 채택됐다. `B-EMBED-01` v1·v2 실패 이력(run `33861971976`·`33870910880`, issue #29)은 회귀셋으로 보존하고 재실행하지 않는다.
    - 채택된 `B-SOURCE-03` 결과는 `scripts/kb/load-source-snapshots.mjs`로 `kb.source_snapshots`에 적재한다. 운영 적재는 Migration 적용 뒤 한다.
    - 나머지 16개 blocker는 `docs/ops/quality-evaluation-plan.md`에 따라 기준 완화·결과 맞춤 라벨 수정 없이 진행하며 Gate 상태를 변경하지 않는다.
 2. P0 `docs/04-feature-spec.md` — Implementation Gate가 `GO`가 된 뒤 확정
