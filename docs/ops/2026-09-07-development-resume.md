@@ -4,6 +4,8 @@
 
 ## 2026-09-07 12시 37분: 실제 회원 PDF 연결 통과
 
+- 12시 50분: 실제 브라우저 로그인 → PDF TUS 업로드 → TTL Workflow 접수 → Claim 6개 표시 → 금리 1개 선택 → 6 Agent·Judge → 결과 화면·실제 DB COMPLETED까지 확인했다. 원본 cleanup도 SUCCEEDED다. Run 15회 USD 0.069194를 모두 정산했다(Intake 별도). 품질 Gate·복수 Claim 정상 완료와 구분한다.
+
 - 고정 합성 PDF로 사용자 JWT의 실제 TUS 업로드 → Storage 읽기 → 실제 Sandbox Parser → PII Gate → Sonnet 5 → 실제 FinShield worker 페이지·Claim 저장 → 중단·물리 삭제를 시험했다. 모의 Storage를 사용하지 않았다. 1쪽·Claim 6개, 처리·삭제 12,988ms, 전체 시험 15.25초, 모델 1회 7,956 microunits(약 USD 0.008)를 정산했다. 삭제 함수가 실제 부재를 확인했고 재조회도 실패했다. OCR은 사용하지 않았다.
 - 결과는 `evidence/development/files/2026-09-07-native-pdf.json`, 재현은 명시적으로 켜는 `file-storage-live.integration.test.ts`에 있다. UI·Workflow·이미지 OCR 전체 성공이나 Gate 증거로 표현하지 않는다.
 - 원격 예산 설정이 비어 있어 Sonnet 5 합성 검증용 일일 USD 0.50, 소유자 일일 USD 0.30, Case·Run USD 0.20 상한을 추가했다. 기존 설정을 덮거나 상한을 올리지 않았다. 정책은 `synthetic-file-probe-20260907`이며 운영 비용 정책의 승인으로 해석하지 않는다.
