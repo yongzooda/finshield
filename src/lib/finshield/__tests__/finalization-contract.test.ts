@@ -71,12 +71,12 @@ it("초기 검증 알림을 재검증 변화 없음으로 바꾸지 않고 미�
   const query=strings.join("");
   if(query.includes("claim_notification_events"))return ["VERIFICATION_COMPLETED","REVALIDATION_NO_CHANGE","UNSUPPORTED_EVENT"].map((type,index)=>({id:`e${index}`,event_type:"NOTIFICATION_REQUESTED",deduplication_key:`k${index}`,payload:{notification_type:type,owner_id:"owner",case_id:"case"}}));
   if(query.includes("insert into public.notifications"))inserts.push(params);
-  if(query.includes("finish_outbox_event"))finishes.push(params);
+  if(query.includes("finish_outbox_event"))finishes.push([...params,query.includes("'NOTIFY_FAILED'")]);
   return [];
  });
  expect(await dispatchNotifications(sql as unknown as ReturnType<typeof postgres>)).toBe(2);
  expect(inserts[0]).toContain("검증 결과가 저장되었습니다");
  expect(inserts[0]).not.toContain("다시 확인했으나 달라진 것이 없습니다");
  expect(inserts[1]).toContain("다시 확인했으나 달라진 것이 없습니다");
- expect(finishes).toContainEqual(["e2","NOTIFY_FAILED"]);
+ expect(finishes).toContainEqual(["e2",true]);
 });
