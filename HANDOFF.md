@@ -1,3 +1,7 @@
+## 2026-09-08 실제 계정 탈퇴 검증
+
+별도 합성 계정의 Case·실제 TUS PNG에서 보호 Preview 계정 탈퇴 Workflow를 완료했다. 첫 응답 유실 후 다른 세션 복원·접수 후 새 작업 차단·중복 요청·Auth 마지막 삭제·영수증만으로 완료 조회를 확인했다. Auth/Profile/Case/Storage 부재와 완료 원장 1건을 별도 SQL로 확인했다. 기존 시험 계정은 보존하고 임시 Preview 허용 값을 복원했다. [검증 범위](evidence/development/deletion/2026-09-08-account-preview.md)를 따른다. 신규 Slot 차단의 500은 409 안내로 수정했고 전체 장애·Live OCR 파생물 삭제·Release 완료는 아니다.
+
 ## 2026-09-07 23시 50분: 원격 DB 계약 적용
 
 PR #234를 main `2ae0230`으로 squash merge하고 원격에 0038~0041만 forward 적용했다. 적용 전 기존 0037 해시 6종, 적용 후 0041 격리 기준 해시 6종이 각각 일치했다. RLS/FORCE 81개·anon 누출 0·Worker 본문 거부 13표를 확인했다. main CI 34134803969는 통과했다. main 부분 PASS 8/20, 기능 Draft는 Health 차이로 7/20이며 정식 재채택 전이다. 실제 합성 계정 탈퇴·Profile/알림 복원을 검증 중이다.

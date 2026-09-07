@@ -37,5 +37,11 @@ export async function POST(request:Request) {
       return jsonNoStore({error:"파일 정리 예약을 완료하지 못했습니다. 잠시 후 다시 시도해 주세요."},503);
     }
     return jsonNoStore({...slot,supabase_url:env.SUPABASE_URL,publishable_key:env.SUPABASE_ANON_KEY},200);
-  }catch(error){if(error instanceof UnauthenticatedError)return jsonNoStore({error:error.message},401);throw error;}
+  }catch(error){
+    if(error instanceof UnauthenticatedError)return jsonNoStore({error:error.message},401);
+    if(error instanceof Error && error.message === "ACCOUNT_DELETING") {
+      return jsonNoStore({code:"ACCOUNT_DELETING",error:"계정 삭제가 진행 중입니다. 개인정보 관리 화면에서 진행 상태를 확인해 주세요."},409);
+    }
+    throw error;
+  }
 }

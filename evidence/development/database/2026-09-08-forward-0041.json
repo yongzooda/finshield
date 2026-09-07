@@ -1,0 +1,9 @@
+{
+  "main_sha": "2ae023021957cfc3ffd1972acc6f80af5ac91eb6",
+  "files": {
+    "supabase/migrations/0038_account_deletion.sql": "d834138d6a6d8752be426cb5df32daf5432fe4c74805405b6c668046cf077656",
+    "supabase/migrations/0039_shared_provider_budget.sql": "7422f28c8db9306864c74e60d4578abee4f687d1966c1dcb5cc1355ba73bcce8",
+    "supabase/migrations/0040_notification_delivery.sql": "34de0c5c912de6fda48ad3ea5b2be3bb9cc65410e69b38771ed4ba478cebe045",
+    "supabase/migrations/0041_profile_policy.sql": "38500b006f0e27c639162c500667f05e1ebb45b9bc28a755f8399477bf4ae38d"
+  }
+}
