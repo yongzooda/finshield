@@ -1,6 +1,6 @@
 "use client";
 
-import { sessionFetch } from "../../../session-client";
+import { sessionFetch, readSessionToken, sessionIdentity } from "../../../session-client";
 
 /**
  * 가입 후 점검 (S-016).
@@ -13,17 +13,23 @@ import { sessionFetch } from "../../../session-client";
  * (RES-007).
  */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { FsCard, FsChip, type ChipTone } from "../../../fs-shell";
 import { FsLoginCard, useFsToken } from "../../../fs-session";
+import { fetchCase } from "../../case-api";
+import type { ContractComparison, PriorClaim } from "@/lib/finshield/contract-comparison";
+import { AftercareDocuments } from "./aftercare-documents";
 import { QUESTIONS } from "@/lib/finshield/aftercare";
 
 type Action = {
   action_code: string; label: string; detail: string;
   required_material_codes: string[]; official_channel: string | null;
 };
-type Result = { result: string; reasons: string[]; actions: Action[] };
+type Result = { assessment_no?: number; finished_at?: string; result: string; reasons: string[]; actions: Action[]; comparison?: ContractComparison[] };
+type ReviewJob = { id: string; status: string; request_key: string; base_passport_id: string; reason_code: string | null;
+  input_masked: { answers: { question_code: string; answer_code: string }[]; comparison: ContractComparison[] };
+  agent_trace: { agent_code: string; status: string; tools: { tool_code: string; sources: { ref: string; title: string; url: string | null; excerpt_masked: string; reference_only: boolean }[] }[] }[] };
 
 const RESULT_VIEW: Record<string, { label: string; state: string; tone: ChipTone; lead: string }> = {
   NORMAL_MANAGEMENT: {
@@ -50,34 +56,141 @@ const MATERIAL_LABEL: Record<string, string> = {
 
 export function AftercareFlow({ caseId }: { caseId: string }) {
   const [token, setToken, ready] = useFsToken();
+  const sessionKey = sessionIdentity(token);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [prior, setPrior] = useState<PriorClaim[]>([]);
+  const [basePassport, setBasePassport] = useState<string | null>(null);
+  const [terms, setTerms] = useState<Record<string, string>>({});
+  const [documentLinks,setDocumentLinks]=useState<Record<string,string>>({});
+  const [fileBusy,setFileBusy]=useState(false);
   const [busy, setBusy] = useState(false);
+  const [loadedSession, setLoadedSession] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
+  const [reviewJob, setReviewJob] = useState<ReviewJob | null>(null);
+  const requestKey = useRef<{ payload: string; id: string } | null>(null);
+
+  useEffect(() => {
+    const token = readSessionToken();
+    if (!ready || !token || sessionIdentity(token) !== sessionKey) return;
+    let alive = true;
+    void (async () => {
+      try {
+        const [response, savedResponse] = await Promise.all([
+          fetchCase<{ passports: { id: string; verification_run_id: string }[];
+            final_claims: (PriorClaim & { verification_run_id: string })[] }>(caseId, token),
+          sessionFetch(`/api/finshield/cases/${caseId}/aftercare`, token, { headers: { Authorization: `Bearer ${token}` } }),
+        ]);
+        const saved = await savedResponse.json();
+        if (!alive) return;
+        if (!response.ok) { setNotice(response.error); return; }
+        if (!savedResponse.ok) { setNotice(saved.error ?? "이전 점검 결과를 읽지 못했습니다"); return; }
+        const assessment = saved.assessment;
+        setReviewJob(saved.review_job ?? null);
+        setDocumentLinks(Object.fromEntries((saved.review_job?.input_masked?.document_sources??[]).map((s:{target_claim_id:string;id:string})=>[s.target_claim_id,s.id])));
+        const passport = saved.review_job || assessment
+          ? response.data.passports.find(row => row.id === (saved.review_job?.base_passport_id ?? assessment.base_passport_id))
+          : response.data.passports[0];
+        setBasePassport(passport?.id ?? null);
+        setPrior(response.data.final_claims.filter(claim => claim.verification_run_id === passport?.verification_run_id));
+        if (assessment) {
+          setAnswers(assessment.answers);
+          setTerms(Object.fromEntries(assessment.comparison.map((row: ContractComparison) => [row.claim_id, row.contract])));
+          setResult(assessment);
+        } else { setResult(null); setAnswers({}); setTerms({}); }
+        if (saved.review_job && ["QUEUED", "RUNNING", "FAILED", "CANCELLED"].includes(saved.review_job.status)) {
+          setAnswers(Object.fromEntries(saved.review_job.input_masked.answers
+            .filter((a: { question_code: string }) => QUESTIONS.some(q => q.code === a.question_code))
+            .map((a: { question_code: string; answer_code: string }) => [a.question_code, a.answer_code])));
+          setTerms(Object.fromEntries(saved.review_job.input_masked.comparison.map((row: ContractComparison) => [row.claim_id, row.contract])));
+        }
+      } catch { if (alive) setNotice("이전 기록을 읽지 못했습니다. 다시 열어 주세요."); }
+      finally { if (alive) setLoadedSession(sessionKey); }
+    })();
+    return () => { alive = false; };
+  }, [ready, caseId, sessionKey]);
+
+  const pending = reviewJob?.status === "QUEUED" || reviewJob?.status === "RUNNING";
+  const activeReviewId = reviewJob?.id;
+  useEffect(() => {
+    if (!pending || !activeReviewId) return;
+    let alive = true, inFlight = false;
+    const poll = async () => {
+      if (inFlight) return; inFlight = true;
+      try {
+        const current = readSessionToken();
+        if (!current || sessionIdentity(current) !== sessionKey) return;
+        const response = await sessionFetch(`/api/finshield/cases/${caseId}/aftercare?job_id=${activeReviewId}`, current);
+        const body = await response.json();
+        if (!alive || sessionIdentity(readSessionToken()) !== sessionKey) return;
+        if (!response.ok) { setNotice(body.error ?? "점검 상태를 확인하지 못했습니다"); return; }
+        setReviewJob(body.review_job ?? null);
+        if (["FAILED", "CANCELLED"].includes(body.review_job?.status)) requestKey.current = null;
+        if (body.assessment && ["COMPLETED", "PARTIAL"].includes(body.review_job?.status)) setResult(body.assessment);
+      } catch { if (alive) setNotice("연결이 끊겼습니다. 저장된 진행 상태를 다시 확인하겠습니다."); }
+      finally { inFlight = false; }
+    };
+    void poll(); const interval = setInterval(() => void poll(), 3000);
+    return () => { alive = false; clearInterval(interval); };
+  }, [pending, activeReviewId, caseId, sessionKey]);
+
+  const operate = async (operation: "RESUME" | "CANCEL") => {
+    if (!reviewJob || !token) return;
+    setBusy(true);
+    try {
+      const response = await sessionFetch(`/api/finshield/cases/${caseId}/aftercare`, token, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ operation, job_id: reviewJob.id }),
+      });
+      if (sessionIdentity(readSessionToken()) !== sessionKey) return;
+      setNotice(response.ok ? "요청을 보냈습니다. 저장된 상태를 확인하고 있습니다." : "요청 결과를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+    } catch { if (sessionIdentity(readSessionToken()) === sessionKey) setNotice("연결이 끊겼습니다. 진행 상태를 다시 확인하겠습니다."); }
+    finally { setBusy(false); }
+  };
 
   const submit = async () => {
     if (!token) return;
     setBusy(true); setNotice(null);
     try {
+      const payload = JSON.stringify({ answers, base_passport_id: basePassport, contract_terms: terms, document_links: documentLinks });
+      if (requestKey.current?.payload !== payload) requestKey.current = { payload, id: crypto.randomUUID() };
       const response = await sessionFetch(`/api/finshield/cases/${caseId}/aftercare`, token, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ answers }),
+        body: JSON.stringify({ ...JSON.parse(payload), request_key: requestKey.current.id }),
       });
       const body = await response.json().catch(() => null);
+      if (sessionIdentity(readSessionToken()) !== sessionKey) return;
       if (!response.ok) {
         if (response.status === 401) setToken(null);
         setNotice(body?.error ?? "점검하지 못했습니다");
         return;
       }
-      setResult(body as Result);
+      const restored = await sessionFetch(`/api/finshield/cases/${caseId}/aftercare?job_id=${body.review_job_id}`, token);
+      const saved = await restored.json();
+      if (sessionIdentity(readSessionToken()) !== sessionKey) return;
+      if (!restored.ok) { setNotice("점검은 접수됐습니다. 화면을 다시 열면 진행 상태를 복원합니다."); return; }
+      setReviewJob(saved.review_job ?? null);
+      if (["FAILED", "CANCELLED"].includes(saved.review_job?.status)) requestKey.current = null;
+      setResult(saved.assessment ?? null);
     } catch {
-      setNotice("연결이 끊어졌습니다. 처리 결과를 확인한 뒤 다시 시도해 주세요.");
+      if (sessionIdentity(readSessionToken()) === sessionKey) setNotice("연결이 끊어졌습니다. 처리 결과를 확인한 뒤 다시 시도해 주세요.");
     } finally { setBusy(false); }
   };
 
   if (!ready) return null;
   if (!token) return <FsLoginCard onToken={setToken} title="가입 후 점검" />;
+
+  if (loadedSession !== sessionKey) return <FsCard><p className="fs-body">저장된 점검 기록을 읽고 있습니다.</p></FsCard>;
+
+  if (pending) return <FsCard>
+    <h1 className="fs-h2">설명·계약과 공식 자료를 점검하고 있습니다</h1>
+    <p className="fs-body mt-3" role="status">{reviewJob?.status === "QUEUED" ? "점검 실행 대기 중" : "가입 후 Agent 검토 중"} · 화면을 닫아도 같은 Case에서 진행 상태를 복원합니다.</p>
+    <p className="fs-meta mt-3">서류 원본은 본인 기기에 따로 보관해 주세요. 이 점검은 위법·사기를 확정하지 않습니다.</p>
+    {notice ? <p className="fs-body mt-3">{notice}</p> : null}
+    {reviewJob?.status === "QUEUED" ? <button type="button" disabled={busy} onClick={() => void operate("RESUME")} className="fs-btn fs-btn--quiet mt-4">대기 중인 요청 다시 연결</button> : null}
+    <button type="button" disabled={busy} onClick={() => void operate("CANCEL")} className="fs-btn fs-btn--quiet mt-4">점검 중단</button>
+    <Link href={`/cases/${caseId}`} className="fs-btn fs-btn--quiet mt-4">기록으로 돌아가기</Link>
+  </FsCard>;
 
   if (result) {
     const view = RESULT_VIEW[result.result]
@@ -85,16 +198,32 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
     return (
       <>
         <header>
-          <p className="fs-eyebrow">가입 후 점검 결과</p>
+          <p className="fs-eyebrow">가입 후 점검 결과{result.assessment_no ? ` · ${result.assessment_no}번째 점검` : ""}</p>
           {/* RES-005: 결론보다 행동을 먼저 놓는다. */}
           <h1 className="fs-h1 mt-2">{view.label}</h1>
           <div className="mt-3"><FsChip tone={view.tone}>{view.state}</FsChip></div>
           <p className="fs-lead mt-3">{view.lead}</p>
+          {reviewJob?.status === "PARTIAL" ? <p className="fs-body mt-3" role="status">Agent 조회·판단 중 일부를 확인하지 못했습니다. 아래 결과는 확보된 답변과 근거 범위의 안내입니다.</p> : null}
+          {reviewJob && ["FAILED", "CANCELLED"].includes(reviewJob.status) ? <p className="fs-body mt-3" role="status">새 점검은 끝내지 못했습니다. 아래에는 이전에 저장한 점검 결과를 보여 줍니다.</p> : null}
           <div className="mt-4 flex flex-wrap gap-3">
             <Link href={`/cases/${caseId}`} className="fs-btn fs-btn--quiet">기록으로 돌아가기</Link>
+            <button type="button" className="fs-btn fs-btn--quiet" onClick={() => { setResult(null); setReviewJob(null); requestKey.current = null; }}>답변을 보완해 새 점검 만들기</button>
           </div>
         </header>
 
+        {(result.comparison ?? []).length > 0 ? <FsCard className="mt-8">
+          <h2 className="fs-h2">이전 권유와 계약 문구 비교</h2>
+          <p className="fs-meta mt-2">입력한 문구의 차이입니다. 조건 변경이나 위법 여부의 확정 판단은 아닙니다.</p>
+          <div className="mt-4 space-y-4">{result.comparison!.map(row => <section key={row.claim_id} className="border-t border-[var(--fs-line)] pt-3">
+            <FsChip tone={row.result === "DIFFERENT_TEXT" ? "caution" : "neutral"}>
+              {row.result === "DIFFERENT_TEXT" ? "문구 차이 · 확인 필요" : row.result === "SAME_TEXT" ? "입력 문구 일치" : "계약 문구 미입력"}
+            </FsChip>
+            <div className="mt-2 grid gap-3 md:grid-cols-2">
+              <p className="fs-body"><strong>이전 권유</strong><br />{row.before}</p>
+              <p className="fs-body"><strong>입력한 계약 문구</strong><br />{row.contract || "확인하지 못했습니다."}</p>
+            </div>
+          </section>)}</div>
+        </FsCard> : null}
         <FsCard className="mt-8">
           <h2 className="fs-h2">지금 하실 일</h2>
           <ul className="mt-4 space-y-5">
@@ -116,6 +245,17 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
           </ul>
         </FsCard>
 
+        {reviewJob?.agent_trace?.length ? <FsCard>
+          <h2 className="fs-h2">가입 후 검토 기록과 근거</h2>
+          {reviewJob.agent_trace.map(agent => <section key={agent.agent_code} className="mt-4">
+            <h3 className="font-bold">{agent.agent_code === "SALES_CONDUCT" ? "판매 설명 점검" : "규정·분쟁 자료 점검"} · {agent.status === "SUCCEEDED" ? "검토 기록 저장" : "일부 미확인"}</h3>
+            {agent.tools.flatMap(tool => tool.sources).map(source => <details key={source.ref} className="mt-3">
+              <summary>{source.title}{source.reference_only ? " · 참고 사례" : ""}</summary>
+              <p className="fs-body mt-2">{source.excerpt_masked}</p>
+              {source.url && /^https?:\/\//.test(source.url) ? <a href={source.url} target="_blank" rel="noreferrer" className="fs-link">공식 원문 확인</a> : null}
+            </details>)}
+          </section>)}
+        </FsCard> : null}
         <FsCard>
           <h2 className="fs-h2">판단 이유</h2>
           <ul className="fs-body mt-3 list-disc space-y-2 pl-5">
@@ -143,7 +283,20 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
       </header>
 
       {notice ? <FsCard className="mt-8"><p className="fs-body">{notice}</p></FsCard> : null}
+      {reviewJob && ["FAILED", "CANCELLED"].includes(reviewJob.status) ? <FsCard className="mt-8"><p className="fs-body">이전 점검은 끝내지 못했습니다. 보존된 답변을 확인해 새 점검을 시작할 수 있습니다. 이전 실행을 자동으로 다시 호출하지 않습니다.</p></FsCard> : null}
 
+      <FsCard className="mt-8">
+        <h2 className="fs-h2">실제 계약서에 적힌 조건</h2>
+        <p className="fs-body mt-2">이전 검증 기록의 문장과 비교할 계약 문구를 입력하세요. 시험용 합성 계약만 사용하고, 이름·계좌번호는 넣지 마세요.</p>
+        <div className="mt-4 space-y-4">{prior.map(claim => <div key={claim.claim_id}>
+          <label className="fs-label" htmlFor={`contract-${claim.claim_id}`}>이전 권유: {claim.statement_masked}</label>
+          <textarea id={`contract-${claim.claim_id}`} rows={2} maxLength={400} className="fs-field"
+            value={terms[claim.claim_id] ?? ""} placeholder="계약서의 대응 문구를 입력하세요. 없으면 비워 두세요."
+            onChange={event => {setTerms(prev => ({ ...prev, [claim.claim_id]: event.target.value }));setDocumentLinks(prev=>{const next={...prev};delete next[claim.claim_id];return next;});}} />
+        </div>)}</div>
+        {basePassport?<AftercareDocuments key={`${caseId}:${sessionKey}:${basePassport}`} token={token!} caseId={caseId} basePassport={basePassport} prior={prior}
+          onBusyChange={setFileBusy} onUse={(values,links)=>{setTerms(old=>({...old,...values}));setDocumentLinks(old=>({...old,...links}));}}/>:null}
+      </FsCard>
       <FsCard className="mt-8">
         <ul className="space-y-7">
           {QUESTIONS.map((question) => (
@@ -168,7 +321,7 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
         </ul>
 
         <div className="mt-8">
-          <button type="button" disabled={busy || answered === 0} onClick={() => void submit()}
+          <button type="button" disabled={busy || fileBusy || answered === 0 || !basePassport} onClick={() => void submit()}
             className="fs-btn fs-btn--primary">
             {busy ? "정리하는 중" : "점검 결과 보기"}
           </button>

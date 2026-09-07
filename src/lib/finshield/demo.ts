@@ -150,6 +150,7 @@ const demoRecorder = (sql: Sql, demoRunId: string): RunRecorder => ({
 export const runDemo = async (args: {
   sql: Sql;
   session: DemoSession;
+  signal?: AbortSignal;
   progress?: RunProgress;
 }): Promise<{ demoRunId: string; manifest: Record<string, unknown> }> => {
   const { sql, session } = args;
@@ -171,13 +172,14 @@ export const runDemo = async (args: {
         caseId: session.sessionId,
         runId: demoRunId,
         manifest,
+        signal: args.signal,
         recorder: demoRecorder(sql, demoRunId),
       },
       claims: seed.claims,
       maskedIntake: seed.maskedInput,
       journeyStage: "PRE_TRANSACTION",
-      agentModel: createAgentModel(),
-      judgeModel: createJudgeModel(),
+      agentModel: createAgentModel({sql,demoRunId}),
+      judgeModel: createJudgeModel({sql,demoRunId}),
       progress: args.progress,
     });
 

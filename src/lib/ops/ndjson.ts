@@ -11,7 +11,7 @@
 
 import "server-only";
 
-export function ndjsonStream(events: AsyncGenerator<unknown>): Response {
+export function ndjsonStream(events: AsyncGenerator<unknown>, onCancel?: () => void): Response {
   const encoder = new TextEncoder();
 
   const body = new ReadableStream<Uint8Array>({
@@ -29,6 +29,7 @@ export function ndjsonStream(events: AsyncGenerator<unknown>): Response {
       }
     },
     async cancel() {
+      onCancel?.();
       // 이용자가 창을 닫으면 파이프라인도 멈춘다 — 남은 모델 호출을 태우지 않는다
       await events.return(undefined);
     },

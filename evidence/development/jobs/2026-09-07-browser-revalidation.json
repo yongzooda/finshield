@@ -1,0 +1,39 @@
+{
+  "kind": "development-local-http-workflow-live-model-worker-not-release",
+  "job_status": "NO_CHANGE",
+  "base_passport_id": "da3c5d95-e20b-496c-83e3-915a6b55135f",
+  "result_passport_id": "3f71005e-5599-4b02-9267-6bff185bd7ac",
+  "partial": false,
+  "diff": {
+    "claim_changes": [],
+    "result_changes": [],
+    "material_change": false,
+    "evidence_changes": []
+  },
+  "event_types": [
+    "QUEUED",
+    "LEASED",
+    "HEARTBEAT_PROGRESS",
+    "HEARTBEAT_PROGRESS",
+    "HEARTBEAT_PROGRESS",
+    "HEARTBEAT_PROGRESS",
+    "HEARTBEAT_PROGRESS",
+    "HEARTBEAT_PROGRESS",
+    "HEARTBEAT_PROGRESS",
+    "HEARTBEAT_PROGRESS",
+    "HEARTBEAT_PROGRESS",
+    "HEARTBEAT_PROGRESS",
+    "HEARTBEAT_PROGRESS",
+    "HEARTBEAT_PROGRESS",
+    "HEARTBEAT_PROGRESS",
+    "HEARTBEAT_PROGRESS",
+    "COMPLETED"
+  ],
+  "usage": [
+    {
+      "status": "SETTLED",
+      "calls": 15,
+      "cost": 73088
+    }
+  ]
+}

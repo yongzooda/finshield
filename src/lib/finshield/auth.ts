@@ -42,5 +42,10 @@ export const resolveOwner = async (
   const body = (await response.json().catch(() => null)) as { id?: unknown } | null;
   const id = typeof body?.id === "string" ? body.id : "";
   if (!UUID.test(id)) throw new UnauthenticatedError("로그인이 필요합니다");
+  // 격리 Preview에만 설정한다. 서버가 확인한 합성 시험 계정 외에는 연결하지 않는다.
+  const probeOwner = process.env.FINSHIELD_PROBE_OWNER_ID;
+  if (probeOwner !== undefined && (!UUID.test(probeOwner) || id !== probeOwner)) {
+    throw new UnauthenticatedError("현재 환경은 지정된 합성 시험 계정만 사용할 수 있습니다");
+  }
   return id;
 };

@@ -4,6 +4,7 @@
  * 서버가 발급처의 세션 유효성을 확인한 뒤 사용자 Token으로 RLS 소유권 검사를 적용한다.
  */
 
+import { casePage, casePageQuery, readCaseCursor } from "@/lib/finshield/case-pagination";
 import { jsonNoStore } from "@/lib/ops/http";
 import { bearerToken, resolveOwner, UnauthenticatedError } from "@/lib/finshield/auth";
 import { restSelect, RestError } from "@/lib/finshield/rest";
@@ -20,14 +21,11 @@ export async function GET(request: Request): Promise<Response> {
     const rows = await restSelect({
       token,
       path: "financial_cases",
-      query: {
-        select: "id,scenario,lifecycle,title_masked,created_at,updated_at,deletion_status,deleted_at",
-        order: "created_at.desc",
-        limit: "50",
-      },
+      query: casePageQuery(readCaseCursor(new URL(request.url).searchParams.get("cursor"))),
     });
-    return jsonNoStore({ cases: rows }, 200);
+    return jsonNoStore(casePage(rows), 200);
   } catch (error) {
+    if (error instanceof Error && error.message === "INVALID_CASE_CURSOR") return jsonNoStore({ error: "기록 목록을 처음부터 다시 열어 주세요" }, 400);
     if (error instanceof UnauthenticatedError) return jsonNoStore({ error: error.message }, 401);
     if (error instanceof RestError) return jsonNoStore({ error: error.message }, error.status);
     throw error;

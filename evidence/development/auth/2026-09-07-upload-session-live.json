@@ -1,0 +1,18 @@
+{
+  "schema_version": "upload-session-development-v1",
+  "observed_at": "2026-09-07T12:05:55.122Z",
+  "scope": "합성 PNG·실제 보호 Preview Slot/Workflow 예약·TUS·Cookie 회전·삭제, OCR/모델/자연 만료는 미측정",
+  "checks": {
+    "slot_status": 200,
+    "uploaded_bytes": 68,
+    "total_bytes": 68,
+    "refresh_boundaries": 2,
+    "delete_status": 200,
+    "delete_result": "COMPLETED",
+    "deleted_case_status": 404,
+    "session_cleanup": 200
+  },
+  "outcome": "PASS",
+  "sha": "e3ecfba4427cf9655bedb81f8433a999f8415e8e",
+  "deployment_id": "dpl_FFtzdnAc8Md18N5XXCxEiEJyi56Y"
+}

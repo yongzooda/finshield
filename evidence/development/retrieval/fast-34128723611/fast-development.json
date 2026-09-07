@@ -1,0 +1,3802 @@
+{
+  "classification": "DEVELOPMENT_ONLY_NOT_GATE_EVIDENCE",
+  "code_sha": "00b192a9dafce97fd2f0e956bc6abb4f10cedade",
+  "fixture_sha256": "cb5f6c47af921e345050437f786b4f41d03dc3af1ed0c778473666c8c3e752a3",
+  "split": "development",
+  "claims": 20,
+  "release_id": "508fb6af-fb83-590a-a79c-ae5873d19798",
+  "formula": "fast-relevance-060-authority-025-freshness-015-case-seat-v1",
+  "cases": [
+    {
+      "case_id": "dev_card_reissue",
+      "baseline": {
+        "recall_at_5": 1,
+        "precision_at_5": 1,
+        "critical_recall_at_5": null,
+        "found": 5,
+        "critical_found": 0,
+        "top_units": [
+          "dev_card_reissue-4",
+          "dev_card_reissue-5",
+          "dev_card_reissue-3",
+          "dev_card_reissue-2",
+          "dev_card_reissue-1"
+        ]
+      },
+      "fast": {
+        "recall_at_5": 1,
+        "precision_at_5": 1,
+        "critical_recall_at_5": null,
+        "found": 5,
+        "critical_found": 0,
+        "top_units": [
+          "dev_card_reissue-4",
+          "dev_card_reissue-5",
+          "dev_card_reissue-3",
+          "dev_card_reissue-1",
+          "dev_card_reissue-2"
+        ],
+        "collapsed": 0
+      }
+    },
+    {
+      "case_id": "dev_mobile_limit",
+      "baseline": {
+        "recall_at_5": 1,
+        "precision_at_5": 1,
+        "critical_recall_at_5": null,
+        "found": 5,
+        "critical_found": 0,
+        "top_units": [
+          "dev_mobile_limit-1",
+          "dev_mobile_limit-5",
+          "dev_mobile_limit-3",
+          "dev_mobile_limit-2",
+          "dev_mobile_limit-4"
+        ]
+      },
+      "fast": {
+        "recall_at_5": 1,
+        "precision_at_5": 1,
+        "critical_recall_at_5": null,
+        "found": 5,
+        "critical_found": 0,
+        "top_units": [
+          "dev_mobile_limit-3",
+          "dev_mobile_limit-1",
+          "dev_mobile_limit-5",
+          "dev_mobile_limit-2",
+          "dev_mobile_limit-4"
+        ],
+        "collapsed": 0
+      }
+    },
+    {
+      "case_id": "dev_supervisory_regulation",
+      "baseline": {
+        "recall_at_5": 1,
+        "precision_at_5": 1,
+        "critical_recall_at_5": null,
+        "found": 5,
+        "critical_found": 0,
+        "top_units": [
+          "dev_supervisory_regulation-5",
+          "dev_supervisory_regulation-4",
+          "dev_supervisory_regulation-3",
+          "dev_supervisory_regulation-2",
+          "dev_supervisory_regulation-1"
+        ]
+      },
+      "fast": {
+        "recall_at_5": 1,
+        "precision_at_5": 1,
+        "critical_recall_at_5": null,
+        "found": 5,
+        "critical_found": 0,
+        "top_units": [
+          "dev_supervisory_regulation-5",
+          "dev_supervisory_regulation-4",
+          "dev_supervisory_regulation-3",
+          "dev_supervisory_regulation-2",
+          "dev_supervisory_regulation-1"
+        ],
+        "collapsed": 0
+      }
+    },
+    {
+      "case_id": "dev_bureau_report_fee",
+      "baseline": {
+        "recall_at_5": 0.8,
+        "precision_at_5": 0.8,
+        "critical_recall_at_5": null,
+        "found": 4,
+        "critical_found": 0,
+        "top_units": [
+          "dev_bureau_report_fee-2",
+          "dev_bureau_report_fee-1",
+          "dev_bureau_report_fee-3",
+          "dev_bureau_report_fee-5",
+          "inquiry_types-4"
+        ]
+      },
+      "fast": {
+        "recall_at_5": 1,
+        "precision_at_5": 1,
+        "critical_recall_at_5": null,
+        "found": 5,
+        "critical_found": 0,
+        "top_units": [
+          "dev_bureau_report_fee-1",
+          "dev_bureau_report_fee-2",
+          "dev_bureau_report_fee-5",
+          "dev_bureau_report_fee-4",
+          "dev_bureau_report_fee-3"
+        ],
+        "collapsed": 0
+      }
+    }
+  ],
+  "samples": [
+    {
+      "claim_key": "dev_card_reissue:c1",
+      "candidates": [
+        {
+          "unit": "dev_card_reissue-2",
+          "fast_score": 0.814997,
+          "keyword_rank": 0.020264236,
+          "vector_distance": 0.33228562263078487,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-1",
+          "fast_score": 0.6438669,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.3733270764350891,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "cash_advance_fee-1",
+          "fast_score": 0.6110107,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.4605150818824768,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-10",
+          "fast_score": 0.53665286,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.47941151138612603,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "cash_advance_fee-10",
+          "fast_score": 0.34298956,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.4866928458213806,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-10",
+          "fast_score": 0.6257583,
+          "keyword_rank": null,
+          "vector_distance": 0.48815010452717833,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "auto_loan_residual-10",
+          "fast_score": 0.32904667,
+          "keyword_rank": null,
+          "vector_distance": 0.5174088478088379,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "card_loan_terms-10",
+          "fast_score": 0.44707403,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.5178218042201339,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "cash_advance_fee-9",
+          "fast_score": 0.3644156,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.5295957326889038,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-9",
+          "fast_score": 0.42785084,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.5350638946928907,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "lease_vs_rental-10",
+          "fast_score": 0.3644156,
+          "keyword_rank": null,
+          "vector_distance": 0.5401942407969085,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-1",
+          "fast_score": 0.46840155,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.5539434882368728,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "card_loan_terms-4",
+          "fast_score": 0.37534004,
+          "keyword_rank": null,
+          "vector_distance": 0.5600163805489651,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "card_loan_terms-9",
+          "fast_score": 0.33250546,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.5720574600730806,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "card_loan_terms-1",
+          "fast_score": 0.3465192,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.5727395967996354,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "cash_advance_fee-2",
+          "fast_score": 0.34298956,
+          "keyword_rank": null,
+          "vector_distance": 0.5788733065128326,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-3",
+          "fast_score": 0.3938279,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.5832683444023132,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "auto_loan_residual-4",
+          "fast_score": 0.32218465,
+          "keyword_rank": null,
+          "vector_distance": 0.5918086116428003,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-9",
+          "fast_score": 0.42785084,
+          "keyword_rank": null,
+          "vector_distance": 0.5939649585506337,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "auto_loan_residual-9",
+          "fast_score": 0.3644156,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.6047205807185345,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "auto_loan_residual-1",
+          "fast_score": 0.3790106,
+          "keyword_rank": 0.010132118,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "lease_vs_rental-9",
+          "fast_score": 0.34298956,
+          "keyword_rank": 0.010132118,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "revolving_min_pay-2",
+          "fast_score": 0.56563467,
+          "keyword_rank": 0.010132118,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "lease_vs_rental-1",
+          "fast_score": 0.3790106,
+          "keyword_rank": 0.010132118,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "dev_card_reissue-5",
+          "fast_score": 0.36080432,
+          "keyword_rank": 0.010132118,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        }
+      ]
+    },
+    {
+      "claim_key": "dev_card_reissue:c2",
+      "candidates": [
+        {
+          "unit": "dev_card_reissue-3",
+          "fast_score": 0.87949914,
+          "keyword_rank": 0.020264236,
+          "vector_distance": 0.2569449697104065,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-4",
+          "fast_score": 0.67026305,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.3947836521396747,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-1",
+          "fast_score": 0.5828235,
+          "keyword_rank": null,
+          "vector_distance": 0.4508196384203209,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-9",
+          "fast_score": 0.5347097,
+          "keyword_rank": null,
+          "vector_distance": 0.49267768859862926,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-2",
+          "fast_score": 0.48008865,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.5709948964705871,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "cash_advance_fee-9",
+          "fast_score": 0.33947718,
+          "keyword_rank": null,
+          "vector_distance": 0.5863237432434398,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-5",
+          "fast_score": 0.42785084,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.6039319696385835,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "card_loan_terms-2",
+          "fast_score": 0.30206156,
+          "keyword_rank": null,
+          "vector_distance": 0.6203711176360986,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "card_loan_terms-9",
+          "fast_score": 0.29877773,
+          "keyword_rank": null,
+          "vector_distance": 0.6286097322237172,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-10",
+          "fast_score": 0.45868814,
+          "keyword_rank": null,
+          "vector_distance": 0.6473154706342937,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "card_loan_terms-3",
+          "fast_score": 0.25802675,
+          "keyword_rank": null,
+          "vector_distance": 0.6482625692047214,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "cash_advance_fee-3",
+          "fast_score": 0.3153985,
+          "keyword_rank": null,
+          "vector_distance": 0.6486558914184546,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-10",
+          "fast_score": 0.3790106,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.6496069013603808,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "cash_advance_fee-1",
+          "fast_score": 0.27637792,
+          "keyword_rank": null,
+          "vector_distance": 0.6524488718777217,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-1",
+          "fast_score": 0.2890505,
+          "keyword_rank": null,
+          "vector_distance": 0.6543523257198722,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "cash_advance_fee-5",
+          "fast_score": 0.229259,
+          "keyword_rank": null,
+          "vector_distance": 0.6672259569168066,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "auto_loan_residual-2",
+          "fast_score": 0.35720867,
+          "keyword_rank": null,
+          "vector_distance": 0.6742938368670746,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-3",
+          "fast_score": 0.26102942,
+          "keyword_rank": null,
+          "vector_distance": 0.6762949228286721,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "auto_loan_residual-4",
+          "fast_score": 0.25802675,
+          "keyword_rank": null,
+          "vector_distance": 0.6817676723003365,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-4",
+          "fast_score": 0.2404891,
+          "keyword_rank": null,
+          "vector_distance": 0.6824708013184306,
+          "matched_by": "VECTOR"
+        }
+      ]
+    },
+    {
+      "claim_key": "dev_card_reissue:c3",
+      "candidates": [
+        {
+          "unit": "dev_card_reissue-4",
+          "fast_score": 0.90073955,
+          "keyword_rank": 0.013509491,
+          "vector_distance": 0.19178234387740134,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-3",
+          "fast_score": 0.5922893,
+          "keyword_rank": null,
+          "vector_distance": 0.32283331887920486,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-1",
+          "fast_score": 0.6257583,
+          "keyword_rank": null,
+          "vector_distance": 0.40862699798506386,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-5",
+          "fast_score": 0.7517211,
+          "keyword_rank": 0.0067547457,
+          "vector_distance": 0.43041809978592893,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-9",
+          "fast_score": 0.6202536,
+          "keyword_rank": null,
+          "vector_distance": 0.4481242895126304,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-2",
+          "fast_score": 0.5191313,
+          "keyword_rank": null,
+          "vector_distance": 0.5709370203501611,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "card_loan_terms-2",
+          "fast_score": 0.39010403,
+          "keyword_rank": null,
+          "vector_distance": 0.6167528470459994,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "cash_advance_fee-3",
+          "fast_score": 0.39756414,
+          "keyword_rank": null,
+          "vector_distance": 0.6302518248558018,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "cash_advance_fee-9",
+          "fast_score": 0.37168384,
+          "keyword_rank": null,
+          "vector_distance": 0.6441049959722153,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "card_loan_terms-9",
+          "fast_score": 0.35720867,
+          "keyword_rank": null,
+          "vector_distance": 0.6479800519919457,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "auto_loan_residual-2",
+          "fast_score": 0.40131235,
+          "keyword_rank": 0.0067547457,
+          "vector_distance": 0.6554547733610598,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-10",
+          "fast_score": 0.42021888,
+          "keyword_rank": null,
+          "vector_distance": 0.6574346712918284,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "cash_advance_fee-5",
+          "fast_score": 0.31878197,
+          "keyword_rank": 0.0067547457,
+          "vector_distance": 0.658363819122312,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-10",
+          "fast_score": 0.3500658,
+          "keyword_rank": null,
+          "vector_distance": 0.6658175487300811,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-5",
+          "fast_score": 0.4126248,
+          "keyword_rank": null,
+          "vector_distance": 0.6682361364364601,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "card_loan_terms-3",
+          "fast_score": 0.3086902,
+          "keyword_rank": null,
+          "vector_distance": 0.6709916395540017,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-3",
+          "fast_score": 0.37168384,
+          "keyword_rank": 0.0067547457,
+          "vector_distance": 0.6763294637203194,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-1",
+          "fast_score": 0.2890505,
+          "keyword_rank": null,
+          "vector_distance": 0.6937820546367234,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "cash_advance_fee-1",
+          "fast_score": 0.31878197,
+          "keyword_rank": null,
+          "vector_distance": 0.6947964843986318,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-4",
+          "fast_score": 0.292272,
+          "keyword_rank": 0.0067547457,
+          "vector_distance": 0.704199499642759,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "lease_vs_rental-3",
+          "fast_score": 0.2890505,
+          "keyword_rank": 0.0067547457,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "cash_advance_fee-4",
+          "fast_score": 0.28585017,
+          "keyword_rank": 0.0067547457,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "cash_advance_fee-10",
+          "fast_score": 0.29877773,
+          "keyword_rank": 0.0067547457,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "lease_vs_rental-5",
+          "fast_score": 0.3500658,
+          "keyword_rank": 0.0067547457,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        }
+      ]
+    },
+    {
+      "claim_key": "dev_card_reissue:c4",
+      "candidates": [
+        {
+          "unit": "dev_card_reissue-5",
+          "fast_score": 0.90073955,
+          "keyword_rank": 0.015198178,
+          "vector_distance": 0.2188553810119629,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-4",
+          "fast_score": 0.6091522,
+          "keyword_rank": null,
+          "vector_distance": 0.41257901041757516,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-3",
+          "fast_score": 0.49179763,
+          "keyword_rank": 0.007599089,
+          "vector_distance": 0.46880418062210083,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-1",
+          "fast_score": 0.5540844,
+          "keyword_rank": null,
+          "vector_distance": 0.5659599602222443,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-9",
+          "fast_score": 0.5560139,
+          "keyword_rank": null,
+          "vector_distance": 0.5890310651641442,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-2",
+          "fast_score": 0.47034734,
+          "keyword_rank": 0.007599089,
+          "vector_distance": 0.6318439104370939,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "auto_loan_residual-2",
+          "fast_score": 0.42785084,
+          "keyword_rank": null,
+          "vector_distance": 0.6362427852298482,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-5",
+          "fast_score": 0.3938279,
+          "keyword_rank": null,
+          "vector_distance": 0.6633486352355096,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-4",
+          "fast_score": 0.29551446,
+          "keyword_rank": null,
+          "vector_distance": 0.6833837846975047,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-9",
+          "fast_score": 0.3153985,
+          "keyword_rank": null,
+          "vector_distance": 0.6866335980077737,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-1",
+          "fast_score": 0.273264,
+          "keyword_rank": null,
+          "vector_distance": 0.6878999881684768,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-2",
+          "fast_score": 0.34298956,
+          "keyword_rank": null,
+          "vector_distance": 0.6896003258704728,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-10",
+          "fast_score": 0.43936244,
+          "keyword_rank": null,
+          "vector_distance": 0.691563299046853,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "auto_loan_residual-3",
+          "fast_score": 0.36080432,
+          "keyword_rank": null,
+          "vector_distance": 0.6962053775787354,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-3",
+          "fast_score": 0.30206156,
+          "keyword_rank": null,
+          "vector_distance": 0.6963101806455738,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "auto_loan_residual-5",
+          "fast_score": 0.35362908,
+          "keyword_rank": null,
+          "vector_distance": 0.6998321920583304,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "auto_loan_residual-4",
+          "fast_score": 0.273264,
+          "keyword_rank": null,
+          "vector_distance": 0.7083898360496852,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "lease_vs_rental-4",
+          "fast_score": 0.28585017,
+          "keyword_rank": null,
+          "vector_distance": 0.7099838381996053,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "lease_vs_rental-5",
+          "fast_score": 0.39010403,
+          "keyword_rank": null,
+          "vector_distance": 0.7294994214027947,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "card_loan_terms-3",
+          "fast_score": 0.29877773,
+          "keyword_rank": null,
+          "vector_distance": 0.7330713868141174,
+          "matched_by": "VECTOR"
+        }
+      ]
+    },
+    {
+      "claim_key": "dev_card_reissue:c5",
+      "candidates": [
+        {
+          "unit": "dev_card_reissue-3",
+          "fast_score": 0.5502207,
+          "keyword_rank": null,
+          "vector_distance": 0.3452388048171997,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-1",
+          "fast_score": 0.82423574,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.37077707052230835,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-4",
+          "fast_score": 0.5790196,
+          "keyword_rank": null,
+          "vector_distance": 0.37601609515951484,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-2",
+          "fast_score": 0.47424158,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.5146650093394495,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-5",
+          "fast_score": 0.5132781,
+          "keyword_rank": null,
+          "vector_distance": 0.5253987312316895,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-9",
+          "fast_score": 0.57711405,
+          "keyword_rank": null,
+          "vector_distance": 0.5379062868412554,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-10",
+          "fast_score": 0.6165665,
+          "keyword_rank": null,
+          "vector_distance": 0.5778208547181144,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-4",
+          "fast_score": 0.33947718,
+          "keyword_rank": 0.020264236,
+          "vector_distance": 0.6194247149735322,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "auto_loan_residual-2",
+          "fast_score": 0.3644156,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.651932278390662,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "cash_advance_fee-4",
+          "fast_score": 0.39756414,
+          "keyword_rank": 0.020264236,
+          "vector_distance": 0.6531452950065952,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "cash_advance_fee-10",
+          "fast_score": 0.42021888,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.6678884029388428,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-5",
+          "fast_score": 0.3644156,
+          "keyword_rank": null,
+          "vector_distance": 0.6761006607949334,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_card_reissue-10",
+          "fast_score": 0.36080432,
+          "keyword_rank": null,
+          "vector_distance": 0.6941784438001177,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-1",
+          "fast_score": 0.32218465,
+          "keyword_rank": null,
+          "vector_distance": 0.6964670238773236,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "card_loan_terms-3",
+          "fast_score": 0.2491548,
+          "keyword_rank": null,
+          "vector_distance": 0.7024092078208923,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "cash_advance_fee-5",
+          "fast_score": 0.24624321,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.714505033820567,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "auto_loan_residual-4",
+          "fast_score": 0.25208935,
+          "keyword_rank": null,
+          "vector_distance": 0.7167636324904179,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-2",
+          "fast_score": 0.35720867,
+          "keyword_rank": null,
+          "vector_distance": 0.7177585997869234,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "card_loan_terms-2",
+          "fast_score": 0.292272,
+          "keyword_rank": null,
+          "vector_distance": 0.7192046176913147,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "revolving_min_pay-9",
+          "fast_score": 0.32218465,
+          "keyword_rank": null,
+          "vector_distance": 0.7247738674148237,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "lease_vs_rental-3",
+          "fast_score": 0.26710218,
+          "keyword_rank": 0.010132118,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "lease_vs_rental-5",
+          "fast_score": 0.3153985,
+          "keyword_rank": 0.010132118,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "revolving_min_pay-3",
+          "fast_score": 0.27637792,
+          "keyword_rank": 0.010132118,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        }
+      ]
+    },
+    {
+      "claim_key": "dev_mobile_limit:c1",
+      "candidates": [
+        {
+          "unit": "dev_mobile_limit-1",
+          "fast_score": 0.92403215,
+          "keyword_rank": 0.034738693,
+          "vector_distance": 0.12916189432144165,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "installment_savings_rate-10",
+          "fast_score": 0.47424158,
+          "keyword_rank": 0.008684673,
+          "vector_distance": 0.41490147754256335,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-10",
+          "fast_score": 0.5035156,
+          "keyword_rank": 0.008684673,
+          "vector_distance": 0.4457437230868254,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "elder_protection-10",
+          "fast_score": 0.4645129,
+          "keyword_rank": null,
+          "vector_distance": 0.4661279757657042,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "secured_loan_grace-1",
+          "fast_score": 0.3680422,
+          "keyword_rank": 0.008684673,
+          "vector_distance": 0.4829616834498446,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "elder_protection-1",
+          "fast_score": 0.57711405,
+          "keyword_rank": null,
+          "vector_distance": 0.4856819220970906,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-3",
+          "fast_score": 0.6509999,
+          "keyword_rank": 0.008684673,
+          "vector_distance": 0.4873892679942491,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "installment_savings_rate-9",
+          "fast_score": 0.5152297,
+          "keyword_rank": 0.008684673,
+          "vector_distance": 0.48880893125427227,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-9",
+          "fast_score": 0.5904014,
+          "keyword_rank": 0.017369347,
+          "vector_distance": 0.49115178041745455,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "secured_loan_grace-9",
+          "fast_score": 0.3500658,
+          "keyword_rank": 0.008684673,
+          "vector_distance": 0.5170612037181854,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "safety_fund_cover-9",
+          "fast_score": 0.3790106,
+          "keyword_rank": 0.008684673,
+          "vector_distance": 0.5210453259321844,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-5",
+          "fast_score": 0.5560139,
+          "keyword_rank": 0.017369347,
+          "vector_distance": 0.521721212761329,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "elder_protection-2",
+          "fast_score": 0.6822351,
+          "keyword_rank": null,
+          "vector_distance": 0.5415272116661072,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "safety_fund_cover-10",
+          "fast_score": 0.45093963,
+          "keyword_rank": null,
+          "vector_distance": 0.542263925075531,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "branch_merger_notice-1",
+          "fast_score": 0.5230306,
+          "keyword_rank": 0.008684673,
+          "vector_distance": 0.542942461792083,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "safety_fund_cover-2",
+          "fast_score": 0.72843933,
+          "keyword_rank": null,
+          "vector_distance": 0.5430951118469238,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "secured_loan_grace-10",
+          "fast_score": 0.39756414,
+          "keyword_rank": null,
+          "vector_distance": 0.5465138554573059,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "installment_savings_rate-1",
+          "fast_score": 0.3938279,
+          "keyword_rank": 0.008684673,
+          "vector_distance": 0.551096753808759,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "branch_merger_notice-10",
+          "fast_score": 0.40507212,
+          "keyword_rank": null,
+          "vector_distance": 0.5583157469849857,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-2",
+          "fast_score": 0.5560139,
+          "keyword_rank": 0.008684673,
+          "vector_distance": 0.5590307379346638,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "branch_merger_notice-9",
+          "fast_score": 0.3086902,
+          "keyword_rank": 0.008684673,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "safety_fund_cover-1",
+          "fast_score": 0.41641688,
+          "keyword_rank": 0.008684673,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        }
+      ]
+    },
+    {
+      "claim_key": "dev_mobile_limit:c2",
+      "candidates": [
+        {
+          "unit": "dev_mobile_limit-2",
+          "fast_score": 0.8099383,
+          "keyword_rank": 0.017369347,
+          "vector_distance": 0.39680213966344124,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "elder_protection-2",
+          "fast_score": 0.42785084,
+          "keyword_rank": null,
+          "vector_distance": 0.618033223269389,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-5",
+          "fast_score": 0.52692705,
+          "keyword_rank": null,
+          "vector_distance": 0.6268130389674855,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-3",
+          "fast_score": 0.48008865,
+          "keyword_rank": null,
+          "vector_distance": 0.6439333598732895,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-4",
+          "fast_score": 0.4664567,
+          "keyword_rank": null,
+          "vector_distance": 0.6481207222866575,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "safety_fund_cover-2",
+          "fast_score": 0.5093739,
+          "keyword_rank": null,
+          "vector_distance": 0.656944414559339,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-9",
+          "fast_score": 0.48398986,
+          "keyword_rank": null,
+          "vector_distance": 0.6756644933623679,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "secured_loan_grace-3",
+          "fast_score": 0.3500658,
+          "keyword_rank": null,
+          "vector_distance": 0.6910894881380214,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "safety_fund_cover-3",
+          "fast_score": 0.43551737,
+          "keyword_rank": null,
+          "vector_distance": 0.6920790970325448,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-1",
+          "fast_score": 0.4976563,
+          "keyword_rank": null,
+          "vector_distance": 0.6962140979639229,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "elder_protection-3",
+          "fast_score": 0.3500658,
+          "keyword_rank": null,
+          "vector_distance": 0.7010552287101725,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "elder_protection-1",
+          "fast_score": 0.292272,
+          "keyword_rank": null,
+          "vector_distance": 0.7068561068944803,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "elder_protection-5",
+          "fast_score": 0.29551446,
+          "keyword_rank": null,
+          "vector_distance": 0.7306258540972553,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "installment_savings_rate-4",
+          "fast_score": 0.38269496,
+          "keyword_rank": null,
+          "vector_distance": 0.7331762492937591,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "branch_merger_notice-3",
+          "fast_score": 0.45093963,
+          "keyword_rank": null,
+          "vector_distance": 0.7374898068625075,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "branch_merger_notice-5",
+          "fast_score": 0.42021888,
+          "keyword_rank": null,
+          "vector_distance": 0.7480417490005475,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "branch_merger_notice-2",
+          "fast_score": 0.40884307,
+          "keyword_rank": null,
+          "vector_distance": 0.7544660267552117,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "secured_loan_grace-5",
+          "fast_score": 0.37168384,
+          "keyword_rank": null,
+          "vector_distance": 0.7563442282266345,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "elder_protection-4",
+          "fast_score": 0.30206156,
+          "keyword_rank": null,
+          "vector_distance": 0.7601978462580713,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "installment_savings_rate-3",
+          "fast_score": 0.35720867,
+          "keyword_rank": null,
+          "vector_distance": 0.7627813800833965,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "installment_savings_rate-9",
+          "fast_score": 0.33598238,
+          "keyword_rank": 0.008684673,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        }
+      ]
+    },
+    {
+      "claim_key": "dev_mobile_limit:c3",
+      "candidates": [
+        {
+          "unit": "dev_mobile_limit-3",
+          "fast_score": 0.9371187,
+          "keyword_rank": 0.006079271,
+          "vector_distance": 0.2528179137219122,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-4",
+          "fast_score": 0.69562757,
+          "keyword_rank": null,
+          "vector_distance": 0.470236031427146,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "elder_protection-2",
+          "fast_score": 0.7198565,
+          "keyword_rank": null,
+          "vector_distance": 0.47164335677882085,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-1",
+          "fast_score": 0.7322856,
+          "keyword_rank": 0.006079271,
+          "vector_distance": 0.487949340817292,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "branch_merger_notice-3",
+          "fast_score": 0.42785084,
+          "keyword_rank": 0.006079271,
+          "vector_distance": 0.5403946316006926,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "elder_protection-3",
+          "fast_score": 0.42021888,
+          "keyword_rank": null,
+          "vector_distance": 0.5655903298366463,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "safety_fund_cover-2",
+          "fast_score": 0.5405358,
+          "keyword_rank": null,
+          "vector_distance": 0.58255097762054,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-5",
+          "fast_score": 0.5424755,
+          "keyword_rank": null,
+          "vector_distance": 0.5879052877426119,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-2",
+          "fast_score": 0.46257016,
+          "keyword_rank": null,
+          "vector_distance": 0.5950346291065187,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "installment_savings_rate-3",
+          "fast_score": 0.74212277,
+          "keyword_rank": 0.006079271,
+          "vector_distance": 0.5985066294670076,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "branch_merger_notice-2",
+          "fast_score": 0.40507212,
+          "keyword_rank": null,
+          "vector_distance": 0.6010806322741878,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-9",
+          "fast_score": 0.5230306,
+          "keyword_rank": null,
+          "vector_distance": 0.6126885414123507,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "safety_fund_cover-3",
+          "fast_score": 0.5191313,
+          "keyword_rank": null,
+          "vector_distance": 0.6287750457257086,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "elder_protection-1",
+          "fast_score": 0.36080432,
+          "keyword_rank": null,
+          "vector_distance": 0.6505112051963782,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "elder_protection-10",
+          "fast_score": 0.3086902,
+          "keyword_rank": null,
+          "vector_distance": 0.6587775342563569,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "secured_loan_grace-1",
+          "fast_score": 0.3790106,
+          "keyword_rank": null,
+          "vector_distance": 0.6595701765501709,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "installment_savings_rate-10",
+          "fast_score": 0.37168384,
+          "keyword_rank": 0.006079271,
+          "vector_distance": 0.6605611140037577,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "installment_savings_rate-9",
+          "fast_score": 0.38639295,
+          "keyword_rank": null,
+          "vector_distance": 0.6706086891526712,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "secured_loan_grace-3",
+          "fast_score": 0.43551737,
+          "keyword_rank": 0.006079271,
+          "vector_distance": 0.6778362691402413,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "secured_loan_grace-2",
+          "fast_score": 0.39010403,
+          "keyword_rank": null,
+          "vector_distance": 0.6898446494248295,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "secured_loan_grace-5",
+          "fast_score": 0.38269496,
+          "keyword_rank": 0.006079271,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "elder_protection-5",
+          "fast_score": 0.2890505,
+          "keyword_rank": 0.006079271,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "branch_merger_notice-5",
+          "fast_score": 0.47813898,
+          "keyword_rank": 0.006079271,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        }
+      ]
+    },
+    {
+      "claim_key": "dev_mobile_limit:c4",
+      "candidates": [
+        {
+          "unit": "dev_mobile_limit-4",
+          "fast_score": 0.7617867,
+          "keyword_rank": null,
+          "vector_distance": 0.6170343896191557,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-2",
+          "fast_score": 0.43551737,
+          "keyword_rank": null,
+          "vector_distance": 0.6453788665162785,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-5",
+          "fast_score": 0.44707403,
+          "keyword_rank": null,
+          "vector_distance": 0.66377470873443,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-9",
+          "fast_score": 0.45093963,
+          "keyword_rank": null,
+          "vector_distance": 0.6757168576548559,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "elder_protection-2",
+          "fast_score": 0.43168002,
+          "keyword_rank": null,
+          "vector_distance": 0.6782808218337062,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "safety_fund_cover-3",
+          "fast_score": 0.45481116,
+          "keyword_rank": null,
+          "vector_distance": 0.6894979517754225,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "safety_fund_cover-2",
+          "fast_score": 0.46257016,
+          "keyword_rank": null,
+          "vector_distance": 0.7009901047933205,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-3",
+          "fast_score": 0.48203897,
+          "keyword_rank": null,
+          "vector_distance": 0.70400643348693,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "secured_loan_grace-3",
+          "fast_score": 0.4761899,
+          "keyword_rank": null,
+          "vector_distance": 0.7151109406418124,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-1",
+          "fast_score": 0.4996094,
+          "keyword_rank": null,
+          "vector_distance": 0.7187335155884622,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "elder_protection-3",
+          "fast_score": 0.40884307,
+          "keyword_rank": null,
+          "vector_distance": 0.7338490606276497,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "branch_merger_notice-4",
+          "fast_score": 0.45481116,
+          "keyword_rank": null,
+          "vector_distance": 0.7417447413053913,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-10",
+          "fast_score": 0.3680422,
+          "keyword_rank": null,
+          "vector_distance": 0.757838183319297,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "elder_protection-5",
+          "fast_score": 0.35362908,
+          "keyword_rank": null,
+          "vector_distance": 0.7659498770177201,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "branch_merger_notice-9",
+          "fast_score": 0.26102942,
+          "keyword_rank": null,
+          "vector_distance": 0.7816765942188002,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "branch_merger_notice-2",
+          "fast_score": 0.37168384,
+          "keyword_rank": null,
+          "vector_distance": 0.784984518287719,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "elder_protection-1",
+          "fast_score": 0.3086902,
+          "keyword_rank": null,
+          "vector_distance": 0.7860215923798999,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "installment_savings_rate-3",
+          "fast_score": 0.40131235,
+          "keyword_rank": null,
+          "vector_distance": 0.7893924140567993,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "secured_loan_grace-2",
+          "fast_score": 0.33598238,
+          "keyword_rank": null,
+          "vector_distance": 0.8020755263656991,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "branch_merger_notice-3",
+          "fast_score": 0.31878197,
+          "keyword_rank": null,
+          "vector_distance": 0.8053624033927862,
+          "matched_by": "VECTOR"
+        }
+      ]
+    },
+    {
+      "claim_key": "dev_mobile_limit:c5",
+      "candidates": [
+        {
+          "unit": "dev_mobile_limit-5",
+          "fast_score": 0.8951933,
+          "keyword_rank": 0.02605402,
+          "vector_distance": 0.18837353199001428,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-9",
+          "fast_score": 0.72064364,
+          "keyword_rank": 0.017369347,
+          "vector_distance": 0.40518902447419813,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-1",
+          "fast_score": 0.7330507,
+          "keyword_rank": 0.017369347,
+          "vector_distance": 0.4128208264326022,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-2",
+          "fast_score": 0.5327655,
+          "keyword_rank": 0.008684673,
+          "vector_distance": 0.4821903439419838,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-3",
+          "fast_score": 0.59417456,
+          "keyword_rank": null,
+          "vector_distance": 0.5949391496326566,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "elder_protection-2",
+          "fast_score": 0.7174872,
+          "keyword_rank": null,
+          "vector_distance": 0.6258786766673685,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "safety_fund_cover-3",
+          "fast_score": 0.48594123,
+          "keyword_rank": null,
+          "vector_distance": 0.6297789138687245,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-4",
+          "fast_score": 0.61286587,
+          "keyword_rank": null,
+          "vector_distance": 0.6328307827912802,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "branch_merger_notice-2",
+          "fast_score": 0.39010403,
+          "keyword_rank": null,
+          "vector_distance": 0.6481322469553628,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "elder_protection-1",
+          "fast_score": 0.42021888,
+          "keyword_rank": null,
+          "vector_distance": 0.6646450165548885,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "installment_savings_rate-10",
+          "fast_score": 0.31878197,
+          "keyword_rank": null,
+          "vector_distance": 0.6729107493539939,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "branch_merger_notice-3",
+          "fast_score": 0.3120345,
+          "keyword_rank": null,
+          "vector_distance": 0.6793376971870191,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "safety_fund_cover-2",
+          "fast_score": 0.5540844,
+          "keyword_rank": null,
+          "vector_distance": 0.6803021812078713,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "elder_protection-3",
+          "fast_score": 0.32904667,
+          "keyword_rank": null,
+          "vector_distance": 0.695927578453561,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "installment_savings_rate-3",
+          "fast_score": 0.5540844,
+          "keyword_rank": null,
+          "vector_distance": 0.7144576225654556,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "secured_loan_grace-5",
+          "fast_score": 0.32904667,
+          "keyword_rank": null,
+          "vector_distance": 0.7238788502432967,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "secured_loan_grace-1",
+          "fast_score": 0.25208935,
+          "keyword_rank": null,
+          "vector_distance": 0.7265379293836354,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_mobile_limit-10",
+          "fast_score": 0.35362908,
+          "keyword_rank": null,
+          "vector_distance": 0.7282104139139849,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "installment_savings_rate-4",
+          "fast_score": 0.2890505,
+          "keyword_rank": null,
+          "vector_distance": 0.7288404753588497,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "branch_merger_notice-9",
+          "fast_score": 0.28585017,
+          "keyword_rank": 0.008684673,
+          "vector_distance": 0.7364290074790689,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        }
+      ]
+    },
+    {
+      "claim_key": "dev_supervisory_regulation:c1",
+      "candidates": [
+        {
+          "unit": "dev_supervisory_regulation-3",
+          "fast_score": 0.92908084,
+          "keyword_rank": 0.015198178,
+          "vector_distance": 0.3098211103784364,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-2",
+          "fast_score": 0.74435914,
+          "keyword_rank": 0.007599089,
+          "vector_distance": 0.3666775604082597,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-4",
+          "fast_score": 0.6972792,
+          "keyword_rank": 0.007599089,
+          "vector_distance": 0.475627692006367,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-9",
+          "fast_score": 0.48789302,
+          "keyword_rank": 0.007599089,
+          "vector_distance": 0.599336016257284,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-1",
+          "fast_score": 0.5540844,
+          "keyword_rank": null,
+          "vector_distance": 0.6060675554194981,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-3",
+          "fast_score": 0.5866176,
+          "keyword_rank": null,
+          "vector_distance": 0.6410361956314807,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "senior_sale_rule-9",
+          "fast_score": 0.47424158,
+          "keyword_rank": null,
+          "vector_distance": 0.6717328624884562,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "rate_cut_request-3",
+          "fast_score": 0.63486034,
+          "keyword_rank": null,
+          "vector_distance": 0.6955517945022411,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-10",
+          "fast_score": 0.37168384,
+          "keyword_rank": null,
+          "vector_distance": 0.701719582080839,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-2",
+          "fast_score": 0.39010403,
+          "keyword_rank": null,
+          "vector_distance": 0.7384915351867658,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-5",
+          "fast_score": 0.45093963,
+          "keyword_rank": null,
+          "vector_distance": 0.7431520529804166,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "rate_cut_request-10",
+          "fast_score": 0.33250546,
+          "keyword_rank": null,
+          "vector_distance": 0.7474299073219282,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "rate_cut_request-2",
+          "fast_score": 0.29551446,
+          "keyword_rank": null,
+          "vector_distance": 0.7502552494482743,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dsr_rule-10",
+          "fast_score": 0.2890505,
+          "keyword_rank": null,
+          "vector_distance": 0.7506620734535407,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "rate_cut_request-5",
+          "fast_score": 0.33947718,
+          "keyword_rank": null,
+          "vector_distance": 0.7515935449842481,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-10",
+          "fast_score": 0.32560632,
+          "keyword_rank": null,
+          "vector_distance": 0.7601488518537459,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "rate_cut_request-1",
+          "fast_score": 0.34298956,
+          "keyword_rank": null,
+          "vector_distance": 0.7622895814854651,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "rate_cut_request-4",
+          "fast_score": 0.4645129,
+          "keyword_rank": null,
+          "vector_distance": 0.7639863929756642,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "senior_sale_rule-5",
+          "fast_score": 0.37168384,
+          "keyword_rank": null,
+          "vector_distance": 0.7645511784882018,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-9",
+          "fast_score": 0.40131235,
+          "keyword_rank": null,
+          "vector_distance": 0.765002844929356,
+          "matched_by": "VECTOR"
+        }
+      ]
+    },
+    {
+      "claim_key": "dev_supervisory_regulation:c2",
+      "candidates": [
+        {
+          "unit": "dev_supervisory_regulation-9",
+          "fast_score": 0.5424755,
+          "keyword_rank": null,
+          "vector_distance": 0.45465493202209084,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-1",
+          "fast_score": 0.74062485,
+          "keyword_rank": 0.012158542,
+          "vector_distance": 0.4746472835540734,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-2",
+          "fast_score": 0.56563467,
+          "keyword_rank": null,
+          "vector_distance": 0.5192469071893032,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-4",
+          "fast_score": 0.58472174,
+          "keyword_rank": 0.012158542,
+          "vector_distance": 0.6198378574751524,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "senior_sale_rule-1",
+          "fast_score": 0.38269496,
+          "keyword_rank": null,
+          "vector_distance": 0.6632764035361529,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-9",
+          "fast_score": 0.41641688,
+          "keyword_rank": null,
+          "vector_distance": 0.6968850493431069,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-10",
+          "fast_score": 0.3086902,
+          "keyword_rank": null,
+          "vector_distance": 0.7104067457207138,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "rate_cut_request-1",
+          "fast_score": 0.3790106,
+          "keyword_rank": null,
+          "vector_distance": 0.7139089874083362,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-2",
+          "fast_score": 0.39756414,
+          "keyword_rank": null,
+          "vector_distance": 0.7146275299343503,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "stress_rate_notice-9",
+          "fast_score": 0.35720867,
+          "keyword_rank": null,
+          "vector_distance": 0.717249870300291,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-1",
+          "fast_score": 0.37168384,
+          "keyword_rank": null,
+          "vector_distance": 0.7174852918079664,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-3",
+          "fast_score": 0.3680422,
+          "keyword_rank": null,
+          "vector_distance": 0.7175656388739127,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "senior_sale_rule-9",
+          "fast_score": 0.33947718,
+          "keyword_rank": null,
+          "vector_distance": 0.7194305491108024,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "senior_sale_rule-10",
+          "fast_score": 0.27637792,
+          "keyword_rank": null,
+          "vector_distance": 0.7278043465497696,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dsr_rule-2",
+          "fast_score": 0.26710218,
+          "keyword_rank": null,
+          "vector_distance": 0.7326745668261727,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-3",
+          "fast_score": 0.35720867,
+          "keyword_rank": null,
+          "vector_distance": 0.7337241768836956,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "senior_sale_rule-5",
+          "fast_score": 0.3644156,
+          "keyword_rank": null,
+          "vector_distance": 0.7338266492772066,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "stress_rate_notice-5",
+          "fast_score": 0.34298956,
+          "keyword_rank": null,
+          "vector_distance": 0.7413665796140774,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "rate_cut_request-4",
+          "fast_score": 0.34298956,
+          "keyword_rank": null,
+          "vector_distance": 0.7436072375540275,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "senior_sale_rule-2",
+          "fast_score": 0.32904667,
+          "keyword_rank": null,
+          "vector_distance": 0.7464932501316053,
+          "matched_by": "VECTOR"
+        }
+      ]
+    },
+    {
+      "claim_key": "dev_supervisory_regulation:c3",
+      "candidates": [
+        {
+          "unit": "dev_supervisory_regulation-2",
+          "fast_score": 0.8631496,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.3490141034126282,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-4",
+          "fast_score": 0.7198565,
+          "keyword_rank": null,
+          "vector_distance": 0.5339674353599548,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-3",
+          "fast_score": 0.7054605,
+          "keyword_rank": null,
+          "vector_distance": 0.5418141782283783,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-9",
+          "fast_score": 0.5249792,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.6056206461417283,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-1",
+          "fast_score": 0.53665286,
+          "keyword_rank": null,
+          "vector_distance": 0.6331888655907585,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-5",
+          "fast_score": 0.5113262,
+          "keyword_rank": null,
+          "vector_distance": 0.6999126851610724,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-2",
+          "fast_score": 0.50546855,
+          "keyword_rank": null,
+          "vector_distance": 0.7050859156302158,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-3",
+          "fast_score": 0.45868814,
+          "keyword_rank": null,
+          "vector_distance": 0.7199146318486547,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "senior_sale_rule-5",
+          "fast_score": 0.42021888,
+          "keyword_rank": null,
+          "vector_distance": 0.7206937933795186,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-10",
+          "fast_score": 0.41641688,
+          "keyword_rank": null,
+          "vector_distance": 0.7294240730657616,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "rate_cut_request-5",
+          "fast_score": 0.43168002,
+          "keyword_rank": null,
+          "vector_distance": 0.7345182299613953,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "rate_cut_request-2",
+          "fast_score": 0.33250546,
+          "keyword_rank": null,
+          "vector_distance": 0.7363739374018246,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "rate_cut_request-1",
+          "fast_score": 0.3938279,
+          "keyword_rank": null,
+          "vector_distance": 0.7453258043139196,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-1",
+          "fast_score": 0.45093963,
+          "keyword_rank": null,
+          "vector_distance": 0.7502174377441406,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "senior_sale_rule-9",
+          "fast_score": 0.38269496,
+          "keyword_rank": null,
+          "vector_distance": 0.7513858675956726,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "stress_rate_notice-10",
+          "fast_score": 0.33250546,
+          "keyword_rank": null,
+          "vector_distance": 0.7658196072793458,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "senior_sale_rule-3",
+          "fast_score": 0.43168002,
+          "keyword_rank": null,
+          "vector_distance": 0.7691272726394912,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-10",
+          "fast_score": 0.35720867,
+          "keyword_rank": null,
+          "vector_distance": 0.773494838267872,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "rate_cut_request-4",
+          "fast_score": 0.50156254,
+          "keyword_rank": null,
+          "vector_distance": 0.7754398435354233,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "rate_cut_request-10",
+          "fast_score": 0.3465192,
+          "keyword_rank": null,
+          "vector_distance": 0.7762929365809518,
+          "matched_by": "VECTOR"
+        }
+      ]
+    },
+    {
+      "claim_key": "dev_supervisory_regulation:c4",
+      "candidates": [
+        {
+          "unit": "dev_supervisory_regulation-5",
+          "fast_score": 0.9623348,
+          "keyword_rank": 0.040528473,
+          "vector_distance": 0.06642560963172572,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-5",
+          "fast_score": 0.45868814,
+          "keyword_rank": null,
+          "vector_distance": 0.6213024186311651,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-4",
+          "fast_score": 0.5191313,
+          "keyword_rank": null,
+          "vector_distance": 0.6550209337447936,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-3",
+          "fast_score": 0.49179763,
+          "keyword_rank": null,
+          "vector_distance": 0.6944657332341968,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "rate_cut_request-5",
+          "fast_score": 0.32560632,
+          "keyword_rank": null,
+          "vector_distance": 0.6972865525142466,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-1",
+          "fast_score": 0.40507212,
+          "keyword_rank": null,
+          "vector_distance": 0.7061144639048933,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-2",
+          "fast_score": 0.43551737,
+          "keyword_rank": null,
+          "vector_distance": 0.706211959575179,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "rate_cut_request-4",
+          "fast_score": 0.39756414,
+          "keyword_rank": null,
+          "vector_distance": 0.7063987903119555,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "rate_cut_request-3",
+          "fast_score": 0.3938279,
+          "keyword_rank": null,
+          "vector_distance": 0.7297295033931656,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-2",
+          "fast_score": 0.36080432,
+          "keyword_rank": null,
+          "vector_distance": 0.7313255827828851,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-3",
+          "fast_score": 0.4432148,
+          "keyword_rank": null,
+          "vector_distance": 0.7319969120031151,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-9",
+          "fast_score": 0.36080432,
+          "keyword_rank": null,
+          "vector_distance": 0.7350286123105381,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "rate_cut_request-1",
+          "fast_score": 0.35720867,
+          "keyword_rank": null,
+          "vector_distance": 0.737672361690435,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "stress_rate_notice-4",
+          "fast_score": 0.40131235,
+          "keyword_rank": null,
+          "vector_distance": 0.7377175249029639,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "senior_sale_rule-9",
+          "fast_score": 0.4126248,
+          "keyword_rank": null,
+          "vector_distance": 0.7470017377136049,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-4",
+          "fast_score": 0.32560632,
+          "keyword_rank": null,
+          "vector_distance": 0.7499596178579768,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "senior_sale_rule-5",
+          "fast_score": 0.35362908,
+          "keyword_rank": null,
+          "vector_distance": 0.7509498000144887,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-10",
+          "fast_score": 0.30206156,
+          "keyword_rank": null,
+          "vector_distance": 0.7559164304882706,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-9",
+          "fast_score": 0.36080432,
+          "keyword_rank": null,
+          "vector_distance": 0.7569368320220409,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dsr_rule-5",
+          "fast_score": 0.33598238,
+          "keyword_rank": null,
+          "vector_distance": 0.7596823704810668,
+          "matched_by": "VECTOR"
+        }
+      ]
+    },
+    {
+      "claim_key": "dev_supervisory_regulation:c5",
+      "candidates": [
+        {
+          "unit": "dev_supervisory_regulation-4",
+          "fast_score": 0.93665683,
+          "keyword_rank": 0.022797266,
+          "vector_distance": 0.16429925944204538,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-2",
+          "fast_score": 0.7174872,
+          "keyword_rank": null,
+          "vector_distance": 0.4054044726732048,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-1",
+          "fast_score": 0.54828656,
+          "keyword_rank": 0.007599089,
+          "vector_distance": 0.5173538327217068,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-9",
+          "fast_score": 0.52692705,
+          "keyword_rank": null,
+          "vector_distance": 0.55542308092117,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-3",
+          "fast_score": 0.6202536,
+          "keyword_rank": null,
+          "vector_distance": 0.5746837600877135,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-10",
+          "fast_score": 0.4432148,
+          "keyword_rank": null,
+          "vector_distance": 0.6416886021719697,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-5",
+          "fast_score": 0.5152297,
+          "keyword_rank": null,
+          "vector_distance": 0.6674838364124274,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "senior_sale_rule-9",
+          "fast_score": 0.3938279,
+          "keyword_rank": null,
+          "vector_distance": 0.682271938459392,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-3",
+          "fast_score": 0.3680422,
+          "keyword_rank": 0.007599089,
+          "vector_distance": 0.6918319165706612,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-2",
+          "fast_score": 0.3680422,
+          "keyword_rank": null,
+          "vector_distance": 0.7312897123443738,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-9",
+          "fast_score": 0.38269496,
+          "keyword_rank": null,
+          "vector_distance": 0.7351403236389141,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "stress_rate_notice-3",
+          "fast_score": 0.39010403,
+          "keyword_rank": null,
+          "vector_distance": 0.7433509673685408,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_supervisory_regulation-10",
+          "fast_score": 0.3465192,
+          "keyword_rank": null,
+          "vector_distance": 0.7519810497760755,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "stress_rate_notice-10",
+          "fast_score": 0.3644156,
+          "keyword_rank": null,
+          "vector_distance": 0.7549792376172958,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "senior_sale_rule-5",
+          "fast_score": 0.3465192,
+          "keyword_rank": null,
+          "vector_distance": 0.754980848130139,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-4",
+          "fast_score": 0.3500658,
+          "keyword_rank": null,
+          "vector_distance": 0.755369887076013,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "high_risk_product_notice-1",
+          "fast_score": 0.4126248,
+          "keyword_rank": null,
+          "vector_distance": 0.7560842338850633,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "senior_sale_rule-10",
+          "fast_score": 0.3465192,
+          "keyword_rank": null,
+          "vector_distance": 0.75965006707013,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "rate_cut_request-5",
+          "fast_score": 0.38269496,
+          "keyword_rank": 0.007599089,
+          "vector_distance": 0.7632326789637013,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dsr_rule-10",
+          "fast_score": 0.3120345,
+          "keyword_rank": null,
+          "vector_distance": 0.7651289263444495,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "stress_rate_notice-5",
+          "fast_score": 0.39010403,
+          "keyword_rank": 0.007599089,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "rate_cut_request-1",
+          "fast_score": 0.3790106,
+          "keyword_rank": 0.007599089,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "senior_sale_rule-3",
+          "fast_score": 0.35720867,
+          "keyword_rank": 0.007599089,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        }
+      ]
+    },
+    {
+      "claim_key": "dev_bureau_report_fee:c1",
+      "candidates": [
+        {
+          "unit": "dev_bureau_report_fee-1",
+          "fast_score": 0.9065208,
+          "keyword_rank": 0.030396355,
+          "vector_distance": 0.2505023553518252,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_bureau_report_fee-5",
+          "fast_score": 0.40507212,
+          "keyword_rank": null,
+          "vector_distance": 0.475200220203406,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_bureau_report_fee-9",
+          "fast_score": 0.69064254,
+          "keyword_rank": null,
+          "vector_distance": 0.4791018211573903,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_bureau_report_fee-10",
+          "fast_score": 0.57138395,
+          "keyword_rank": 0.007599089,
+          "vector_distance": 0.4873859133537384,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "score_dispute-2",
+          "fast_score": 0.42403036,
+          "keyword_rank": null,
+          "vector_distance": 0.5488059655187718,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "delinquency_registration-10",
+          "fast_score": 0.6527729,
+          "keyword_rank": null,
+          "vector_distance": 0.5576992499142659,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "score_model_factors-10",
+          "fast_score": 0.48203897,
+          "keyword_rank": null,
+          "vector_distance": 0.558281110473904,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "score_dispute-10",
+          "fast_score": 0.56563467,
+          "keyword_rank": 0.007599089,
+          "vector_distance": 0.5760656378210464,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "score_model_factors-5",
+          "fast_score": 0.3500658,
+          "keyword_rank": null,
+          "vector_distance": 0.5792369717132141,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "inquiry_types-9",
+          "fast_score": 0.5424755,
+          "keyword_rank": null,
+          "vector_distance": 0.5848356710227431,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "inquiry_types-1",
+          "fast_score": 0.40884307,
+          "keyword_rank": null,
+          "vector_distance": 0.5891466018303214,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "inquiry_types-4",
+          "fast_score": 0.40507212,
+          "keyword_rank": 0.007599089,
+          "vector_distance": 0.5919721844204593,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "score_dispute-9",
+          "fast_score": 0.47813898,
+          "keyword_rank": null,
+          "vector_distance": 0.598735058194553,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "thin_file_scoring-10",
+          "fast_score": 0.45481116,
+          "keyword_rank": null,
+          "vector_distance": 0.6038523440184996,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "thin_file_scoring-4",
+          "fast_score": 0.3500658,
+          "keyword_rank": null,
+          "vector_distance": 0.6109481337949076,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "inquiry_types-10",
+          "fast_score": 0.45481116,
+          "keyword_rank": null,
+          "vector_distance": 0.6187730913988676,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "delinquency_registration-1",
+          "fast_score": 0.36080432,
+          "keyword_rank": null,
+          "vector_distance": 0.6189878327559339,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "inquiry_types-3",
+          "fast_score": 0.39756414,
+          "keyword_rank": 0.015198178,
+          "vector_distance": 0.6244346089492621,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "delinquency_registration-5",
+          "fast_score": 0.37168384,
+          "keyword_rank": 0.007599089,
+          "vector_distance": 0.6252583973032699,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "delinquency_registration-9",
+          "fast_score": 0.42785084,
+          "keyword_rank": null,
+          "vector_distance": 0.6287281887965315,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "score_dispute-4",
+          "fast_score": 0.292272,
+          "keyword_rank": 0.007599089,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "thin_file_scoring-2",
+          "fast_score": 0.3153985,
+          "keyword_rank": 0.007599089,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "thin_file_scoring-5",
+          "fast_score": 0.292272,
+          "keyword_rank": 0.007599089,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "inquiry_types-5",
+          "fast_score": 0.30206156,
+          "keyword_rank": 0.007599089,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "delinquency_registration-4",
+          "fast_score": 0.33598238,
+          "keyword_rank": 0.007599089,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "delinquency_registration-3",
+          "fast_score": 0.3465192,
+          "keyword_rank": 0.007599089,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "score_dispute-5",
+          "fast_score": 0.35362908,
+          "keyword_rank": 0.007599089,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        }
+      ]
+    },
+    {
+      "claim_key": "dev_bureau_report_fee:c2",
+      "candidates": [
+        {
+          "unit": "dev_bureau_report_fee-2",
+          "fast_score": 0.9036689,
+          "keyword_rank": 0.040528473,
+          "vector_distance": 0.13233636232180424,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_bureau_report_fee-3",
+          "fast_score": 0.5885108,
+          "keyword_rank": 0.010132118,
+          "vector_distance": 0.5738131999969482,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "thin_file_scoring-2",
+          "fast_score": 0.4126248,
+          "keyword_rank": null,
+          "vector_distance": 0.6966420177648025,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "delinquency_registration-2",
+          "fast_score": 0.5093739,
+          "keyword_rank": null,
+          "vector_distance": 0.7330275774002075,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_bureau_report_fee-1",
+          "fast_score": 0.53859496,
+          "keyword_rank": null,
+          "vector_distance": 0.7373210504864376,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "thin_file_scoring-3",
+          "fast_score": 0.57138395,
+          "keyword_rank": null,
+          "vector_distance": 0.7431214069010895,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "delinquency_registration-3",
+          "fast_score": 0.39010403,
+          "keyword_rank": null,
+          "vector_distance": 0.7593834990630444,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_bureau_report_fee-9",
+          "fast_score": 0.3644156,
+          "keyword_rank": null,
+          "vector_distance": 0.7686784267425537,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "score_dispute-5",
+          "fast_score": 0.3500658,
+          "keyword_rank": null,
+          "vector_distance": 0.7729739411457738,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "thin_file_scoring-5",
+          "fast_score": 0.3938279,
+          "keyword_rank": null,
+          "vector_distance": 0.7739191502332687,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "thin_file_scoring-1",
+          "fast_score": 0.29551446,
+          "keyword_rank": null,
+          "vector_distance": 0.7774994340539637,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "delinquency_registration-1",
+          "fast_score": 0.33598238,
+          "keyword_rank": null,
+          "vector_distance": 0.7849850910919781,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "score_dispute-10",
+          "fast_score": 0.31878197,
+          "keyword_rank": null,
+          "vector_distance": 0.7938984282137822,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "inquiry_types-5",
+          "fast_score": 0.29877773,
+          "keyword_rank": null,
+          "vector_distance": 0.8024071337227301,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "delinquency_registration-5",
+          "fast_score": 0.3500658,
+          "keyword_rank": null,
+          "vector_distance": 0.8047328707735016,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "score_dispute-4",
+          "fast_score": 0.3153985,
+          "keyword_rank": null,
+          "vector_distance": 0.804847740549117,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "delinquency_registration-9",
+          "fast_score": 0.3465192,
+          "keyword_rank": null,
+          "vector_distance": 0.8073827864939804,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "score_model_factors-5",
+          "fast_score": 0.31878197,
+          "keyword_rank": null,
+          "vector_distance": 0.8078053593635559,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "inquiry_types-4",
+          "fast_score": 0.26102942,
+          "keyword_rank": null,
+          "vector_distance": 0.8078940327230669,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "score_dispute-2",
+          "fast_score": 0.30206156,
+          "keyword_rank": null,
+          "vector_distance": 0.8100037688014642,
+          "matched_by": "VECTOR"
+        }
+      ]
+    },
+    {
+      "claim_key": "dev_bureau_report_fee:c3",
+      "candidates": [
+        {
+          "unit": "dev_bureau_report_fee-3",
+          "fast_score": 0.7383674,
+          "keyword_rank": 0.030396355,
+          "vector_distance": 0.33858982690633255,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_bureau_report_fee-2",
+          "fast_score": 0.44707403,
+          "keyword_rank": null,
+          "vector_distance": 0.5760930938554231,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "thin_file_scoring-2",
+          "fast_score": 0.32904667,
+          "keyword_rank": null,
+          "vector_distance": 0.6873194836402857,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_bureau_report_fee-1",
+          "fast_score": 0.41641688,
+          "keyword_rank": null,
+          "vector_distance": 0.6924421741171758,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_bureau_report_fee-9",
+          "fast_score": 0.3086902,
+          "keyword_rank": null,
+          "vector_distance": 0.705197381663478,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_bureau_report_fee-10",
+          "fast_score": 0.3053658,
+          "keyword_rank": null,
+          "vector_distance": 0.7200400102114666,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "score_dispute-1",
+          "fast_score": 0.3644156,
+          "keyword_rank": 0.015198178,
+          "vector_distance": 0.7289691350171217,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "delinquency_registration-2",
+          "fast_score": 0.3938279,
+          "keyword_rank": null,
+          "vector_distance": 0.753107204848098,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "score_dispute-2",
+          "fast_score": 0.29551446,
+          "keyword_rank": null,
+          "vector_distance": 0.7537381346537906,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "inquiry_types-4",
+          "fast_score": 0.2376467,
+          "keyword_rank": null,
+          "vector_distance": 0.7559555761867075,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_bureau_report_fee-4",
+          "fast_score": 0.34298956,
+          "keyword_rank": null,
+          "vector_distance": 0.756810188699372,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "score_dispute-3",
+          "fast_score": 0.33250546,
+          "keyword_rank": null,
+          "vector_distance": 0.7574546928730785,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "score_dispute-5",
+          "fast_score": 0.26102942,
+          "keyword_rank": null,
+          "vector_distance": 0.7589154839515668,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_bureau_report_fee-5",
+          "fast_score": 0.29551446,
+          "keyword_rank": null,
+          "vector_distance": 0.7624463282557525,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "delinquency_registration-10",
+          "fast_score": 0.28585017,
+          "keyword_rank": null,
+          "vector_distance": 0.7653584918166102,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "delinquency_registration-3",
+          "fast_score": 0.30206156,
+          "keyword_rank": null,
+          "vector_distance": 0.7665138522966084,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "inquiry_types-5",
+          "fast_score": 0.24624321,
+          "keyword_rank": null,
+          "vector_distance": 0.7669715732336028,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "thin_file_scoring-3",
+          "fast_score": 0.3644156,
+          "keyword_rank": null,
+          "vector_distance": 0.7697898092677968,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "inquiry_types-9",
+          "fast_score": 0.25802675,
+          "keyword_rank": null,
+          "vector_distance": 0.7767339646816238,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "delinquency_registration-9",
+          "fast_score": 0.29551446,
+          "keyword_rank": null,
+          "vector_distance": 0.7776005781411943,
+          "matched_by": "VECTOR"
+        }
+      ]
+    },
+    {
+      "claim_key": "dev_bureau_report_fee:c4",
+      "candidates": [
+        {
+          "unit": "dev_bureau_report_fee-4",
+          "fast_score": 0.79950494,
+          "keyword_rank": null,
+          "vector_distance": 0.2710383261487821,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "inquiry_types-4",
+          "fast_score": 0.44707403,
+          "keyword_rank": 0.017369347,
+          "vector_distance": 0.6327893952852841,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "score_dispute-9",
+          "fast_score": 0.37534004,
+          "keyword_rank": null,
+          "vector_distance": 0.6581781302796674,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_bureau_report_fee-9",
+          "fast_score": 0.29551446,
+          "keyword_rank": null,
+          "vector_distance": 0.6747317314147949,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_bureau_report_fee-1",
+          "fast_score": 0.43551737,
+          "keyword_rank": 0.017369347,
+          "vector_distance": 0.6765525428590105,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "delinquency_registration-3",
+          "fast_score": 0.29551446,
+          "keyword_rank": 0.008684673,
+          "vector_distance": 0.7039144215634805,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "inquiry_types-5",
+          "fast_score": 0.34298956,
+          "keyword_rank": 0.008684673,
+          "vector_distance": 0.707412881100945,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "score_dispute-5",
+          "fast_score": 0.32904667,
+          "keyword_rank": 0.008684673,
+          "vector_distance": 0.7153421768750052,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "delinquency_registration-2",
+          "fast_score": 0.27637792,
+          "keyword_rank": null,
+          "vector_distance": 0.7233946919441223,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "inquiry_types-9",
+          "fast_score": 0.27637792,
+          "keyword_rank": null,
+          "vector_distance": 0.725930018778444,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_bureau_report_fee-5",
+          "fast_score": 0.33598238,
+          "keyword_rank": null,
+          "vector_distance": 0.7322404086589813,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "inquiry_types-2",
+          "fast_score": 0.32218465,
+          "keyword_rank": null,
+          "vector_distance": 0.7454074691600314,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "inquiry_types-1",
+          "fast_score": 0.3053658,
+          "keyword_rank": null,
+          "vector_distance": 0.7586449980735779,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "score_dispute-3",
+          "fast_score": 0.3644156,
+          "keyword_rank": null,
+          "vector_distance": 0.7672389447689056,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "score_dispute-2",
+          "fast_score": 0.292272,
+          "keyword_rank": null,
+          "vector_distance": 0.7698864775963733,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "thin_file_scoring-3",
+          "fast_score": 0.2890505,
+          "keyword_rank": null,
+          "vector_distance": 0.7725190777359994,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "thin_file_scoring-1",
+          "fast_score": 0.2890505,
+          "keyword_rank": null,
+          "vector_distance": 0.772883770122077,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "inquiry_types-10",
+          "fast_score": 0.21840255,
+          "keyword_rank": null,
+          "vector_distance": 0.7758556604385376,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "delinquency_registration-5",
+          "fast_score": 0.3053658,
+          "keyword_rank": 0.008684673,
+          "vector_distance": 0.7789728773252438,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_bureau_report_fee-3",
+          "fast_score": 0.24624321,
+          "keyword_rank": null,
+          "vector_distance": 0.781132847070694,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "inquiry_types-3",
+          "fast_score": 0.29551446,
+          "keyword_rank": 0.008684673,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "score_dispute-4",
+          "fast_score": 0.3938279,
+          "keyword_rank": 0.008684673,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "thin_file_scoring-2",
+          "fast_score": 0.25504667,
+          "keyword_rank": 0.008684673,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "thin_file_scoring-5",
+          "fast_score": 0.25208935,
+          "keyword_rank": 0.008684673,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "dev_bureau_report_fee-10",
+          "fast_score": 0.30206156,
+          "keyword_rank": 0.008684673,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        },
+        {
+          "unit": "delinquency_registration-4",
+          "fast_score": 0.26710218,
+          "keyword_rank": 0.008684673,
+          "vector_distance": null,
+          "matched_by": "KEYWORD"
+        }
+      ]
+    },
+    {
+      "claim_key": "dev_bureau_report_fee:c5",
+      "candidates": [
+        {
+          "unit": "dev_bureau_report_fee-5",
+          "fast_score": 0.8839792,
+          "keyword_rank": 0.024317084,
+          "vector_distance": 0.412311315536499,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "inquiry_types-4",
+          "fast_score": 0.63304734,
+          "keyword_rank": 0.012158542,
+          "vector_distance": 0.45864579328025523,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "inquiry_types-2",
+          "fast_score": 0.5904014,
+          "keyword_rank": 0.012158542,
+          "vector_distance": 0.5628100838789402,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "inquiry_types-5",
+          "fast_score": 0.47813898,
+          "keyword_rank": null,
+          "vector_distance": 0.5735137208410328,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "inquiry_types-9",
+          "fast_score": 0.6856128,
+          "keyword_rank": 0.012158542,
+          "vector_distance": 0.5873510591596989,
+          "matched_by": "KEYWORD_AND_VECTOR"
+        },
+        {
+          "unit": "dev_bureau_report_fee-9",
+          "fast_score": 0.5327655,
+          "keyword_rank": null,
+          "vector_distance": 0.5890713334083557,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "inquiry_types-1",
+          "fast_score": 0.42785084,
+          "keyword_rank": null,
+          "vector_distance": 0.6303535401821136,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_bureau_report_fee-1",
+          "fast_score": 0.5230306,
+          "keyword_rank": null,
+          "vector_distance": 0.6323218783948541,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "score_dispute-3",
+          "fast_score": 0.5405358,
+          "keyword_rank": null,
+          "vector_distance": 0.6414878070354462,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "score_dispute-5",
+          "fast_score": 0.4432148,
+          "keyword_rank": null,
+          "vector_distance": 0.6725960774776976,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "delinquency_registration-9",
+          "fast_score": 0.40507212,
+          "keyword_rank": null,
+          "vector_distance": 0.6810635233242368,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "score_model_factors-2",
+          "fast_score": 0.32560632,
+          "keyword_rank": null,
+          "vector_distance": 0.6908760141282042,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "delinquency_registration-2",
+          "fast_score": 0.39010403,
+          "keyword_rank": null,
+          "vector_distance": 0.691209077835083,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "inquiry_types-3",
+          "fast_score": 0.46840155,
+          "keyword_rank": null,
+          "vector_distance": 0.693304717540741,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "score_dispute-4",
+          "fast_score": 0.41641688,
+          "keyword_rank": null,
+          "vector_distance": 0.7110166894177548,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "score_dispute-2",
+          "fast_score": 0.42785084,
+          "keyword_rank": null,
+          "vector_distance": 0.7172465790959246,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "dev_bureau_report_fee-10",
+          "fast_score": 0.4761899,
+          "keyword_rank": null,
+          "vector_distance": 0.7190636694431305,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "delinquency_registration-3",
+          "fast_score": 0.4126248,
+          "keyword_rank": null,
+          "vector_distance": 0.722632126651279,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "score_model_factors-3",
+          "fast_score": 0.3644156,
+          "keyword_rank": null,
+          "vector_distance": 0.7283397478854802,
+          "matched_by": "VECTOR"
+        },
+        {
+          "unit": "delinquency_registration-5",
+          "fast_score": 0.40507212,
+          "keyword_rank": null,
+          "vector_distance": 0.7362188258040647,
+          "matched_by": "VECTOR"
+        }
+      ]
+    }
+  ],
+  "ledger": [
+    {
+      "sequence": 1,
+      "model": "embed-v4.0",
+      "estimate": 2499,
+      "actual": 344,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:31.265Z",
+      "http_status": 200,
+      "units": 2863,
+      "request_ref": "c568afbed3f20b4ada3832ac973ccef7cf515e1d1f0ebff378a9bd13f83aafda",
+      "latency_ms": 393
+    },
+    {
+      "sequence": 2,
+      "model": "embed-v4.0",
+      "estimate": 2414,
+      "actual": 292,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:31.895Z",
+      "http_status": 200,
+      "units": 2430,
+      "request_ref": "6d2bab1495f4242e0cf79e8343a79d9196aa360b3f7578e966a78715c26984e0",
+      "latency_ms": 386
+    },
+    {
+      "sequence": 3,
+      "model": "embed-v4.0",
+      "estimate": 1187,
+      "actual": 136,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:32.994Z",
+      "http_status": 200,
+      "units": 1131,
+      "request_ref": "9495a4e06a4719bb4713ae94f0af1064010cc79ebd179147b5de6436f21b3239",
+      "latency_ms": 159
+    },
+    {
+      "sequence": 4,
+      "model": "embed-v4.0",
+      "estimate": 25,
+      "actual": 3,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:34.096Z",
+      "http_status": 200,
+      "units": 24,
+      "request_ref": "522d790502970ab8b6a2002556d2770089c08cade2c93d5b543647bb339d0d79",
+      "latency_ms": 104
+    },
+    {
+      "sequence": 5,
+      "model": "embed-v4.0",
+      "estimate": 22,
+      "actual": 3,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:35.195Z",
+      "http_status": 200,
+      "units": 17,
+      "request_ref": "d6d200c13d2262d6c45dc944b8252d6c14e1556399aed153dd47f778f704362b",
+      "latency_ms": 95
+    },
+    {
+      "sequence": 6,
+      "model": "embed-v4.0",
+      "estimate": 25,
+      "actual": 3,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:36.308Z",
+      "http_status": 200,
+      "units": 24,
+      "request_ref": "3a0bf4fdc85b630ace81e9ff6d25551b73319d423451c38efb4959ec66fb5d49",
+      "latency_ms": 92
+    },
+    {
+      "sequence": 7,
+      "model": "embed-v4.0",
+      "estimate": 25,
+      "actual": 3,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:37.395Z",
+      "http_status": 200,
+      "units": 22,
+      "request_ref": "65fbe2198113326795dc1ffc3965b2abcfc33a542d1b8d2fae0d5c98118491d8",
+      "latency_ms": 96
+    },
+    {
+      "sequence": 8,
+      "model": "embed-v4.0",
+      "estimate": 23,
+      "actual": 3,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:38.496Z",
+      "http_status": 200,
+      "units": 17,
+      "request_ref": "60eb6e7e85acb4cd0cef4326a0baad0795fb073261c4847fe3c3ff0ba8414983",
+      "latency_ms": 88
+    },
+    {
+      "sequence": 9,
+      "model": "embed-v4.0",
+      "estimate": 26,
+      "actual": 4,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:39.596Z",
+      "http_status": 200,
+      "units": 28,
+      "request_ref": "f23bb69522a4e130f92d3210157b6b004fb968bd6fe22d14c536088541505ea8",
+      "latency_ms": 547
+    },
+    {
+      "sequence": 10,
+      "model": "embed-v4.0",
+      "estimate": 23,
+      "actual": 2,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:40.699Z",
+      "http_status": 200,
+      "units": 16,
+      "request_ref": "8bfbb40d7e435d148fb75264797136050c19b8e4fcf0980734b367e3c863699c",
+      "latency_ms": 92
+    },
+    {
+      "sequence": 11,
+      "model": "embed-v4.0",
+      "estimate": 26,
+      "actual": 4,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:41.799Z",
+      "http_status": 200,
+      "units": 30,
+      "request_ref": "22202c7d1c3330375421987a892fd8423e47fb5eea1d579dfeaf7b4c68dc1ed5",
+      "latency_ms": 91
+    },
+    {
+      "sequence": 12,
+      "model": "embed-v4.0",
+      "estimate": 21,
+      "actual": 2,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:42.899Z",
+      "http_status": 200,
+      "units": 12,
+      "request_ref": "2b3b111d832547158ac0db083dc395a14beb11b60815b05885d14234389a86f2",
+      "latency_ms": 72
+    },
+    {
+      "sequence": 13,
+      "model": "embed-v4.0",
+      "estimate": 24,
+      "actual": 3,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:44.002Z",
+      "http_status": 200,
+      "units": 21,
+      "request_ref": "db0083aa62f29cff786d839240a431eb9674c06abb015d03613d0dddf2df88e6",
+      "latency_ms": 98
+    },
+    {
+      "sequence": 14,
+      "model": "embed-v4.0",
+      "estimate": 26,
+      "actual": 3,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:45.112Z",
+      "http_status": 200,
+      "units": 23,
+      "request_ref": "e7459410b254fd059f2b001f6b874f1ebae795ffe5cc969709bcb785a1a2f21a",
+      "latency_ms": 91
+    },
+    {
+      "sequence": 15,
+      "model": "embed-v4.0",
+      "estimate": 23,
+      "actual": 2,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:46.200Z",
+      "http_status": 200,
+      "units": 13,
+      "request_ref": "e1b5725297a633d8e45e24e07581ac7911642e49722d1b2322a2ce255396094e",
+      "latency_ms": 78
+    },
+    {
+      "sequence": 16,
+      "model": "embed-v4.0",
+      "estimate": 22,
+      "actual": 3,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:47.300Z",
+      "http_status": 200,
+      "units": 17,
+      "request_ref": "e8f4328669fa3d80d1792d0ef26fba43f3d9ea013b390196604c1aa717532c74",
+      "latency_ms": 1080
+    },
+    {
+      "sequence": 17,
+      "model": "embed-v4.0",
+      "estimate": 27,
+      "actual": 3,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:48.565Z",
+      "http_status": 200,
+      "units": 21,
+      "request_ref": "c166dfe9c4a64215d537f0d2cae927395bde67d47d528e28a7f9b79ce317c863",
+      "latency_ms": 95
+    },
+    {
+      "sequence": 18,
+      "model": "embed-v4.0",
+      "estimate": 25,
+      "actual": 3,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:49.664Z",
+      "http_status": 200,
+      "units": 20,
+      "request_ref": "de7a765f1ac028d916ace7640b63e5f2b2fce240cb1be84c0dffb6f213a925d0",
+      "latency_ms": 95
+    },
+    {
+      "sequence": 19,
+      "model": "embed-v4.0",
+      "estimate": 24,
+      "actual": 3,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:50.765Z",
+      "http_status": 200,
+      "units": 19,
+      "request_ref": "363e48c065614e31f9ed7f0a571391f747cd977a1425beea2ff7bf4b82ecfa57",
+      "latency_ms": 89
+    },
+    {
+      "sequence": 20,
+      "model": "embed-v4.0",
+      "estimate": 23,
+      "actual": 3,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:51.864Z",
+      "http_status": 200,
+      "units": 19,
+      "request_ref": "15300a8be281b2ed4c8f93b856a73a27db3f9e7fd2f09464534aea7523461fb5",
+      "latency_ms": 93
+    },
+    {
+      "sequence": 21,
+      "model": "embed-v4.0",
+      "estimate": 20,
+      "actual": 2,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:52.965Z",
+      "http_status": 200,
+      "units": 11,
+      "request_ref": "5fc566cf3b736a3e7c200b2da726f12a88c22fd7cad7a077d8663beb84987174",
+      "latency_ms": 92
+    },
+    {
+      "sequence": 22,
+      "model": "embed-v4.0",
+      "estimate": 24,
+      "actual": 3,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:54.069Z",
+      "http_status": 200,
+      "units": 18,
+      "request_ref": "0809f67b533a62ab0b01bdee0b8f365483931f438733a67407086045edfba7ca",
+      "latency_ms": 95
+    },
+    {
+      "sequence": 23,
+      "model": "embed-v4.0",
+      "estimate": 23,
+      "actual": 2,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:55.166Z",
+      "http_status": 200,
+      "units": 15,
+      "request_ref": "980c9f10ce036e539cdb2120f95c4db9e4dfa8a2d8c91c08f1f5a360b421baf0",
+      "latency_ms": 91
+    },
+    {
+      "sequence": 24,
+      "model": "rerank-v4.0-fast",
+      "estimate": 2000,
+      "actual": 2000,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:56.267Z",
+      "http_status": 200,
+      "units": 1,
+      "request_ref": "17ea509c6451c6cad8b0ea236323c01d11cae773ea7b437148a565154044e536",
+      "latency_ms": 93
+    },
+    {
+      "sequence": 25,
+      "model": "rerank-v4.0-fast",
+      "estimate": 2000,
+      "actual": 2000,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:57.366Z",
+      "http_status": 200,
+      "units": 1,
+      "request_ref": "cb4fb6e3041bf5780c8a8f2bceac3d7ffa41f124533b7ecfdfd6117ea4e01794",
+      "latency_ms": 95
+    },
+    {
+      "sequence": 26,
+      "model": "rerank-v4.0-fast",
+      "estimate": 2000,
+      "actual": 2000,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:58.467Z",
+      "http_status": 200,
+      "units": 1,
+      "request_ref": "64bc332b6d70b2e3dd297120f22b0c90edbf876a09ed2169a96eca64819e2c4a",
+      "latency_ms": 95
+    },
+    {
+      "sequence": 27,
+      "model": "rerank-v4.0-fast",
+      "estimate": 2000,
+      "actual": 2000,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:41:59.568Z",
+      "http_status": 200,
+      "units": 1,
+      "request_ref": "795f5a820c341716cf2b3faf1ce8d99323e70f93a03a6a7c3158d729d81a6bb4",
+      "latency_ms": 86
+    },
+    {
+      "sequence": 28,
+      "model": "rerank-v4.0-fast",
+      "estimate": 2000,
+      "actual": 2000,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:42:00.668Z",
+      "http_status": 200,
+      "units": 1,
+      "request_ref": "28f7d3706d1b59ab8493a3ada2a0d049b5285449d51c44be221d9506bfc157a0",
+      "latency_ms": 88
+    },
+    {
+      "sequence": 29,
+      "model": "rerank-v4.0-fast",
+      "estimate": 2000,
+      "actual": 2000,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:42:01.769Z",
+      "http_status": 200,
+      "units": 1,
+      "request_ref": "084e366f69e1732d80e8710df69815bf29111a820ce0cf2f1f80c2816703ba00",
+      "latency_ms": 367
+    },
+    {
+      "sequence": 30,
+      "model": "rerank-v4.0-fast",
+      "estimate": 2000,
+      "actual": 2000,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:42:02.870Z",
+      "http_status": 200,
+      "units": 1,
+      "request_ref": "44a5ffa8df6181101db65267f903fb4ee7808342877fcd5eb62e3418c7b74bc9",
+      "latency_ms": 90
+    },
+    {
+      "sequence": 31,
+      "model": "rerank-v4.0-fast",
+      "estimate": 2000,
+      "actual": 2000,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:42:03.970Z",
+      "http_status": 200,
+      "units": 1,
+      "request_ref": "ed55bee9e5dbce3ac98b9c1b4107bcfc19d619aa4780015320c9c67d161c8e40",
+      "latency_ms": 91
+    },
+    {
+      "sequence": 32,
+      "model": "rerank-v4.0-fast",
+      "estimate": 2000,
+      "actual": 2000,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:42:05.071Z",
+      "http_status": 200,
+      "units": 1,
+      "request_ref": "72102a01c2eed21a3e133e9ef2cffa2507611346522ab4e2aff76a157598cc78",
+      "latency_ms": 90
+    },
+    {
+      "sequence": 33,
+      "model": "rerank-v4.0-fast",
+      "estimate": 2000,
+      "actual": 2000,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:42:06.172Z",
+      "http_status": 200,
+      "units": 1,
+      "request_ref": "d2bb3377b97e1aeabe1f48775983a5c8989600f640b91779f4e829918ec79d61",
+      "latency_ms": 85
+    },
+    {
+      "sequence": 34,
+      "model": "rerank-v4.0-fast",
+      "estimate": 2000,
+      "actual": 2000,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:42:07.272Z",
+      "http_status": 200,
+      "units": 1,
+      "request_ref": "3d3b53a2413ce53927c0579fa3d3182d6d0fd7fefe7a463a9cd6fea36c31ae69",
+      "latency_ms": 275
+    },
+    {
+      "sequence": 35,
+      "model": "rerank-v4.0-fast",
+      "estimate": 2000,
+      "actual": 2000,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:42:08.372Z",
+      "http_status": 200,
+      "units": 1,
+      "request_ref": "39351f91d657bfa10386e8e0bf693ca224006eb5058cdf4ed1482f31f342d1ca",
+      "latency_ms": 361
+    },
+    {
+      "sequence": 36,
+      "model": "rerank-v4.0-fast",
+      "estimate": 2000,
+      "actual": 2000,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:42:09.473Z",
+      "http_status": 200,
+      "units": 1,
+      "request_ref": "01449fb12984a185a1b2b096f2b3217e838e574b803ef38fec13dced968220e3",
+      "latency_ms": 88
+    },
+    {
+      "sequence": 37,
+      "model": "rerank-v4.0-fast",
+      "estimate": 2000,
+      "actual": 2000,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:42:10.575Z",
+      "http_status": 200,
+      "units": 1,
+      "request_ref": "3814ba291f348bd5bbc9ec70ee1311143a4a38c3e29bee8e30d1c59ad1a87744",
+      "latency_ms": 89
+    },
+    {
+      "sequence": 38,
+      "model": "rerank-v4.0-fast",
+      "estimate": 2000,
+      "actual": 2000,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:42:11.675Z",
+      "http_status": 200,
+      "units": 1,
+      "request_ref": "be4cbc5ef96762c51848dca8b8c0f7eaab1390ca22f5be3305b201fd0488c883",
+      "latency_ms": 85
+    },
+    {
+      "sequence": 39,
+      "model": "rerank-v4.0-fast",
+      "estimate": 2000,
+      "actual": 2000,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:42:12.778Z",
+      "http_status": 200,
+      "units": 1,
+      "request_ref": "2893521e074c25890af95dd10ff88de1c1144a5d76d64450f5fc20ddd89c082f",
+      "latency_ms": 104
+    },
+    {
+      "sequence": 40,
+      "model": "rerank-v4.0-fast",
+      "estimate": 2000,
+      "actual": 2000,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:42:13.877Z",
+      "http_status": 200,
+      "units": 1,
+      "request_ref": "5152519857c88ec624fdf9bfac2ad7a70dff9853005e15fd8321f189abf7a0a1",
+      "latency_ms": 89
+    },
+    {
+      "sequence": 41,
+      "model": "rerank-v4.0-fast",
+      "estimate": 2000,
+      "actual": 2000,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:42:14.979Z",
+      "http_status": 200,
+      "units": 1,
+      "request_ref": "0153749590a003784b41ac007bcf6856fa2114c55559319ee770b43e3fd8c8f3",
+      "latency_ms": 570
+    },
+    {
+      "sequence": 42,
+      "model": "rerank-v4.0-fast",
+      "estimate": 2000,
+      "actual": 2000,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:42:16.079Z",
+      "http_status": 200,
+      "units": 1,
+      "request_ref": "232b5c5710c86c3b838a07f2fd1f132255aa93f87f0cdf5898e2fa67d60ee09c",
+      "latency_ms": 86
+    },
+    {
+      "sequence": 43,
+      "model": "rerank-v4.0-fast",
+      "estimate": 2000,
+      "actual": 2000,
+      "status": "SETTLED",
+      "started_at": "2026-09-07T13:42:17.181Z",
+      "http_status": 200,
+      "units": 1,
+      "request_ref": "3745a068b734f69f5d5f5d22a76e1322a52540b2fabbbaf29f11c5e299c41678",
+      "latency_ms": 382
+    }
+  ],
+  "usage": {
+    "consumed": 40829,
+    "reserved": 0
+  },
+  "fast_p95_ms": 382
+}

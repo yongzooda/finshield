@@ -1,0 +1,14 @@
+{
+  "classification": "SYNTHETIC_PREVIEW_API",
+  "case_count": 51,
+  "pages": [
+    50,
+    5
+  ],
+  "unique": true,
+  "two_sessions_equal": true,
+  "invalid_cursor_status": 400,
+  "deleted": 51,
+  "cleanup_complete": true,
+  "cleaned_ids_absent": true
+}

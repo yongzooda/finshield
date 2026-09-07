@@ -1,0 +1,15 @@
+{
+  "kind": "development-live-tus-storage-parser-model-worker-cleanup-not-release",
+  "fixture_sha256": "3b4edb0a7075f273ddfa1c426bb818bd4df2ae1c48011f8e191d17830cc53a1a",
+  "elapsed_ms": 12988,
+  "claims": 6,
+  "pages": 1,
+  "model_calls": 1,
+  "model_cost_microunits": 7956,
+  "cleanup": {
+    "finished": 1,
+    "pending": false
+  },
+  "absent_status": 400,
+  "ocr_used": false
+}

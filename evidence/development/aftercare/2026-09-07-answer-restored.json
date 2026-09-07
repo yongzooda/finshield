@@ -1,0 +1,34 @@
+{
+  "kind": "development-protected-preview-aftercare-restoration",
+  "sha": "efbdb8f0585f1b0405160ee2ee4bb953bb274255",
+  "case_id": "2f843145-e83c-4a65-934d-27e2ec4afa21",
+  "assessment_id": "501e006b-4007-46b0-81da-ae4783b04420",
+  "base_passport_id": "3f71005e-5599-4b02-9267-6bff185bd7ac",
+  "http_status": 200,
+  "assessment_no": 1,
+  "result": "DISPUTE_PREPARATION",
+  "answers": {
+    "EXPLAINED_RATE_AND_FEES": "PARTIAL",
+    "UNDERSTOOD_TERMS": "PARTIAL",
+    "CONTRACT_MATCHES_EXPLANATION": "DIFFERENT",
+    "HAS_CONTRACT_COPY": "YES"
+  },
+  "comparison": [
+    {
+      "claim_id": "d9195188-72d5-46f1-82d5-e849d3f7547f",
+      "before": "햇살론15 상품은 연 3% 고정금리이다.",
+      "contract": "합성 계약의 금리는 연 8.2%입니다.",
+      "result": "DIFFERENT_TEXT"
+    }
+  ],
+  "preserved_existing_assessment": true,
+  "new_assessments_created": 0,
+  "browser": {
+    "runtime": "local-next-with-actual-finshield-db",
+    "result_visible": true,
+    "edit_form_restored_answer_count": 4,
+    "contract_matches_explanation_restored": "DIFFERENT",
+    "screenshot": "/tmp/finshield-aftercare-browser.png"
+  },
+  "scope_limit": "문구 비교·설문 규칙·불변 기록과 복원 검증이며 가입 후 Agent 또는 법적 판단 품질 Gate가 아니다."
+}

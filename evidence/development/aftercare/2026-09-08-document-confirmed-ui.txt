@@ -1,0 +1,29 @@
+The following is a diff from the previous accessibility tree for Window: "Untitled query | SQL Editor | finshield | yongju | Supabase" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 187-188
+~								129 버튼 Run
++										187 버튼 1 row(Limited to only 100 rows)
++											188 container
++												189 text 1  row (Limited to only 100 rows)
++									190 표
++										191 row raw_objects confirmed_terms original_claims ocr_artifacts
++											192 열 헤더
++												193 텍스트 raw_objects
++											194 열 헤더
++												195 텍스트 confirmed_terms
++											196 열 헤더
++												197 텍스트 original_claims
++											198 열 헤더
++												199 텍스트 ocr_artifacts
++										200 row 0 1 1 0
++											201 셀
++												202 텍스트 0
++											203 셀
++												204 텍스트 1
++											205 셀
++												206 텍스트 1
++											207 셀
++												208 텍스트 0
+The focused UI element is 131 editor (settable) Description: Editor content, Value: -f3b9-4419-920e-9d371b2c0187/synthetic-id-2/synthetic-id-6.pdf') as raw_objects,
+ (select count(*) from public.precase_document_terms where case_id='synthetic-id-1' and confirmed) as confirmed_terms,
+ (select count(*) from public.claims where case_id='synthetic-id-1') as original_claims,
+ (select count(*) from private.ocr_artifacts where case_input_id='synthetic-id-2') as ocr_artifacts;

@@ -1,0 +1,95 @@
+{
+  "mode": "isolated-preview-http-file-development",
+  "fixture": "scanned",
+  "sha": "8dc04f4c74b27a6694fea80398746d7bc2ddb173",
+  "steps": [
+    {
+      "path": "/api/finshield/session",
+      "status": 200,
+      "elapsed_ms": 981
+    },
+    {
+      "path": "/api/finshield/files/slot",
+      "status": 200,
+      "elapsed_ms": 1284
+    },
+    {
+      "path": "/api/finshield/files/process",
+      "status": 200,
+      "elapsed_ms": 29080
+    },
+    {
+      "path": "/api/finshield/cases/[case]/stop",
+      "status": 200,
+      "elapsed_ms": 716
+    }
+  ],
+  "fixture_sha256": "f9ebb96e1ded704c55bf570a513d0bb84f2deca5929f3b3ab66a5bdc4a172b81",
+  "upload_status": 204,
+  "pages": 10,
+  "claims": 8,
+  "ok": true,
+  "cleanup": {
+    "ok": true,
+    "cleanup_count": 1
+  },
+  "model_usage": {
+    "calls": 1,
+    "cost": 13308
+  },
+  "cleanup_jobs": [
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "INPUT_OBJECT"
+    }
+  ],
+  "ocr_authorization": [
+    {
+      "event_code": "EXTERNAL_OCR_RAW_AUTHORIZED",
+      "status_code": "AUTHORIZED"
+    }
+  ],
+  "raw_pending": false,
+  "storage_absent": true,
+  "storage_status": 400
+}

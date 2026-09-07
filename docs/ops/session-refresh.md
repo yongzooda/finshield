@@ -20,3 +20,11 @@ React 조회 Effect는 JWT 문자열 대신 세션 식별자를 기준으로 실
 원본은 `evidence/development/auth/2026-09-07-session-refresh*.json`이다. DB·Migration·package·Provider 설정·Gate를 바꾸지 않는다. 직접 PostgREST/Storage의 폐기 세션 차단은 별도 PR #226에서 실제 적용·검증했다. 전체 계정 탈퇴는 후속 보안 작업이다. 전체 AUTH·P0·Release 완료로 표시하지 않는다.
 
 근거: [Supabase 세션과 Refresh 재사용 예외](https://supabase.com/docs/guides/auth/sessions), [서버 세션·Cookie·Cache 경계](https://supabase.com/docs/guides/auth/server-side/advanced-guide). 공식 SDK의 클라이언트 Refresh 저장 방식 대신 현재 서버 Auth 중계에 Cookie 교환을 추가했으며 SDK 설치·Provider 정책 변경은 하지 않았다.
+
+## 기능 Draft 통합·배포 확인
+
+main PR #224 병합 뒤 Production `72e54054ee358407c5d23afa227e824ce13bf484`에서 실제 합성 새 세션 두 개를 발급해 Cookie 회전·조회 200, 외부 Origin 403, 폐기 후 갱신 401, 다른 세션 조회 200을 확인했다. 두 시험 세션의 정리도 확인했다. `2026-09-07-session-refresh-production.json`은 실제 배포 API 경계이며 자연 만료·브라우저 표본은 위 별도 기록을 따른다.
+
+Draft #192의 가입 후 점검·재검증 GET도 동일 갱신 함수를 사용한다. Effect는 세션 식별자에 묶어 갱신 시 저장하지 않은 입력을 다시 불러오지 않는다. 파일 Slot·Process·중단은 보호 API를 통하고 TUS는 허용된 Storage Origin의 각 요청 직전 갱신을 기다린다. 청크 응답 유실은 HEAD로 Offset을 확인하며 인증 실패·갱신 중 취소에는 파일을 전송하지 않는다. 이 통합의 전체 Live 파일 흐름과 Workflow 장애 품질은 아직 별도 검증이 필요하다.
+
+보호 Preview `e3ecfba4427cf9655bedb81f8433a999f8415e8e`에서도 실제 Cookie 회전·조회·폐기·다른 세션 유지와 정리를 확인했다. 추가 합성 PNG 68바이트의 Slot 예약 200 → TUS 시작·청크마다 Cookie 회전 두 번 → 전체 바이트 전송 → Case 삭제 COMPLETED·재조회 404 → 시험 세션 삭제 200이 통과했다. OCR·모델은 호출하지 않았고 자연 만료나 다중 청크 전체 Live 품질로 확대하지 않는다. 재실행 harness는 `src/app/verify/__tests__/upload-session-live.integration.test.ts`, 원본은 `2026-09-07-upload-session-live.json`이다.

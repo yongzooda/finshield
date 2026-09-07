@@ -1,3 +1,4 @@
+import type { ModelUsage } from "./model-budget";
 /**
  * Run 오케스트레이터.
  *
@@ -20,9 +21,12 @@ import { createRunSession, type ToolCallContext } from "./tools/runtime";
 import { TOOL_IMPLS, assertToolsImplemented } from "./tools";
 import { runDomainAgent, runReviewAgent, type AgentModel } from "./agents/runner";
 import { assertPromptsComplete } from "./agents/prompts";
+import { recordJudgeRun } from "./agents/judge-record";
 
 export type JudgeModel = {
+  usage?: () => ModelUsage;
   judge: (args: {
+    signal?: AbortSignal;
     claims: ConfirmedClaim[];
     findings: (DomainFinding & { agent_code: string })[];
     evidence: ToolEvidence[];
@@ -65,12 +69,14 @@ export const runVerification = async (args: {
 
   const session = createRunSession(args.ctx);
   const agentResults: OrchestratedRun["agentResults"] = [];
+  let budgetExhausted = false;
   const findings: (DomainFinding & { agent_code: string })[] = [];
   const evidence: ToolEvidence[] = [];
   const evidenceIds = new Map<string, string>();
   const progress = args.progress ?? (() => {});
 
   for (const agent of DOMAIN_AGENTS) {
+    session.signal?.throwIfAborted();
     progress({ type: "agent_started", agentCode: agent.agentCode });
     const result = await runDomainAgent({
       session,
@@ -99,6 +105,7 @@ export const runVerification = async (args: {
       type: "agent_finished", agentCode: agent.agentCode, status: result.status,
       findings: result.output?.findings.length ?? 0, toolCalls: result.toolCalls,
     });
+    if (result.reasonCode === "TOOL_BUDGET") { budgetExhausted = true; break; }
   }
 
   // 규칙 3: 중요 Claim 은 독립 재확인과 반대 근거 찾기를 거친다. 두 Agent 는
@@ -107,8 +114,9 @@ export const runVerification = async (args: {
   let cove: CoveOutput | null = null;
   let redTeam: RedTeamOutput | null = null;
 
-  if (materialClaims.length > 0 && COVE_AGENT && RED_TEAM_AGENT) {
+  if (!budgetExhausted && materialClaims.length > 0 && COVE_AGENT && RED_TEAM_AGENT) {
     for (const [agent, kind] of [[COVE_AGENT, "cove"], [RED_TEAM_AGENT, "red_team"]] as const) {
+      session.signal?.throwIfAborted();
       progress({ type: "agent_started", agentCode: agent.agentCode });
       const parse = (raw: unknown) => {
         const schema = kind === "cove" ? coveOutput : redTeamOutput;
@@ -126,8 +134,12 @@ export const runVerification = async (args: {
             || entry.status === "COUNTER_EVIDENCE",
         })),
       });
-      if (kind === "cove") cove = (result.output as CoveOutput | null);
-      else redTeam = (result.output as RedTeamOutput | null);
+      evidence.push(...result.evidence);
+      for (const [ref, id] of result.evidenceIds) evidenceIds.set(ref, id);
+      // 조회 자체가 실패한 검토의 NONE_FOUND/CONFIRMED는 독립 검증 증거가 아니다.
+      const reviewed = result.status === "SUCCEEDED" ? result.output : null;
+      if (kind === "cove") cove = (reviewed as CoveOutput | null);
+      else redTeam = (reviewed as RedTeamOutput | null);
       agentResults.push({
         agentCode: agent.agentCode, status: result.status,
         reasonCode: result.reasonCode, toolCalls: result.toolCalls,
@@ -136,29 +148,42 @@ export const runVerification = async (args: {
         type: "agent_finished", agentCode: agent.agentCode, status: result.status,
         findings: result.output?.results.length ?? 0, toolCalls: result.toolCalls,
       });
+      if (result.reasonCode === "TOOL_BUDGET") { budgetExhausted = true; break; }
     }
   }
 
+  session.signal?.throwIfAborted();
   progress({ type: "judge_started" });
+  const judgeStartedAt = Date.now();
   let judged: JudgeOutput | null = null;
   let judgeReasonCode: string | null = null;
   try {
     // AI-013: Judge 에는 원문을 넣지 않는다. Agent 가 만든 구조와 근거만 넣는다.
-    const raw = await args.judgeModel.judge({ claims: args.claims, findings, evidence });
+    const stageSignal = AbortSignal.timeout(8_000);
+    const signal = session.signal ? AbortSignal.any([session.signal, stageSignal]) : stageSignal;
+    signal.throwIfAborted();
+    if (budgetExhausted) throw Object.assign(new Error("MODEL_BUDGET_BLOCKED"), {code:"MODEL_BUDGET_BLOCKED"});
+    const raw = await args.judgeModel.judge({ claims: args.claims, findings, evidence, signal });
     const parsed = judgeOutput.safeParse(raw);
     if (!parsed.success) {
       judgeReasonCode = "JUDGE_SCHEMA_INVALID";
     } else {
       const problems: string[] = [];
+      const requested = new Set(args.claims.map(claim => claim.claim_ref));
+      const returned = parsed.data.claim_results.map(claim => claim.claim_ref);
+      if (new Set(returned).size !== requested.size || returned.length !== requested.size || returned.some(ref => !requested.has(ref))) {
+        problems.push("CLAIM_COVERAGE_INVALID");
+      }
       for (const result of parsed.data.claim_results) {
         problems.push(...citationProblems(result.evidence_refs, result.state, session.evidence));
       }
       if (problems.length > 0) judgeReasonCode = "JUDGE_CITATION_INVALID";
       else judged = parsed.data;
     }
-  } catch {
-    judgeReasonCode = "JUDGE_CALL_FAILED";
+  } catch (error) {
+    judgeReasonCode = (error as {code?:string}).code === "MODEL_BUDGET_BLOCKED" ? "TOOL_BUDGET" : "JUDGE_CALL_FAILED";
   }
+  await recordJudgeRun(session, { claims: args.claims, findings }, judged, judgeStartedAt, judgeReasonCode, args.judgeModel.usage?.());
   progress({ type: "judge_finished", status: judged ? "SUCCEEDED" : "FAILED" });
 
   return {

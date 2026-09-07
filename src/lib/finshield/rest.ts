@@ -37,7 +37,8 @@ export const restSelect = async (args: {
     throw new RestError(response.status === 401 ? 401 : 502, "자료를 읽지 못했습니다");
   }
   const body = await response.json().catch(() => null);
-  return Array.isArray(body) ? body : [];
+  if (!Array.isArray(body)) throw new RestError(502, "자료 형식을 확인하지 못했습니다");
+  return body;
 };
 
 /**
@@ -72,5 +73,6 @@ export const restUpsert = async (args: {
     throw new RestError(response.status === 401 ? 401 : 502, "저장하지 못했습니다");
   }
   const body = await response.json().catch(() => null);
-  return Array.isArray(body) ? body : [];
+  if (!Array.isArray(body)) throw new RestError(502, "자료 형식을 확인하지 못했습니다");
+  return body;
 };

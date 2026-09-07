@@ -1,3 +1,4 @@
+import { cleanupCaseFiles } from "@/lib/finshield/files/cleanup";
 /**
  * POST /api/finshield/cases/[id]/stop — 사용자가 중단한다 (S-007, 규칙 4).
  *
@@ -39,6 +40,7 @@ export async function POST(
     const rows = await fsql()`
       select private.stop_case_input(${ownerId}::uuid, ${caseId}::uuid, ${inputId}::uuid,
         'USER_STOPPED') as cleanups`;
+    await cleanupCaseFiles(fsql(),ownerId,caseId).catch(()=>undefined);
     return jsonNoStore({ ok: true, cleanup_count: Number(rows[0]?.cleanups ?? 0) }, 200);
   } catch (error) {
     const code = String((error as { code?: string })?.code ?? "");

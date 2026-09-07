@@ -1,0 +1,31 @@
+{
+  "started_at": "2026-09-07T15:03:34.769Z",
+  "branch_sha": "d89d8ef",
+  "deployment": "A2a9uKiuavVWJdvpt9K5QSbpruuF",
+  "checks": {
+    "preview_owner_access": true,
+    "slot_response": true,
+    "tus_created": true,
+    "tus_uploaded": true,
+    "physical_object_present_before": true,
+    "foreign_origin_403": true,
+    "first_receipt_before_dispatch": true,
+    "lost_first_response_second_session_restore": true,
+    "new_file_slot_blocked": true,
+    "new_case_db_guard": true,
+    "workflow_dispatch_accepted": true,
+    "duplicate_same_request": true,
+    "workflow_completed": true,
+    "db_request_completed": true,
+    "auth_physically_absent": true,
+    "storage_physically_absent": true,
+    "old_token_denied": true,
+    "receipt_only_completion_restore": true,
+    "receipt_only_repeat_completed": true,
+    "original_fixture_auth_preserved": true
+  },
+  "blocked_slot_status": 500,
+  "dispatch_http": 200,
+  "latest_status": "COMPLETED",
+  "completed_at": "2026-09-07T15:04:20.912Z"
+}

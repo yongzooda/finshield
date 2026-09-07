@@ -15,6 +15,7 @@ import { runVerification, type JudgeModel } from "../orchestrator";
 import type { DomainAgentInput } from "../schemas";
 import { DEFINITION_VERSION } from "../manifest";
 import { loadManifest, resetManifestCache } from "../registry";
+import { lookupOfficialChannel } from "../tools/registry";
 
 const dsn = process.env.FINSHIELD_TEST_DSN;
 // fixture 를 만들려면 소유자 표에 쓸 수 있어야 한다. Worker 에게는 그 권한이 없고
@@ -29,12 +30,16 @@ maybe("근거 사슬", () => {
   let caseId = "";
   let runId = "";
   let agentRunId = "";
+  let channelHost = "";
+  let sourceOfficialId = "";
 
   beforeAll(async () => {
     resetManifestCache();
     const manifest = await loadManifest(sql);
     const owner = await admin`select gen_random_uuid() as id`;
     ownerId = owner[0].id as string;
+    channelHost = `${ownerId}.example.org`;
+    sourceOfficialId = `fixture:channel:${ownerId}`;
     await admin`insert into auth.users (id) values (${ownerId}::uuid)`;
     await admin`
       insert into public.financial_profiles
@@ -72,15 +77,15 @@ maybe("근거 사슬", () => {
     await admin`
       insert into kb.source_snapshots
         (source_type, authority_level, publisher_name, source_title, official_id, source_version,
-         retrieved_at, content_hash, source_fingerprint, freshness_status, is_complete, is_citable)
-      values ('GUIDE', 'B', '서민금융진흥원', '공식 신청 채널 안내', 'kinfa:channel:test', 'v1',
-              now(), ${"1".repeat(64)}, ${"2".repeat(64)}, 'FRESH', true, true)
+         retrieved_at, fresh_until, content_hash, source_fingerprint, freshness_status, is_complete, is_citable)
+      values ('GUIDE', 'B', '서민금융진흥원', '공식 신청 채널 안내', ${sourceOfficialId}, 'v1',
+              now(), now()+interval '1 hour', ${"1".repeat(64)}, ${"2".repeat(64)}, 'FRESH', true, true)
       on conflict do nothing`;
     await admin`
       insert into kb.official_channel_registry
         (institution_code, channel_type, normalized_value, display_value, source_snapshot_id, valid_from)
-      select 'KINFA', 'URL', 'kinfa.or.kr', 'https://www.kinfa.or.kr', s.id, current_date
-        from kb.source_snapshots s where s.official_id = 'kinfa:channel:test'
+      select 'KINFA', 'URL', ${channelHost}, ${`https://${channelHost}`}, s.id, current_date
+        from kb.source_snapshots s where s.official_id = ${sourceOfficialId}
       on conflict do nothing`;
 
     const agentRun = await sql`
@@ -98,6 +103,19 @@ maybe("근거 사슬", () => {
   const session = () => createRunSession({
     sql, ownerId, caseId, runId,
     manifest: { manifestId: "", kbReleaseId: "", agentIds: {}, toolIds: {} },
+  });
+
+  it("저장된 채널의 재조회가 Snapshot·외부 수집 시각을 갱신하지 않는다", async () => {
+    const [source] = await admin`select id,retrieved_at from kb.source_snapshots where official_id=${sourceOfficialId}`;
+    const [before] = await admin`select count(*)::int as n from kb.source_fetch_events where source_snapshot_id=${source.id}::uuid`;
+    const s = session();
+    const result = await executeTool(s,"FRAUD_CHANNEL","lookup_official_channel","VERIFY_CHANNEL",{values:[channelHost]},lookupOfficialChannel);
+    expect(result.evidence).toHaveLength(1);
+    expect(result.evidence[0].fetched_at).toBe(new Date(source.retrieved_at).toISOString());
+    expect(result.evidence[0].freshness_at_use).toBe("FRESH");
+    await persistToolRuns(s,agentRunId,[result.pending]);
+    const [after] = await admin`select count(*)::int as n from kb.source_fetch_events where source_snapshot_id=${source.id}::uuid`;
+    expect(after.n).toBe(before.n);
   });
 
   it("Tool 결과가 근거가 되고 인용 이름이 붙는다", async () => {
@@ -288,7 +306,7 @@ maybe("근거 사슬", () => {
         if (askedOnce.has(input.agent_code)) return [];
         askedOnce.add(input.agent_code);
         return input.agent_code === "FRAUD_CHANNEL"
-          ? [{ toolCode: "lookup_official_channel", input: { values: ["https://kinfa.or.kr"] } }]
+          ? [{ toolCode: "lookup_official_channel", input: { values: [`https://${channelHost}`] } }]
           : [];
       },
       decide: async ({ input, evidence }) => ({

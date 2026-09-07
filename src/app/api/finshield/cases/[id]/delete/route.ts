@@ -1,3 +1,4 @@
+import { cleanupCaseFiles } from "@/lib/finshield/files/cleanup";
 /**
  * POST /api/finshield/cases/[id]/delete — Case 삭제 요청 (S-017, AUTH-005).
  *
@@ -13,7 +14,9 @@
 import { createHash, createHmac } from "node:crypto";
 import { jsonNoStore } from "@/lib/ops/http";
 import { fsql } from "@/lib/finshield/db";
-import { resolveOwner, UnauthenticatedError } from "@/lib/finshield/auth";
+import { bearerToken, UnauthenticatedError } from "@/lib/finshield/auth";
+import { resolveRecentlyAuthenticatedOwner, ReauthenticationRequiredError, RequestOriginError } from "@/lib/finshield/reauthentication";
+import { restSelect } from "@/lib/finshield/rest";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,8 +31,10 @@ export async function POST(
 ): Promise<Response> {
   let ownerId: string;
   try {
-    ownerId = await resolveOwner(request);
+    ownerId = await resolveRecentlyAuthenticatedOwner(request);
   } catch (error) {
+    if (error instanceof ReauthenticationRequiredError) return jsonNoStore({error:error.message,code:"REAUTHENTICATION_REQUIRED"},403);
+    if (error instanceof RequestOriginError) return jsonNoStore({error:error.message,code:"ORIGIN_REJECTED"},403);
     if (error instanceof UnauthenticatedError) return jsonNoStore({ error: error.message }, 401);
     throw error;
   }
@@ -52,7 +57,13 @@ export async function POST(
       select private.request_case_deletion(${ownerId}::uuid, ${caseId}::uuid,
         ${idempotencyKey}::text, ${requestHash}::text, ${targetHmac}::text,
         ${KEY_VERSION}::text, ${POLICY_VERSION}::text) as id`;
-    return jsonNoStore({ deletion_request_id: rows[0].id, status: "PENDING" }, 200);
+    await cleanupCaseFiles(fsql(),ownerId,caseId).catch(()=>undefined);
+    const purged = await fsql()`select private.purge_case(${rows[0].id}::uuid) as ok`.catch(()=>[]);
+    // 완료 응답이 유실돼 재요청하면 Purge 대상 Case는 이미 없다. 본인 삭제 원장의 종결 상태를 복원한다.
+    const previous = purged[0]?.ok ? [] : await restSelect({token:bearerToken(request)!,path:"deletion_requests",
+      query:{select:"status",id:`eq.${rows[0].id}`,owner_id:`eq.${ownerId}`,limit:"1"}});
+    const completed = purged[0]?.ok || (previous[0] as {status?:string}|undefined)?.status === "COMPLETED";
+    return jsonNoStore({ deletion_request_id: rows[0].id, status: completed ? "COMPLETED" : "PENDING" }, 200);
   } catch (error) {
     const code = String((error as { code?: string })?.code ?? "");
     if (code === "42501") return jsonNoStore({ error: "이 Case 를 찾을 수 없습니다" }, 404);

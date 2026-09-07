@@ -13,6 +13,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CLAIM_STATE_VIEW, FsCard, FsChip } from "../../fs-shell";
 import { FsLoginCard, useFsToken } from "../../fs-session";
+import { OfficialActions, type StoredGuide } from "../../official-actions";
+import { EvidenceCitation, type EvidenceCitationData } from "../../evidence-citation";
 import { fetchCase } from "../case-api";
 import {
   ACTION_LABEL, AFTERCARE_RESULT, AFTERCARE_STATUS, AXIS_LABEL, FRESHNESS_LABEL, JOURNEY_STAGE,
@@ -28,16 +30,16 @@ type Detail = {
     coverage_satisfied: boolean | null; partial_reason_codes: string[] | null; finished_at: string | null }[];
   final_claims: { id: string; verification_run_id: string; claim_id: string; status: string;
     reason_code: string; cove_status: string; red_team_status: string; is_material: boolean;
-    decision_summary_masked: string }[];
+    decision_summary_masked: string; statement_masked: string }[];
   axes: { verification_run_id: string; axis: string; result_code: string;
     summary_masked: string; limitation_codes: string[] | null }[];
   claim_evidences: { final_claim_version_id: string; evidence_id: string; relation: string;
     is_independent: boolean; policy_reason_code: string | null }[];
-  evidences: { id: string; source_locator: Record<string, unknown>; excerpt_masked: string | null;
+  evidences: (EvidenceCitationData & { id: string; source_locator: Record<string, unknown>; excerpt_masked: string | null;
     directness: string; citable: boolean; reference_only: boolean; incomplete: boolean;
     freshness_at_use: string; independence_key: string; selection_reason_code: string;
-    content_hash: string; created_at: string }[];
-  passports: { id: string; verification_run_id: string; passport_version_no: number;
+    content_hash: string; created_at: string })[];
+  passports: { guide?: StoredGuide | null; id: string; verification_run_id: string; passport_version_no: number;
     overall_result: string; created_at: string }[];
   events: { event_no: number; event_type: string; actor_type: string; created_at: string }[];
   assessments: { id: string; assessment_no: number; status: string; result: string | null;
@@ -125,6 +127,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
         </FsCard>
       ) : null}
 
+      <OfficialActions guide={passport?.guide} />
       {latest ? (
         <FsCard>
           <h2 className="fs-h2">세 가지 확인 결과</h2>
@@ -165,9 +168,10 @@ export function CaseDetail({ caseId }: { caseId: string }) {
               return (
                 <li key={row.id} className="border-t border-[var(--fs-line)] pt-5 first:border-0 first:pt-0">
                   <div className="flex flex-wrap items-start justify-between gap-3">
-                    <p className="max-w-xl leading-relaxed">{row.decision_summary_masked}</p>
+                    <p className="max-w-xl leading-relaxed">{row.statement_masked}</p>
                     <FsChip tone={view.tone}>{view.label}</FsChip>
                   </div>
+                  <p className="fs-body mt-2">{row.decision_summary_masked}</p>
                   <p className="fs-meta mt-1">
                     {row.is_material ? "거래에 영향이 큰 항목" : "참고 항목"} · 이렇게 정한 이유: {reasonLabel(row.reason_code)}
                     {row.cove_status !== "NOT_REQUIRED" ? ` · 독립 재확인 ${coveLabel(row.cove_status)}` : ""}
@@ -201,7 +205,8 @@ export function CaseDetail({ caseId }: { caseId: string }) {
                                 {evidence!.reference_only ? <FsChip tone="caution">참고용</FsChip> : null}
                               </div>
                               <p className="fs-body mt-2">{evidence!.excerpt_masked ?? "본문 없음"}</p>
-                              <details className="fs-details"><summary>출처·조회 정보</summary>
+                              <EvidenceCitation evidence={evidence!} />
+                              <details className="fs-details"><summary>근거 연결 정보</summary>
                               <dl className="fs-meta mt-2 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1">
                                 <dt>위치</dt><dd className="break-all">{JSON.stringify(evidence!.source_locator)}</dd>
                                 <dt>인용 가능</dt><dd>{evidence!.citable ? "예" : "아니오"}</dd>

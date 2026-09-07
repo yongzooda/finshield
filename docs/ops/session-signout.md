@@ -26,3 +26,15 @@ PR #222의 첫 SHA `2d91ec05d5ec221421da8842fe39bcb56352191c`에서 CI와 Previe
 기존 격리 설정 절차는 `codex/p0-audit-contract-spike`에만 환경변수를 등록한다. 새 브랜치의 누락 설정이 의심되지만 Vercel CLI와 연결 API가 팀 접근 403을 반환해 원격 설정·로그로 원인을 확정하지 못했다. 로그인은 현재 DB 환경변수도 요구한다. Production의 같은 잘못된 합성 로그인은 정상 인증 거부 401이었으며, 이 관측만으로 로그아웃의 Production 성공을 뜻하지 않는다. 설정 범위·배포 보호·유료 계약은 변경하지 않았다.
 
 참고: [Supabase 세션](https://supabase.com/docs/guides/auth/sessions), [로그아웃 계약](https://supabase.com/docs/reference/javascript/auth-signout), [발급처 세션 검증 구현](https://github.com/supabase/auth/blob/master/internal/api/auth.go), [현재 세션 폐기 구현](https://github.com/supabase/auth/blob/master/internal/api/logout.go). 2026-09-07 문서·소스 확인과 실제 계정 관측을 구분한다.
+
+## 병합 후 Production 확인
+
+PR #222는 최종 CI 통과 후 `4ca57bbeef88ca67e1eafdad4838c2cc0a63c381`로 squash 병합했다. Runtime manifest에서 같은 Production SHA를 확인한 뒤 합성 새 세션 두 개로 로그인 200·초기 기록 조회 200·타 Origin 거부 403·로그아웃 200·폐기 Token의 조회 네 곳 401·반복 로그아웃 200·다른 세션 조회 200을 확인했다. 시험에서 만든 두 세션은 모두 정리했고 원본은 `2026-09-07-session-production.json`이다. 모델·OCR 호출이나 회원 자료 쓰기는 없었다.
+
+최종 PR CI의 첫 실행은 ADR 변조 시험의 임시 폴더 삭제에서 `ENOTEMPTY`로 중단됐다. 검사 코드·기준 변경 없이 같은 SHA의 재실행 `34110723447`이 통과했다. 첫 실패 로그와 별도 Preview 로그인 실패는 현재 성공으로 덮지 않는다.
+
+기능 Draft #192에 main을 통합하면서 상세 Passport 조회 계약과 삭제 재인증을 보존했다. 재인증 중 로그아웃, 로그아웃 중 삭제 실행을 함께 막는다. 통합 뒤 기본 시험은 517건 통과·선택적 91건 건너뜀이다. 기능 브랜치의 Health는 여전히 미평가이며 전체 P0·Release 완료가 아니다.
+
+## 통합 Draft 보호 Preview 확인
+
+`1c85539d082f187a12539c9e0bea5053f63678b2`의 Runtime manifest와 배포 ID를 확인한 뒤 동일한 합성 인증 시험이 통과했다. 로그인 두 번·폐기 전 조회·로그아웃·반복·다른 세션 조회는 200, 다른 Origin은 403, 폐기 Token의 네 조회 경로는 모두 401이었다. 시험에서 만든 세션만 정리했다. 원본은 `2026-09-07-session-draft-preview.json`이다. 새 보안 브랜치의 로그인 500 실패와 구분하며, 파일·모델·전체 가입 후 보호를 이번 시험에서 재검증한 것은 아니다.

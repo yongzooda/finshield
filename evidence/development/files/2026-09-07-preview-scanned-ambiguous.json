@@ -1,0 +1,94 @@
+{
+  "mode": "isolated-preview-http-file-development",
+  "fixture": "scanned",
+  "sha": "c70f9269de0a818e96459e254d8828173c4fa903",
+  "steps": [
+    {
+      "path": "/api/finshield/session",
+      "status": 200,
+      "elapsed_ms": 587
+    },
+    {
+      "path": "/api/finshield/files/slot",
+      "status": 200,
+      "elapsed_ms": 766
+    },
+    {
+      "path": "/api/finshield/files/process",
+      "status": 422,
+      "elapsed_ms": 25580
+    },
+    {
+      "path": "/api/finshield/cases/[case]/stop",
+      "status": 200,
+      "elapsed_ms": 173
+    }
+  ],
+  "fixture_sha256": "f9ebb96e1ded704c55bf570a513d0bb84f2deca5929f3b3ab66a5bdc4a172b81",
+  "upload_status": 204,
+  "ok": false,
+  "error": "HTTP_422: 항목의 원문 위치를 정확히 구분하지 못했습니다. 해당 구절을 텍스트로 입력해 주세요.",
+  "cleanup": {
+    "ok": true,
+    "cleanup_count": 0
+  },
+  "model_usage": {
+    "calls": 1,
+    "cost": 12080
+  },
+  "cleanup_jobs": [
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "OCR_ARTIFACT"
+    },
+    {
+      "status": "SUCCEEDED",
+      "target_type": "INPUT_OBJECT"
+    }
+  ],
+  "ocr_authorization": [
+    {
+      "event_code": "EXTERNAL_OCR_RAW_AUTHORIZED",
+      "status_code": "AUTHORIZED"
+    }
+  ],
+  "raw_pending": false,
+  "storage_absent": true,
+  "storage_status": 400
+}

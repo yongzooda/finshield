@@ -15,18 +15,19 @@ import { sessionFetch } from "../session-client";
  * 시각과 판 정보와 본문 해시를 함께 적는다 (EV-002).
  */
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { FileIntake } from "./file-intake";
 import Link from "next/link";
 import { readRunStream } from "../run-stream";
 import { CLAIM_STATE_VIEW, FsCard, FsChip } from "../fs-shell";
 import { FsLoginCard, useFsToken } from "../fs-session";
 import {
-  AGENT_LABEL, DIRECTNESS_LABEL, FRESHNESS_LABEL, coveLabel, nextAction,
+  AGENT_LABEL, AXIS_LABEL, axisResultOf, DIRECTNESS_LABEL, FRESHNESS_LABEL, coveLabel, nextAction,
 } from "../fs-labels";
 
 type Claim = {
-  claim_id: string; claim_ref: string; claim_type: string;
-  statement_masked: string; materiality: string;
+  claim_id: string; claim_ref: string; claim_type: string; expected_revision_no?: number;
+  statement_masked: string; materiality: string; source_page_no?: number;
 };
 type Evidence = {
   ref: string; title: string; source: string; grade: string; official_id: string | null;
@@ -63,13 +64,20 @@ export function VerifyFlow() {
   const [step, setStep] = useState<"input" | "extracting" | "claims" | "running" | "result">("input");
   const [stages, setStages] = useState<{ stage: string; detail: string }[]>([]);
   const [busy, setBusy] = useState(false);
+  const [fileBusy, setFileBusy] = useState(false);
+  const intakeAbort = useRef<AbortController | null>(null);
+  const [activeRunId, setActiveRunId] = useState<string | null>(null);
+  useEffect(() => () => intakeAbort.current?.abort(), []);
   const [notice, setNotice] = useState<string | null>(null);
   const [text, setText] = useState("");
+  const [filePages,setFilePages] = useState<{page_no:number;text:string}[]>([]);
   const [claims, setClaims] = useState<Claim[]>([]);
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [agents, setAgents] = useState<AgentLine[]>([]);
   const [claimResults, setClaimResults] = useState<ClaimResult[]>([]);
   const [evidence, setEvidence] = useState<Evidence[]>([]);
+  const [officialChannels, setOfficialChannels] = useState<{ display_value: string }[]>([]);
+  const [axes, setAxes] = useState<{ axis: string; result_code: string; summary_masked: string }[]>([]);
   const [partial, setPartial] = useState(false);
   const [saved, setSaved] = useState(true);
   const [opened, setOpened] = useState<Set<string>>(new Set());
@@ -85,10 +93,11 @@ export function VerifyFlow() {
 
   const submitText = async () => {
     if (!token) { setNotice("다시 로그인해 주세요"); return; }
-    setBusy(true); setNotice(null); setStages([]); setStep("extracting");
+    const controller = new AbortController(); intakeAbort.current = controller;
+    setBusy(true); setNotice(null); setStages([]); setFilePages([]); setStep("extracting");
     try {
       const response = await sessionFetch("/api/finshield/intake", token, {
-        method: "POST", headers: authed(), body: JSON.stringify({ text }),
+        method: "POST", headers: authed(), body: JSON.stringify({ text }), signal: controller.signal,
       });
       if (!response.ok || !response.body) {
         const body = await response.json().catch(() => null);
@@ -118,11 +127,12 @@ export function VerifyFlow() {
       });
     } catch {
       setNotice("연결이 끊어졌습니다. 다시 시도해 주세요."); setStep("input");
-    } finally { setBusy(false); }
+    } finally { intakeAbort.current = null; setBusy(false); }
   };
 
   /** 사용자가 중단하면 원본을 지우기 시작한다. 화면에서 물러나는 것이 아니다 (규칙 4). */
   const stopInput = async () => {
+    intakeAbort.current?.abort();
     if (!token) { setNotice("다시 로그인해 주세요"); return; }
     if (!caseId || !inputId) { setStep("input"); return; }
     setBusy(true);
@@ -139,7 +149,7 @@ export function VerifyFlow() {
     } finally {
       setBusy(false);
       setClaims([]); setPicked(new Set()); setStages([]);
-      setCaseId(null); setInputId(null); masked.current = "";
+      setCaseId(null); setInputId(null); setActiveRunId(null); masked.current = "";
       setStep("input");
     }
   };
@@ -152,8 +162,7 @@ export function VerifyFlow() {
         method: "POST", headers: authed(),
         body: JSON.stringify({
           case_id: caseId,
-          masked_text: masked.current,
-          journey_stage: "PRE_TRANSACTION",
+          ...(activeRunId ? { replace_run_id: activeRunId } : {}),
           claims: claims.filter((claim) => picked.has(claim.claim_id)),
         }),
       });
@@ -164,7 +173,10 @@ export function VerifyFlow() {
       }
       await readRunStream(response, (line) => {
           const event = JSON.parse(line);
-          if (event.type === "agent_started") {
+          if (event.type === "run_started" && event.claims) {
+            setActiveRunId(event.run_id as string);
+            setClaims(event.claims);
+          } else if (event.type === "agent_started") {
             setAgents((prev) => prev.some((a) => a.agentCode === event.agentCode)
               ? prev : [...prev, { agentCode: event.agentCode, status: "RUNNING" }]);
           } else if (event.type === "agent_finished") {
@@ -172,15 +184,19 @@ export function VerifyFlow() {
               ? { ...a, status: event.status, findings: event.findings, toolCalls: event.toolCalls } : a));
           } else if (event.type === "done") {
             // 독립 검증까지 반영한 최종 상태를 쓴다. 저장된 값과 화면이 같아야 한다.
-            const finals = (event.final_claims ?? []) as ClaimResult[];
-            const merged = (event.claim_results as ClaimResult[]).map((base) => {
-              const settled = finals.find((entry) => entry.claim_ref === base.claim_ref);
-              return settled ? { ...base, ...settled } : base;
+            const finals = (event.final_claims ?? []) as (Omit<ClaimResult, "evidence_refs" | "withheld_reason" | "rationale_masked"> & { summary_masked: string })[];
+            const merged = finals.map((settled) => {
+              const base = (event.claim_results as ClaimResult[]).find(entry => entry.claim_ref === settled.claim_ref);
+              return { evidence_refs: base?.evidence_refs ?? [], withheld_reason: base?.withheld_reason ?? null,
+                ...settled, rationale_masked: settled.summary_masked };
             });
+            setAxes(event.axes ?? []);
+            setOfficialChannels(event.guide?.channels ?? []);
             setSaved(event.saved !== false);
             setClaimResults(merged);
             setEvidence(event.evidence);
             setPartial(event.partial);
+            setActiveRunId(null);
             setStep("result");
           } else if (event.type === "error") {
             setNotice(event.message); setStep("claims");
@@ -219,10 +235,15 @@ export function VerifyFlow() {
           <p className="fs-inline-notice mt-4">시험 서비스입니다. 실제 개인정보와 금융 서류는 입력하지 마세요.</p>
           <textarea id="statement" maxLength={4000} rows={7} value={text} onChange={(e) => setText(e.target.value)}
             className="fs-field mt-4" placeholder="예) 정부지원 햇살론15 승인 대상입니다. 연 3% 고정으로 2천만원까지 가능하고 오늘까지만 접수합니다." />
-          <button type="button" disabled={busy || text.trim().length === 0} onClick={submitText}
+          <button type="button" disabled={busy || fileBusy || text.trim().length === 0} onClick={submitText}
             className="fs-btn fs-btn--primary mt-4">
             {busy ? "정리하는 중" : "다음 · 확인 항목 선택"}
           </button>
+          <FileIntake token={token} onBusyChange={setFileBusy} onPrepared={result=>{
+            setClaims(result.claims);setPicked(new Set(result.claims.filter(c=>c.materiality==="MATERIAL").map(c=>c.claim_id)));
+            setCaseId(result.case_id);setInputId(result.input_id);masked.current=result.masked_text;
+            setFilePages(result.masked_pages);setNotice(null);setStep("claims");
+          }}/>
         </FsCard>
       ) : null}
 
@@ -246,7 +267,7 @@ export function VerifyFlow() {
             })}
           </ul>
           <div className="mt-5 flex flex-wrap gap-3">
-            <button type="button" disabled={busy} onClick={() => void stopInput()}
+            <button type="button" onClick={() => void stopInput()}
               className="fs-btn fs-btn--quiet">중단하고 지우기</button>
           </div>
         </FsCard>
@@ -255,32 +276,42 @@ export function VerifyFlow() {
       {step === "claims" ? (
         <FsCard>
           <h2 className="fs-h2">무엇을 확인할까요</h2>
-          <p className="fs-body mt-2">받은 권유와 같은 내용인지 확인하고 검증할 항목을 선택해 주세요. 입력과 다르게 추출됐다면 다시 입력해 주세요.</p>
+          <p className="fs-body mt-2">받은 권유와 같은 내용인지 확인하고 검증할 항목을 선택해 주세요. 입력과 다르게 추출됐다면 아래 문장을 직접 고쳐 주세요. 수정한 문장도 개인정보를 가린 뒤 기록합니다.</p>
+          {activeRunId ? <p className="fs-inline-notice mt-4">이전 검증이 중단되었습니다. 같은 항목으로 다시 시작할 수 있습니다.</p> : null}
+          {filePages.length ? <details className="mt-4 rounded-lg border border-[var(--fs-line)] p-4">
+            <summary className="cursor-pointer font-bold">페이지별 추출 내용과 대조하기</summary>
+            {filePages.map(page=><section className="mt-4" key={page.page_no}><h3 className="font-bold">{page.page_no}쪽</h3>
+              <p className="fs-body mt-2 whitespace-pre-wrap">{page.text}</p></section>)}
+          </details> : null}
           <ul className="mt-5 space-y-2">
             {claims.map((claim) => (
               <li key={claim.claim_id}>
-                <label className="flex cursor-pointer items-start gap-3 rounded-[10px] border border-[var(--fs-line)] px-4 py-3">
-                  <input type="checkbox" className="mt-1.5" checked={picked.has(claim.claim_id)}
+                <div className="flex items-start gap-3 rounded-[10px] border border-[var(--fs-line)] px-4 py-3">
+                  <input type="checkbox" aria-label={`${claim.claim_ref} 검증 대상으로 선택`} className="mt-1.5" checked={picked.has(claim.claim_id)}
                     onChange={(e) => setPicked((prev) => {
                       const next = new Set(prev);
                       if (e.target.checked) next.add(claim.claim_id); else next.delete(claim.claim_id);
                       return next;
                     })} />
                   <span className="flex-1">
-                    <span className="block leading-relaxed">{claim.statement_masked}</span>
+                    {claim.source_page_no ? <span className="fs-meta">원문 {claim.source_page_no}쪽</span> : null}
+                    <textarea aria-label={`${claim.claim_ref} 확인 문장 수정`} className="fs-field" rows={2}
+                      maxLength={400} value={claim.statement_masked}
+                      onChange={event => setClaims(prev => prev.map(item => item.claim_id === claim.claim_id
+                        ? { ...item, statement_masked: event.target.value } : item))} />
                     <span className="mt-1.5 inline-block">
                       <FsChip tone={claim.materiality === "MATERIAL" ? "caution" : "neutral"}>
                         {claim.materiality === "MATERIAL" ? "거래에 영향이 큼" : "참고 항목"}
                       </FsChip>
                     </span>
                   </span>
-                </label>
+                </div>
               </li>
             ))}
           </ul>
           <div className="mt-5 flex flex-wrap gap-3">
-            <button type="button" disabled={busy || picked.size === 0} onClick={startRun}
-              className="fs-btn fs-btn--primary">선택한 항목 검증하기</button>
+            <button type="button" disabled={busy || picked.size === 0 || claims.some(claim => picked.has(claim.claim_id) && !claim.statement_masked.trim())} onClick={startRun}
+              className="fs-btn fs-btn--primary">{activeRunId ? "같은 항목 다시 검증하기" : "선택한 항목 검증하기"}</button>
             <button type="button" disabled={busy} onClick={() => void stopInput()}
               className="fs-btn fs-btn--quiet">중단하고 다시 입력</button>
           </div>
@@ -332,8 +363,20 @@ export function VerifyFlow() {
             <p className="fs-eyebrow">지금 하실 일</p>
             <h2 className="fs-h2 mt-2">{action.title}</h2>
             <p className="fs-body mt-2">{action.detail}</p>
+            {officialChannels.map(channel => <p key={channel.display_value} className="fs-body mt-3 font-semibold">공식 확인 창구: {channel.display_value}</p>)}
           </FsCard>
 
+          <FsCard>
+            <h2 className="fs-h2">세 가지 확인 결과</h2>
+            {axes.length === 0 ? <p className="fs-body mt-3" role="status">{saved ? "저장된 축 결과를 이번 응답에서 읽지 못했습니다. 내 기록의 Passport에서 확인해 주세요." : "축 결과가 저장되지 않아 확정된 판단으로 표시하지 않습니다."}</p> : null}
+            <div className="mt-4 grid gap-4 md:grid-cols-3">
+              {axes.map(axis => <section key={axis.axis}>
+                <h3 className="font-bold">{AXIS_LABEL[axis.axis]}</h3>
+                <FsChip tone={axisResultOf(axis.result_code).tone}>{axisResultOf(axis.result_code).label}</FsChip>
+                <p className="fs-meta mt-2">{axis.summary_masked}</p>
+              </section>)}
+            </div>
+          </FsCard>
           <FsCard>
             <h2 className="fs-h2">항목별 확인 결과</h2>
             <ul className="mt-5 space-y-5">

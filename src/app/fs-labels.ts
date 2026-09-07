@@ -34,7 +34,7 @@ export const RELATION_LABEL: Record<string, string> = {
 };
 
 export const FRESHNESS_LABEL: Record<string, string> = {
-  FRESH: "현행", STALE: "오래됨", UNKNOWN: "현행 여부 불명",
+  FRESH: "최근 수집", STALE: "재확인 필요", UNKNOWN: "최신성 미확인",
 };
 
 export const DIRECTNESS_LABEL: Record<string, string> = {
@@ -53,6 +53,7 @@ export const AGENT_LABEL: Record<string, string> = {
 /** 확정 상태를 그렇게 정한 이유. 낮춘 이유가 여기 남는다. */
 const REASON: Record<string, string> = {
   AS_JUDGED: "확인한 근거대로",
+  INDEPENDENT_REVIEW_FAILED: "독립 검토를 마치지 못해 보류함",
   COVE_CONFIRMED: "다른 검색으로 다시 확인함",
   COVE_REFUTED: "다시 확인했더니 결론이 달랐음",
   COVE_INCONCLUSIVE: "다시 확인했으나 판단하지 못함",
@@ -62,6 +63,7 @@ const REASON: Record<string, string> = {
 export const reasonLabel = (code: string): string => pick(REASON, code);
 
 export const COVE_LABEL: Record<string, string> = {
+  CHALLENGED: "다른 결론", UNRESOLVED: "판단 못 함", FAILED: "검토 실패",
   CONFIRMED: "같은 결론", REFUTED: "다른 결론", INCONCLUSIVE: "판단 못 함",
 };
 export const coveLabel = (code: string): string => pick(COVE_LABEL, code);

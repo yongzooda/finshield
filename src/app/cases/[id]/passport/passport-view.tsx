@@ -15,12 +15,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CLAIM_STATE_VIEW, FsCard, FsChip } from "../../../fs-shell";
 import { FsLoginCard, useFsToken } from "../../../fs-session";
+import { OfficialActions, type StoredGuide } from "../../../official-actions";
+import { EvidenceCitation, type EvidenceCitationData } from "../../../evidence-citation";
 import { fetchCase } from "../../case-api";
 import {
   AXIS_LABEL, axisResultOf, coveLabel, overallResultOf, partialLabel, reasonLabel, runStatusLabel,
 } from "../../../fs-labels";
 
 type Passport = {
+  guide?: StoredGuide | null;
   id: string; verification_run_id: string; passport_version_no: number;
   overall_result: string; coverage_satisfied: boolean;
   passport_schema_version: string; manifest: Record<string, unknown>;
@@ -31,20 +34,20 @@ type Detail = {
   runs: { id: string; run_no: number; status: string; partial_reason_codes: string[] | null;
     finished_at: string | null }[];
   final_claims: { id: string; verification_run_id: string; status: string; reason_code: string;
-    cove_status: string; red_team_status: string; is_material: boolean; decision_summary_masked: string }[];
-  axes: { verification_run_id: string; axis: string; result_code: string; summary_masked: string }[];
+    cove_status: string; red_team_status: string; is_material: boolean; statement_masked: string; decision_summary_masked: string }[];
+  axes: { verification_run_id: string; axis: string; result_code: string; summary_masked: string; policy_evaluation?: { policy_version: string; checks: { rule_code: string; reason_masked: string; outcome: string; evidence_id?: string }[] } | null }[];
   claim_evidences: { final_claim_version_id: string; evidence_id: string; relation: string; is_independent: boolean }[];
-  evidences: { id: string; content_hash: string; independence_key: string; freshness_at_use: string;
-    citable: boolean; reference_only: boolean }[];
+  evidences: (EvidenceCitationData & { independence_key: string; citable: boolean })[];
   passports: Passport[];
 };
 
-export function PassportView({ caseId }: { caseId: string }) {
+export function PassportView({ caseId, requestedPassport = null }: { caseId: string; requestedPassport?: string | null }) {
   const [token, setToken, ready] = useFsToken();
   const sessionKey = sessionIdentity(token);
   const [detail, setDetail] = useState<Detail | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
+  const [selectedVersion, setSelectedVersion] = useState<string | null>(requestedPassport);
+  const [loadedSession, setLoadedSession] = useState<string | null>(null);
 
   useEffect(() => {
     const token = readSessionToken();
@@ -52,8 +55,8 @@ export function PassportView({ caseId }: { caseId: string }) {
     let alive = true;
     void (async () => {
       const result = await fetchCase<Detail>(caseId, token);
-      if (!alive) return;
-      if (result.ok) { setDetail(result.data); setNotice(null); return; }
+      if (!alive || sessionIdentity(readSessionToken()) !== sessionKey) return;
+      if (result.ok) { setDetail(result.data); setLoadedSession(sessionKey); setNotice(null); return; }
       if (result.status === 401) setToken(null);
       setNotice(result.error);
     })();
@@ -62,9 +65,10 @@ export function PassportView({ caseId }: { caseId: string }) {
 
   if (!ready) return null;
   if (!token) return <FsLoginCard onToken={setToken} />;
-  if (!detail) return <FsCard className="mt-8"><p className="fs-body">{notice ?? "불러오는 중입니다."}</p></FsCard>;
+  if (!detail || loadedSession !== sessionKey) return <FsCard className="mt-8"><p className="fs-body">{notice ?? "불러오는 중입니다."}</p></FsCard>;
 
-  const passport = detail.passports.find((row) => row.id === selectedVersion) ?? detail.passports[0];
+  const passport = selectedVersion ? detail.passports.find((row) => row.id === selectedVersion) : detail.passports[0];
+  if (selectedVersion && !passport) return <FsCard className="mt-8"><p className="fs-body">요청한 검증 기록을 찾을 수 없습니다.</p><Link href={`/cases/${caseId}/passport`} className="fs-btn fs-btn--quiet mt-4">검증 기록 목록으로</Link></FsCard>;
   if (!passport) {
     return (
       <FsCard className="mt-8">
@@ -123,6 +127,7 @@ export function PassportView({ caseId }: { caseId: string }) {
         </FsCard>
       ) : null}
 
+      <OfficialActions guide={passport.guide} />
       <FsCard className="mt-8">
         <h2 className="fs-h2">세 가지 확인 결과</h2>
         <ul className="mt-4 space-y-3">
@@ -135,6 +140,14 @@ export function PassportView({ caseId }: { caseId: string }) {
                   <FsChip tone={view.tone}>{view.label}</FsChip>
                 </div>
                 <p className="fs-meta mt-1">{axis.summary_masked}</p>
+                {axis.policy_evaluation ? <details className="mt-2">
+                  <summary className="cursor-pointer text-sm underline">프로필 비교 이유와 확인하지 못한 조건</summary>
+                  <p className="fs-meta mt-2">검증을 시작할 때 저장한 프로필을 사용했습니다. 현재 프로필을 수정해도 이 결과는 바뀌지 않습니다.</p>
+                  <ul className="mt-2 space-y-2 text-sm">
+                    {axis.policy_evaluation.checks.map((check, index) => <li key={`${check.rule_code}:${index}`}>{check.reason_masked}</li>)}
+                  </ul>
+                  <p className="fs-meta mt-2">적용 규칙: {axis.policy_evaluation.policy_version}</p>
+                </details> : null}
               </li>
             );
           })}
@@ -150,15 +163,20 @@ export function PassportView({ caseId }: { caseId: string }) {
             return (
               <li key={row.id} className="border-t border-[var(--fs-line)] pt-4 first:border-0 first:pt-0">
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <p className="max-w-xl leading-relaxed">{row.decision_summary_masked}</p>
+                  <p className="max-w-xl font-semibold leading-relaxed">{row.statement_masked}</p>
                   <FsChip tone={view.tone}>{view.label}</FsChip>
                 </div>
+                <p className="fs-body mt-2">{row.decision_summary_masked}</p>
                 <p className="fs-meta mt-1">
                   이렇게 정한 이유: {reasonLabel(row.reason_code)} · 근거 {links.length}건
                   (독립 {links.filter((l) => l.is_independent).length}건)
                   {row.cove_status !== "NOT_REQUIRED" ? ` · 독립 재확인 ${coveLabel(row.cove_status)}` : ""}
                   {row.red_team_status === "COUNTER_EVIDENCE" ? " · 반대 근거 있음" : ""}
                 </p>
+                <ul className="mt-3 space-y-2">{links.map(link => {
+                  const evidence = detail.evidences.find(item => item.id === link.evidence_id);
+                  return evidence ? <li key={evidence.id}><EvidenceCitation evidence={evidence} /></li> : null;
+                })}</ul>
               </li>
             );
           })}
@@ -174,7 +192,7 @@ export function PassportView({ caseId }: { caseId: string }) {
           <dt>쓴 근거</dt><dd>{used.length}건 · 독립 출처 {independentKeys.size}곳</dd>
           <dt>인용 가능 근거</dt><dd>{used.filter((row) => row.citable).length}건</dd>
           <dt>참고용 근거</dt><dd>{used.filter((row) => row.reference_only).length}건</dd>
-          <dt>현행 근거</dt><dd>{used.filter((row) => row.freshness_at_use === "FRESH").length}건</dd>
+          <dt>최근 수집한 근거</dt><dd>{used.filter((row) => row.freshness_at_use === "FRESH").length}건</dd>
           <dt>본문 해시</dt><dd className="break-all">{passport.payload_hash}</dd>
         </dl>
         <p className="fs-meta mt-4">

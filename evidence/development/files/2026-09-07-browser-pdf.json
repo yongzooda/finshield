@@ -1,0 +1,72 @@
+{
+  "runs": [
+    {
+      "id": "91488eb3-948e-4526-b3d4-b2edafab48ff",
+      "status": "COMPLETED"
+    }
+  ],
+  "agents": [
+    {
+      "agent_code": "PRODUCT_INSTITUTION",
+      "status": "SUCCEEDED",
+      "input_tokens": "3865",
+      "output_tokens": "223",
+      "cost_microunits": "9960"
+    },
+    {
+      "agent_code": "FRAUD_CHANNEL",
+      "status": "SUCCEEDED",
+      "input_tokens": "3501",
+      "output_tokens": "97",
+      "cost_microunits": "7972"
+    },
+    {
+      "agent_code": "SALES_CONDUCT",
+      "status": "SUCCEEDED",
+      "input_tokens": "3315",
+      "output_tokens": "74",
+      "cost_microunits": "7370"
+    },
+    {
+      "agent_code": "REGULATION_DISPUTE",
+      "status": "SUCCEEDED",
+      "input_tokens": "3558",
+      "output_tokens": "70",
+      "cost_microunits": "7816"
+    },
+    {
+      "agent_code": "COVE",
+      "status": "SUCCEEDED",
+      "input_tokens": "6022",
+      "output_tokens": "184",
+      "cost_microunits": "13884"
+    },
+    {
+      "agent_code": "RED_TEAM",
+      "status": "SUCCEEDED",
+      "input_tokens": "6342",
+      "output_tokens": "204",
+      "cost_microunits": "14724"
+    },
+    {
+      "agent_code": "EVIDENCE_JUDGE",
+      "status": "SUCCEEDED",
+      "input_tokens": "3149",
+      "output_tokens": "117",
+      "cost_microunits": "7468"
+    }
+  ],
+  "usage": [
+    {
+      "status": "SETTLED",
+      "calls": 15,
+      "cost": 69194
+    }
+  ],
+  "jobs": [
+    {
+      "status": "SUCCEEDED",
+      "total": 1
+    }
+  ]
+}

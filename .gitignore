@@ -44,3 +44,7 @@ measure/pii-n501.json
 
 # 개인 권한 설정 — 공유하지 않는다
 .claude/settings.local.json
+/.swc
+
+# Workflow 로컬 실행 상태는 비공개 운영 데이터다.
+.workflow-data/

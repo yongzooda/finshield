@@ -25,6 +25,9 @@ export function CaseList({ intent = "history" }: { intent?: "history" | "afterca
   const [token, setToken, ready] = useFsToken();
   const sessionKey = sessionIdentity(token);
   const [rows, setRows] = useState<CaseRow[] | null>(null);
+  const [loadedSession, setLoadedSession] = useState<string | null>(null);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,19 +35,32 @@ export function CaseList({ intent = "history" }: { intent?: "history" | "afterca
     if (!ready || !token || sessionIdentity(token) !== sessionKey) return;
     let alive = true;
     void (async () => {
-      const result = await fetchCases<{ cases: CaseRow[] }>(token);
-      if (!alive) return;
-      if (result.ok) { setRows(result.data.cases); setNotice(null); return; }
+      const result = await fetchCases<{ cases: CaseRow[]; next_cursor: string | null }>(token);
+      if (!alive || sessionIdentity(readSessionToken()) !== sessionKey) return;
+      if (result.ok) { setRows(result.data.cases); setCursor(result.data.next_cursor); setLoadedSession(sessionKey); setNotice(null); return; }
       if (result.status === 401) setToken(null);
       setNotice(result.error);
     })();
     return () => { alive = false; };
   }, [ready, sessionKey, setToken]);
 
+  const loadMore = async () => {
+    if (!token || !cursor || loadingMore || loadedSession !== sessionKey) return;
+    setLoadingMore(true); setNotice(null);
+    try {
+      const result = await fetchCases<{ cases: CaseRow[]; next_cursor: string | null }>(token, cursor);
+      if (sessionIdentity(readSessionToken()) !== sessionKey) return;
+      if (result.ok) {
+        setRows(previous => [...new Map([...(previous ?? []), ...result.data.cases].map(row => [row.id, row])).values()]);
+        setCursor(result.data.next_cursor);
+      } else { setNotice(result.error); if (result.status === 401) setToken(null); }
+    } finally { setLoadingMore(false); }
+  };
+
   if (!ready) return null;
   if (!token) return <FsLoginCard onToken={setToken} title={intent === "aftercare" ? "가입 후 보호 시작하기" : "내 기록 보기"} />;
 
-  if (rows === null) {
+  if (rows === null || loadedSession !== sessionKey) {
     return (
       <FsCard className="mt-8">
         <p className="fs-body">{notice ?? "불러오는 중입니다."}</p>
@@ -84,6 +100,8 @@ export function CaseList({ intent = "history" }: { intent?: "history" | "afterca
           );
         })}
       </ul>
+      {notice ? <p role="status" className="fs-body mt-4">{notice}</p> : null}
+      {cursor ? <button type="button" className="fs-btn fs-btn--quiet mt-4" disabled={loadingMore} onClick={() => void loadMore()}>{loadingMore ? "이전 기록을 불러오는 중" : "이전 기록 더 보기"}</button> : null}
     </FsCard>
   );
 }

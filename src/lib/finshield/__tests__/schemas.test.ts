@@ -20,6 +20,8 @@ const evidence = (ref: string, over: Partial<ToolEvidence> = {}): ToolEvidence =
   excerpt_masked: "마스킹된 조문",
   independence_key: `key-${ref}`,
   reference_only: false,
+  citable: true,
+  incomplete: false,
   freshness_at_use: "FRESH",
   directness: "DIRECT",
   ...over,

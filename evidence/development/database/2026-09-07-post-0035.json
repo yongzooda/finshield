@@ -1,0 +1,107 @@
+{
+  "kind": "development-preflight-not-gate-evidence",
+  "code_under_test_sha": "0e70a893291d38b674a8d5c39e7033b8778c3069",
+  "remote": {
+    "host_role": "finshield_worker",
+    "pooler_port": 6543,
+    "schema": {
+      "tracked_schemas": [
+        "public",
+        "private",
+        "kb",
+        "demo"
+      ],
+      "routines": 105,
+      "routine_digest": "cc05ab35834423e69d78b752dc065657598fd0d26fb4cc848bdc56ed11fda130",
+      "tables": 81,
+      "tables_digest": "5ae0f6b22541320c231e6a913e29106c63fef4577cee655863450344a798d520",
+      "constraints": 741,
+      "constraint_digest": "c714ec4e8b73ce5a8685b64851e3d63954758828917208887cc5edeeb8a2c85a",
+      "indexes": 255,
+      "index_digest": "d4d4a0fe83d7dadbda088f92ec9218af954780ea0fe19145ab86916086580272",
+      "rls_total": 81,
+      "rls_enforced": 81,
+      "rls_missing": []
+    },
+    "anon_leaks": [],
+    "exposed_grants": [],
+    "worker_denied_tables": [
+      "private.input_objects",
+      "private.ocr_artifacts",
+      "public.case_events",
+      "public.case_input_findings",
+      "public.case_input_pages",
+      "public.case_inputs",
+      "public.claim_revisions",
+      "public.claims",
+      "public.financial_cases",
+      "public.financial_profile_versions",
+      "public.financial_profiles",
+      "public.processing_consents",
+      "public.profiles"
+    ],
+    "worker_allowed_tables": [],
+    "storage": {
+      "buckets": [
+        {
+          "id": "finshield-kb",
+          "is_public": false,
+          "file_size_limit": null
+        },
+        {
+          "id": "finshield-quarantine",
+          "is_public": false,
+          "file_size_limit": 10485760
+        }
+      ],
+      "member_policies": [
+        {
+          "name": "finshield_quarantine__insert_open_slot",
+          "cmd": "INSERT",
+          "roles": [
+            "authenticated"
+          ]
+        }
+      ]
+    },
+    "extensions": {
+      "pgcrypto": {
+        "version": "1.3",
+        "schema": "extensions"
+      },
+      "vector": {
+        "version": "0.8.2",
+        "schema": "extensions"
+      },
+      "pg_trgm": {
+        "version": "1.6",
+        "schema": "extensions"
+      }
+    },
+    "roles": {
+      "worker_bypassrls": false,
+      "worker_login": true,
+      "postgres_bypassrls": true,
+      "legacy_roles": []
+    }
+  },
+  "local": {
+    "tracked_schemas": [
+      "public",
+      "private",
+      "kb",
+      "demo"
+    ],
+    "routines": 105,
+    "routine_digest": "cc05ab35834423e69d78b752dc065657598fd0d26fb4cc848bdc56ed11fda130",
+    "tables": 81,
+    "tables_digest": "5ae0f6b22541320c231e6a913e29106c63fef4577cee655863450344a798d520",
+    "constraints": 741,
+    "constraint_digest": "c714ec4e8b73ce5a8685b64851e3d63954758828917208887cc5edeeb8a2c85a",
+    "indexes": 255,
+    "index_digest": "d4d4a0fe83d7dadbda088f92ec9218af954780ea0fe19145ab86916086580272",
+    "rls_total": 81,
+    "rls_enforced": 81,
+    "rls_missing": []
+  }
+}

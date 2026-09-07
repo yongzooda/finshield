@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-vi.mock("../env", () => ({ authConfigured: () => true, finshieldEnv: () => ({ SUPABASE_URL: "https://auth.example.invalid", SUPABASE_ANON_KEY: "public-fixture" }) }));
+const { sqlMock } = vi.hoisted(() => ({ sqlMock: vi.fn() }));
+vi.mock("../db", () => ({ fsql: () => sqlMock }));
+vi.mock("../env", () => ({ authConfigured: () => true, finshieldEnv: () => ({ SUPABASE_URL: "https://auth.example.invalid", SUPABASE_ANON_KEY: "public-fixture",SUPABASE_SECRET_KEY:"private-admin-fixture" }) }));
 import { POST, PATCH, DELETE } from "@/app/api/finshield/session/route";
 import { POST as signup } from "@/app/api/finshield/signup/route";
 const id = "00000000-0000-4000-8000-000000000001";
@@ -10,7 +12,7 @@ const req = (method = "PATCH", origin: string | null = "https://app.example.inva
   Authorization: `Bearer ${jwt(id,id,1)}`, Cookie: cookies, ...(origin ? {Origin:origin}:{}), "Content-Type":"application/json",
 }, ...(method === "POST" ? {body:JSON.stringify({email:"synthetic@example.invalid",password:"synthetic-password"})}: {}) });
 const fetchMock = vi.fn();
-beforeEach(() => { vi.stubGlobal("fetch", fetchMock); fetchMock.mockReset(); });
+beforeEach(() => { vi.stubGlobal("fetch", fetchMock); fetchMock.mockReset(); sqlMock.mockReset(); });
 afterEach(() => vi.unstubAllGlobals());
 const pair = (token = jwt()) => Response.json({access_token:token,refresh_token:"rotated-private-fixture"});
 
@@ -50,4 +52,22 @@ it("로그아웃이 확인되면 해당 세션의 Refresh Cookie도 폐기한다
 });
 it("이메일 확인이 필요한 가입은 토큰·Cookie를 만들지 않는다",async()=>{
  fetchMock.mockResolvedValue(Response.json({user:{id}}));const r=await signup(req("POST"));expect(await r.json()).toEqual({access_token:null,needs_confirmation:true});expect(r.headers.get("set-cookie")).toBeNull();
+});
+it("가입 메일 발송 한도는 일반 인증 장애로 숨기지 않는다",async()=>{
+ fetchMock.mockResolvedValue(Response.json({error_code:"over_email_send_rate_limit",msg:"private-fixture"},{status:429}));
+ const r=await signup(req("POST"));expect(r.status).toBe(429);
+ expect(await r.json()).toEqual({code:"AUTH_EMAIL_RATE_LIMIT",error:"가입 확인 메일 발송이 지연되고 있습니다. 잠시 뒤 다시 시도하거나 로그인 없이 체험해 주세요."});
+ expect(r.headers.get("set-cookie")).toBeNull();expect(fetchMock).toHaveBeenCalledOnce();
+});
+it("P0 직접 가입은 공유 제한 뒤 Auth Admin 생성과 비밀번호 세션 발급을 잇는다",async()=>{
+ vi.stubEnv("FINSHIELD_P0_DIRECT_SIGNUP","true");sqlMock.mockResolvedValue([{allowed:true,retry_after_seconds:0}]);
+ fetchMock.mockResolvedValueOnce(Response.json({id})).mockResolvedValueOnce(pair());
+ const r=await signup(req("POST"));expect(r.status).toBe(200);expect((await r.json()).needs_confirmation).toBe(false);
+ expect(fetchMock).toHaveBeenCalledTimes(2);expect(fetchMock.mock.calls[0][0]).toContain("/auth/v1/admin/users");
+ expect(fetchMock.mock.calls[1][0]).toContain("grant_type=password");expect(sqlMock).toHaveBeenCalledOnce();
+});
+it("P0 직접 가입 공유 제한은 Auth에 비밀번호를 보내기 전에 차단한다",async()=>{
+ vi.stubEnv("FINSHIELD_P0_DIRECT_SIGNUP","true");sqlMock.mockResolvedValue([{allowed:false,retry_after_seconds:125}]);
+ const r=await signup(req("POST"));expect(r.status).toBe(429);expect(r.headers.get("retry-after")).toBe("125");
+ expect(await r.text()).not.toContain("synthetic-password");expect(fetchMock).not.toHaveBeenCalled();
 });

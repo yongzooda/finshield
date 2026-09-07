@@ -1,3 +1,4 @@
+import type { ModelBudgetContext } from "./model-budget";
 /**
  * 입력 접수 — 원문에서 Claim 까지.
  *
@@ -23,12 +24,15 @@ export const MAX_INPUT_BYTES = 10 * 1024 * 1024;
 export const PII_POLICY_VERSION = "pii-policy-v1";
 
 export type ExtractedClaim = {
+  sourceQuote?: string;
+  sourcePageNo?: number;
   claimType: string;
   statementMasked: string;
   materiality: "MATERIAL" | "NON_MATERIAL" | "UNDETERMINED";
 };
 
-export type ClaimExtractor = (maskedText: string) => Promise<ExtractedClaim[]>;
+export type ClaimExtractor = (maskedText: string, options?: { signal?: AbortSignal; budget?: ModelBudgetContext;
+  pages?: {page_no:number;text:string}[] }) => Promise<ExtractedClaim[]>;
 
 export type IntakeBlocked = { ok: false; reason: "PII_RESIDUAL"; ask: string };
 export type IntakeAccepted = {
@@ -56,8 +60,11 @@ export const startIntake = async (args: {
   titleMasked: string;
   extractClaims: ClaimExtractor;
   onStage?: StageReporter;
+  signal?: AbortSignal;
 }): Promise<IntakeAccepted | IntakeBlocked> => {
   const { sql, ownerId } = args;
+  const signal = AbortSignal.any([AbortSignal.timeout(10000), ...(args.signal ? [args.signal] : [])]);
+  signal.throwIfAborted();
   const report: StageReporter = args.onStage ?? (() => undefined);
   const raw = args.rawText.trim();
   if (raw.length === 0) throw new Error("입력이 비어 있다");
@@ -79,6 +86,7 @@ export const startIntake = async (args: {
   const inputId = input[0].id as string;
   report("INPUT_CREATED", { case_id: caseId, input_id: inputId, bytes });
 
+  try {
   for (const [stage, patch] of [
     ["VALIDATED", {}],
     ["EXTRACTED", {}],
@@ -95,23 +103,38 @@ export const startIntake = async (args: {
   }
 
   // Claim 추출은 마스킹된 문장만 본다.
-  const extracted = await args.extractClaims(maskedText);
-  const claims: (ConfirmedClaim & { claimId: string })[] = [];
-  for (const [index, claim] of extracted.entries()) {
-    const row = await sql`
-      select private.record_extracted_claim(${ownerId}::uuid, ${caseId}::uuid, ${inputId}::uuid, null,
-        ${claim.claimType}, ${claim.statementMasked}, ${claim.materiality}, 'MODEL') as id`;
-    claims.push({
-      claimId: row[0].id as string,
-      claim_ref: `C${index + 1}`,
-      claim_type: claim.claimType,
-      statement_masked: claim.statementMasked,
-      materiality: claim.materiality,
-    });
+  const extracted = await args.extractClaims(maskedText,{signal,budget:{sql,ownerId,caseId,inputId}});
+  signal.throwIfAborted();
+  if (!extracted.length) throw new Error("CLAIMS_NOT_FOUND");
+  const normalized: ExtractedClaim[] = [];
+  for (const claim of extracted) {
+    const claimGate = gateForModel(claim.statementMasked);
+    if (!claimGate.ok) {
+      await sql`select private.stop_case_input(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid,'PII_RESIDUAL')`;
+      return { ok: false, reason: "PII_RESIDUAL", ask: claimGate.ask };
+    }
+    normalized.push({...claim, statementMasked: claimGate.masked.text});
   }
+  const claims = await sql.begin(async tx => {
+    const rows: (ConfirmedClaim & { claimId: string })[] = [];
+    for (const [index, claim] of normalized.entries()) {
+      signal.throwIfAborted();
+      const [row] = await tx`
+        select private.record_extracted_claim(${ownerId}::uuid, ${caseId}::uuid, ${inputId}::uuid, null,
+          ${claim.claimType}, ${claim.statementMasked}, ${claim.materiality}, 'MODEL',
+          ${JSON.stringify({schema_version:"v1",source_quote:claim.sourceQuote??null})}::text::jsonb) as id`;
+      rows.push({ claimId: row.id as string, claim_ref: `C${index + 1}`, claim_type: claim.claimType,
+        statement_masked: claim.statementMasked, materiality: claim.materiality });
+    }
+    return rows;
+  });
 
   report("CLAIMS_EXTRACTED", { claim_count: claims.length });
   return { ok: true, caseId, inputId, maskedText, claims };
+  } catch (error) {
+    await sql`select private.stop_case_input(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid,'INTAKE_FAILED')`.catch(()=>undefined);
+    throw error;
+  }
 };
 
 /** 사용자가 고른 Claim 만 확정한다. 확정하지 않은 것은 검증 대상이 아니다. */

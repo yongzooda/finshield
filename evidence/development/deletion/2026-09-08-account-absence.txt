@@ -1,0 +1,42 @@
+- grid:
+      - row "auth_users profiles cases active_inputs active_ocr embeddings storage_objects pending_requests account_completed_events":
+        - columnheader "auth_users":
+          - generic: auth_users
+        - columnheader "profiles":
+          - generic: profiles
+        - columnheader "cases":
+          - generic: cases
+        - columnheader "active_inputs":
+          - generic: active_inputs
+        - columnheader "active_ocr":
+          - generic: active_ocr
+        - columnheader "embeddings":
+          - generic: embeddings
+        - columnheader "storage_objects":
+          - generic: storage_objects
+        - columnheader "pending_requests":
+          - generic: pending_requests
+        - columnheader "account_completed_events":
+          - generic: account_completed_events
+      - row "0 0 0 0 0 0 0 0 1":
+        - gridcell "0":
+          - generic: "0"
+        - gridcell "0":
+          - generic: "0"
+        - gridcell "0":
+          - generic: "0"
+        - gridcell "0":
+          - generic: "0"
+        - gridcell "0":
+          - generic: "0"
+        - gridcell "0":
+          - generic: "0"
+        - gridcell "0":
+          - generic: "0"
+        - gridcell "0":
+          - generic: "0"
+        - gridcell "1":
+          - generic: "1"
+- alert: SQL Editor | finshield | yongju | Supabase
+- alert
+- alert

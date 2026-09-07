@@ -40,6 +40,9 @@ export type SourceItem = {
   /** EV-006 의 Source Fingerprint. 재게시본은 원본과 같은 값을 쓴다. */
   fingerprint: string;
   freshness: "FRESH" | "STALE" | "UNKNOWN";
+  /** 저장된 공식 자료의 재조회는 새 외부 수집으로 기록하지 않는다. */
+  storedSnapshotId?: string;
+  retrievedAt?: string;
   licenseCode: string | null;
   isComplete: boolean;
   isCitable: boolean;
@@ -97,6 +100,9 @@ export type ToolCallContext = {
   runId: string;
   manifest: ResolvedManifest;
   recorder?: RunRecorder;
+  signal?: AbortSignal;
+  /** 전용 recorder와 함께 사용하며 거래 전 verification_run_id를 쓰지 않는다. */
+  aftercareJobId?: string;
 };
 
 export type RunSession = ToolCallContext & {
@@ -130,11 +136,12 @@ const assertAllowed = (agentCode: string, toolCode: string, purposeCode: string)
 
 /**
  * 조회한 출처를 Snapshot 으로 남긴다. kb 표는 적재 역할의 것이라 worker 가 직접
- * 쓰지 못하고 함수로만 쓴다. 같은 원문이면 행이 늘지 않고 조회 시각만 갱신된다.
+ * 쓰지 못하고 함수로만 쓴다. 외부 수집은 별도 fetch event를 남기고, 저장 자료 조회는 기존 ID를 쓴다.
  */
-const recordSnapshot = async (
+export const recordSnapshot = async (
   sql: Sql, item: SourceItem, toolCode: string, runId: string,
 ): Promise<string> => {
+  if (item.storedSnapshotId) return item.storedSnapshotId;
   const rows = await sql`
     select private.record_source_snapshot(
       ${item.sourceType}, ${item.authorityGrade}::public.authority_level, ${item.publisher},
@@ -221,11 +228,13 @@ export const executeTool = async (
       url: item.canonicalUrl,
       locator: item.locator,
       published_at: item.publishedAt,
-      fetched_at: new Date().toISOString(),
+      fetched_at: item.retrievedAt ?? new Date().toISOString(),
       content_hash: item.contentHash,
       excerpt_masked: item.excerptMasked,
       independence_key: item.fingerprint,
       reference_only: item.referenceOnly,
+      citable: item.isCitable && item.isComplete && !item.referenceOnly,
+      incomplete: !item.isComplete,
       freshness_at_use: item.freshness,
       directness: item.directness,
     };

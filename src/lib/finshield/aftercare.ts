@@ -11,7 +11,7 @@
  * (RES-007). 없으면 없다고 적는다.
  */
 
-export const AFTERCARE_SCHEMA_VERSION = "aftercare-v1";
+export const AFTERCARE_SCHEMA_VERSION = "aftercare-v2";
 
 export type AftercareResult =
   | "NORMAL_MANAGEMENT" | "ADDITIONAL_EXPLANATION" | "CORRECTION_OR_INQUIRY" | "DISPUTE_PREPARATION";
@@ -163,6 +163,7 @@ export const decideAftercare = (args: {
   answers: Answers;
   /** 거래 전 검증에서 사실과 다르다고 확정된 항목 수. */
   contradictedClaims: number;
+  contractTextDifferences?: number;
 }): Decision => {
   const { answers, contradictedClaims } = args;
   const reasons: string[] = [];
@@ -180,6 +181,10 @@ export const decideAftercare = (args: {
     result = "DISPUTE_PREPARATION";
     reasons.push("계약서가 설명과 다른 부분이 있다고 답하셨습니다.");
     actions.push(ACTIONS.ASK_OFFICIAL_CHANNEL, ACTIONS.REPORT_IMPERSONATION);
+  } else if ((args.contractTextDifferences ?? 0) > 0) {
+    result = "CORRECTION_OR_INQUIRY";
+    reasons.push(`이전 권유와 다른 계약 문구가 ${args.contractTextDifferences}건 있습니다. 문구 차이가 실제 조건 변경인지 서면으로 확인해 주세요.`);
+    actions.push(ACTIONS.REQUEST_WRITTEN_EXPLANATION, ACTIONS.ASK_OFFICIAL_CHANNEL);
   } else if (contradictedClaims > 0) {
     result = "CORRECTION_OR_INQUIRY";
     reasons.push(`거래 전 확인에서 공식 자료와 다른 항목이 ${contradictedClaims}건 있었습니다.`);
@@ -192,6 +197,10 @@ export const decideAftercare = (args: {
   } else if (notUnderstood) {
     result = "ADDITIONAL_EXPLANATION";
     reasons.push("설명은 들으셨지만 이해되지 않은 부분이 남아 있습니다.");
+    actions.push(ACTIONS.REQUEST_WRITTEN_EXPLANATION);
+  } else if (Object.keys(answers).length < QUESTIONS.length || answers.CONTRACT_MATCHES_EXPLANATION === "UNKNOWN") {
+    result = "ADDITIONAL_EXPLANATION";
+    reasons.push("확인하지 못한 설명·계약 항목이 남아 있습니다.");
     actions.push(ACTIONS.REQUEST_WRITTEN_EXPLANATION);
   } else {
     reasons.push("설명과 계약 내용에서 지금 조치가 필요한 부분은 나오지 않았습니다.");
@@ -207,3 +216,6 @@ export const decideAftercare = (args: {
   const summary = `${reasons[0]} 이 결과는 답하신 내용과 이미 확정된 검증 결과만 보고 정한 것입니다.`;
   return { result, summary_masked: summary.slice(0, 4000), actions, reasons };
 };
+
+/** 저장된 행동 코드를 표시 문구로 바꾼다. 과거 결과를 재판정하지 않는다. */
+export const aftercareAction = (code: string): PlannedAction | null => ACTIONS[code] ?? null;

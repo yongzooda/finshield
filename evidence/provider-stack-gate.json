@@ -135,25 +135,6 @@
       "result_sha256": "c323e72d2c8d9a829894522fa508ca53ae869aaabb30de04b82d9e6402fc005c",
       "adoption_pr_number": 166,
       "adopted_at": "2026-09-06T16:34:05Z"
-    },
-    "B-HEALTH-01": {
-      "code_under_test_sha": "d04be4a6da4b67205b43aa0d48adbf0fd001b32c",
-      "workflow_head_sha": "d04be4a6da4b67205b43aa0d48adbf0fd001b32c",
-      "run_id": 34084937234,
-      "run_attempt": 1,
-      "workflow_id": 351994574,
-      "workflow_path": ".github/workflows/health-evidence.yml",
-      "workflow_blob_sha": "f7a71271b4c291bb1ca5f1def6bb36ee20af239f",
-      "harness_blob_sha": "ba74bcd3a75dba2e7bee7ab9c3da1925a74acc8b",
-      "scope_sha256": "3ea2b04957ff40497b4d591e1bd00bc8948e1b748fa99f3356d90c618b7595f4",
-      "job_name": "health-evidence / B-HEALTH-01",
-      "artifact_id": 10004899299,
-      "artifact_name": "provider-evidence-B-HEALTH-01-d04be4a6da4b67205b43aa0d48adbf0fd001b32c",
-      "artifact_digest": "sha256:9bd41755bce01256acf4ece8856bb4dcadb6129184938ad102ce1812b8d30261",
-      "result_path": "evidence/results/B-HEALTH-01/34084937234.json",
-      "result_sha256": "7850d6de8bda8e3d5bbce49f63b1fdf4f15b4a57d9e606abe1f0f0d8194d3544",
-      "adoption_pr_number": 212,
-      "adopted_at": "2026-09-07T04:59:27Z"
     }
   }
 }

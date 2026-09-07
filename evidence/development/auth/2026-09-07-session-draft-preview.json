@@ -1,0 +1,28 @@
+{
+  "schema_version": "auth-deployed-development-v1",
+  "observed_at": "2026-09-07T10:28:42.564Z",
+  "sha": "1c85539d082f187a12539c9e0bea5053f63678b2",
+  "environment": "preview",
+  "scope": "합성 계정의 새 세션 2개·실제 배포 Auth·민감 조회 API",
+  "checks": {
+    "login_0_status": 200,
+    "login_1_status": 200,
+    "before_cases_status": 200,
+    "foreign_origin_status": 403,
+    "signout_status": 200,
+    "revoked_read_statuses": [
+      401,
+      401,
+      401,
+      401
+    ],
+    "repeat_status": 200,
+    "other_session_cases_status": 200
+  },
+  "outcome": "PASS",
+  "deployment_id": "dpl_DUhRfZtx2gf5K4S9JaauA7TMXdQE",
+  "created_session_cleanup_statuses": [
+    "CONFIRMED",
+    "CONFIRMED"
+  ]
+}

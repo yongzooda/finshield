@@ -18,7 +18,7 @@ import { FsLoginCard, useFsToken } from "../fs-session";
 import { fetchNotifications } from "../cases/case-api";
 
 type Notification = {
-  id: string; case_id: string; notification_type: string; title: string;
+  id: string; case_id: string; revalidation_job_id: string | null; passport_id: string | null; notification_type: string; title: string;
   body_masked: string; read_at: string | null; created_at: string;
 };
 
@@ -26,6 +26,7 @@ export function NotificationCenter() {
   const [token, setToken, ready] = useFsToken();
   const sessionKey = sessionIdentity(token);
   const [rows, setRows] = useState<Notification[] | null>(null);
+  const [loadedSession, setLoadedSession] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
@@ -34,13 +35,13 @@ export function NotificationCenter() {
     let alive = true;
     void (async () => {
       const response = await fetchNotifications<{ notifications: Notification[] }>(token);
-      if (!alive) return;
+      if (!alive || sessionIdentity(readSessionToken()) !== sessionKey) return;
       if (!response.ok) {
         if (response.status === 401) setToken(null);
         setNotice(response.error);
         return;
       }
-      setRows(response.data.notifications);
+      setRows(response.data.notifications); setLoadedSession(sessionKey); setNotice(null);
     })();
     return () => { alive = false; };
   }, [ready, sessionKey, setToken]);
@@ -53,6 +54,7 @@ export function NotificationCenter() {
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({ notification_id: id }),
     });
+    if (sessionIdentity(readSessionToken()) !== sessionKey) return;
     if (!response.ok) { setNotice("읽음으로 바꾸지 못했습니다"); return; }
     setRows((prev) => (prev ?? []).map((row) =>
       row.id === id ? { ...row, read_at: new Date().toISOString() } : row));
@@ -74,7 +76,7 @@ export function NotificationCenter() {
 
       {notice ? <FsCard className="mt-8"><p className="fs-body">{notice}</p></FsCard> : null}
 
-      {rows === null ? (
+      {rows === null || loadedSession !== sessionKey ? (
         notice ? null : <FsCard className="mt-8"><p className="fs-body">불러오는 중입니다.</p></FsCard>
       ) : rows.length === 0 ? (
         <FsCard className="mt-8">
@@ -96,8 +98,8 @@ export function NotificationCenter() {
                 <p className="fs-body mt-1">{row.body_masked}</p>
                 <p className="fs-meta mt-1">{new Date(row.created_at).toLocaleString("ko-KR")}</p>
                 <div className="mt-3 flex flex-wrap gap-3">
-                  <Link href={`/cases/${row.case_id}`} className="fs-btn fs-btn--quiet !px-3 !text-[0.9rem]">
-                    기록 열기
+                  <Link href={row.revalidation_job_id ? `/cases/${row.case_id}/revalidate?job_id=${row.revalidation_job_id}` : row.passport_id ? `/cases/${row.case_id}/passport?passport_id=${row.passport_id}` : `/cases/${row.case_id}`} className="fs-btn fs-btn--quiet !px-3 !text-[0.9rem]">
+                    {row.revalidation_job_id ? "해당 재검증 비교 열기" : "해당 검증 기록 열기"}
                   </Link>
                   {row.read_at ? null : (
                     <button type="button" onClick={() => void markRead(row.id)}

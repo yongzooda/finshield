@@ -1,14 +1,56 @@
+## 2026-09-08 계약 PDF 수정 후 실측 완료·사용자 요청으로 작업 종료
+
+계약 문서 비용 거부를 PR #242로 수정해 main `d4a180f`에 병합했고 원격은 0044다. 구조 해시 6종 일치 후 보호 Preview의 native PDF 처리·문구 확인·두 세션 복원·동일 확인 재시도·과거 Claim 불변과 원본/Case 물리 삭제를 확인했다. 첫 실패와 추가 비용 USD 0.003914를 함께 보존했다. [실측](evidence/development/aftercare/2026-09-08-document-preview.md)을 따른다. 기본 602건 통과·선택적 96건 건너뜀, 44 Migration/SQL 32파일·타입·빌드 통과다. 사용자 요청에 따라 여기서 추가 P0 구현을 멈춘다. Implementation NO-GO·Release NOT-EVALUATED와 Draft #192를 유지한다.
+
+## 2026-09-08 가입 후 PDF 실측 실패와 비용 경계 수정
+
+PR #240은 main `7b3c29c`로 병합됐고 원격 CI가 통과했다. 원격 0043의 구조 해시 6종 일치, RLS/FORCE 83개·anon 누출 0건을 확인했다. 실제 계약 PDF는 마스킹 뒤 비용 예약에서 실패했고 추가 과금은 없었다. 실패 Case는 삭제했다. Migration 0044와 처리 실패 정리를 보완했으며 [실패와 검증 범위](docs/ops/aftercare-input-budget.md)를 따른다. 전체 P0·Gate 완료는 아니다.
+
 ## 2026-09-08 가입 후 계약 PDF 비용 예약 수정
 
 보호 Preview의 실제 계약 PDF가 마스킹 뒤 비용 예약에서 거부된 실패를 재현했다. Migration 0044는 같은 Case의 AFTERCARE 문서에 기존 비용 경계를 연결한다. 격리 44 Migration·32 SQL 파일이 통과했으며 상한·소유권·확인 후 재호출 거부를 검사했다. 원격은 0043이며 수정 후 실제 파일 검증과 Gate 재채택은 남아 있다. [실패와 수정 범위](docs/ops/aftercare-input-budget.md)를 따른다.
 
 ## 2026-09-08 가입 후 계약 문서 DB 경계
 
-PC-008·PC-011의 Migration 0043과 격리 SQL 시험을 기능 Draft에서 분리했다. 동일 Case의 가입 후 문구는 전용 표에 저장하며 과거 Claim/Passport를 변경하지 않는다. 동일 확인 재시도·원본 정리·문서 출처 고정을 검증했다. 원격은 0042이며 0043 적용·배포 검증은 후속이다. [검증 범위](docs/ops/aftercare-document-contracts.md)를 따른다. Implementation NO-GO·Release NOT-EVALUATED와 DB 증거 STALE를 유지한다.
+PC-008·PC-011의 Migration 0043과 격리 SQL 시험을 기능 Draft에서 분리했다. 동일 Case의 가입 후 문구는 전용 표에 저장하며 과거 Claim/Passport를 변경하지 않는다. 원격 적용 전 기록은 [검증 범위](docs/ops/aftercare-document-contracts.md)에 보존한다.
 
-## 2026-09-08 가입 후 실행 DB 계약
+## 2026-09-08 가입 후 문서 입력 구현
 
-기능 Draft #192에서 점검 Job·같은 Case의 Agent/Tool Trace·Lease·요청 복원·전용 비용 예약 계약을 분리했다. Migration 0042와 SQL 31파일을 격리 검증했다. 이 브랜치는 화면·모델 Adapter·Workflow 코드를 포함하지 않는다. 실제 원격은 0041이며 0042 적용·Preview 검증 전이다. 기존 다섯 DB Evidence의 STALE과 main 부분 PASS 8/20을 유지한다.
+PC-008·PC-011의 동일 Case Image/PDF 입력·인식 문구 확인·이전 Claim 연결·원본 삭제·저장 복원을 기능 Draft에 추가했다. 거래 전 Claim/Passport는 유지한다. 원격 0043 적용과 배포 검증은 아직 전이며 [격리 구현 범위](docs/ops/aftercare-document-inputs.md)를 따른다. 한국어 기록 검사 PR #238은 main `486667b`에 병합됐고 원격 CI가 통과했다. 전체 Implementation NO-GO·Release NOT-EVALUATED를 유지한다.
+
+## 2026-09-08 실제 가입 후 Agent·원격 0042 검증
+
+원격 0042의 해시 6종 일치와 보호 Preview 점검 접수·중복 방지·두 세션 복원·부분 저장·Case 삭제를 확인했다. Sales 인용 오류와 공식 조회 0건을 보존했으며 두 Agent 품질 성공은 아니다. 추가 비용 USD 0.024174, 합산 일일 사용 USD 0.257351이고 미확정 예약은 0이다. [실측 범위](evidence/development/aftercare/2026-09-08-agent-preview.md)를 따른다. 최신 기능 CI의 Git 메타데이터 검사 실패는 별도 수정 중이다. Gate는 NO-GO이며 과거 기록은 아래에 남긴다.
+
+## 2026-09-08 가입 후 DB 계약 main 통합
+
+분리 PR #236의 실제 merge candidate `6015fa9`와 CI `34139544176`이 통과해 main `dd203fd`로 squash merge됐다. 원격 DB는 0041이며 0042 적용을 준비 중이다. 기능 구현은 기존 Draft #192에 보존한다. main 부분 PASS 8/20·기능 Draft 7/20, Implementation NO-GO·Release NOT-EVALUATED를 유지한다.
+
+## 2026-09-08 가입 후 Agent 실행 연결
+
+PC-005의 점검 전용 Job·Workflow에서 기존 Sales Conduct·Regulation & Dispute Runner와 Tool을 재사용하고 근거·실행·비용을 같은 점검에 귀속했다. 요청 복원·중복 억제·취소·기한·미확정 실행 실패·부분 결과와 과거 Passport 불변을 격리 검증했다. 0042 원격 적용과 새 Preview 검증, 가입 후 파일 입력과 품질 Gate는 남아 있다. [검증 범위](docs/ops/aftercare-agent-review.md)를 따른다.
+
+## 2026-09-08 실제 계정 탈퇴 검증
+
+별도 합성 계정의 Case·실제 TUS PNG에서 보호 Preview 계정 탈퇴 Workflow를 완료했다. 첫 응답 유실 후 다른 세션 복원·접수 후 새 작업 차단·중복 요청·Auth 마지막 삭제·영수증만으로 완료 조회를 확인했다. Auth/Profile/Case/Storage 부재와 완료 원장 1건을 별도 SQL로 확인했다. 기존 시험 계정은 보존하고 임시 Preview 허용 값을 복원했다. [검증 범위](evidence/development/deletion/2026-09-08-account-preview.md)를 따른다. 신규 Slot 차단의 500은 409 안내로 수정했고 전체 장애·Live OCR 파생물 삭제·Release 완료는 아니다.
+
+## 2026-09-07 23시 50분: 원격 DB 계약 적용
+
+PR #234를 main `2ae0230`으로 squash merge하고 원격에 0038~0041만 forward 적용했다. 적용 전 기존 0037 해시 6종, 적용 후 0041 격리 기준 해시 6종이 각각 일치했다. RLS/FORCE 81개·anon 누출 0·Worker 본문 거부 13표를 확인했다. main CI 34134803969는 통과했다. main 부분 PASS 8/20, 기능 Draft는 Health 차이로 7/20이며 정식 재채택 전이다. 실제 합성 계정 탈퇴·Profile/알림 복원을 검증 중이다.
+
+## 2026-09-07 23시: 프로필 적합성 규칙 추가
+
+- Migration 0041은 실행 Snapshot의 부담·비상 자금·목적과 유효한 상품 조건을 결정적 규칙으로 비교한다. 자기신고 확정값을 거부하고 정책 Trace를 불변 Passport 해시에 연결했다.
+- 실제 격리 DB에서 현재 프로필 변경 뒤 과거 축/Passport 해시 불변, 종료·다른 상품 제외와 타인 조회 거부를 확인했다. SQL 30파일·기본 575건·타입·린트·빌드 통과, 선택적 skip 96건이다.
+- 원격에는 0038~0041이 없고 공용 KB 문서/청크 0/0이다. 별도 DB 계약 PR·적용·Live 검증이 남았으며 이 기록은 Gate 채택이 아니다.
+- [검증 범위](evidence/development/profile/2026-09-07-profile-policy.md)를 참조한다.
+
+## 2026-09-07 최종 통합 상태
+
+- 보안 PR #224·#226과 별도 증거 채택 PR #230이 main에 병합됐다. main은 `5498a6d`, 기능 Draft #192의 부분 PASS는 12/20이다. main의 13/20과 Health 측정 범위 차이를 유지한다.
+- 실제 증거 채택은 merge candidate `72f6ed3`의 CI `34120542628`이 통과했다. 두 번의 채택 CI 거부 이력과 모든 원본은 보존했다.
+- 기본 시험 550건·선택적 94건 건너뜀, 별도 실제 TUS 갱신/삭제 1건 통과다. 코드·브라우저·자연 만료·배포 표본의 범위는 세션 갱신 기록을 따른다. 전체 P0·Release 완료가 아니다.
+- 계정 탈퇴 전체 흐름·OCR·검색·Workflow 장애·개인정보 계약·판정 품질은 남아 있다. Cohere 학습 설정 변경과 Rerank Fast 개발 후보는 사용자 결정 전 실행하지 않는다.
 
 ## 2026-09-07 P0 DB 계약 분리
 
@@ -18,6 +60,15 @@ Migration 0038~0041과 SQL 시험을 기능 Draft #192에서 분리했다. 새 �
 
 - 별도 PR #230에서 최종 main `72e5405`의 Supabase·Rate·Consent·Storage·Delete 원본을 채택한다. 첫 채택 CI 거부와 두 번의 원본을 모두 보존한다. [측정 범위](evidence/adoption/2026-09-07-session-rls.md)를 따른다.
 - 부분 PASS는 main 13/20이며 Implementation NO-GO·Release NOT-EVALUATED다. 기능 Draft의 Health 범위는 별도다.
+
+## 2026-09-07 갱신 보안의 기능 Draft 통합
+
+- main PR #224·#226의 Cookie 갱신·직접 세션 RLS를 기존 기능 Draft에 통합했다. 재검증 Job·중단 신호·서버 Claim·상세 Passport 계약은 보존했다.
+- 가입 후 점검과 재검증 조회는 세션 식별자를 사용해 갱신 시 재초기화하지 않는다. 파일 Slot·Process·중단과 TUS 시작·청크·복구 조회에 최신 세션을 적용했다.
+- 기본 시험 550건 통과·선택적 94건 건너뜀, 타입·린트 오류 0건·빌드 통과다. TUS 응답 유실·Offset 복원·취소·계정 교체 시험을 포함한다. 기존 린트 경고 2건은 유지한다.
+- main 배포의 실제 Cookie 갱신·로그아웃·다른 세션 유지와 정리를 확인했다. [원본](evidence/development/auth/2026-09-07-session-refresh-production.json)은 합성 API 경계이며 전체 파일 Live·Release 증거가 아니다.
+- 보호 Preview에서 합성 PNG의 Slot 예약·실제 TUS 시작/청크의 Cookie 회전 두 번·파일과 Case 삭제 COMPLETED·조회 404·세션 정리 200이 통과했다. OCR·모델은 호출하지 않았다.
+- 다섯 DB 증거의 재채택 전 현재 Draft PASS는 7/20이다. main은 8/20이며 Health 한 항목의 차이를 유지한다.
 
 ## 2026-09-07 세션 갱신 보안 보완
 
@@ -30,6 +81,36 @@ Migration 0038~0041과 SQL 시험을 기능 Draft #192에서 분리했다. 새 �
 - 로그아웃 뒤 유효 JWT로 직접 PostgREST 개인정보 행을 읽는 문제를 실제 재현했다. 원본 실패를 보존한다.
 - Migration 0037은 회원 Base table·정의자 Helper·진행 View·Storage slot에서 활성 Auth 세션을 검사한다. 실제 원격 적용·폐기 JWT의 직접 조회·Storage/TUS 거부와 다른 세션 보존·합성 Case 정리를 확인했다. 세부 범위는 `docs/ops/session-rls.md`를 따른다.
 - Supabase·Rate·Consent·Storage·Delete의 기존 증거 5개는 DB scope 변경으로 STALE이다. Implementation은 NO-GO이며 새 main 측정과 별도 Adoption이 필요하다.
+
+## 2026-09-07 서버 로그아웃 보안 수정 통합
+
+- main PR #222의 보안 수정을 통합했다. Production 합성 새 세션의 폐기·조회 네 경로 401·다른 세션 유지·시험 세션 정리를 확인했다.
+- 상세 Passport 조회 계약과 삭제 전 재인증을 보존하고 로그아웃과 재인증의 동시 실행을 막는다. 기본 시험 517건 통과·선택적 91건 건너뜀이다.
+- [실제 검증 기록](docs/ops/session-signout.md)에 새 브랜치 Preview 실패와 Production 성공을 분리했다. 통합 Draft의 보호 Preview에서도 같은 인증 시험과 시험 세션 정리가 통과했다. Gate는 바꾸지 않는다.
+
+## 기능 브랜치의 Health 재측정 경계
+
+- main은 PR #212에서 B-HEALTH-01을 채택했다. 이 기능 브랜치는 `withWorkflow`와 파일 추적 설정이 있는 Next 설정을 사용하므로 main 측정의 build scope와 다르다.
+- 원본 실측은 보존하고 이 브랜치에서만 Health를 NOT-EVALUATED로 되돌렸다. 기능·Workflow 인프라 기준선이 main에 반영된 뒤 같은 100회 시험을 다시 측정·채택해야 한다.
+
+# 2026-09-07 추가 개발 기록
+
+- 실제 CLOVA 합성 3문서·12쪽의 응답·페이지·고정 앵커 진단이 통과했다. 전체 파일 서비스·OCR Gate 통과는 아니다.
+- 캐시 근거의 수집 시각·만료·출처 등급을 보존하고 모델 입력의 DB 식별자를 제거했다.
+- 상세 이력과 남은 장애는 `docs/ops/2026-09-07-development-resume.md`를 따른다. 확정 제출 문서는 보존했다.
+
+# FinShield HANDOFF
+
+## 2026-09-07 제출 이후 개발 재개
+
+- 사용자가 제출본 확정 후 커밋·푸시를 요청했고, 클로드 이동 요청을 취소한 뒤 현재 작업의 개발 계속을 요청했다.
+- 최신 작업 상태와 재개 지시는 [개발 재개 기록](docs/ops/2026-09-07-development-resume.md)를 우선 확인한다. 아래 과거 완료·다음 작업 목록은 기준선 이력이므로 현재 작업 브랜치 상태와 구분한다.
+- 작업 브랜치는 `codex/p0-audit-contract-spike`다. 서버 Claim 확정, Case 조회, 독립 검토 계약, 보류 결과 저장·수동 재검증을 보완했고 파일 파서·가입 후 비교 코드는 전체 연결 검증 전이다.
+- 초기 실제 회원 검증은 시간 초과로 보류됐다. 이후 합성 단일 Claim의 실제 Provider·공식 근거·로컬 worker 저장(약 47초)과 native PDF의 실제 파서·모델·로컬 저장(약 11초, Storage 대체)을 통과했다. 재검증/만료 정리 Workflow와 가입 후 점검 복원도 격리 구현·시험했다. 실제 Storage/OCR 전체 흐름과 Production 반영·Release는 미완료다.
+- FinShield DB에 0026~0035를 적용하고 원격·로컬 전체 schema digest 일치를 확인했다. 기존 Migration ledger는 없으며 소급 기록을 만들지 않았다. 관련 Evidence scope를 다시 측정 중이다.
+- 11시 추가: 모델 비용 예약·실사용 정산·미확정 보존을 연결했고 입력 취소/늦은 결과 차단을 보완했다. 단위 시험 430건과 실제 합성 단일/복수 Claim 저장을 확인했다. 복수 Claim은 Domain 시간 초과/분쟁 자료 미연결에 따른 부분 결과다.
+- 제출 확정 PDF는 `output/pdf/`에 보존했다. 상세 중단 기록은 [제출 우선 중단 기록](docs/ops/2026-09-07-submission-stop.md)을 따른다.
+- 13시 추가: 실제 회원 native PDF의 업로드·분석·저장·복원, 보호 Preview의 PNG OCR·8 Claim 추출·물리 삭제, 로컬 HTTP Workflow의 실제 재검증 NO_CHANGE·새 판 보존·새로고침 복원을 확인했다. 10쪽 스캔 인용 페이지 구분은 보완 후 재검증 중이다. 기본 시험 445건 통과·89건 선택적 건너뜀, 실제 로컬 DB 경계 7건 통과다.
 
 ## OCR 정식 측정 실패 보존
 
@@ -55,8 +136,6 @@ Migration 0038~0041과 SQL 시험을 기능 Draft #192에서 분리했다. 새 �
 - main run `34084937234`에서 실제 Next HTTP 100회와 DB 장애 시험이 통과했다. 외부 fetch·HTTP·HTTPS 전송 시도는 정상·장애 모두 0회이며 계측 제어는 각각 1회다.
 - 보호 Preview와 Production에서도 DB 정상 응답을 확인했다. 미관측 Provider는 `unknown`·전체 `degraded`로 보존한다.
 - 별도 Adoption에서 B-HEALTH-01의 부분 PASS만 채택한다. Implementation은 NO-GO, Release는 NOT-EVALUATED다.
-
-# FinShield HANDOFF
 
 ## 2026-09-07 저녁 인증 보안 보완
 
@@ -89,7 +168,7 @@ Migration 0038~0041과 SQL 시험을 기능 Draft #192에서 분리했다. 새 �
 - 상위 기획: `docs/01-product-plan.md`
 - DB 구현 기준: `docs/03-database-spec.md`
 - Provider Stack ADR: `docs/adr/001-p0-provider-stack.md`
-- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`·`B-FILE-SAFETY`·`B-RUNTIME-01`·`B-LAW-01`·`B-HEALTH-01`·`B-SUPABASE-01`·`B-RATE-01`·`B-CONSENT-01`·`B-STORAGE-01`·`B-DELETE-01`이 `PASS`다.
+- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`·`B-FILE-SAFETY`·`B-RUNTIME-01`·`B-LAW-01`·`B-RATE-01`·`B-CONSENT-01`·`B-STORAGE-01`·`B-DELETE-01`·`B-SUPABASE-01`이 `PASS`다.
 - Migration `0025`가 들어와 `B-SUPABASE-01`·`B-RATE-01`·`B-CONSENT-01`·`B-STORAGE-01`·`B-DELETE-01`의 scope digest가 바뀌었다. 다섯을 다시 재서 채택한다.
 - Product Release Gate (`N-QLT-009`): `NOT-EVALUATED` — P0 기능 구현 뒤 평가한다. Claim 판정 품질 `B-CLAIM-01`을 포함해 4개다.
 - 배포: Vercel `finshield` Production 연결 완료 (`https://finshield-gamma.vercel.app`)
@@ -192,6 +271,17 @@ Migration 0038~0041과 SQL 시험을 기능 Draft #192에서 분리했다. 새 �
 - GitHub의 Vercel success status는 Build/Deploy 성공이며 Provider 기능 성공 증거가 아니다.
 - main Ruleset의 required `check`는 strict·bypass 0·Actions retention 90일 기준을 충족한다. 저장소가 개인 소유이고 외부 Required Workflow·App attestation이 없다는 위험은 `B-CI-INTEGRITY = DEFERRED`로 보존하되 P0 Implementation·Release Gate를 차단하지 않는다. P0 증거는 외부 독립 보증이 아닌 `repository-controlled evidence`로만 표시한다.
 
+## 2026-09-07 전체 P0 구현 우선 재개
+
+사용자가 전체 P0 구현 우선 진행을 지시했고 Cohere 학습 사용 Off 및 Fast 합성 개발 시험 최대 USD 0.05를 승인했다. Off 변경과 별도 페이지 재확인을 완료했으며 아직 유료 Provider 호출은 하지 않았다. 계정 탈퇴의 API·화면·Workflow·DB 작업 차단·Auth 마지막 삭제를 기능 Draft에서 구현했다. 격리 SQL과 API 검증은 `evidence/development/deletion/2026-09-07-account-deletion.md`를 따른다. Migration 0038의 원격 적용·Live 파일/Auth/다기기 검증은 남아 있다. 0038로 기능 Draft의 DB 관련 다섯 증거는 STALE이며 Health도 기존 STALE이므로 7/20이다. main은 13/20을 유지한다. Implementation NO-GO·Release NOT-EVALUATED이며 Draft #192 전체를 병합하지 않는다.
+
+공용 KB 도구·Cohere 비용 경계도 구현했다. 상세 범위와 한계는 `evidence/development/retrieval/2026-09-07-public-kb-runtime.md`를 따른다. Migration 0039는 전체/Provider 합산 예약을 추가하며 상한을 자동 설정하지 않는다. PreCase의 고정 corpus 중 20문서·28청크를 로컬 격리 DB에서 검색·본문 복원했다. 참고용·UNKNOWN이며 원격 공식 KB 완성이나 Fast Live 성공은 아니다. 실제 Provider 호출은 아직 0건이다.
+
+기록·삭제 목록에 50건 이후 Cursor 조회를 추가했다. 생성 시각의 microsecond와 ID 동점을 보존하고 계정 전환 시 과거 목록/지연 응답을 격리한다. 기본 573건·선택적 skip 96건과 빌드 통과이며 실제 다기기 대량 목록은 별도 검증이 필요하다.
+
+알림 INSERT·Outbox 완료의 원자성과 과거 PROCESSING 복구를 Migration 0040으로 추가했다. SQL 29파일·기본 572건·빌드가 통과했고 알림은 저장된 Job/Passport 판으로 이동한다. 전역 주기 Dispatcher·원격 적용·Live UI는 아직 검증하지 않았다. 별도 보호 Preview API에서 합성 Case 51개를 두 로그인 세션으로 페이지 조회하고 모두 삭제했다. 기록은 `evidence/development/notifications/`·`evidence/development/records/`를 따른다.
 ## 2026-09-07 Fast 합성 개발 시험
 
 사용자 승인 범위의 개발 전용 실행 경로를 추가했다. `docs/ops/2026-09-07-rerank-fast-development.md`에 산식·개발 split·최대 USD 0.05·첫 dispatch/attempt·원장 보존을 사전등록했다. 제품 기능 Draft #192와 별도이며 기존 실패 Gate를 재평가하거나 제품 Rerank를 바꾸지 않는다. 현재 계약 시험·기본 449건과 빌드를 통과했고 선택적 85건은 건너뛰었다. 실제 Provider 결과는 실행 뒤 별도 기록한다.
+
+Fast 실제 개발 시험은 main run 34128723611에서 완료했다. Embed 23회·Fast 20회, USD 0.040829, 미확정 0, Fast P95 382ms다. 개발 Case macro Recall/Precision은 동일 후보의 결정적 0.95 → Fast 1.00이며 위험·중복·독립 holdout 품질을 증명하지 않는다. 원본은 `evidence/development/retrieval/fast-34128723611/`에 보존했다. 운영 DB 원장 밖의 개발 비용이므로 다음 일일 예산 확인 때 별도 합산한다. PR #232만 main에 병합했고 main CI·배포 성공 뒤 clean 기준 폴더 8개를 origin/main 00b192a에 맞췄다. 기능 Draft #192는 보존한다.
