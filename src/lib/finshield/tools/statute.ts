@@ -17,6 +17,7 @@ import { sha256, type SourceItem, type ToolOutcome, type ToolCallContext } from 
 
 const MAX_BODY_FETCH = 2;
 const MAX_EXCERPT = 1200;
+const ARTICLE_REFERENCE = /제\s*(\d+)\s*조(?:\s*의\s*(\d+))?/;
 
 type LawRow = { 법령명한글?: string; 법령ID?: string; 시행일자?: string; 공포일자?: string; 법령상세링크?: string };
 type PrecRow = { 사건명?: string; 판례정보일련번호?: string; 선고일자?: string; 법원명?: string; 판례상세링크?: string };
@@ -65,7 +66,7 @@ const bodyEvidence = (payload: unknown, query: string): { articleNo: string; exc
       Boolean(entry.articleNo && entry.text));
   if (units.length === 0) return null;
 
-  const requested = query.match(/제\s*(\d+)\s*조(?:\s*의\s*(\d+))?/);
+  const requested = query.match(ARTICLE_REFERENCE);
   const requestedNo = requested
     ? `제${Number(requested[1])}조${requested[2] ? `의${Number(requested[2])}` : ""}`
     : null;
@@ -87,7 +88,14 @@ export const lookupStatute = async (input: unknown, ctx?: ToolCallContext): Prom
     return { items: [], provenanceComplete: true, candidateCount: 0, reasonCode: "EMPTY_QUERY" };
   }
 
-  const listed = await lawSearch("law", { query, display: 5, type: "JSON" }, { signal: ctx?.signal, maxRetries: 0 });
+  // 법령 검색 API에는 조문 번호를 넣으면 0건이 돌아올 수 있다. 모델이 지정한
+  // 조문은 본문 선택에 보존하고, 목록 검색에는 정확한 법령명만 보낸다.
+  const lawQuery = query.replace(ARTICLE_REFERENCE, " ").replace(/\s+/g, " ").trim();
+  if (lawQuery.length === 0) {
+    return { items: [], provenanceComplete: true, candidateCount: 0, reasonCode: "LAW_NAME_REQUIRED" };
+  }
+
+  const listed = await lawSearch("law", { query: lawQuery, display: 5, type: "JSON" }, { signal: ctx?.signal, maxRetries: 0 });
   const rows = asArray(((listed as { LawSearch?: { law?: LawRow | LawRow[] } })?.LawSearch?.law));
   const items: SourceItem[] = [];
 

@@ -64,7 +64,7 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
   async chooseTools({ system, signal, input, evidence, observations, availableTools }) {
     const result = await callFinshieldModel({
       model: FINSHIELD_MODEL,
-      system: `${system}${input.aftercare_context ? `\n${AFTERCARE_CONTEXT_INSTRUCTION}` : ""}\n\n지금은 도구를 고르는 단계다. 확인이 더 필요하면 부를 도구를 고르고,\n충분하거나 필요한 자료가 미연결·조회 실패 상태면 calls 를 빈 배열로 둔다. 같은 도구에 같은 입력을 반복하지 않는다. 목록에 없는 도구 이름을 쓰지 않는다. query에는 도구에 맞는 짧은 핵심어를 넣는다. 상품 조회는 상품명, 법령 조회는 법령명, 소비자 안내는 권유의 행동 요구를 쓴다. 이유는 20자 이내다.`,
+      system: `${system}${input.aftercare_context ? `\n${AFTERCARE_CONTEXT_INSTRUCTION}` : ""}\n\n지금은 도구를 고르는 단계다. 확인이 더 필요하면 부를 도구를 고르고,\n충분하거나 필요한 자료가 미연결·조회 실패 상태면 calls 를 빈 배열로 둔다. 같은 도구에 같은 입력을 반복하지 않는다. 목록에 없는 도구 이름을 쓰지 않는다. query에는 도구에 맞는 짧은 핵심어를 넣는다. 상품 조회는 상품명, 법령 조회는 정확한 법령명과 필요한 조문 번호 하나, 소비자 안내는 권유의 행동 요구를 쓴다. 법령명 뒤에는 조문 번호 외 검색어를 붙이지 않는다. 이유는 20자 이내다.`,
       user: JSON.stringify({
         claims: claimBrief(input.claims),
         journey_stage: input.journey_stage,

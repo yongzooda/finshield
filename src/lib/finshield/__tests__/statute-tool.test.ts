@@ -40,6 +40,7 @@ it("검색어와 맞는 실제 조문 번호와 본문을 LAW 근거에 함께 �
     locator: { kind: "statute", law_id: "123", article_no: "제19조", effective_from: "2026-01-01" },
   });
   expect(result.items[0].excerptMasked).toContain("중요한 사항을 설명");
+  expect(lawSearch).toHaveBeenCalledWith("law", { query: "금융상품 판매 설명의무", display: 5, type: "JSON" }, expect.anything());
 });
 
 it("가지번호를 정확히 보존하고 번호 없는 본문은 LAW Snapshot 후보에서 제외한다", async () => {
@@ -53,10 +54,16 @@ it("가지번호를 정확히 보존하고 번호 없는 본문은 LAW Snapshot 
     { 법령명한글: "두 번째 법", 법령ID: "456", 시행일자: "20260101" },
   ] } });
 
-  const result = await lookupStatute({ query: "제95조의2 설명의무" });
+  const result = await lookupStatute({ query: "금융소비자보호법 제95조의2" });
 
   expect(result.items).toHaveLength(1);
   expect(result.items[0]).toMatchObject({ articleNo: "제95조의2", officialId: "law.go.kr:123:제95조의2" });
+});
+
+it("법령명 없이 조문 번호만 주어지면 외부 검색을 하지 않는다", async () => {
+  const result = await lookupStatute({ query: "제19조" });
+  expect(result).toMatchObject({ items: [], candidateCount: 0, reasonCode: "LAW_NAME_REQUIRED" });
+  expect(lawSearch).not.toHaveBeenCalled();
 });
 
 it("조문 번호와 본문을 모두 확정하지 못하면 제목만으로 인용 근거를 만들지 않는다", async () => {
