@@ -255,7 +255,7 @@ maybe("근거 사슬", () => {
     expect(result.reasonCode).toBe("TOOL_NOT_ALLOWED");
   }, 30_000);
 
-  it("지어낸 근거를 인용하면 판단을 버린다", async () => {
+  it("지어낸 근거를 인용하면 영향 Claim만 안전하게 낮춘다", async () => {
     const model: AgentModel = {
       chooseTools: async () => [],
       decide: async () => ({
@@ -271,12 +271,12 @@ maybe("근거 사슬", () => {
       session: session(), agentCode: "FRAUD_CHANNEL", input: agentInput(), model,
       impls: {},
     });
-    expect(result.status).toBe("FAILED");
+    expect(result.status).toBe("PARTIAL");
     expect(result.reasonCode).toBe("CITATION_INVALID");
-    expect(result.output).toBeNull();
+    expect(result.output?.findings[0]).toMatchObject({ state: "UNKNOWN", evidence_refs: [] });
   }, 30_000);
 
-  it("근거 없이 확정하면 판단을 버린다", async () => {
+  it("근거 없이 확정하면 영향 Claim만 안전하게 낮춘다", async () => {
     const model: AgentModel = {
       chooseTools: async () => [],
       decide: async () => ({
@@ -291,8 +291,9 @@ maybe("근거 사슬", () => {
     const result = await runDomainAgent({
       session: session(), agentCode: "FRAUD_CHANNEL", input: agentInput(), model, impls: {},
     });
-    expect(result.status).toBe("FAILED");
+    expect(result.status).toBe("PARTIAL");
     expect(result.reasonCode).toBe("CITATION_INVALID");
+    expect(result.output?.findings[0]).toMatchObject({ state: "UNKNOWN", evidence_refs: [] });
   }, 30_000);
 
 
@@ -363,7 +364,7 @@ maybe("근거 사슬", () => {
     expect(runs[0].n).toBeGreaterThanOrEqual(4);
   }, 60_000);
 
-  it("Judge 가 지어낸 근거를 인용하면 결과를 버리고 부분 실패로 남긴다", async () => {
+  it("Judge 가 지어낸 근거를 인용하면 영향 Claim을 낮추고 부분 실패로 남긴다", async () => {
     const agentModel: AgentModel = {
       chooseTools: async () => [],
       decide: async () => ({ schema_version: "out-v1", findings: [], out_of_scope_claim_refs: ["C1"] }),
@@ -385,7 +386,7 @@ maybe("근거 사슬", () => {
       journeyStage: "PRE_TRANSACTION",
       agentModel, judgeModel,
     });
-    expect(result.judgeOutput).toBeNull();
+    expect(result.judgeOutput?.claim_results[0]).toMatchObject({ state: "UNKNOWN", evidence_refs: [] });
     expect(result.judgeReasonCode).toBe("JUDGE_CITATION_INVALID");
     expect(result.partial).toBe(true);
   }, 60_000);
