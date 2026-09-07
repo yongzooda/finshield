@@ -15,3 +15,5 @@ Migration 0039는 Provider별 한도에 전체 한도를 함께 걸고 같은 �
 실제 격리 DB에서 FTS 검색·Snapshot 본문 복원·다른 Release 거부·없는 검색 결과와 PostgreSQL 취소/연결 복구 2개 통합 시험을 통과했다. Provider 합산 한도 초과와 실패 rollback·정산·미확정 예약·다른 소유자 거부를 SQL로 검증했다. Provider 응답·비용과 참고자료/시점/중복 경계는 단위 시험으로 검증했다. 선택적 통합 시험의 기본 skip을 Live 성공으로 세지 않는다.
 
 Fast와 Embedding의 이 개발 작업 실제 호출은 아직 0건·USD 0이다. 공식 원문·라이선스 보완, 전체 자료 적재·Embedding 생성, 제품 Manifest 연결, 실제 Provider·검색 품질 측정은 남아 있다. B-RETRIEVAL-01이나 개인정보 Gate 채택 증거가 아니다.
+
+실측 뒤 구현 보완: Fast 개발 Adapter도 Keyword 20·Vector 20의 합집합 최대 40개를 받는다. 마스킹 뒤 질의·문서 바이트 경계를 다시 검사해 한 search unit 범위의 제한을 유지한다. 40개 복원과 41개 입력의 예약 전 차단 시험을 추가했다. 제품 기본 Rerank는 변경하지 않았다.

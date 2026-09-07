@@ -76,9 +76,12 @@ export async function embedQuery(query: string, ctx: ToolCallContext): Promise<n
 /** 승인된 Fast 개발 후보에만 사용한다. 제품 기본 Rerank를 조용히 바꾸지 않는다. */
 export async function rerankFast(query: string, documents: string[], ctx: ToolCallContext): Promise<number[]> {
   if (process.env.FINSHIELD_RERANK_FAST_DEVELOPMENT !== "1" || !process.env.FINSHIELD_PROBE_OWNER_ID || ctx.ownerId !== process.env.FINSHIELD_PROBE_OWNER_ID) throw new RetrievalProviderError("RERANK_DEVELOPMENT_ONLY");
-  if (Buffer.byteLength(query) > 512 || documents.length < 1 || documents.length > 20 || documents.some(d => !d || Buffer.byteLength(d) > 3000)) throw new RetrievalProviderError("RERANK_INPUT_INVALID");
+  if (Buffer.byteLength(query) > 512 || documents.length < 1 || documents.length > 40 || documents.some(d => !d || Buffer.byteLength(d) > 3000)) throw new RetrievalProviderError("RERANK_INPUT_INVALID");
   const texts = documents.map(maskedQuery);
-  const body = await callCohere(FAST, { model: FAST, query: maskedQuery(query), documents: texts, top_n: texts.length, max_tokens_per_doc: 4096 }, 2000, ctx);
+  const queryText = maskedQuery(query);
+  // Keyword 20 + Vector 20 합집합을 보존하고 마스킹 뒤에도 청구 단위 경계를 검사한다.
+  if (Buffer.byteLength(queryText) > 512 || texts.some(text => Buffer.byteLength(text) > 3000 || Buffer.byteLength(text) + Buffer.byteLength(queryText) > 4092)) throw new RetrievalProviderError("RERANK_INPUT_INVALID");
+  const body = await callCohere(FAST, { model: FAST, query: queryText, documents: texts, top_n: texts.length, max_tokens_per_doc: 4096 }, 2000, ctx);
   if (!Array.isArray(body.results) || body.results.length !== texts.length) throw new RetrievalProviderError("RERANK_RESULT_INVALID");
   const scores = Array<number>(texts.length); const seen = new Set<number>();
   for (const row of body.results) {

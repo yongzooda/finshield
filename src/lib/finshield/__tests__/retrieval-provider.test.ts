@@ -37,3 +37,13 @@ it("Fast의 원래 후보 순서와 과금 search unit을 복원한다", async (
 it("이미 취소된 검색은 예약·전송하지 않는다", async () => {
   await expect(embedQuery("대출 금리", { ...ctx, signal: AbortSignal.abort() })).rejects.toThrow(); expect(sql).not.toHaveBeenCalled(); expect(fetchMock).not.toHaveBeenCalled();
 });
+
+it("Keyword와 Vector의 40개 합집합을 보존하고 상한 초과는 예약 전에 거부한다", async () => {
+  vi.stubEnv("FINSHIELD_RERANK_FAST_DEVELOPMENT", "1"); vi.stubEnv("FINSHIELD_PROBE_OWNER_ID", ctx.ownerId);
+  const documents = Array.from({ length: 40 }, (_, i) => `합성 자료 ${i}`);
+  fetchMock.mockResolvedValue(Response.json({ id: "synthetic-40", results: documents.map((_, index) => ({ index, relevance_score: .5 })), meta: { billed_units: { search_units: 1 } } }));
+  expect((await rerankFast("대출 조건", documents, ctx)).length).toBe(40);
+  sql.mockClear(); fetchMock.mockClear();
+  await expect(rerankFast("대출 조건", [...documents, "초과"], ctx)).rejects.toThrow("RERANK_INPUT_INVALID");
+  expect(sql).not.toHaveBeenCalled(); expect(fetchMock).not.toHaveBeenCalled();
+});
