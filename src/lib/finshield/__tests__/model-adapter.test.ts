@@ -1,7 +1,9 @@
 /** 모델에 넘기는 것은 인용에 필요한 만큼이다 */
 
 import { describe, expect, it } from "vitest";
-import { claimBrief, evidenceBrief } from "../agents/model-adapter";
+import {
+  citationReferenceSchema, claimBrief, domainOutputSchemaFor, evidenceBrief, judgeOutputSchemaFor,
+} from "../agents/model-adapter";
 import type { ToolEvidence } from "../schemas";
 
 const evidence = (over: Partial<ToolEvidence> = {}): ToolEvidence => ({
@@ -54,5 +56,35 @@ describe("근거 요약", () => {
     expect(brief.reference_only).toBe(true);
     expect(brief.freshness).toBe("STALE");
     expect(brief.grade).toBe("A");
+  });
+});
+
+describe("AI-017 모델 출력 Citation 목록", () => {
+  it("이번 호출에 전달한 ref와 빈 배열만 허용한다", () => {
+    const schema = citationReferenceSchema([evidence({ evidence_ref: "E1" }), evidence({ evidence_ref: "E2" })]);
+    expect(schema.safeParse(["E1", "E2"]).success).toBe(true);
+    expect(schema.safeParse([]).success).toBe(true);
+    expect(schema.safeParse(["E99"]).success).toBe(false);
+  });
+
+  it("근거가 없으면 비어 있지 않은 Citation 배열을 거부한다", () => {
+    const schema = citationReferenceSchema([]);
+    expect(schema.safeParse([]).success).toBe(true);
+    expect(schema.safeParse(["E1"]).success).toBe(false);
+  });
+
+  it("Domain과 Judge의 중첩된 Citation에도 같은 목록을 적용한다", () => {
+    const domain = domainOutputSchemaFor([evidence()]);
+    const judge = judgeOutputSchemaFor([evidence()]);
+    expect(domain.safeParse({
+      schema_version: "out-v1",
+      findings: [{ claim_ref: "C1", state: "VERIFIED", relation: "SUPPORT", evidence_refs: ["E99"], summary_masked: "합성 판단", limits: [] }],
+      out_of_scope_claim_refs: [],
+    }).success).toBe(false);
+    expect(judge.safeParse({
+      schema_version: "out-v1",
+      claim_results: [{ claim_ref: "C1", state: "UNKNOWN", evidence_refs: ["E99"], withheld_reason: "합성 보류", rationale_masked: "합성 판단" }],
+      conflicts: [],
+    }).success).toBe(false);
   });
 });
