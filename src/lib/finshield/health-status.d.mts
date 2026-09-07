@@ -1,0 +1,10 @@
+export const PROVIDERS: readonly string[];
+export const CACHE_TTL_MS: number;
+export const DB_TIMEOUT_MS: number;
+export type ProviderStatus = {provider:string;status:'available'|'unavailable'|'unknown';observed_at:string|null;cache_state:'unobserved'|'fresh'|'expired'};
+export type ProviderStatusCache = {observe(provider:string,available:boolean):void;snapshot():ProviderStatus[]};
+export type HealthReport = {status:'ok'|'degraded'|'down';checks:{name:'db';ok:boolean;ms:number;detail?:string}[];providers:ProviderStatus[];checkedAt:string};
+export function createProviderStatusCache(clock?:()=>number):ProviderStatusCache;
+export const providerStatusCache:ProviderStatusCache;
+export function checkHealth(options:{databaseCheck:(signal:AbortSignal)=>PromiseLike<unknown>;cache?:ProviderStatusCache;timeoutMs?:number}):Promise<HealthReport>;
+export function healthHttpStatus(report:HealthReport,strict?:boolean):number;

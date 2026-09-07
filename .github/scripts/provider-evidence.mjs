@@ -15,6 +15,7 @@ import { validateRateEvidenceResult } from "./rate-evidence-policy.mjs";
 import { validateConsentEvidenceResult } from "./consent-evidence-policy.mjs";
 import { validateStorageEvidenceResult } from "./storage-evidence-policy.mjs";
 import { validateDeleteEvidenceResult } from "./delete-evidence-policy.mjs";
+import { validateHealthEvidenceResult } from "./health-evidence-policy.mjs";
 import { validateRuntimeEvidenceResult } from "./runtime-evidence-policy.mjs";
 import { validateLawEvidenceResult } from "./law-evidence-policy.mjs";
 
@@ -637,7 +638,71 @@ const lawEvidencePolicy = {
   validate: validateLawEvidenceResult,
 };
 
+// B-HEALTH-01: 실제 Next Route와 전송 차단 계측을 함께 고정한다.
+const healthEvidencePolicy = {
+  gate: "implementation", workflowName: "Health Evidence",
+  workflowPath: ".github/workflows/health-evidence.yml",
+  workflowBlobSha: "f7a71271b4c291bb1ca5f1def6bb36ee20af239f",
+  harnessPath: ".github/scripts/run-health-evidence.mjs",
+  harnessBlobSha: "ba74bcd3a75dba2e7bee7ab9c3da1925a74acc8b",
+  trustedExecutionFiles: Object.freeze([
+  {
+    "path": ".github/workflows/health-evidence.yml",
+    "blobSha": "f7a71271b4c291bb1ca5f1def6bb36ee20af239f"
+  },
+  {
+    "path": ".github/scripts/run-health-evidence.mjs",
+    "blobSha": "ba74bcd3a75dba2e7bee7ab9c3da1925a74acc8b"
+  },
+  {
+    "path": ".github/scripts/health-evidence-policy.mjs",
+    "blobSha": "de4f1d39f897f8ebda98368cd647c4e1751523ed"
+  },
+  {
+    "path": ".github/scripts/health-spike.mjs",
+    "blobSha": "095533053a62a9532d9b096805a66ac784f3634e"
+  },
+  {
+    "path": ".github/scripts/health-network-audit.mjs",
+    "blobSha": "304a71773d37ef997e982e05d8a9534431918970"
+  },
+  {
+    "path": "src/lib/finshield/health-status.mjs",
+    "blobSha": "1422a818b06321c1746ed57cc07c0dde2259c2e3"
+  },
+  {
+    "path": ".github/scripts/provider-adr-digest.mjs",
+    "blobSha": "a0d89bbd01fcdd4cc2659afb29d243ba2bdfc099"
+  }
+]),
+  jobName: "health-evidence / B-HEALTH-01",
+  scopePaths: Object.freeze([
+  ".github/scripts/provider-adr-digest.mjs",
+  ".github/scripts/health-spike.mjs",
+  ".github/scripts/health-evidence-policy.mjs",
+  ".github/scripts/run-health-evidence.mjs",
+  ".github/scripts/health-network-audit.mjs",
+  ".github/scripts/test-health-status.mjs",
+  ".github/scripts/test-health-evidence.mjs",
+  ".github/workflows/health-evidence.yml",
+  "docs/ops/health-status-spike.md",
+  "src/app/api/health/route.ts",
+  "src/app/api/health/__tests__/strict.test.ts",
+  "src/lib/finshield/health-status.mjs",
+  "src/lib/finshield/health-status.d.mts",
+  "src/lib/finshield/db.ts",
+  "src/lib/finshield/env.ts",
+  "src/lib/ops/http.ts",
+  "src/app/api/runtime-manifest/route.ts",
+  "next.config.ts",
+  "package.json",
+  "package-lock.json"
+]),
+  validate: validateHealthEvidenceResult,
+};
+
 export const evidencePolicies = Object.freeze({
+  "B-HEALTH-01": healthEvidencePolicy,
   "B-MODEL-01": modelEvidencePolicy,
   "B-EMBED-01": embedEvidencePolicy,
   "B-SUPABASE-01": supabaseEvidencePolicy,

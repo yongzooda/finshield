@@ -1,5 +1,9 @@
 # FinShield HANDOFF
 
+## 저비용 Health 인프라와 증거 준비
+
+- N-AVL-001에 맞춰 외부 Provider 조회를 Health 요청에서 제거하고 FinShield DB·최근 상태 Cache로 분리한다. 실제 Next HTTP 100회·DB 장애·전송 계측을 같은 main SHA로 측정하는 절차를 등록한다. B-HEALTH-01은 별도 실제 실행·Adoption 전까지 NOT-EVALUATED다.
+
 ## 최신 Supabase 증거 재채택
 
 - Migration 0035와 SQL 완료 표기를 반영한 main의 실제 Supabase 검증이 통과했다. 별도 Adoption에서 부분 PASS를 복구한다.

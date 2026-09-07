@@ -66,6 +66,11 @@ jobs:
       - name: 격리 Preview 설정 계약 검증
         run: node .github/scripts/test-configure-isolated-preview.mjs
 
+      - name: 저비용 Health 계약 시험
+        run: |
+          node .github/scripts/test-health-status.mjs
+          node .github/scripts/test-health-evidence.mjs
+
       - name: CI Integrity Preflight Contract Test
         run: node .github/scripts/test-ci-integrity-preflight.mjs
 
