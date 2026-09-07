@@ -1,0 +1,30 @@
+{
+  "schema_version": "auth-browser-development-v1",
+  "observed_date": "2026-09-07",
+  "scope": "로컬 Next HTTP·Chrome·실제 Supabase Auth·앱 조회 API",
+  "outcome": "PASS",
+  "checks": {
+    "synthetic_password_form_login": true,
+    "before_cases_http_status": 200,
+    "injected_network_failure_preserved_token_and_retry": true,
+    "signout_confirmation_visible": true,
+    "session_storage_token_absent": true,
+    "revoked_read_statuses": [
+      401,
+      401,
+      401,
+      401
+    ],
+    "read_routes": [
+      "cases",
+      "case_detail",
+      "profile",
+      "notifications"
+    ],
+    "browser_uncaught_errors": 0
+  },
+  "limitations": [
+    "직접 PostgREST·Storage 접근의 즉시 폐기는 별도 검증",
+    "Vercel HTTP 배포 실측은 별도"
+  ]
+}

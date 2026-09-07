@@ -1,15 +1,15 @@
 /**
  * GET /api/finshield/cases/[id] — Case 상세와 Evidence Passport (S-011·S-012·S-013).
  *
- * 소유권 판단은 데이터베이스 정책이 한다. 서버는 사용자의 token 을 그대로 실어
- * 넘길 뿐이다. 남의 Case 를 물어도 정책이 빈 결과를 돌려준다.
+ * 서버가 발급처의 세션 유효성을 먼저 확인하고 사용자 Token으로 조회한다.
+ * 소유권은 RLS가 확인하며 남의 Case에는 빈 결과를 돌려준다.
  *
  * 근거는 Claim 마다 어떤 관계로 걸렸는지 함께 준다. 화면이 판단과 근거를 이어
  * 보여 줄 수 있어야 하기 때문이다 (EV-001).
  */
 
 import { jsonNoStore } from "@/lib/ops/http";
-import { bearerToken } from "@/lib/finshield/auth";
+import { bearerToken, resolveOwner, UnauthenticatedError } from "@/lib/finshield/auth";
 import { restSelect, RestError } from "@/lib/finshield/rest";
 
 export const runtime = "nodejs";
@@ -28,6 +28,8 @@ export async function GET(
 
   const eq = `eq.${id}`;
   try {
+    // RLS 소유권 검사와 별도로 발급처에서 현재 세션이 살아 있는지 확인한다.
+    await resolveOwner(request);
     const [cases, claims, runs, finals, axes, links, evidences, passports, events,
            assessments, checklists] = await Promise.all([
       restSelect({ token, path: "financial_cases", query: {
@@ -69,6 +71,7 @@ export async function GET(
       assessments, checklists,
     }, 200);
   } catch (error) {
+    if (error instanceof UnauthenticatedError) return jsonNoStore({ error: error.message }, 401);
     if (error instanceof RestError) return jsonNoStore({ error: error.message }, error.status);
     throw error;
   }
