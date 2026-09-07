@@ -73,7 +73,12 @@ export async function processFileInput(args: {sql:Sql;ownerId:string;caseId:stri
   for(const page of pages) { page.text=""; page.words=[]; }
   if (!maskedText.trim()) throw new Error("FILE_TEXT_EMPTY");
   signal.throwIfAborted();
-  const extracted=await args.extractClaims(maskedText,{signal});
+  await sql.begin(async tx=>{
+    await tx`select id from private.advance_input_stage(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid,'EXTRACTED','{}')`;
+    await tx`select id from private.advance_input_stage(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid,'MASKED',
+      ${JSON.stringify({masked_text:maskedText,masked_text_hash:hash(maskedText),pii_policy_version:PII_POLICY_VERSION})}::text::jsonb)`;
+  });
+  const extracted=await args.extractClaims(maskedText,{signal,budget:{sql,ownerId,caseId,inputId}});
   const located=extracted.map(claim=>{
     const gate=gateForModel(claim.statementMasked);
     if(!gate.ok)throw new Error("PII_RESIDUAL");
@@ -83,9 +88,6 @@ export async function processFileInput(args: {sql:Sql;ownerId:string;caseId:stri
   if(!located.length)throw new Error("CLAIMS_NOT_FOUND");
   signal.throwIfAborted();
   const claims=await sql.begin(async tx=>{
-    await tx`select id from private.advance_input_stage(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid,'EXTRACTED','{}')`;
-    await tx`select id from private.advance_input_stage(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid,'MASKED',
-      ${JSON.stringify({masked_text:maskedText,masked_text_hash:hash(maskedText),pii_policy_version:PII_POLICY_VERSION})}::text::jsonb)`;
     const results=[];
     for(const [index,claim] of located.entries()) {
       const pageId=pageIds.find(page=>page.page_no===claim.locator.page_no)?.id;

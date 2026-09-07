@@ -12,7 +12,7 @@
 import "server-only";
 import { z } from "zod";
 import { FINSHIELD_MODEL } from "../manifest";
-import { callStructured } from "@/lib/agents/model";
+import { callFinshieldModel, emptyModelUsage, type ModelBudgetContext, type ModelUsage } from "../model-budget";
 import type { AgentModel } from "./runner";
 import type { JudgeModel } from "../orchestrator";
 import { JUDGE_SYSTEM } from "./prompts";
@@ -47,9 +47,16 @@ const toolChoiceSchema = z.object({
   reason_masked: z.string().max(300),
 });
 
-export const createAgentModel = (): AgentModel => ({
+export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
+  const usage = new Map<string, ModelUsage>();
+  const usageFor = (code: string) => {
+    if (!usage.has(code)) usage.set(code, emptyModelUsage());
+    return usage.get(code)!;
+  };
+  return ({
+  usage: usageFor,
   async chooseTools({ system, signal, input, evidence, observations, availableTools }) {
-    const result = await callStructured({
+    const result = await callFinshieldModel({
       model: FINSHIELD_MODEL,
       system: `${system}\n\n지금은 도구를 고르는 단계다. 확인이 더 필요하면 부를 도구를 고르고,\n충분하거나 필요한 자료가 미연결·조회 실패 상태면 calls 를 빈 배열로 둔다. 같은 도구에 같은 입력을 반복하지 않는다. 목록에 없는 도구 이름을 쓰지 않는다. query에는 도구에 맞는 짧은 핵심어를 넣는다. 상품 조회는 상품명, 법령 조회는 법령명, 소비자 안내는 권유의 행동 요구를 쓴다. 이유는 20자 이내다.`,
       user: JSON.stringify({
@@ -61,7 +68,7 @@ export const createAgentModel = (): AgentModel => ({
       }),
       schema: toolChoiceSchema,
       maxTokens: 1000, effort: "low", signal, maxRetries: 0, timeoutMs: 8_000,
-    });
+    }, context, usageFor(input.agent_code));
     return result.calls.map((call) => ({
       toolCode: call.tool_code,
       input: {
@@ -73,7 +80,7 @@ export const createAgentModel = (): AgentModel => ({
   },
 
   async decide({ system, signal, input, evidence, observations }) {
-    return callStructured({
+    return callFinshieldModel({
       model: FINSHIELD_MODEL,
       system: `${system}\n\n지금은 판단하는 단계다. 아래 근거 목록의 ref 만 인용한다. summary_masked와 note_masked는 각각 40자 이내 한 문장으로 답한다. limits는 꼭 필요한 항목만 한 개 이하로 답한다.`,
       user: JSON.stringify({
@@ -85,13 +92,16 @@ export const createAgentModel = (): AgentModel => ({
       schema: input.agent_code === "COVE" ? coveOutput
         : input.agent_code === "RED_TEAM" ? redTeamOutput : domainAgentOutput,
       maxTokens: 2400, effort: "low", signal, maxRetries: 0, timeoutMs: 12_000,
-    });
+    }, context, usageFor(input.agent_code));
   },
 });
+};
 
-export const createJudgeModel = (): JudgeModel => ({
+export const createJudgeModel = (context?: ModelBudgetContext): JudgeModel => {
+ const usage = emptyModelUsage();
+ return ({ usage: () => usage,
   async judge({ claims, findings, evidence, signal }) {
-    return callStructured({
+    return callFinshieldModel({
       model: FINSHIELD_MODEL,
       system: `${JUDGE_SYSTEM}\n각 rationale_masked는 핵심 근거를 담은 40자 이내 한 문장이다. withheld_reason은 20자 이내다. 입력 Claim마다 정확히 한 결과를 낸다.`,
       user: JSON.stringify({ claims, findings, evidence: evidenceBrief(evidence) }),
@@ -111,9 +121,10 @@ export const createJudgeModel = (): JudgeModel => ({
         })),
       }),
       maxTokens: 2400, effort: "low", signal, maxRetries: 0, timeoutMs: 8_000,
-    });
+    }, context, usage);
   },
 });
+};
 
 /**
  * Claim 추출. 마스킹된 문장에서 확인할 사실 주장을 뽑는다.
@@ -123,7 +134,7 @@ export const createJudgeModel = (): JudgeModel => ({
  * 검증이 시작된다 (CLM-003).
  */
 export const createClaimExtractor = (): ClaimExtractor => async (maskedText, options) => {
-  const result = await callStructured({
+  const result = await callFinshieldModel({
       model: FINSHIELD_MODEL,
     system: `당신은 상담 내용에서 확인할 사실 주장을 뽑는다. 한국어로 답한다.
 
@@ -147,7 +158,7 @@ export const createClaimExtractor = (): ClaimExtractor => async (maskedText, opt
       })).max(8),
     }),
     maxTokens: 1600, effort: "low", maxRetries: 0, timeoutMs: 10_000, signal: options?.signal,
-  });
+  }, options?.budget);
   return result.claims.map((claim) => {
     assertClaimSource(maskedText, claim.source_quote, claim.statement_masked);
     return { sourceQuote: claim.source_quote, claimType: claim.claim_type, statementMasked: claim.statement_masked, materiality: claim.materiality };

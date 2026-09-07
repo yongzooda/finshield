@@ -1,3 +1,4 @@
+import type { ModelUsage } from "../model-budget";
 import { FINSHIELD_MODEL } from "../manifest";
 /**
  * Domain Agent 한 번 실행.
@@ -51,6 +52,7 @@ export type ToolChoice = { toolCode: string; input: unknown };
  * 2) 마지막에 구조화된 판단을 낸다.
  */
 export type AgentModel = {
+  usage?: (agentCode: string) => ModelUsage;
   chooseTools: (args: {
     system: string;
     signal?: AbortSignal;
@@ -116,30 +118,34 @@ export const runDomainAgent = async <T = DomainAgentOutput>(args: {
       choices = await model.chooseTools({
         system, signal, input, evidence, observations, availableTools: [...spec.tools],
       });
-    } catch {
-      reasonCode = signal.aborted ? "DEADLINE_EXCEEDED" : "TOOL_CHOICE_FAILED";
+    } catch (error) {
+      reasonCode = (error as {code?:string}).code === "MODEL_BUDGET_BLOCKED" ? "TOOL_BUDGET" : signal.aborted ? "DEADLINE_EXCEEDED" : "TOOL_CHOICE_FAILED";
       break;
     }
+    if (choices.length > 3) { reasonCode = "TOOL_BATCH_LIMIT"; break; }
     if (choices.length === 0) break;
-    let executedThisTurn = 0;
+    const selected: { choice: ToolChoice; purpose: string; impl: ToolImpl }[] = [];
     for (const choice of choices) {
       if (signal.aborted) { reasonCode = "DEADLINE_EXCEEDED"; break; }
       const allowed = spec.tools.find((tool) => tool.toolCode === choice.toolCode);
-      // Allowlist 밖을 고르면 부르지 않고 그 사실만 남긴다. 모델의 요청은 허가가 아니다.
       if (!allowed) { reasonCode = "TOOL_NOT_ALLOWED"; continue; }
       const impl = impls[choice.toolCode];
       if (!impl) { reasonCode = "TOOL_NOT_IMPLEMENTED"; continue; }
       const key = digest({ tool: choice.toolCode, input: choice.input });
       if (attempted.has(key)) continue;
       attempted.add(key);
-      executedThisTurn += 1;
-      const result = await executeTool({ ...session, signal }, agentCode, choice.toolCode,
-        allowed.purposeCode, choice.input, impl);
+      selected.push({ choice, purpose: allowed.purposeCode, impl });
+    }
+    if (selected.length === 0) break;
+    // 같은 모델 턴에서 독립적으로 요청한 읽기 도구만 함께 실행한다. 결과를 받은 다음 턴은 기다린다.
+    const results = await Promise.all(selected.map(({ choice, purpose, impl }) =>
+      executeTool({ ...session, signal }, agentCode, choice.toolCode, purpose, choice.input, impl)));
+    for (const result of results) {
       toolCalls += 1;
       pendings.push(result.pending);
       evidence.push(...result.evidence);
       observations.push({
-        kind: "tool_execution", tool_code: choice.toolCode, status: result.pending.status,
+        kind: "tool_execution", tool_code: result.pending.toolCode, status: result.pending.status,
         reason_code: result.pending.reasonCode, error_code: result.pending.errorCode,
         provenance_complete: result.pending.provenanceComplete, evidence_count: result.evidence.length,
       });
@@ -148,13 +154,13 @@ export const runDomainAgent = async <T = DomainAgentOutput>(args: {
         reasonCode ??= "TOOL_LOOKUP_FAILED";
       }
     }
-    if (executedThisTurn === 0) break;
   }
 
   let output: T | null = null;
   let status: AgentRunResult["status"] = "SUCCEEDED";
   try {
     signal.throwIfAborted();
+    if (reasonCode === "TOOL_BUDGET") throw Object.assign(new Error("MODEL_BUDGET_BLOCKED"), {code:"MODEL_BUDGET_BLOCKED"});
     const raw = await model.decide({ system, signal, input, evidence, observations });
     // 다른 Schema 로 받는 Agent 는 자기 해독기를 준다. 없으면 Domain Schema 로 받는다.
     const decoded = args.decodeOutput
@@ -166,9 +172,9 @@ export const runDomainAgent = async <T = DomainAgentOutput>(args: {
     } else {
       output = decoded.value as T;
     }
-  } catch {
+  } catch (error) {
     status = "FAILED";
-    reasonCode = signal.aborted ? "DEADLINE_EXCEEDED" : "MODEL_CALL_FAILED";
+    reasonCode = (error as {code?:string}).code === "MODEL_BUDGET_BLOCKED" ? "TOOL_BUDGET" : signal.aborted ? "DEADLINE_EXCEEDED" : "MODEL_CALL_FAILED";
   }
 
   if (status === "SUCCEEDED" && reasonCode) status = "PARTIAL";
@@ -187,6 +193,7 @@ export const runDomainAgent = async <T = DomainAgentOutput>(args: {
     return { agentRunId, output, evidence, evidenceIds, status, reasonCode, toolCalls };
   }
 
+  const measured = args.usage ?? model.usage?.(agentCode);
   const attempts = await sql`
     select count(*)::int as n from public.agent_runs
      where verification_run_id = ${runId}::uuid and logical_agent_key = ${spec.logicalKey}`;
@@ -201,10 +208,10 @@ export const runDomainAgent = async <T = DomainAgentOutput>(args: {
             ${spec.inputSchemaVersion}, ${spec.outputSchemaVersion}, ${spec.promptVersion},
             ${digest(input)}, ${output ? digest(output) : null},
             ${sql.json({ schema_version: "1", tool_calls: toolCalls, evidence_count: evidence.length,
-                         finding_count: findingCount })},
+                         finding_count: findingCount, usage_status: measured ? model.usage?.(agentCode)?.unknownCalls ? "RECONCILE_REQUIRED" : "REPORTED" : "NOT_RECORDED" })},
             'anthropic', ${FINSHIELD_MODEL},
-            ${args.usage?.inputTokens ?? 0}, ${args.usage?.outputTokens ?? 0},
-            ${args.usage?.costMicrounits ?? 0},
+            ${measured?.inputTokens ?? 0}, ${measured?.outputTokens ?? 0},
+            ${measured?.costMicrounits ?? 0},
             ${new Date(startedAt).toISOString()}, now(), ${Date.now() - startedAt}, ${reasonCode})
     returning id`;
   const agentRunId = created[0].id as string;

@@ -38,6 +38,8 @@ export async function POST(request: Request): Promise<Response> {
   if (text.trim().length === 0) return jsonNoStore({ error: "내용을 입력해 주세요" }, 400);
   if (text.length > MAX_CHARS) return jsonNoStore({ error: `${MAX_CHARS}자를 넘을 수 없습니다` }, 400);
 
+  const abort = new AbortController();
+  const signal = AbortSignal.any([request.signal, abort.signal]);
   const events: unknown[] = [];
   const waiters: (() => void)[] = [];
   let finished = false;
@@ -47,7 +49,7 @@ export async function POST(request: Request): Promise<Response> {
   const work = (async () => {
     try {
       const result = await startIntake({
-        sql: fsql(),
+        sql: fsql(), signal,
         ownerId,
         rawText: text,
         // 제목도 마스킹된 값만 남긴다. 원문 앞부분을 그대로 쓰지 않는다.
@@ -92,5 +94,5 @@ export async function POST(request: Request): Promise<Response> {
     await work;
   }
 
-  return ndjsonStream(stream());
+  return ndjsonStream(stream(), () => abort.abort());
 }

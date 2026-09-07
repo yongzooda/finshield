@@ -39,3 +39,12 @@ it('AI-017 실패한 반대 근거 조회의 NONE_FOUND를 최종 독립 검토�
  expect(result.redTeam).toBeNull();expect(result.partial).toBe(true);
  expect(result.agentResults.find(r=>r.agentCode==='RED_TEAM')?.status).toBe('PARTIAL');
 });
+
+it('E-011·EC-015 모델 예산 거부 뒤에 다음 Agent와 Judge를 호출하지 않는다',async()=>{
+ const {runVerification}=await import('../orchestrator');
+ const chooseTools=vi.fn(async()=>{throw Object.assign(new Error('budget'),{code:'MODEL_BUDGET_BLOCKED'});});
+ const decide=vi.fn(), judge=vi.fn();
+ const result=await runVerification({ctx:makeSession(),claims:[...input.claims],maskedIntake:'',journeyStage:'PRE_TRANSACTION',agentModel:{chooseTools,decide},judgeModel:{judge}});
+ expect(chooseTools).toHaveBeenCalledTimes(1);expect(decide).not.toHaveBeenCalled();expect(judge).not.toHaveBeenCalled();
+ expect(result.judgeReasonCode).toBe('TOOL_BUDGET');expect(result.judgeOutput).toBeNull();expect(result.partial).toBe(true);
+});

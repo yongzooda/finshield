@@ -50,7 +50,15 @@ export class ModelFormatError extends Error {
   }
 }
 
+export type ModelUsageReceipt = {
+  usage: Anthropic.Usage; elapsedMs: number; requestId: string;
+  statusCategory: "OK" | "REFUSAL" | "SCHEMA_ERROR";
+};
+
 export type StructuredCallOptions<T extends z.ZodType> = {
+  /** FinShield는 자기 원장에서 예약·정산한다. 기존 PreCase 계량과 중복 기록하지 않는다. */
+  skipLegacyMeter?: boolean;
+  onUsage?: (receipt: ModelUsageReceipt) => Promise<void>;
   system: string;
   /** 사용자 역할로 들어갈 내용. 계층에 따라 원문일 수도, 슬롯 요약일 수도 있다 */
   user: string;
@@ -95,6 +103,7 @@ function meter(usage: Anthropic.Usage | null | undefined, model = env.ANTHROPIC_
 export async function callStructured<T extends z.ZodType>(
   opts: StructuredCallOptions<T>,
 ): Promise<z.infer<T>> {
+  const startedAt = Date.now();
   const res = await anthropic.messages.parse({
     model: opts.model ?? env.ANTHROPIC_MODEL,
     max_tokens: opts.maxTokens ?? 8_000,
@@ -110,7 +119,10 @@ export async function callStructured<T extends z.ZodType>(
 
   // ⚠️ **계량이 결과 판정보다 먼저다** (N-204). 거절이든 토큰 상한이든 토큰은
   // 이미 쓰였다. 성공한 호출만 세면 실패가 잦을수록 쿼터가 실제보다 낮게 보인다.
-  meter(res.usage, opts.model);
+  if (!opts.skipLegacyMeter) meter(res.usage, opts.model);
+  await opts.onUsage?.({ usage: res.usage, elapsedMs: Date.now() - startedAt, requestId: res.id,
+    statusCategory: res.stop_reason === "refusal" ? "REFUSAL"
+      : res.stop_reason === "max_tokens" || res.parsed_output == null ? "SCHEMA_ERROR" : "OK" });
 
   // 안전 분류기가 거절하면 content가 비거나 부분적이다. 먼저 본다.
   if (res.stop_reason === "refusal") {

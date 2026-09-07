@@ -45,7 +45,7 @@ export async function executeRevalidationStep(jobId:string) {
     const input=await loadRunInput(sql,context.owner_id,context.case_id,runId);
     const result=await runVerification({ctx:{sql,ownerId:context.owner_id,caseId:context.case_id,runId,manifest,
       signal:AbortSignal.any([abort.signal,AbortSignal.timeout(Math.max(1,Date.parse(input.deadline_at)-Date.now()-6000))])},
-      claims:input.claims,maskedIntake:"",journeyStage:input.journey_stage,agentModel:createAgentModel(),judgeModel:createJudgeModel(),
+      claims:input.claims,maskedIntake:"",journeyStage:input.journey_stage,agentModel:createAgentModel({sql,ownerId:context.owner_id,caseId:context.case_id,runId}),judgeModel:createJudgeModel({sql,ownerId:context.owner_id,caseId:context.case_id,runId}),
       progress:event=>{progressWrites=progressWrites.then(async()=>{
         await sql`select private.append_revalidation_event(${jobId}::uuid,'PROGRESS',${JSON.stringify(event)}::text::jsonb)`;
       }).catch(()=>{abort.abort();});}});

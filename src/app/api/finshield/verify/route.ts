@@ -91,8 +91,8 @@ export async function POST(request: Request): Promise<Response> {
         })),
         maskedIntake: "",
         journeyStage: input.journey_stage,
-        agentModel: createAgentModel(),
-        judgeModel: createJudgeModel(),
+        agentModel: createAgentModel({sql:fsql(),ownerId,caseId,runId}),
+        judgeModel: createJudgeModel({sql:fsql(),ownerId,caseId,runId}),
         progress,
       });
 

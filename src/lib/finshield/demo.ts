@@ -176,8 +176,8 @@ export const runDemo = async (args: {
       claims: seed.claims,
       maskedIntake: seed.maskedInput,
       journeyStage: "PRE_TRANSACTION",
-      agentModel: createAgentModel(),
-      judgeModel: createJudgeModel(),
+      agentModel: createAgentModel({sql,demoRunId}),
+      judgeModel: createJudgeModel({sql,demoRunId}),
       progress: args.progress,
     });
 

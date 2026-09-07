@@ -13,7 +13,7 @@
  * 시각과 판 정보와 본문 해시를 함께 적는다 (EV-002).
  */
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FileIntake } from "./file-intake";
 import Link from "next/link";
 import { readRunStream } from "../run-stream";
@@ -63,6 +63,8 @@ export function VerifyFlow() {
   const [stages, setStages] = useState<{ stage: string; detail: string }[]>([]);
   const [busy, setBusy] = useState(false);
   const [fileBusy, setFileBusy] = useState(false);
+  const intakeAbort = useRef<AbortController | null>(null);
+  useEffect(() => () => intakeAbort.current?.abort(), []);
   const [notice, setNotice] = useState<string | null>(null);
   const [text, setText] = useState("");
   const [filePages,setFilePages] = useState<{page_no:number;text:string}[]>([]);
@@ -87,10 +89,11 @@ export function VerifyFlow() {
   });
 
   const submitText = async () => {
+    const controller = new AbortController(); intakeAbort.current = controller;
     setBusy(true); setNotice(null); setStages([]); setFilePages([]); setStep("extracting");
     try {
       const response = await fetch("/api/finshield/intake", {
-        method: "POST", headers: authed(), body: JSON.stringify({ text }),
+        method: "POST", headers: authed(), body: JSON.stringify({ text }), signal: controller.signal,
       });
       if (!response.ok || !response.body) {
         const body = await response.json().catch(() => null);
@@ -120,11 +123,12 @@ export function VerifyFlow() {
       });
     } catch {
       setNotice("연결이 끊어졌습니다. 다시 시도해 주세요."); setStep("input");
-    } finally { setBusy(false); }
+    } finally { intakeAbort.current = null; setBusy(false); }
   };
 
   /** 사용자가 중단하면 원본을 지우기 시작한다. 화면에서 물러나는 것이 아니다 (규칙 4). */
   const stopInput = async () => {
+    intakeAbort.current?.abort();
     if (!caseId || !inputId) { setStep("input"); return; }
     setBusy(true);
     try {
@@ -254,7 +258,7 @@ export function VerifyFlow() {
             })}
           </ul>
           <div className="mt-5 flex flex-wrap gap-3">
-            <button type="button" disabled={busy} onClick={() => void stopInput()}
+            <button type="button" onClick={() => void stopInput()}
               className="fs-btn fs-btn--quiet">중단하고 지우기</button>
           </div>
         </FsCard>
