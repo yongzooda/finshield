@@ -18,11 +18,19 @@ export function ServiceNavigation() {
     if (href === "/cases" && /\/(aftercare|journey)$/.test(path)) return false;
     return href === "/" ? path === "/" : path === href || path.startsWith(`${href}/`);
   };
-  const items = NAV.map((item) => (
-    <Link key={item.href} href={item.href} aria-current={active(item.href) ? "page" : undefined}>
-      <FsIcon name={item.icon} /><span>{item.label}</span>
-    </Link>
-  ));
+  const items = NAV.map((item) => {
+    const contents = <><FsIcon name={item.icon} /><span>{item.label}</span></>;
+    // /verify는 입력·Claim·실행 결과를 메모리에 보관한다. 이미 같은 경로에 있을 때
+    // Next의 client navigation이 컴포넌트를 재사용하지 않도록 새 문서로 연다.
+    if (item.href === "/verify") {
+      return <a key={item.href} href={item.href} aria-current={active(item.href) ? "page" : undefined}>{contents}</a>;
+    }
+    return (
+      <Link key={item.href} href={item.href} aria-current={active(item.href) ? "page" : undefined}>
+        {contents}
+      </Link>
+    );
+  });
   return (
     <>
       <header className="fs fs-header">
