@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -52,6 +53,28 @@ export const wrapSquashBody = (body, width = SQUASH_WRAP_COLUMNS) => body.replac
     return wrapped;
   }).join("\n");
 
+// Git이 남긴 충돌 파일 목록은 실제 병합 부모·변경 파일을 대조한 뒤에만
+// 원문 메타데이터로 분리한다. 일반 주석·영어 설명·트레일러는 검사한다.
+export const withoutVerifiedConflictFooter = (message, { parentCount = 0, files = [] } = {}) => {
+  const match = message.trimEnd().match(/\n\n# Conflicts:\n((?:#\t[^\n]+\n?)+)$/);
+  if (!match || parentCount < 2) return message;
+  const paths = match[1].trimEnd().split("\n").map(line => line.slice(2));
+  if (!paths.length || new Set(paths).size !== paths.length || paths.some(path =>
+    !/^[A-Za-z0-9_.\/-]+$/.test(path) || path.split("/").some(part => !part || part === "..") || !files.includes(path))) return message;
+  return message.slice(0, match.index);
+};
+
+const messageForRemoteCommit = async (commit, readJson) => {
+  const message = commit.commit.message;
+  if (!/\n\n# Conflicts:\n/.test(message) || (commit.parents?.length ?? 0) < 2) return message;
+  assertContext(/^[a-f0-9]{40}$/.test(commit.sha ?? ""), "병합 커밋 SHA를 확인할 수 없습니다.");
+  const full = await readJson(`${prefix}/commits/${commit.sha}?per_page=100&page=1`);
+  assertContext(full.sha === commit.sha && full.commit?.message === message
+    && Array.isArray(full.parents) && full.parents.length >= 2
+    && Array.isArray(full.files) && full.files.length < 100, "충돌 메타데이터의 변경 파일 전체를 확인할 수 없습니다.");
+  return withoutVerifiedConflictFooter(message, { parentCount: full.parents.length, files: full.files.map(file => file.filename) });
+};
+
 export const validateCommitMessage = (message) => {
   const [title, ...body] = message.trim().split("\n");
   return validateKoreanRecord({ title, body: body.join("\n") });
@@ -78,7 +101,7 @@ export const validatePullRequest = async (pr, readJson) => {
       total++;
       // main 을 따라잡는 GitHub 병합 커밋은 squash 로 사라지므로 검사하지 않는다.
       if (isBranchUpdateMergeCommit(commit)) continue;
-      errors.push(...validateCommitMessage(commit.commit.message).map((e) => `커밋 ${total}: ${e}`));
+      errors.push(...validateCommitMessage(await messageForRemoteCommit(commit, readJson)).map((e) => `커밋 ${total}: ${e}`));
     }
     if (commits.length < 100) break;
     assertContext(page < 30, "PR 커밋 수가 검증 한도를 초과했습니다.");
@@ -95,8 +118,15 @@ export const validatePullRequest = async (pr, readJson) => {
 
 const run = async () => {
   if (process.argv[2] === "--commit-file") {
-    const message = readFileSync(process.argv[3], "utf8").split("\n").filter((l) => !l.startsWith("#")).join("\n");
-    return validateCommitMessage(message);
+    const message = readFileSync(process.argv[3], "utf8");
+    let context = {};
+    try {
+      const mergeHeads = execFileSync("git", ["rev-parse", "--git-path", "MERGE_HEAD"], { encoding: "utf8" }).trim();
+      const parents = readFileSync(mergeHeads, "utf8").trim().split("\n");
+      const files = execFileSync("git", ["diff", "--cached", "--name-only", "-z"], { encoding: "utf8" }).split("\0");
+      if (parents.every(sha => /^[a-f0-9]{40}$/.test(sha))) context = { parentCount: parents.length + 1, files };
+    } catch { /* 병합 문맥이 없으면 일반 메시지 검사를 적용한다. */ }
+    return validateCommitMessage(withoutVerifiedConflictFooter(message, context));
   }
   assertContext(process.argv[2] === "--ci", "사용법: --commit-file 파일 또는 --ci");
   assertContext(process.env.GITHUB_REPOSITORY === "yongzooda/finshield" && process.env.GITHUB_TOKEN, "저장소·읽기 토큰이 필요합니다.");
@@ -128,13 +158,15 @@ const run = async () => {
     const compare = await readJson(`${prefix}/compare/${event.before}...${event.after}`);
     assertContext(Array.isArray(compare.commits) && compare.commits.length === compare.total_commits
       && compare.total_commits > 0 && compare.total_commits <= 250, "전체 push 커밋을 검증할 수 없습니다.");
-    return compare.commits.flatMap((c) => validateCommitMessage(c.commit.message));
+    const errors = [];
+    for (const commit of compare.commits) errors.push(...validateCommitMessage(await messageForRemoteCommit(commit, readJson)));
+    return errors;
   }
   assertContext(process.env.GITHUB_EVENT_NAME === "schedule", "지원하지 않는 기록 이벤트입니다.");
   // 일일 검사는 현재 main의 squash 커밋을 확인한다. 기존 SHA는 소급 변경하지 않는다.
   assertContext(/^[a-f0-9]{40}$/.test(process.env.GITHUB_SHA ?? ""), "main SHA가 올바르지 않습니다.");
   const commit = await readJson(`${prefix}/commits/${process.env.GITHUB_SHA}`);
-  return validateCommitMessage(commit.commit.message);
+  return validateCommitMessage(await messageForRemoteCommit(commit, readJson));
 };
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
