@@ -1,3 +1,8 @@
+## 기능 브랜치의 Health 재측정 경계
+
+- main은 PR #212에서 B-HEALTH-01을 채택했다. 이 기능 브랜치는 `withWorkflow`와 파일 추적 설정이 있는 Next 설정을 사용하므로 main 측정의 build scope와 다르다.
+- 원본 실측은 보존하고 이 브랜치에서만 Health를 NOT-EVALUATED로 되돌렸다. 기능·Workflow 인프라 기준선이 main에 반영된 뒤 같은 100회 시험을 다시 측정·채택해야 한다.
+
 # 2026-09-07 추가 개발 기록
 
 - 실제 CLOVA 합성 3문서·12쪽의 응답·페이지·고정 앵커 진단이 통과했다. 전체 파일 서비스·OCR Gate 통과는 아니다.
@@ -48,7 +53,7 @@
 - 상위 기획: `docs/01-product-plan.md`
 - DB 구현 기준: `docs/03-database-spec.md`
 - Provider Stack ADR: `docs/adr/001-p0-provider-stack.md`
-- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`·`B-FILE-SAFETY`·`B-RUNTIME-01`·`B-LAW-01`·`B-RATE-01`·`B-CONSENT-01`·`B-STORAGE-01`·`B-DELETE-01`·`B-SUPABASE-01`·`B-HEALTH-01`이 `PASS`다.
+- Provider Implementation Gate (`N-QLT-010`): `NO-GO` — `B-MODEL-01`·`B-EMBED-01`·`B-SOURCE-02`·`B-SOURCE-03`·`B-FILE-SAFETY`·`B-RUNTIME-01`·`B-LAW-01`·`B-RATE-01`·`B-CONSENT-01`·`B-STORAGE-01`·`B-DELETE-01`·`B-SUPABASE-01`이 `PASS`다.
 - Migration `0025`가 들어와 `B-SUPABASE-01`·`B-RATE-01`·`B-CONSENT-01`·`B-STORAGE-01`·`B-DELETE-01`의 scope digest가 바뀌었다. 다섯을 다시 재서 채택한다.
 - Product Release Gate (`N-QLT-009`): `NOT-EVALUATED` — P0 기능 구현 뒤 평가한다. Claim 판정 품질 `B-CLAIM-01`을 포함해 4개다.
 - 배포: Vercel `finshield` Production 연결 완료 (`https://finshield-gamma.vercel.app`)

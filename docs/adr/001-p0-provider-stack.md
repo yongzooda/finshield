@@ -615,7 +615,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `EVID-STORAGE-01` | 인증 사용자 Storage 권한과 발급 token 재사용 | PASS | Migration 0035 뒤 main run `34079512207`, artifact `10003224195`. 실제 시험 계정의 사용자 JWT로 정상 업로드 1건과 차단 8경로를 검증했다. 부당 읽기·쓰기·덮어쓰기·닫힌 token 재사용 허용은 모두 0건이다. RLS 우회 키 없이 측정했다. 과거 결과는 이력으로 보존한다 |
 | `EVID-DELETE-01` | 원본·OCR 임시물·Case vector 물리 삭제와 기발급 URL 차단 | PASS | Migration 0035 뒤 main run `34079528185`, artifact `10003318461`. 합성 40 Case의 확인·중단·삭제·만료 경계를 측정했다. 삭제 대상 35건의 원본·OCR·vector 잔존과 기발급 URL 접근은 0건이다. 조기 만료 5건은 보존됐고 시험 뒤 객체를 모두 정리했다. 24시간 실시간 대기나 실제 Workflow 검증은 아니다. 과거 결과는 이력으로 보존한다 |
 | `EVID-RUNTIME-01` | Preview·Production 실제 Node·region·deployment | PASS | main run `34044111706`, artifact `9992567920`. 배포 안에 둔 관측 endpoint 를 Preview 와 Production 배포 3개씩에서 불렀다. 여섯 배포 모두 Node 판과 region 과 deployment ID 를 돌려줘 기록률이 100% 다. 배포가 스스로 적은 deployment ID 가 Vercel API 의 값과 여섯 건 모두 같아 응답의 출처가 고정된다. 실제 Node 는 v24.18.0 이고 region 은 icn1 이다. major 24 는 8.2 와 맞고 minor·patch 는 로컬과 달라 고정 Snapshot 으로 적지 않는다는 판단이 근거를 얻었다. 배포 보호는 Vercel 자동화 우회 비밀로 열었고 그 값은 결과에 남기지 않았다 |
-| `EVID-HEALTH-01` | 저비용 Health 실제 HTTP·DB 장애·외부 전송 계측 | PASS | main run `34084937234`, artifact `10004899299`. 실제 Next HTTP 100회에서 외부 fetch·HTTP·HTTPS 시도는 모두 0회다. 끊긴 DB의 기본·엄격 응답은 503이며 계측 제어는 세 경로를 각각 1회 검출했다. 미관측·정상·만료·실패·시계 역행 Cache 상태를 검증했다. 외부 Provider 상태는 실제 관측이 없으면 unknown으로 유지하며 제품 전체 정상이나 Provider 품질 증거로 확대하지 않는다 |
+| `EVID-HEALTH-01` | 저비용 Health 실제 HTTP·DB 장애·외부 전송 계측 | STALE | main 채택은 유지되지만 이 격리 기능 브랜치의 Workflow Next 설정이 측정 scope와 달라 재사용하지 않는다. 과거 main run `34084937234`, artifact `10004899299`. 실제 Next HTTP 100회에서 외부 fetch·HTTP·HTTPS 시도는 모두 0회다. 끊긴 DB의 기본·엄격 응답은 503이며 계측 제어는 세 경로를 각각 1회 검출했다. 미관측·정상·만료·실패·시계 역행 Cache 상태를 검증했다. 외부 Provider 상태는 실제 관측이 없으면 unknown으로 유지하며 제품 전체 정상이나 Provider 품질 증거로 확대하지 않는다 |
 
 위 PASS는 제품 Live Vertical Slice PASS가 아니다. GitHub의 Vercel status는 build/deploy 성공을 뜻하며 Provider key·OCR·RLS·Workflow 기능 성공을 증명하지 않는다.
 
@@ -640,7 +640,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `B-JOB-01` | Workflow deploy·replay·retry·orphan·fencing·cancel·ambiguous Provider | NOT-EVALUATED | §15.1 Workflow 합격 + fault run/DB state |
 | `B-RATE-01` | 원자 reserve/settle·multi-instance rate·CLOVA 기본 1 TPS | PASS | §15.1 Rate·Budget 합격 |
 | `B-DEADLINE-01` | Text 120초·Image/PDF 180초 abort·status 조회·partial save | NOT-EVALUATED | §4.3 예산 합·§15.1 P95/단절 복원 합격 + terminal row |
-| `B-HEALTH-01` | 저비용 health와 cached provider status | PASS | §15.1 Health 합격 + provider 호출 없는 trace |
+| `B-HEALTH-01` | 저비용 health와 cached provider status | NOT-EVALUATED | §15.1 Health 합격 + provider 호출 없는 trace |
 | `B-RUNTIME-01` | Preview/Production 실제 Node minor/patch·deployment·region | PASS | §15.1 Runtime 합격 + manifest |
 | `B-SPIKE-01` | 실제 Provider·Source·Storage·DB·Workflow component vertical | NOT-EVALUATED | §15.1 합성 Text·Image·PDF spike 합격; 제품 UI 요구 없음 |
 
