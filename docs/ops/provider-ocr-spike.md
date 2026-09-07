@@ -4,7 +4,7 @@
 
 - 요구사항: `N-QLT-010`의 `B-OCR-01`
 - 현재 상태: `NOT-EVALUATED`
-- 이 문서는 콘솔과 공식 요금표에서 확인한 사실 기록이다. harness·측정은 아직 없다.
+- 이 문서는 콘솔 운영 사실과 개발 진단 절차다. 합성 3문서·12쪽의 개발 진단을 사전등록했으며 Gate용 30문서·100쪽 평가는 아직 없다.
 - 실제 개인정보 문서를 사용하지 않는다. 합성 Fixture 만 Provider 로 보낸다.
 
 ## 프로젝트 사실
@@ -77,3 +77,13 @@ API Gateway 는 P0 규모에서 호출·전송 모두 무료 구간이다. 캐�
 - 콘솔에 표시된 1 TPS 권장 성능을 실제 응답 헤더로 확인하지 않았다.
 - 입력 이미지의 보존 기간과 학습 사용 여부는 `B-PROCESSOR-PRIVACY` 에서 약관으로 확인한다. 학습에 사용한다는 조건이면 실제 사용자 문서를 보낼 수 없다.
 - 해상도 권장값(150dpi 이상 A4 기준, 장축 10px~1960px)이 합성 Fixture 에 미치는 영향을 확인하지 않았다.
+
+## 개발 진단 사전등록
+
+`ocr-development-probe.yml`은 main의 고정 SHA에서만 `provider-spike` 자격증명을 사용한다. 사전 생성한 합성 digital PDF 1쪽, PNG 1쪽, scanned PDF 10쪽의 파일 해시를 먼저 확인한다. 사용자 파일·외부 URL·임의 경로 입력은 받지 않는다.
+
+General V2, 한국어, 표 추출 끔으로 총 3회 호출한다. 순차 호출하고 응답 완료 뒤 1.1초를 더 기다리며 자동 재시도하지 않는다. 요청 timeout은 25초, 응답은 4MiB로 제한한다. 응답의 request ID, 페이지 수·순서·중복, 성공 상태, 필드 좌표를 검사하고 사전등록한 기관·상품·숫자·부정어·전화·URL 앵커의 공백 제거 후 exact 포함 여부를 기록한다. 전문·Secret·Invoke URL·Provider ID는 결과에 저장하지 않는다.
+
+이는 호출 호환성 및 실패 원인 진단이다. F1·Gate 정확도·P95를 계산하거나 PASS 증거로 채택하지 않는다. 10쪽 문서 1건의 시간도 P95가 아니다. 향후 별도의 30문서·100쪽 평가를 사전등록해야 한다. 개발 Fixture 생성기는 PyMuPDF 1.26.7과 한국어 폰트를 사용하며, 실행에는 저장된 PDF/PNG만 쓴다.
+
+응답 계약 기준은 [CLOVA General OCR 공식 API 문서](https://api.ncloud-docs.com/docs/en/ai-application-service-ocr-ocr)다.
