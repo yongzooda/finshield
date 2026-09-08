@@ -12,7 +12,7 @@
 import "server-only";
 import type postgres from "postgres";
 import {
-  AGENTS, DEFINITION_VERSION, MANIFEST_VERSION, FINSHIELD_MODEL, MODEL_TIMEOUTS,
+  AGENTS, DEFINITION_VERSION, MANIFEST_VERSION, FINSHIELD_MODEL, MODEL_TIMEOUTS, RETRIEVAL_POLICY,
   TOOLS, POLICY_VERSIONS,
 } from "./manifest";
 
@@ -36,7 +36,7 @@ export const loadManifest = async (sql: Sql): Promise<ResolvedManifest> => {
     select id, kb_release_id, model_bundle, profile_policy_version from private.execution_manifests
      where manifest_version = ${MANIFEST_VERSION}`;
   if (manifests.length !== 1) {
-    throw new ManifestDriftError(`실행 Manifest ${MANIFEST_VERSION} 이 DB 에 없다. Migration 0041 을 적용했는지 확인할 것`);
+    throw new ManifestDriftError(`실행 Manifest ${MANIFEST_VERSION} 이 DB 에 없다. 최신 Migration 적용 상태를 확인할 것`);
   }
   if (manifests[0].profile_policy_version !== POLICY_VERSIONS.profilePolicyVersion) {
     throw new ManifestDriftError("Manifest 프로필 정책이 코드와 다르다");
@@ -48,6 +48,19 @@ export const loadManifest = async (sql: Sql): Promise<ResolvedManifest> => {
   const timeoutPolicy = bundle?.timeout_policy;
   if (!timeoutPolicy || Object.entries(MODEL_TIMEOUTS).some(([key, value]) => timeoutPolicy[key] !== value)) {
     throw new ManifestDriftError("Manifest 모델 시간 제한이 코드와 다르다");
+  }
+  const retrieval = bundle?.retrieval;
+  if (!retrieval || retrieval.embedding_model !== RETRIEVAL_POLICY.embeddingModel
+    || retrieval.rerank_model !== RETRIEVAL_POLICY.rerankModel
+    || retrieval.keyword_candidate_pool !== RETRIEVAL_POLICY.keywordCandidatePool
+    || retrieval.vector_candidate_pool !== RETRIEVAL_POLICY.vectorCandidatePool
+    || retrieval.max_rerank_candidates !== RETRIEVAL_POLICY.maxRerankCandidates
+    || retrieval.top_k !== RETRIEVAL_POLICY.topK
+    || retrieval.max_query_bytes !== RETRIEVAL_POLICY.maxQueryBytes
+    || retrieval.max_document_bytes !== RETRIEVAL_POLICY.maxDocumentBytes
+    || retrieval.max_tokens_per_document !== RETRIEVAL_POLICY.maxTokensPerDocument
+    || retrieval.pricing_version !== RETRIEVAL_POLICY.pricingVersion) {
+    throw new ManifestDriftError("Manifest Retrieval 구성이 코드와 다르다");
   }
   const manifestId = manifests[0].id as string;
   const kbReleaseId = manifests[0].kb_release_id as string;

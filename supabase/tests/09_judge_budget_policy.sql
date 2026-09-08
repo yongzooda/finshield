@@ -1,4 +1,4 @@
--- N-OPS-003·SEC-OPS-003: 심사 운영 상한·기존 원장·Fast 격리·권한을 검증한다.
+-- N-OPS-003·SEC-OPS-003: 심사 운영 상한·기존 원장·Fast 제품 한도·권한을 검증한다.
 begin;
 
 do $$
@@ -20,15 +20,19 @@ begin
   end if;
 
   if private.budget_limit_for('RUN', 'anthropic', 'claude-sonnet-5') <> 800000
-     or private.budget_limit_for('RUN', 'cohere', 'embed-v4.0') <> 100000 then
+     or private.budget_limit_for('RUN', 'cohere', 'embed-v4.0') <> 100000
+     or private.budget_limit_for('GLOBAL_DAY', 'cohere', 'rerank-v4.0-fast') <> 2000000
+     or private.budget_limit_for('OWNER_DAY', 'cohere', 'rerank-v4.0-fast') <> 500000
+     or private.budget_limit_for('CASE', 'cohere', 'rerank-v4.0-fast') <> 500000
+     or private.budget_limit_for('RUN', 'cohere', 'rerank-v4.0-fast') <> 100000 then
     raise exception 'Provider별 Run 상한이 다릅니다';
   end if;
 
   if exists (
     select 1 from private.budget_limits
-     where provider = 'cohere' and model in ('*', 'rerank-v4.0-fast')
+     where provider = 'cohere' and model = '*'
   ) then
-    raise exception '개발 전용 Fast 또는 Cohere wildcard가 운영 정책에 포함됐습니다';
+    raise exception 'Cohere wildcard가 운영 정책에 포함됐습니다';
   end if;
 
   -- 현재 사용량을 초과한 낮은 Snapshot을 만들고 정책 재적용을 검증한다.
@@ -76,7 +80,19 @@ begin
     raise exception 'Worker가 예산 정책을 재적용했습니다';
   end if;
 
-  raise notice '통과: 심사 상한·기존 원장 보존·Fast 격리·DB 소유자 전용 적용';
+  v_failed := false;
+  begin
+    set local role finshield_worker;
+    perform private.apply_judge_rerank_budget_policy();
+  exception when insufficient_privilege then
+    v_failed := true;
+  end;
+  reset role;
+  if not v_failed then
+    raise exception 'Worker가 Fast 예산 정책을 재적용했습니다';
+  end if;
+
+  raise notice '통과: 심사 상한·기존 원장 보존·Fast 제품 한도·DB 소유자 전용 적용';
 end
 $$;
 

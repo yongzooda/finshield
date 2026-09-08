@@ -1,3 +1,9 @@
+## 2026-09-08 Cohere Fast 제품 Retrieval 결정과 증거 재평가
+
+- 사용자의 후속 승인에 따라 Cohere `rerank-v4.0-fast`를 제품 relevance 단계에 연결하고 Keyword 20개·Vector 20개 합집합 최대 40개, 최종 top 5, 네 범위 비용 상한을 Manifest v8·Migration 0052로 고정했다. 개발 split 성공은 정식 Gate 증거로 쓰지 않는다.
+- 이 Provider 결정으로 ADR decision digest가 바뀌어 기존 8개 채택 증거를 재사용하지 않는다. 원래 index는 `evidence/development/runtime/pre-0052-adopted-entries.json`에 보존했고 현재 부분 PASS는 0/20이다. 새 main 실행과 별도 Adoption 전까지 Implementation `NO-GO`, Release `NOT-EVALUATED`를 유지한다.
+- 원격 DB에는 0045·0050·0051·0052와 Production `COHERE_API_KEY`가 아직 필요하다. 적용 전에는 Manifest v8 코드를 Production에 올리지 않으며 현재 Production은 `ba42700` 배포로 롤백돼 있다.
+
 ## 2026-09-08 회원 복수 Claim 실행 예산 변경
 
 - Production 실측에서 7개 Claim이 71.520초에 PARTIAL로 끝났고 인용 오류는 사라졌지만 Product/Institution Agent가 12.187초에 `DEADLINE_EXCEEDED`로 실패했다. Agent 선택 9초를 11초, Domain 단계 16초를 18초로 조정하고 전체 회원 Text 예산은 115초로 120초 상한 안에 유지했다.
