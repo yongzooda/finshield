@@ -1,0 +1,2709 @@
+{
+  "scope": "실제 사용자 제공 합성 PDF: 새 6 Claim 실행",
+  "commit": "e9d6e9d1c6d6ecd5c90bb4c6e27e089433885a04",
+  "observed_at": "2026-09-08T15:08:19.955Z",
+  "reports": [
+    {
+      "stage": "signup",
+      "path": "/api/finshield/signup",
+      "status": 200,
+      "elapsed_ms": 4206,
+      "types": [
+        "json"
+      ]
+    },
+    {
+      "stage": "signup",
+      "path": "/api/finshield/cases",
+      "status": 200,
+      "elapsed_ms": 2990,
+      "types": [
+        "json"
+      ]
+    },
+    {
+      "stage": "file",
+      "path": "/api/finshield/files/slot",
+      "status": 200,
+      "elapsed_ms": 4150,
+      "types": [
+        "json"
+      ]
+    },
+    {
+      "stage": "file",
+      "path": "/api/finshield/files/process",
+      "status": 200,
+      "elapsed_ms": 13596,
+      "types": [
+        "json"
+      ]
+    },
+    {
+      "stage": "verify",
+      "path": "/api/finshield/verify",
+      "status": 200,
+      "elapsed_ms": 92981,
+      "types": [
+        "run_started",
+        "agent_started",
+        "heartbeat",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "heartbeat",
+        "agent_finished",
+        "judge_started",
+        "heartbeat",
+        "judge_finished",
+        "done"
+      ]
+    },
+    {
+      "stage": "verify",
+      "path": "/api/finshield/cases/3f8ca3a7-d3d3-4052-b547-0a0ad1251cdb",
+      "status": 200,
+      "elapsed_ms": 3284,
+      "types": [
+        "json"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "568ab5d7-843b-4c32-9103-254f485370ef",
+      "claim_ref": "C1",
+      "claim_type": "PRODUCT_TERM",
+      "statement_masked": "햇살론15는 연 3% 고정금리이다.",
+      "materiality": "MATERIAL",
+      "expected_revision_no": 1,
+      "source_page_no": 1
+    },
+    {
+      "claim_id": "48bec269-782a-4f5b-ba89-bbe05ba4b8a3",
+      "claim_ref": "C2",
+      "claim_type": "PRODUCT_TERM",
+      "statement_masked": "햇살론15는 최대 2천만 원까지 대출 가능하다.",
+      "materiality": "MATERIAL",
+      "expected_revision_no": 1,
+      "source_page_no": 1
+    },
+    {
+      "claim_id": "52bf6955-4cf2-40c7-b13f-d24e0e4e2e82",
+      "claim_ref": "C3",
+      "claim_type": "ELIGIBILITY",
+      "statement_masked": "햇살론15 승인 대상이다.",
+      "materiality": "MATERIAL",
+      "expected_revision_no": 1,
+      "source_page_no": 1
+    },
+    {
+      "claim_id": "a1fab1b3-1d88-49c2-9d7f-58ecc962df84",
+      "claim_ref": "C4",
+      "claim_type": "CONDUCT",
+      "statement_masked": "오늘 안에 신청해야 한다.",
+      "materiality": "MATERIAL",
+      "expected_revision_no": 1,
+      "source_page_no": 1
+    },
+    {
+      "claim_id": "e516d136-136f-4178-b6f0-a16cefc44167",
+      "claim_ref": "C5",
+      "claim_type": "CONDUCT",
+      "statement_masked": "진행하려면 보증료 30만 원을 먼저 입금해야 한다.",
+      "materiality": "MATERIAL",
+      "expected_revision_no": 1,
+      "source_page_no": 1
+    },
+    {
+      "claim_id": "b517a63b-14fe-4e30-bd98-e2069ce9549b",
+      "claim_ref": "C6",
+      "claim_type": "CONDUCT",
+      "statement_masked": "상담원이 원격제어 앱을 설치해 달라고 요청했다.",
+      "materiality": "MATERIAL",
+      "expected_revision_no": 1,
+      "source_page_no": 1
+    }
+  ],
+  "result": {
+    "type": "done",
+    "guide": {
+      "actions": [
+        {
+          "action_no": 1,
+          "action_code": "VERIFY_OFFICIAL_CHANNEL",
+          "title": "송금·원격제어 앱 설치를 멈추고 공식 창구로 확인하세요",
+          "detail": "권유문에 위험한 행동 요구가 있습니다. 권유자가 준 연락처를 사용하지 말고 아래 공식 창구에서 확인하세요. 개별 사실 판정이 보류돼도 이 예방 안내를 먼저 따라 주세요."
+        }
+      ],
+      "channels": [
+        {
+          "action_no": 1,
+          "display_value": "서민금융콜센터 1397 (국번 없이)"
+        }
+      ]
+    },
+    "axes": [
+      {
+        "axis": "AUTHENTICITY",
+        "result_code": "UNCERTAIN",
+        "summary_masked": "상품과 기관과 접근 경로가 공식 자료와 맞는지 본 결과입니다.",
+        "limitation_codes": [],
+        "policy_evaluation": null
+      },
+      {
+        "axis": "TRANSACTION_SALES_RISK",
+        "result_code": "HIGH_RISK_ACTION",
+        "summary_masked": "선입금 또는 원격제어 앱 설치 요구가 포함되어 있습니다. 송금·설치를 멈추고 공식 창구로 확인하세요. 범죄 사실을 확정한 판단은 아닙니다.",
+        "limitation_codes": [
+          "PRE_TRANSACTION_SCOPE"
+        ],
+        "policy_evaluation": null
+      },
+      {
+        "axis": "SUITABILITY",
+        "result_code": "NEED_MORE_INFORMATION",
+        "summary_masked": "금융 프로필을 건너뛰어 적합성을 판단하지 않았습니다. 안전하다는 뜻이 아닙니다.",
+        "limitation_codes": [
+          "PROFILE_SKIPPED"
+        ],
+        "policy_evaluation": {
+          "checks": [],
+          "products": [],
+          "not_assessed": [
+            "CREDIT_APPROVAL",
+            "FULL_AFFORDABILITY",
+            "LOSS_TOLERANCE_FOR_NON_LOAN_PRODUCTS"
+          ],
+          "policy_version": "profile-policy-v2",
+          "schema_version": "2",
+          "profile_version_id": "8d7974d9-393f-4425-9240-eefbd7d0c3b7",
+          "profile_content_hash": "aca4f35f41032cc795886052118ddbcf8372ad255e987cd1db905fbb6275b670",
+          "profile_schema_version": "v1"
+        }
+      }
+    ],
+    "axes_pending_restore": false,
+    "saved": true,
+    "save_reason": null,
+    "final_claims": [
+      {
+        "claim_ref": "C1",
+        "state": "UNKNOWN",
+        "reason_code": "COVE_INCONCLUSIVE",
+        "cove_status": "UNRESOLVED",
+        "red_team_status": "COUNTER_EVIDENCE",
+        "summary_masked": "독립 자료 확인이 충분하지 않아 이 항목을 확정하지 않았습니다."
+      },
+      {
+        "claim_ref": "C2",
+        "state": "NEED_MORE_INFORMATION",
+        "reason_code": "AS_JUDGED",
+        "cove_status": "UNRESOLVED",
+        "red_team_status": "UNRESOLVED",
+        "summary_masked": "개인 승인 여부는 심사자료 부재로 판단 불가하며 상품도 종료됨."
+      },
+      {
+        "claim_ref": "C3",
+        "state": "UNKNOWN",
+        "reason_code": "COVE_INCONCLUSIVE",
+        "cove_status": "UNRESOLVED",
+        "red_team_status": "COUNTER_EVIDENCE",
+        "summary_masked": "독립 자료 확인이 충분하지 않아 이 항목을 확정하지 않았습니다."
+      },
+      {
+        "claim_ref": "C4",
+        "state": "CONTRADICTED",
+        "reason_code": "COVE_CONFIRMED",
+        "cove_status": "CONFIRMED",
+        "red_team_status": "COUNTER_EVIDENCE",
+        "summary_masked": "햇살론15는 2025.12.31 보증 종료되어 현재 신청 불가."
+      },
+      {
+        "claim_ref": "C5",
+        "state": "CONTRADICTED",
+        "reason_code": "HIGH_RISK_REMOTE_CONTROL",
+        "cove_status": "CONFIRMED",
+        "red_team_status": "COUNTER_EVIDENCE",
+        "summary_masked": "권유문에 원격제어 앱 설치 요구가 있습니다. 설치를 멈추고 공식 창구로 확인하세요. 실제 발신자나 앱의 악성 여부를 확정한 결과는 아닙니다."
+      },
+      {
+        "claim_ref": "C6",
+        "state": "CONTRADICTED",
+        "reason_code": "HIGH_RISK_ADVANCE_PAYMENT",
+        "cove_status": "CONFIRMED",
+        "red_team_status": "COUNTER_EVIDENCE",
+        "summary_masked": "권유문에 대출 전 비용을 먼저 보내라는 요구가 있습니다. 공식 예방 지침에 따라 입금 전에 공식 창구로 확인하세요. 실제 사기 여부를 확정한 결과는 아닙니다."
+      }
+    ],
+    "run_id": "0f913929-f511-4699-9ab1-cacd162d0de4",
+    "partial": false,
+    "agents": [
+      {
+        "agentCode": "PRODUCT_INSTITUTION",
+        "status": "SUCCEEDED",
+        "reasonCode": null,
+        "toolCalls": 3
+      },
+      {
+        "agentCode": "FRAUD_CHANNEL",
+        "status": "SUCCEEDED",
+        "reasonCode": null,
+        "toolCalls": 3
+      },
+      {
+        "agentCode": "SALES_CONDUCT",
+        "status": "SUCCEEDED",
+        "reasonCode": null,
+        "toolCalls": 2
+      },
+      {
+        "agentCode": "REGULATION_DISPUTE",
+        "status": "SUCCEEDED",
+        "reasonCode": null,
+        "toolCalls": 3
+      },
+      {
+        "agentCode": "COVE",
+        "status": "SUCCEEDED",
+        "reasonCode": null,
+        "toolCalls": 3
+      },
+      {
+        "agentCode": "RED_TEAM",
+        "status": "SUCCEEDED",
+        "reasonCode": null,
+        "toolCalls": 3
+      }
+    ],
+    "claim_results": [
+      {
+        "claim_ref": "C1",
+        "state": "CONTRADICTED",
+        "evidence_refs": [
+          "E2",
+          "E4"
+        ],
+        "withheld_reason": null,
+        "rationale_masked": "햇살론15는 2025.12.31 보증 종료로 현재 신규 가입 한도 조건 불성립."
+      },
+      {
+        "claim_ref": "C2",
+        "state": "NEED_MORE_INFORMATION",
+        "evidence_refs": [
+          "E2",
+          "E4"
+        ],
+        "withheld_reason": "개인 심사자료 없음",
+        "rationale_masked": "개인 승인 여부는 심사자료 부재로 판단 불가하며 상품도 종료됨."
+      },
+      {
+        "claim_ref": "C3",
+        "state": "CONTRADICTED",
+        "evidence_refs": [
+          "E2",
+          "E4"
+        ],
+        "withheld_reason": null,
+        "rationale_masked": "햇살론15는 보증 종료로 현재 연 3% 고정금리 가입 불가."
+      },
+      {
+        "claim_ref": "C4",
+        "state": "CONTRADICTED",
+        "evidence_refs": [
+          "E2",
+          "E4"
+        ],
+        "withheld_reason": null,
+        "rationale_masked": "햇살론15는 2025.12.31 보증 종료되어 현재 신청 불가."
+      },
+      {
+        "claim_ref": "C5",
+        "state": "CONTRADICTED",
+        "evidence_refs": [
+          "E2",
+          "E4",
+          "E5",
+          "E6",
+          "E7"
+        ],
+        "withheld_reason": null,
+        "rationale_masked": "공식 절차엔 없는 원격제어 앱 설치 요구, 상품도 종료됨."
+      },
+      {
+        "claim_ref": "C6",
+        "state": "CONTRADICTED",
+        "evidence_refs": [
+          "E2",
+          "E4",
+          "E5",
+          "E6",
+          "E7"
+        ],
+        "withheld_reason": null,
+        "rationale_masked": "공식 기관은 선입금 요구 안 하며 상품도 종료 상태."
+      }
+    ],
+    "conflicts": [],
+    "judge_reason_code": null,
+    "evidence": [
+      {
+        "ref": "E1",
+        "title": "햇살론15 공식 상품 안내 (보증 종료 자료)",
+        "source": "PRODUCT",
+        "grade": "B",
+        "official_id": "kinfa:hessalLoan",
+        "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+        "published_at": null,
+        "fetched_at": "2026-09-08T15:06:14.891Z",
+        "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+        "freshness": "FRESH",
+        "directness": "CONTEXT_ONLY",
+        "reference_only": false,
+        "excerpt": "햇살론15 공유하기 프린트 대부업·불법사금융 등 고금리 대출을 이용할 수 밖에 없는 최저신용자가 최소한의 기준만 충족하면 은행 대출을 편이하게 이용할 수 있도록 지원하는 서민금융진흥원 보증 정책서민금융상품 [2025년 12월 31일 보증 종료] 대출한도 최대 2000만원 대출금리 연 15.9% (단일금리) 대출기간 3년 또는 5년 우대금리 성실상환시 1년마다 금리 인하 (3년 선택시 3.0%p씩, 5년 선택시 1.5%p씩 인하) 상환방법 원리금균등분할상환 지원대상 ① 개인신용평점이 하위 100분의 20*에 해당하는 자 (연소득 3천5백만원 이하는 개인신용평점 제한 없음) ② 연소득 4천5백만원 이하"
+      },
+      {
+        "ref": "E2",
+        "title": "햇살론15 공식 보증 종료 고지",
+        "source": "PRODUCT",
+        "grade": "B",
+        "official_id": "kinfa:hessalLoan",
+        "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+        "published_at": null,
+        "fetched_at": "2026-09-08T15:06:14.891Z",
+        "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "햇살론15 [2025년 12월 31일 보증 종료]"
+      },
+      {
+        "ref": "E3",
+        "title": "햇살론15 공식 상품 안내 (보증 종료 자료)",
+        "source": "PRODUCT",
+        "grade": "B",
+        "official_id": "kinfa:hessalLoan",
+        "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+        "published_at": null,
+        "fetched_at": "2026-09-08T15:06:14.956Z",
+        "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+        "freshness": "FRESH",
+        "directness": "CONTEXT_ONLY",
+        "reference_only": false,
+        "excerpt": "햇살론15 공유하기 프린트 대부업·불법사금융 등 고금리 대출을 이용할 수 밖에 없는 최저신용자가 최소한의 기준만 충족하면 은행 대출을 편이하게 이용할 수 있도록 지원하는 서민금융진흥원 보증 정책서민금융상품 [2025년 12월 31일 보증 종료] 대출한도 최대 2000만원 대출금리 연 15.9% (단일금리) 대출기간 3년 또는 5년 우대금리 성실상환시 1년마다 금리 인하 (3년 선택시 3.0%p씩, 5년 선택시 1.5%p씩 인하) 상환방법 원리금균등분할상환 지원대상 ① 개인신용평점이 하위 100분의 20*에 해당하는 자 (연소득 3천5백만원 이하는 개인신용평점 제한 없음) ② 연소득 4천5백만원 이하"
+      },
+      {
+        "ref": "E4",
+        "title": "햇살론15 공식 보증 종료 고지",
+        "source": "PRODUCT",
+        "grade": "B",
+        "official_id": "kinfa:hessalLoan",
+        "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+        "published_at": null,
+        "fetched_at": "2026-09-08T15:06:14.956Z",
+        "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "햇살론15 [2025년 12월 31일 보증 종료]"
+      },
+      {
+        "ref": "E5",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "source": "GUIDE",
+        "grade": "B",
+        "official_id": "kinfa:notice:24020",
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "published_at": "2021-05-27",
+        "fetched_at": "2026-09-08T15:06:30.395Z",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+      },
+      {
+        "ref": "E6",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "source": "GUIDE",
+        "grade": "B",
+        "official_id": "kinfa:notice:24020",
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "published_at": "2021-05-27",
+        "fetched_at": "2026-09-08T15:06:30.454Z",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+      },
+      {
+        "ref": "E7",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "source": "GUIDE",
+        "grade": "B",
+        "official_id": "kinfa:notice:24020",
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "published_at": "2021-05-27",
+        "fetched_at": "2026-09-08T15:06:40.172Z",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+      },
+      {
+        "ref": "E8",
+        "title": "햇살론15 공식 상품 안내 (보증 종료 자료)",
+        "source": "PRODUCT",
+        "grade": "B",
+        "official_id": "kinfa:hessalLoan",
+        "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+        "published_at": null,
+        "fetched_at": "2026-09-08T15:07:02.371Z",
+        "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+        "freshness": "FRESH",
+        "directness": "CONTEXT_ONLY",
+        "reference_only": false,
+        "excerpt": "햇살론15 공유하기 프린트 대부업·불법사금융 등 고금리 대출을 이용할 수 밖에 없는 최저신용자가 최소한의 기준만 충족하면 은행 대출을 편이하게 이용할 수 있도록 지원하는 서민금융진흥원 보증 정책서민금융상품 [2025년 12월 31일 보증 종료] 대출한도 최대 2000만원 대출금리 연 15.9% (단일금리) 대출기간 3년 또는 5년 우대금리 성실상환시 1년마다 금리 인하 (3년 선택시 3.0%p씩, 5년 선택시 1.5%p씩 인하) 상환방법 원리금균등분할상환 지원대상 ① 개인신용평점이 하위 100분의 20*에 해당하는 자 (연소득 3천5백만원 이하는 개인신용평점 제한 없음) ② 연소득 4천5백만원 이하"
+      },
+      {
+        "ref": "E9",
+        "title": "햇살론15 공식 보증 종료 고지",
+        "source": "PRODUCT",
+        "grade": "B",
+        "official_id": "kinfa:hessalLoan",
+        "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+        "published_at": null,
+        "fetched_at": "2026-09-08T15:07:02.371Z",
+        "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "햇살론15 [2025년 12월 31일 보증 종료]"
+      },
+      {
+        "ref": "E11",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "source": "GUIDE",
+        "grade": "B",
+        "official_id": "kinfa:notice:24020",
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "published_at": "2021-05-27",
+        "fetched_at": "2026-09-08T15:07:02.426Z",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+      },
+      {
+        "ref": "E10",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "source": "GUIDE",
+        "grade": "B",
+        "official_id": "kinfa:notice:24020",
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "published_at": "2021-05-27",
+        "fetched_at": "2026-09-08T15:07:02.420Z",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+      },
+      {
+        "ref": "E13",
+        "title": "햇살론15 공식 상품 안내 (보증 종료 자료)",
+        "source": "PRODUCT",
+        "grade": "B",
+        "official_id": "kinfa:hessalLoan",
+        "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+        "published_at": null,
+        "fetched_at": "2026-09-08T15:07:19.525Z",
+        "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+        "freshness": "FRESH",
+        "directness": "CONTEXT_ONLY",
+        "reference_only": false,
+        "excerpt": "햇살론15 공유하기 프린트 대부업·불법사금융 등 고금리 대출을 이용할 수 밖에 없는 최저신용자가 최소한의 기준만 충족하면 은행 대출을 편이하게 이용할 수 있도록 지원하는 서민금융진흥원 보증 정책서민금융상품 [2025년 12월 31일 보증 종료] 대출한도 최대 2000만원 대출금리 연 15.9% (단일금리) 대출기간 3년 또는 5년 우대금리 성실상환시 1년마다 금리 인하 (3년 선택시 3.0%p씩, 5년 선택시 1.5%p씩 인하) 상환방법 원리금균등분할상환 지원대상 ① 개인신용평점이 하위 100분의 20*에 해당하는 자 (연소득 3천5백만원 이하는 개인신용평점 제한 없음) ② 연소득 4천5백만원 이하"
+      },
+      {
+        "ref": "E14",
+        "title": "햇살론15 공식 보증 종료 고지",
+        "source": "PRODUCT",
+        "grade": "B",
+        "official_id": "kinfa:hessalLoan",
+        "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+        "published_at": null,
+        "fetched_at": "2026-09-08T15:07:19.525Z",
+        "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "햇살론15 [2025년 12월 31일 보증 종료]"
+      },
+      {
+        "ref": "E12",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "source": "GUIDE",
+        "grade": "B",
+        "official_id": "kinfa:notice:24020",
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "published_at": "2021-05-27",
+        "fetched_at": "2026-09-08T15:07:19.512Z",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+      }
+    ]
+  },
+  "restored": {
+    "case": {
+      "id": "3f8ca3a7-d3d3-4052-b547-0a0ad1251cdb",
+      "owner_id": "943d1a00-b838-43f0-8959-0cb05273df3c",
+      "scenario": "LOAN",
+      "title_masked": "파일 권유 검증",
+      "lifecycle": "VERIFIED",
+      "resume_state": null,
+      "journey_stage": "PRE_TRANSACTION",
+      "enrollment_confirmed_at": null,
+      "aftercare_status": "NOT_STARTED",
+      "deletion_status": "ACTIVE",
+      "created_at": "2026-09-08T15:05:33.922655+00:00",
+      "updated_at": "2026-09-08T15:07:39.58356+00:00",
+      "initial_profile_version_id": "8d7974d9-393f-4425-9240-eefbd7d0c3b7",
+      "latest_successful_run_id": "0f913929-f511-4699-9ab1-cacd162d0de4",
+      "latest_passport_id": "ea4ef139-eb0d-4dce-90e9-152a184cf3b6",
+      "inputs": [
+        {
+          "id": "5bc99ae5-c506-470b-a285-85ffe225005f",
+          "created_at": "2026-09-08T15:05:33.922655+00:00",
+          "input_type": "PDF",
+          "page_count": 1,
+          "size_bytes": 39274,
+          "input_stage": "RAW_DELETED",
+          "input_outcome": "ACTIVE",
+          "raw_deleted_at": "2026-09-08T15:06:10.211677+00:00",
+          "pii_scan_status": "PASSED",
+          "raw_delete_status": "SUCCEEDED",
+          "claim_confirmed_at": "2026-09-08T15:06:09.883246+00:00"
+        }
+      ],
+      "runs": [
+        {
+          "kind": "INITIAL",
+          "run_id": "0f913929-f511-4699-9ab1-cacd162d0de4",
+          "run_no": 1,
+          "status": "COMPLETED",
+          "started_at": "2026-09-08T15:06:10.240659+00:00",
+          "deadline_at": "2026-09-08T15:09:09.883246+00:00",
+          "finished_at": "2026-09-08T15:07:39.58356+00:00",
+          "reason_code": null,
+          "overall_result": "MATERIAL_RISK_FOUND",
+          "coverage_satisfied": false,
+          "partial_reason_codes": []
+        }
+      ],
+      "passports": [
+        {
+          "is_latest": true,
+          "created_at": "2026-09-08T15:07:39.58356+00:00",
+          "version_no": 1,
+          "passport_id": "ea4ef139-eb0d-4dce-90e9-152a184cf3b6",
+          "overall_result": "MATERIAL_RISK_FOUND"
+        }
+      ],
+      "timeline": [
+        {
+          "event_no": 1,
+          "to_state": "DRAFT",
+          "actor_type": "USER",
+          "created_at": "2026-09-08T15:05:33.922655+00:00",
+          "event_type": "CASE_CREATED",
+          "from_state": null
+        },
+        {
+          "event_no": 2,
+          "to_state": "INPUT_REVIEW",
+          "actor_type": "USER",
+          "created_at": "2026-09-08T15:06:09.883246+00:00",
+          "event_type": "CASE_LIFECYCLE_CHANGED",
+          "from_state": "DRAFT"
+        },
+        {
+          "event_no": 3,
+          "to_state": null,
+          "actor_type": "USER",
+          "created_at": "2026-09-08T15:06:09.883246+00:00",
+          "event_type": "CASE_INPUT_CLAIMS_CONFIRMED",
+          "from_state": null
+        },
+        {
+          "event_no": 4,
+          "to_state": "VERIFYING",
+          "actor_type": "SYSTEM",
+          "created_at": "2026-09-08T15:06:09.883246+00:00",
+          "event_type": "CASE_LIFECYCLE_CHANGED",
+          "from_state": "INPUT_REVIEW"
+        },
+        {
+          "event_no": 5,
+          "to_state": null,
+          "actor_type": "SYSTEM",
+          "created_at": "2026-09-08T15:06:09.883246+00:00",
+          "event_type": "RUN_CREATED",
+          "from_state": null
+        },
+        {
+          "event_no": 6,
+          "to_state": "VERIFIED",
+          "actor_type": "SYSTEM",
+          "created_at": "2026-09-08T15:07:39.58356+00:00",
+          "event_type": "CASE_LIFECYCLE_CHANGED",
+          "from_state": "VERIFYING"
+        },
+        {
+          "event_no": 7,
+          "to_state": null,
+          "actor_type": "SYSTEM",
+          "created_at": "2026-09-08T15:07:39.58356+00:00",
+          "event_type": "RUN_COMPLETED",
+          "from_state": null
+        }
+      ]
+    },
+    "claims": [
+      {
+        "id": "568ab5d7-843b-4c32-9103-254f485370ef",
+        "claim_type": "PRODUCT_TERM",
+        "source_input_id": "5bc99ae5-c506-470b-a285-85ffe225005f",
+        "source_locator": {
+          "end": 86,
+          "kind": "masked_text_span",
+          "start": 76,
+          "page_no": 1,
+          "schema_version": "v1"
+        },
+        "created_at": "2026-09-08T15:05:49.134637+00:00"
+      },
+      {
+        "id": "48bec269-782a-4f5b-ba89-bbe05ba4b8a3",
+        "claim_type": "PRODUCT_TERM",
+        "source_input_id": "5bc99ae5-c506-470b-a285-85ffe225005f",
+        "source_locator": {
+          "end": 103,
+          "kind": "masked_text_span",
+          "start": 87,
+          "page_no": 1,
+          "schema_version": "v1"
+        },
+        "created_at": "2026-09-08T15:05:49.134637+00:00"
+      },
+      {
+        "id": "52bf6955-4cf2-40c7-b13f-d24e0e4e2e82",
+        "claim_type": "ELIGIBILITY",
+        "source_input_id": "5bc99ae5-c506-470b-a285-85ffe225005f",
+        "source_locator": {
+          "end": 74,
+          "kind": "masked_text_span",
+          "start": 60,
+          "page_no": 1,
+          "schema_version": "v1"
+        },
+        "created_at": "2026-09-08T15:05:49.134637+00:00"
+      },
+      {
+        "id": "a1fab1b3-1d88-49c2-9d7f-58ecc962df84",
+        "claim_type": "CONDUCT",
+        "source_input_id": "5bc99ae5-c506-470b-a285-85ffe225005f",
+        "source_locator": {
+          "end": 118,
+          "kind": "masked_text_span",
+          "start": 105,
+          "page_no": 1,
+          "schema_version": "v1"
+        },
+        "created_at": "2026-09-08T15:05:49.134637+00:00"
+      },
+      {
+        "id": "e516d136-136f-4178-b6f0-a16cefc44167",
+        "claim_type": "CONDUCT",
+        "source_input_id": "5bc99ae5-c506-470b-a285-85ffe225005f",
+        "source_locator": {
+          "end": 141,
+          "kind": "masked_text_span",
+          "start": 126,
+          "page_no": 1,
+          "schema_version": "v1"
+        },
+        "created_at": "2026-09-08T15:05:49.134637+00:00"
+      },
+      {
+        "id": "b517a63b-14fe-4e30-bd98-e2069ce9549b",
+        "claim_type": "CONDUCT",
+        "source_input_id": "5bc99ae5-c506-470b-a285-85ffe225005f",
+        "source_locator": {
+          "end": 172,
+          "kind": "masked_text_span",
+          "start": 157,
+          "page_no": 1,
+          "schema_version": "v1"
+        },
+        "created_at": "2026-09-08T15:05:49.134637+00:00"
+      }
+    ],
+    "runs": [
+      {
+        "kind": "INITIAL",
+        "run_id": "0f913929-f511-4699-9ab1-cacd162d0de4",
+        "run_no": 1,
+        "status": "COMPLETED",
+        "started_at": "2026-09-08T15:06:10.240659+00:00",
+        "deadline_at": "2026-09-08T15:09:09.883246+00:00",
+        "finished_at": "2026-09-08T15:07:39.58356+00:00",
+        "reason_code": null,
+        "overall_result": "MATERIAL_RISK_FOUND",
+        "coverage_satisfied": false,
+        "partial_reason_codes": [],
+        "id": "0f913929-f511-4699-9ab1-cacd162d0de4"
+      }
+    ],
+    "final_claims": [
+      {
+        "id": "4d4867e5-2a9c-4b76-93ee-84763e59ff8d",
+        "status": "UNKNOWN",
+        "claim_id": "48bec269-782a-4f5b-ba89-bbe05ba4b8a3",
+        "cove_status": "UNRESOLVED",
+        "is_material": true,
+        "reason_code": "COVE_INCONCLUSIVE",
+        "red_team_status": "COUNTER_EVIDENCE",
+        "statement_masked": "햇살론15는 최대 2천만 원까지 대출 가능하다.",
+        "decision_summary_masked": "독립 자료 확인이 충분하지 않아 이 항목을 확정하지 않았습니다.",
+        "verification_run_id": "0f913929-f511-4699-9ab1-cacd162d0de4"
+      },
+      {
+        "id": "65ef8e4f-8d3e-455d-8d64-e80a710c49a4",
+        "status": "NEED_MORE_INFORMATION",
+        "claim_id": "52bf6955-4cf2-40c7-b13f-d24e0e4e2e82",
+        "cove_status": "UNRESOLVED",
+        "is_material": true,
+        "reason_code": "AS_JUDGED",
+        "red_team_status": "UNRESOLVED",
+        "statement_masked": "햇살론15 승인 대상이다.",
+        "decision_summary_masked": "개인 승인 여부는 심사자료 부재로 판단 불가하며 상품도 종료됨.",
+        "verification_run_id": "0f913929-f511-4699-9ab1-cacd162d0de4"
+      },
+      {
+        "id": "2acc784b-fa08-466b-a860-42798cf1baaf",
+        "status": "UNKNOWN",
+        "claim_id": "568ab5d7-843b-4c32-9103-254f485370ef",
+        "cove_status": "UNRESOLVED",
+        "is_material": true,
+        "reason_code": "COVE_INCONCLUSIVE",
+        "red_team_status": "COUNTER_EVIDENCE",
+        "statement_masked": "햇살론15는 연 3% 고정금리이다.",
+        "decision_summary_masked": "독립 자료 확인이 충분하지 않아 이 항목을 확정하지 않았습니다.",
+        "verification_run_id": "0f913929-f511-4699-9ab1-cacd162d0de4"
+      },
+      {
+        "id": "b4b60288-a025-4c08-ae15-c1f322f83ea4",
+        "status": "CONTRADICTED",
+        "claim_id": "a1fab1b3-1d88-49c2-9d7f-58ecc962df84",
+        "cove_status": "CONFIRMED",
+        "is_material": true,
+        "reason_code": "COVE_CONFIRMED",
+        "red_team_status": "COUNTER_EVIDENCE",
+        "statement_masked": "오늘 안에 신청해야 한다.",
+        "decision_summary_masked": "햇살론15는 2025.12.31 보증 종료되어 현재 신청 불가.",
+        "verification_run_id": "0f913929-f511-4699-9ab1-cacd162d0de4"
+      },
+      {
+        "id": "66385734-3df3-4c0e-9f69-c3a568d812eb",
+        "status": "CONTRADICTED",
+        "claim_id": "b517a63b-14fe-4e30-bd98-e2069ce9549b",
+        "cove_status": "CONFIRMED",
+        "is_material": true,
+        "reason_code": "HIGH_RISK_REMOTE_CONTROL",
+        "red_team_status": "COUNTER_EVIDENCE",
+        "statement_masked": "상담원이 원격제어 앱을 설치해 달라고 요청했다.",
+        "decision_summary_masked": "권유문에 원격제어 앱 설치 요구가 있습니다. 설치를 멈추고 공식 창구로 확인하세요. 실제 발신자나 앱의 악성 여부를 확정한 결과는 아닙니다.",
+        "verification_run_id": "0f913929-f511-4699-9ab1-cacd162d0de4"
+      },
+      {
+        "id": "0e15223c-89b4-4407-9801-005899644f8d",
+        "status": "CONTRADICTED",
+        "claim_id": "e516d136-136f-4178-b6f0-a16cefc44167",
+        "cove_status": "CONFIRMED",
+        "is_material": true,
+        "reason_code": "HIGH_RISK_ADVANCE_PAYMENT",
+        "red_team_status": "COUNTER_EVIDENCE",
+        "statement_masked": "진행하려면 보증료 30만 원을 먼저 입금해야 한다.",
+        "decision_summary_masked": "권유문에 대출 전 비용을 먼저 보내라는 요구가 있습니다. 공식 예방 지침에 따라 입금 전에 공식 창구로 확인하세요. 실제 사기 여부를 확정한 결과는 아닙니다.",
+        "verification_run_id": "0f913929-f511-4699-9ab1-cacd162d0de4"
+      }
+    ],
+    "axes": [
+      {
+        "axis": "AUTHENTICITY",
+        "result_code": "UNCERTAIN",
+        "summary_masked": "상품과 기관과 접근 경로가 공식 자료와 맞는지 본 결과입니다.",
+        "limitation_codes": [],
+        "policy_evaluation": null,
+        "verification_run_id": "0f913929-f511-4699-9ab1-cacd162d0de4"
+      },
+      {
+        "axis": "TRANSACTION_SALES_RISK",
+        "result_code": "HIGH_RISK_ACTION",
+        "summary_masked": "선입금 또는 원격제어 앱 설치 요구가 포함되어 있습니다. 송금·설치를 멈추고 공식 창구로 확인하세요. 범죄 사실을 확정한 판단은 아닙니다.",
+        "limitation_codes": [
+          "PRE_TRANSACTION_SCOPE"
+        ],
+        "policy_evaluation": null,
+        "verification_run_id": "0f913929-f511-4699-9ab1-cacd162d0de4"
+      },
+      {
+        "axis": "SUITABILITY",
+        "result_code": "NEED_MORE_INFORMATION",
+        "summary_masked": "금융 프로필을 건너뛰어 적합성을 판단하지 않았습니다. 안전하다는 뜻이 아닙니다.",
+        "limitation_codes": [
+          "PROFILE_SKIPPED"
+        ],
+        "policy_evaluation": {
+          "checks": [],
+          "products": [],
+          "not_assessed": [
+            "CREDIT_APPROVAL",
+            "FULL_AFFORDABILITY",
+            "LOSS_TOLERANCE_FOR_NON_LOAN_PRODUCTS"
+          ],
+          "policy_version": "profile-policy-v2",
+          "schema_version": "2",
+          "profile_version_id": "8d7974d9-393f-4425-9240-eefbd7d0c3b7",
+          "profile_content_hash": "aca4f35f41032cc795886052118ddbcf8372ad255e987cd1db905fbb6275b670",
+          "profile_schema_version": "v1"
+        },
+        "verification_run_id": "0f913929-f511-4699-9ab1-cacd162d0de4"
+      }
+    ],
+    "claim_evidences": [
+      {
+        "final_claim_version_id": "4d4867e5-2a9c-4b76-93ee-84763e59ff8d",
+        "evidence_id": "b1445c50-71c3-499d-a345-b15b92421d04",
+        "relation": "CONTRADICT",
+        "is_independent": true
+      },
+      {
+        "final_claim_version_id": "4d4867e5-2a9c-4b76-93ee-84763e59ff8d",
+        "evidence_id": "b14de040-c41d-471e-9944-bca55ed9fee6",
+        "relation": "CONTRADICT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "4d4867e5-2a9c-4b76-93ee-84763e59ff8d",
+        "evidence_id": "773bd067-3fc8-4fc8-9a5c-e9cec0f64c07",
+        "relation": "CONTRADICT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "65ef8e4f-8d3e-455d-8d64-e80a710c49a4",
+        "evidence_id": "b1445c50-71c3-499d-a345-b15b92421d04",
+        "relation": "CONTEXT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "65ef8e4f-8d3e-455d-8d64-e80a710c49a4",
+        "evidence_id": "b14de040-c41d-471e-9944-bca55ed9fee6",
+        "relation": "CONTEXT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "2acc784b-fa08-466b-a860-42798cf1baaf",
+        "evidence_id": "b1445c50-71c3-499d-a345-b15b92421d04",
+        "relation": "CONTRADICT",
+        "is_independent": true
+      },
+      {
+        "final_claim_version_id": "2acc784b-fa08-466b-a860-42798cf1baaf",
+        "evidence_id": "b14de040-c41d-471e-9944-bca55ed9fee6",
+        "relation": "CONTRADICT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "2acc784b-fa08-466b-a860-42798cf1baaf",
+        "evidence_id": "773bd067-3fc8-4fc8-9a5c-e9cec0f64c07",
+        "relation": "CONTRADICT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "b4b60288-a025-4c08-ae15-c1f322f83ea4",
+        "evidence_id": "b1445c50-71c3-499d-a345-b15b92421d04",
+        "relation": "CONTRADICT",
+        "is_independent": true
+      },
+      {
+        "final_claim_version_id": "b4b60288-a025-4c08-ae15-c1f322f83ea4",
+        "evidence_id": "b14de040-c41d-471e-9944-bca55ed9fee6",
+        "relation": "CONTRADICT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "b4b60288-a025-4c08-ae15-c1f322f83ea4",
+        "evidence_id": "322b88ca-33c2-404d-8689-dc56bf1133c2",
+        "relation": "CONTRADICT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "b4b60288-a025-4c08-ae15-c1f322f83ea4",
+        "evidence_id": "773bd067-3fc8-4fc8-9a5c-e9cec0f64c07",
+        "relation": "CONTRADICT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "66385734-3df3-4c0e-9f69-c3a568d812eb",
+        "evidence_id": "b1445c50-71c3-499d-a345-b15b92421d04",
+        "relation": "CONTRADICT",
+        "is_independent": true
+      },
+      {
+        "final_claim_version_id": "66385734-3df3-4c0e-9f69-c3a568d812eb",
+        "evidence_id": "b14de040-c41d-471e-9944-bca55ed9fee6",
+        "relation": "CONTRADICT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "66385734-3df3-4c0e-9f69-c3a568d812eb",
+        "evidence_id": "c25e9680-9515-4c26-8877-5e696f578117",
+        "relation": "CONTRADICT",
+        "is_independent": true
+      },
+      {
+        "final_claim_version_id": "66385734-3df3-4c0e-9f69-c3a568d812eb",
+        "evidence_id": "637ce00d-5897-482c-a5da-087f07c1faa0",
+        "relation": "CONTRADICT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "66385734-3df3-4c0e-9f69-c3a568d812eb",
+        "evidence_id": "54075730-22f0-4f55-aab0-b29e704d3edc",
+        "relation": "CONTRADICT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "66385734-3df3-4c0e-9f69-c3a568d812eb",
+        "evidence_id": "a74398ca-5157-49aa-b3a2-fecc5def1fc5",
+        "relation": "CONTRADICT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "66385734-3df3-4c0e-9f69-c3a568d812eb",
+        "evidence_id": "c2ed3fa9-4b78-4d9d-a733-e3987e948c91",
+        "relation": "CONTRADICT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "66385734-3df3-4c0e-9f69-c3a568d812eb",
+        "evidence_id": "af85ebfc-a71c-4f26-bf68-3e2d890baf91",
+        "relation": "CONTRADICT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "0e15223c-89b4-4407-9801-005899644f8d",
+        "evidence_id": "b1445c50-71c3-499d-a345-b15b92421d04",
+        "relation": "CONTRADICT",
+        "is_independent": true
+      },
+      {
+        "final_claim_version_id": "0e15223c-89b4-4407-9801-005899644f8d",
+        "evidence_id": "b14de040-c41d-471e-9944-bca55ed9fee6",
+        "relation": "CONTRADICT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "0e15223c-89b4-4407-9801-005899644f8d",
+        "evidence_id": "c25e9680-9515-4c26-8877-5e696f578117",
+        "relation": "CONTRADICT",
+        "is_independent": true
+      },
+      {
+        "final_claim_version_id": "0e15223c-89b4-4407-9801-005899644f8d",
+        "evidence_id": "637ce00d-5897-482c-a5da-087f07c1faa0",
+        "relation": "CONTRADICT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "0e15223c-89b4-4407-9801-005899644f8d",
+        "evidence_id": "54075730-22f0-4f55-aab0-b29e704d3edc",
+        "relation": "CONTRADICT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "0e15223c-89b4-4407-9801-005899644f8d",
+        "evidence_id": "a74398ca-5157-49aa-b3a2-fecc5def1fc5",
+        "relation": "CONTRADICT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "0e15223c-89b4-4407-9801-005899644f8d",
+        "evidence_id": "c2ed3fa9-4b78-4d9d-a733-e3987e948c91",
+        "relation": "CONTRADICT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "0e15223c-89b4-4407-9801-005899644f8d",
+        "evidence_id": "af85ebfc-a71c-4f26-bf68-3e2d890baf91",
+        "relation": "CONTRADICT",
+        "is_independent": false
+      }
+    ],
+    "evidences": [
+      {
+        "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+        "title": "햇살론15 공식 보증 종료 고지",
+        "citable": true,
+        "created_at": "2026-09-08T15:06:27.230824+00:00",
+        "directness": "DIRECT",
+        "fetched_at": "2026-09-08T11:42:39.774495+00:00",
+        "incomplete": false,
+        "official_id": "kinfa:hessalLoan",
+        "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+        "published_at": null,
+        "target_match": true,
+        "excerpt_masked": "햇살론15 [2025년 12월 31일 보증 종료]",
+        "kb_snapshot_id": "9b3db2c6-0ada-4bb8-91b9-a1b5e77ec262",
+        "publisher_name": "서민금융진흥원",
+        "reference_only": false,
+        "source_locator": {
+          "kind": "html_section",
+          "selector": "#ConTitle",
+          "assessed_on": "2026-09-09",
+          "permitted_use": "REFUTE_CURRENT_OFFER",
+          "schema_version": "1",
+          "temporal_status": "ENDED",
+          "product_end_date": "2025-12-31",
+          "current_transaction_proof": false
+        },
+        "source_version": "html-status-v1:e04a6e5a3376d2bcf5914679",
+        "authority_grade": "B",
+        "freshness_at_use": "FRESH",
+        "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf",
+        "id": "b1445c50-71c3-499d-a345-b15b92421d04"
+      },
+      {
+        "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+        "title": "햇살론15 공식 보증 종료 고지",
+        "citable": true,
+        "created_at": "2026-09-08T15:06:27.279402+00:00",
+        "directness": "DIRECT",
+        "fetched_at": "2026-09-08T11:42:39.774495+00:00",
+        "incomplete": false,
+        "official_id": "kinfa:hessalLoan",
+        "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+        "published_at": null,
+        "target_match": true,
+        "excerpt_masked": "햇살론15 [2025년 12월 31일 보증 종료]",
+        "kb_snapshot_id": "9b3db2c6-0ada-4bb8-91b9-a1b5e77ec262",
+        "publisher_name": "서민금융진흥원",
+        "reference_only": false,
+        "source_locator": {
+          "kind": "html_section",
+          "selector": "#ConTitle",
+          "assessed_on": "2026-09-09",
+          "permitted_use": "REFUTE_CURRENT_OFFER",
+          "schema_version": "1",
+          "temporal_status": "ENDED",
+          "product_end_date": "2025-12-31",
+          "current_transaction_proof": false
+        },
+        "source_version": "html-status-v1:e04a6e5a3376d2bcf5914679",
+        "authority_grade": "B",
+        "freshness_at_use": "FRESH",
+        "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf",
+        "id": "b14de040-c41d-471e-9944-bca55ed9fee6"
+      },
+      {
+        "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+        "title": "햇살론15 공식 보증 종료 고지",
+        "citable": true,
+        "created_at": "2026-09-08T15:07:30.078802+00:00",
+        "directness": "DIRECT",
+        "fetched_at": "2026-09-08T11:42:39.774495+00:00",
+        "incomplete": false,
+        "official_id": "kinfa:hessalLoan",
+        "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+        "published_at": null,
+        "target_match": true,
+        "excerpt_masked": "햇살론15 [2025년 12월 31일 보증 종료]",
+        "kb_snapshot_id": "9b3db2c6-0ada-4bb8-91b9-a1b5e77ec262",
+        "publisher_name": "서민금융진흥원",
+        "reference_only": false,
+        "source_locator": {
+          "kind": "html_section",
+          "selector": "#ConTitle",
+          "assessed_on": "2026-09-09",
+          "permitted_use": "REFUTE_CURRENT_OFFER",
+          "schema_version": "1",
+          "temporal_status": "ENDED",
+          "product_end_date": "2025-12-31",
+          "current_transaction_proof": false
+        },
+        "source_version": "html-status-v1:e04a6e5a3376d2bcf5914679",
+        "authority_grade": "B",
+        "freshness_at_use": "FRESH",
+        "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf",
+        "id": "773bd067-3fc8-4fc8-9a5c-e9cec0f64c07"
+      },
+      {
+        "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+        "title": "햇살론15 공식 보증 종료 고지",
+        "citable": true,
+        "created_at": "2026-09-08T15:07:15.26133+00:00",
+        "directness": "DIRECT",
+        "fetched_at": "2026-09-08T11:42:39.774495+00:00",
+        "incomplete": false,
+        "official_id": "kinfa:hessalLoan",
+        "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+        "published_at": null,
+        "target_match": true,
+        "excerpt_masked": "햇살론15 [2025년 12월 31일 보증 종료]",
+        "kb_snapshot_id": "9b3db2c6-0ada-4bb8-91b9-a1b5e77ec262",
+        "publisher_name": "서민금융진흥원",
+        "reference_only": false,
+        "source_locator": {
+          "kind": "html_section",
+          "selector": "#ConTitle",
+          "assessed_on": "2026-09-09",
+          "permitted_use": "REFUTE_CURRENT_OFFER",
+          "schema_version": "1",
+          "temporal_status": "ENDED",
+          "product_end_date": "2025-12-31",
+          "current_transaction_proof": false
+        },
+        "source_version": "html-status-v1:e04a6e5a3376d2bcf5914679",
+        "authority_grade": "B",
+        "freshness_at_use": "FRESH",
+        "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf",
+        "id": "322b88ca-33c2-404d-8689-dc56bf1133c2"
+      },
+      {
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "citable": true,
+        "created_at": "2026-09-08T15:06:36.59997+00:00",
+        "directness": "DIRECT",
+        "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+        "incomplete": false,
+        "official_id": "kinfa:notice:24020",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "published_at": "2021-05-27T00:00:00+00:00",
+        "target_match": true,
+        "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+        "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+        "publisher_name": "서민금융진흥원",
+        "reference_only": false,
+        "source_locator": {
+          "kind": "html_section",
+          "selector": ".board-detail-con",
+          "reviewed_at": "2026-09-08T11:31:40.000Z",
+          "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+          "review_due_at": "2026-09-15T11:31:40.000Z",
+          "schema_version": "1",
+          "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+          "current_transaction_proof": false
+        },
+        "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+        "authority_grade": "B",
+        "freshness_at_use": "FRESH",
+        "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3",
+        "id": "c25e9680-9515-4c26-8877-5e696f578117"
+      },
+      {
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "citable": true,
+        "created_at": "2026-09-08T15:06:36.62852+00:00",
+        "directness": "DIRECT",
+        "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+        "incomplete": false,
+        "official_id": "kinfa:notice:24020",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "published_at": "2021-05-27T00:00:00+00:00",
+        "target_match": true,
+        "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+        "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+        "publisher_name": "서민금융진흥원",
+        "reference_only": false,
+        "source_locator": {
+          "kind": "html_section",
+          "selector": ".board-detail-con",
+          "reviewed_at": "2026-09-08T11:31:40.000Z",
+          "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+          "review_due_at": "2026-09-15T11:31:40.000Z",
+          "schema_version": "1",
+          "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+          "current_transaction_proof": false
+        },
+        "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+        "authority_grade": "B",
+        "freshness_at_use": "FRESH",
+        "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3",
+        "id": "637ce00d-5897-482c-a5da-087f07c1faa0"
+      },
+      {
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "citable": true,
+        "created_at": "2026-09-08T15:06:46.554077+00:00",
+        "directness": "DIRECT",
+        "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+        "incomplete": false,
+        "official_id": "kinfa:notice:24020",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "published_at": "2021-05-27T00:00:00+00:00",
+        "target_match": true,
+        "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+        "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+        "publisher_name": "서민금융진흥원",
+        "reference_only": false,
+        "source_locator": {
+          "kind": "html_section",
+          "selector": ".board-detail-con",
+          "reviewed_at": "2026-09-08T11:31:40.000Z",
+          "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+          "review_due_at": "2026-09-15T11:31:40.000Z",
+          "schema_version": "1",
+          "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+          "current_transaction_proof": false
+        },
+        "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+        "authority_grade": "B",
+        "freshness_at_use": "FRESH",
+        "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3",
+        "id": "54075730-22f0-4f55-aab0-b29e704d3edc"
+      },
+      {
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "citable": true,
+        "created_at": "2026-09-08T15:07:15.28776+00:00",
+        "directness": "DIRECT",
+        "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+        "incomplete": false,
+        "official_id": "kinfa:notice:24020",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "published_at": "2021-05-27T00:00:00+00:00",
+        "target_match": true,
+        "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+        "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+        "publisher_name": "서민금융진흥원",
+        "reference_only": false,
+        "source_locator": {
+          "kind": "html_section",
+          "selector": ".board-detail-con",
+          "reviewed_at": "2026-09-08T11:31:40.000Z",
+          "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+          "review_due_at": "2026-09-15T11:31:40.000Z",
+          "schema_version": "1",
+          "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+          "current_transaction_proof": false
+        },
+        "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+        "authority_grade": "B",
+        "freshness_at_use": "FRESH",
+        "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3",
+        "id": "a74398ca-5157-49aa-b3a2-fecc5def1fc5"
+      },
+      {
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "citable": true,
+        "created_at": "2026-09-08T15:07:15.314543+00:00",
+        "directness": "DIRECT",
+        "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+        "incomplete": false,
+        "official_id": "kinfa:notice:24020",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "published_at": "2021-05-27T00:00:00+00:00",
+        "target_match": true,
+        "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+        "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+        "publisher_name": "서민금융진흥원",
+        "reference_only": false,
+        "source_locator": {
+          "kind": "html_section",
+          "selector": ".board-detail-con",
+          "reviewed_at": "2026-09-08T11:31:40.000Z",
+          "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+          "review_due_at": "2026-09-15T11:31:40.000Z",
+          "schema_version": "1",
+          "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+          "current_transaction_proof": false
+        },
+        "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+        "authority_grade": "B",
+        "freshness_at_use": "FRESH",
+        "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3",
+        "id": "c2ed3fa9-4b78-4d9d-a733-e3987e948c91"
+      },
+      {
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "citable": true,
+        "created_at": "2026-09-08T15:07:30.105352+00:00",
+        "directness": "DIRECT",
+        "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+        "incomplete": false,
+        "official_id": "kinfa:notice:24020",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "published_at": "2021-05-27T00:00:00+00:00",
+        "target_match": true,
+        "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+        "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+        "publisher_name": "서민금융진흥원",
+        "reference_only": false,
+        "source_locator": {
+          "kind": "html_section",
+          "selector": ".board-detail-con",
+          "reviewed_at": "2026-09-08T11:31:40.000Z",
+          "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+          "review_due_at": "2026-09-15T11:31:40.000Z",
+          "schema_version": "1",
+          "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+          "current_transaction_proof": false
+        },
+        "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+        "authority_grade": "B",
+        "freshness_at_use": "FRESH",
+        "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3",
+        "id": "af85ebfc-a71c-4f26-bf68-3e2d890baf91"
+      }
+    ],
+    "passports": [
+      {
+        "passport_id": "ea4ef139-eb0d-4dce-90e9-152a184cf3b6",
+        "owner_id": "943d1a00-b838-43f0-8959-0cb05273df3c",
+        "case_id": "3f8ca3a7-d3d3-4052-b547-0a0ad1251cdb",
+        "verification_run_id": "0f913929-f511-4699-9ab1-cacd162d0de4",
+        "passport_version_no": 1,
+        "previous_passport_id": null,
+        "overall_result": "MATERIAL_RISK_FOUND",
+        "coverage_satisfied": false,
+        "passport_schema_version": "p1",
+        "manifest": {
+          "guide": {
+            "status": "COMPLETED",
+            "content_hash": "381e668fc39c6fe032b2b0996ed5dc2ce60808e74ec8d61bd477681dc1675fa0",
+            "action_guide_id": "6f9c424d-b806-4591-a896-e7ee690795cf"
+          },
+          "run_id": "0f913929-f511-4699-9ab1-cacd162d0de4",
+          "run_kind": "INITIAL",
+          "evidences": [
+            {
+              "evidence_id": "322b88ca-33c2-404d-8689-dc56bf1133c2",
+              "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+              "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf"
+            },
+            {
+              "evidence_id": "54075730-22f0-4f55-aab0-b29e704d3edc",
+              "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+              "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+            },
+            {
+              "evidence_id": "637ce00d-5897-482c-a5da-087f07c1faa0",
+              "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+              "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+            },
+            {
+              "evidence_id": "773bd067-3fc8-4fc8-9a5c-e9cec0f64c07",
+              "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+              "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf"
+            },
+            {
+              "evidence_id": "a74398ca-5157-49aa-b3a2-fecc5def1fc5",
+              "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+              "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+            },
+            {
+              "evidence_id": "af85ebfc-a71c-4f26-bf68-3e2d890baf91",
+              "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+              "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+            },
+            {
+              "evidence_id": "b1445c50-71c3-499d-a345-b15b92421d04",
+              "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+              "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf"
+            },
+            {
+              "evidence_id": "b14de040-c41d-471e-9944-bca55ed9fee6",
+              "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+              "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf"
+            },
+            {
+              "evidence_id": "c25e9680-9515-4c26-8877-5e696f578117",
+              "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+              "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+            },
+            {
+              "evidence_id": "c2ed3fa9-4b78-4d9d-a733-e3987e948c91",
+              "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+              "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+            }
+          ],
+          "axis_results": [
+            {
+              "axis": "AUTHENTICITY",
+              "result_code": "UNCERTAIN",
+              "content_hash": "ee06e5b4792082532b18f98a6405cd9ba9e368cc3cf132c9af18c33f2732eca3"
+            },
+            {
+              "axis": "TRANSACTION_SALES_RISK",
+              "result_code": "HIGH_RISK_ACTION",
+              "content_hash": "c7927acb01cae1b6472f6c5e20a386221e1772ed80874032737fcf0a17bdb656"
+            },
+            {
+              "axis": "SUITABILITY",
+              "result_code": "NEED_MORE_INFORMATION",
+              "content_hash": "03f4be81429a7d7c87fc30fb201aba039b19d9bffaad47f767791e556ddf189a"
+            }
+          ],
+          "final_claims": [
+            {
+              "status": "UNKNOWN",
+              "claim_id": "48bec269-782a-4f5b-ba89-bbe05ba4b8a3",
+              "is_material": true,
+              "content_hash": "b82b249fc88b85641ba672201df0f801e09e2c01a3d47b6b21b66648cfeda40c",
+              "final_claim_version_id": "4d4867e5-2a9c-4b76-93ee-84763e59ff8d"
+            },
+            {
+              "status": "NEED_MORE_INFORMATION",
+              "claim_id": "52bf6955-4cf2-40c7-b13f-d24e0e4e2e82",
+              "is_material": true,
+              "content_hash": "812caf4ec15d9d89117a16ea7601b7d7923ec594a03b48ed6136407325f3bc47",
+              "final_claim_version_id": "65ef8e4f-8d3e-455d-8d64-e80a710c49a4"
+            },
+            {
+              "status": "UNKNOWN",
+              "claim_id": "568ab5d7-843b-4c32-9103-254f485370ef",
+              "is_material": true,
+              "content_hash": "ff9f3b7d82c68f395947c2a2913745534d6486cd88ce319fdfbf1ec9240bb0a9",
+              "final_claim_version_id": "2acc784b-fa08-466b-a860-42798cf1baaf"
+            },
+            {
+              "status": "CONTRADICTED",
+              "claim_id": "a1fab1b3-1d88-49c2-9d7f-58ecc962df84",
+              "is_material": true,
+              "content_hash": "5635b026b774c2e0dc8220ea699e764603368016e1cb5b66eee801135f559948",
+              "final_claim_version_id": "b4b60288-a025-4c08-ae15-c1f322f83ea4"
+            },
+            {
+              "status": "CONTRADICTED",
+              "claim_id": "b517a63b-14fe-4e30-bd98-e2069ce9549b",
+              "is_material": true,
+              "content_hash": "55bf70c6412c2783b54881d1c629a7989dcef77db8d53300a342854cb4a31a04",
+              "final_claim_version_id": "66385734-3df3-4c0e-9f69-c3a568d812eb"
+            },
+            {
+              "status": "CONTRADICTED",
+              "claim_id": "e516d136-136f-4178-b6f0-a16cefc44167",
+              "is_material": true,
+              "content_hash": "dc00c663e357adcb86d29a3ee798da4f1006afd8a057f09a80ac7daaeb9b203a",
+              "final_claim_version_id": "0e15223c-89b4-4407-9801-005899644f8d"
+            }
+          ],
+          "kb_release_id": "0030fe96-bdd1-45af-a769-e6e54ebd1747",
+          "overall_result": "MATERIAL_RISK_FOUND",
+          "schema_version": "1",
+          "policy_versions": {
+            "pii": "pii-policy-v1",
+            "profile": "profile-policy-v2",
+            "coverage": "coverage-contract-v1",
+            "evidence": "evidence-policy-v1",
+            "result_matrix": "result-matrix-v2"
+          },
+          "manifest_version": "finshield-p0-loan-v12",
+          "coverage_satisfied": false,
+          "profile_version_id": "8d7974d9-393f-4425-9240-eefbd7d0c3b7",
+          "partial_reason_codes": [],
+          "execution_manifest_id": "a6634003-4f4c-4f6c-b7e7-d4abb2b2458d"
+        },
+        "payload_hash": "a765a287d1ba0b24e773bb5547b3b6fe495910fcdc77374731df5bf8b654f8ab",
+        "created_at": "2026-09-08T15:07:39.58356+00:00",
+        "is_latest": true,
+        "profile_version_id": "8d7974d9-393f-4425-9240-eefbd7d0c3b7",
+        "execution_manifest_id": "a6634003-4f4c-4f6c-b7e7-d4abb2b2458d",
+        "axis_results": [
+          {
+            "axis": "AUTHENTICITY",
+            "result_code": "UNCERTAIN",
+            "summary_masked": "상품과 기관과 접근 경로가 공식 자료와 맞는지 본 결과입니다.",
+            "limitation_codes": [],
+            "policy_evaluation": null
+          },
+          {
+            "axis": "TRANSACTION_SALES_RISK",
+            "result_code": "HIGH_RISK_ACTION",
+            "summary_masked": "선입금 또는 원격제어 앱 설치 요구가 포함되어 있습니다. 송금·설치를 멈추고 공식 창구로 확인하세요. 범죄 사실을 확정한 판단은 아닙니다.",
+            "limitation_codes": [
+              "PRE_TRANSACTION_SCOPE"
+            ],
+            "policy_evaluation": null
+          },
+          {
+            "axis": "SUITABILITY",
+            "result_code": "NEED_MORE_INFORMATION",
+            "summary_masked": "금융 프로필을 건너뛰어 적합성을 판단하지 않았습니다. 안전하다는 뜻이 아닙니다.",
+            "limitation_codes": [
+              "PROFILE_SKIPPED"
+            ],
+            "policy_evaluation": {
+              "checks": [],
+              "products": [],
+              "not_assessed": [
+                "CREDIT_APPROVAL",
+                "FULL_AFFORDABILITY",
+                "LOSS_TOLERANCE_FOR_NON_LOAN_PRODUCTS"
+              ],
+              "policy_version": "profile-policy-v2",
+              "schema_version": "2",
+              "profile_version_id": "8d7974d9-393f-4425-9240-eefbd7d0c3b7",
+              "profile_content_hash": "aca4f35f41032cc795886052118ddbcf8372ad255e987cd1db905fbb6275b670",
+              "profile_schema_version": "v1"
+            }
+          }
+        ],
+        "guide": {
+          "status": "COMPLETED",
+          "actions": [
+            {
+              "title": "송금·원격제어 앱 설치를 멈추고 공식 창구로 확인하세요",
+              "detail": "권유문에 위험한 행동 요구가 있습니다. 권유자가 준 연락처를 사용하지 말고 아래 공식 창구에서 확인하세요. 개별 사실 판정이 보류돼도 이 예방 안내를 먼저 따라 주세요.",
+              "action_no": 1,
+              "action_code": "VERIFY_OFFICIAL_CHANNEL"
+            }
+          ],
+          "channels": [
+            {
+              "valid_to": null,
+              "action_no": 1,
+              "valid_from": "2026-09-07",
+              "channel_type": "PHONE",
+              "display_order": 1,
+              "display_value": "서민금융콜센터 1397 (국번 없이)",
+              "institution_code": "INST_KINFA"
+            }
+          ],
+          "limitation_codes": []
+        },
+        "claims": [
+          {
+            "id": "4d4867e5-2a9c-4b76-93ee-84763e59ff8d",
+            "status": "UNKNOWN",
+            "claim_id": "48bec269-782a-4f5b-ba89-bbe05ba4b8a3",
+            "evidences": [
+              {
+                "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+                "title": "햇살론15 공식 보증 종료 고지",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:06:27.230824+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:39.774495+00:00",
+                "incomplete": false,
+                "evidence_id": "b1445c50-71c3-499d-a345-b15b92421d04",
+                "official_id": "kinfa:hessalLoan",
+                "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+                "published_at": null,
+                "target_match": true,
+                "excerpt_masked": "햇살론15 [2025년 12월 31일 보증 종료]",
+                "is_independent": true,
+                "kb_snapshot_id": "9b3db2c6-0ada-4bb8-91b9-a1b5e77ec262",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": "#ConTitle",
+                  "assessed_on": "2026-09-09",
+                  "permitted_use": "REFUTE_CURRENT_OFFER",
+                  "schema_version": "1",
+                  "temporal_status": "ENDED",
+                  "product_end_date": "2025-12-31",
+                  "current_transaction_proof": false
+                },
+                "source_version": "html-status-v1:e04a6e5a3376d2bcf5914679",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+                "title": "햇살론15 공식 보증 종료 고지",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:06:27.279402+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:39.774495+00:00",
+                "incomplete": false,
+                "evidence_id": "b14de040-c41d-471e-9944-bca55ed9fee6",
+                "official_id": "kinfa:hessalLoan",
+                "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+                "published_at": null,
+                "target_match": true,
+                "excerpt_masked": "햇살론15 [2025년 12월 31일 보증 종료]",
+                "is_independent": false,
+                "kb_snapshot_id": "9b3db2c6-0ada-4bb8-91b9-a1b5e77ec262",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": "#ConTitle",
+                  "assessed_on": "2026-09-09",
+                  "permitted_use": "REFUTE_CURRENT_OFFER",
+                  "schema_version": "1",
+                  "temporal_status": "ENDED",
+                  "product_end_date": "2025-12-31",
+                  "current_transaction_proof": false
+                },
+                "source_version": "html-status-v1:e04a6e5a3376d2bcf5914679",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+                "title": "햇살론15 공식 보증 종료 고지",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:07:30.078802+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:39.774495+00:00",
+                "incomplete": false,
+                "evidence_id": "773bd067-3fc8-4fc8-9a5c-e9cec0f64c07",
+                "official_id": "kinfa:hessalLoan",
+                "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+                "published_at": null,
+                "target_match": true,
+                "excerpt_masked": "햇살론15 [2025년 12월 31일 보증 종료]",
+                "is_independent": false,
+                "kb_snapshot_id": "9b3db2c6-0ada-4bb8-91b9-a1b5e77ec262",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": "#ConTitle",
+                  "assessed_on": "2026-09-09",
+                  "permitted_use": "REFUTE_CURRENT_OFFER",
+                  "schema_version": "1",
+                  "temporal_status": "ENDED",
+                  "product_end_date": "2025-12-31",
+                  "current_transaction_proof": false
+                },
+                "source_version": "html-status-v1:e04a6e5a3376d2bcf5914679",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf"
+              }
+            ],
+            "cove_status": "UNRESOLVED",
+            "is_material": true,
+            "reason_code": "COVE_INCONCLUSIVE",
+            "red_team_status": "COUNTER_EVIDENCE",
+            "statement_masked": "햇살론15는 최대 2천만 원까지 대출 가능하다.",
+            "decision_summary_masked": "독립 자료 확인이 충분하지 않아 이 항목을 확정하지 않았습니다."
+          },
+          {
+            "id": "65ef8e4f-8d3e-455d-8d64-e80a710c49a4",
+            "status": "NEED_MORE_INFORMATION",
+            "claim_id": "52bf6955-4cf2-40c7-b13f-d24e0e4e2e82",
+            "evidences": [
+              {
+                "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+                "title": "햇살론15 공식 보증 종료 고지",
+                "citable": true,
+                "relation": "CONTEXT",
+                "created_at": "2026-09-08T15:06:27.230824+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:39.774495+00:00",
+                "incomplete": false,
+                "evidence_id": "b1445c50-71c3-499d-a345-b15b92421d04",
+                "official_id": "kinfa:hessalLoan",
+                "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+                "published_at": null,
+                "target_match": true,
+                "excerpt_masked": "햇살론15 [2025년 12월 31일 보증 종료]",
+                "is_independent": false,
+                "kb_snapshot_id": "9b3db2c6-0ada-4bb8-91b9-a1b5e77ec262",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": "#ConTitle",
+                  "assessed_on": "2026-09-09",
+                  "permitted_use": "REFUTE_CURRENT_OFFER",
+                  "schema_version": "1",
+                  "temporal_status": "ENDED",
+                  "product_end_date": "2025-12-31",
+                  "current_transaction_proof": false
+                },
+                "source_version": "html-status-v1:e04a6e5a3376d2bcf5914679",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+                "title": "햇살론15 공식 보증 종료 고지",
+                "citable": true,
+                "relation": "CONTEXT",
+                "created_at": "2026-09-08T15:06:27.279402+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:39.774495+00:00",
+                "incomplete": false,
+                "evidence_id": "b14de040-c41d-471e-9944-bca55ed9fee6",
+                "official_id": "kinfa:hessalLoan",
+                "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+                "published_at": null,
+                "target_match": true,
+                "excerpt_masked": "햇살론15 [2025년 12월 31일 보증 종료]",
+                "is_independent": false,
+                "kb_snapshot_id": "9b3db2c6-0ada-4bb8-91b9-a1b5e77ec262",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": "#ConTitle",
+                  "assessed_on": "2026-09-09",
+                  "permitted_use": "REFUTE_CURRENT_OFFER",
+                  "schema_version": "1",
+                  "temporal_status": "ENDED",
+                  "product_end_date": "2025-12-31",
+                  "current_transaction_proof": false
+                },
+                "source_version": "html-status-v1:e04a6e5a3376d2bcf5914679",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf"
+              }
+            ],
+            "cove_status": "UNRESOLVED",
+            "is_material": true,
+            "reason_code": "AS_JUDGED",
+            "red_team_status": "UNRESOLVED",
+            "statement_masked": "햇살론15 승인 대상이다.",
+            "decision_summary_masked": "개인 승인 여부는 심사자료 부재로 판단 불가하며 상품도 종료됨."
+          },
+          {
+            "id": "2acc784b-fa08-466b-a860-42798cf1baaf",
+            "status": "UNKNOWN",
+            "claim_id": "568ab5d7-843b-4c32-9103-254f485370ef",
+            "evidences": [
+              {
+                "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+                "title": "햇살론15 공식 보증 종료 고지",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:06:27.230824+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:39.774495+00:00",
+                "incomplete": false,
+                "evidence_id": "b1445c50-71c3-499d-a345-b15b92421d04",
+                "official_id": "kinfa:hessalLoan",
+                "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+                "published_at": null,
+                "target_match": true,
+                "excerpt_masked": "햇살론15 [2025년 12월 31일 보증 종료]",
+                "is_independent": true,
+                "kb_snapshot_id": "9b3db2c6-0ada-4bb8-91b9-a1b5e77ec262",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": "#ConTitle",
+                  "assessed_on": "2026-09-09",
+                  "permitted_use": "REFUTE_CURRENT_OFFER",
+                  "schema_version": "1",
+                  "temporal_status": "ENDED",
+                  "product_end_date": "2025-12-31",
+                  "current_transaction_proof": false
+                },
+                "source_version": "html-status-v1:e04a6e5a3376d2bcf5914679",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+                "title": "햇살론15 공식 보증 종료 고지",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:06:27.279402+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:39.774495+00:00",
+                "incomplete": false,
+                "evidence_id": "b14de040-c41d-471e-9944-bca55ed9fee6",
+                "official_id": "kinfa:hessalLoan",
+                "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+                "published_at": null,
+                "target_match": true,
+                "excerpt_masked": "햇살론15 [2025년 12월 31일 보증 종료]",
+                "is_independent": false,
+                "kb_snapshot_id": "9b3db2c6-0ada-4bb8-91b9-a1b5e77ec262",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": "#ConTitle",
+                  "assessed_on": "2026-09-09",
+                  "permitted_use": "REFUTE_CURRENT_OFFER",
+                  "schema_version": "1",
+                  "temporal_status": "ENDED",
+                  "product_end_date": "2025-12-31",
+                  "current_transaction_proof": false
+                },
+                "source_version": "html-status-v1:e04a6e5a3376d2bcf5914679",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+                "title": "햇살론15 공식 보증 종료 고지",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:07:30.078802+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:39.774495+00:00",
+                "incomplete": false,
+                "evidence_id": "773bd067-3fc8-4fc8-9a5c-e9cec0f64c07",
+                "official_id": "kinfa:hessalLoan",
+                "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+                "published_at": null,
+                "target_match": true,
+                "excerpt_masked": "햇살론15 [2025년 12월 31일 보증 종료]",
+                "is_independent": false,
+                "kb_snapshot_id": "9b3db2c6-0ada-4bb8-91b9-a1b5e77ec262",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": "#ConTitle",
+                  "assessed_on": "2026-09-09",
+                  "permitted_use": "REFUTE_CURRENT_OFFER",
+                  "schema_version": "1",
+                  "temporal_status": "ENDED",
+                  "product_end_date": "2025-12-31",
+                  "current_transaction_proof": false
+                },
+                "source_version": "html-status-v1:e04a6e5a3376d2bcf5914679",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf"
+              }
+            ],
+            "cove_status": "UNRESOLVED",
+            "is_material": true,
+            "reason_code": "COVE_INCONCLUSIVE",
+            "red_team_status": "COUNTER_EVIDENCE",
+            "statement_masked": "햇살론15는 연 3% 고정금리이다.",
+            "decision_summary_masked": "독립 자료 확인이 충분하지 않아 이 항목을 확정하지 않았습니다."
+          },
+          {
+            "id": "b4b60288-a025-4c08-ae15-c1f322f83ea4",
+            "status": "CONTRADICTED",
+            "claim_id": "a1fab1b3-1d88-49c2-9d7f-58ecc962df84",
+            "evidences": [
+              {
+                "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+                "title": "햇살론15 공식 보증 종료 고지",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:06:27.230824+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:39.774495+00:00",
+                "incomplete": false,
+                "evidence_id": "b1445c50-71c3-499d-a345-b15b92421d04",
+                "official_id": "kinfa:hessalLoan",
+                "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+                "published_at": null,
+                "target_match": true,
+                "excerpt_masked": "햇살론15 [2025년 12월 31일 보증 종료]",
+                "is_independent": true,
+                "kb_snapshot_id": "9b3db2c6-0ada-4bb8-91b9-a1b5e77ec262",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": "#ConTitle",
+                  "assessed_on": "2026-09-09",
+                  "permitted_use": "REFUTE_CURRENT_OFFER",
+                  "schema_version": "1",
+                  "temporal_status": "ENDED",
+                  "product_end_date": "2025-12-31",
+                  "current_transaction_proof": false
+                },
+                "source_version": "html-status-v1:e04a6e5a3376d2bcf5914679",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+                "title": "햇살론15 공식 보증 종료 고지",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:06:27.279402+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:39.774495+00:00",
+                "incomplete": false,
+                "evidence_id": "b14de040-c41d-471e-9944-bca55ed9fee6",
+                "official_id": "kinfa:hessalLoan",
+                "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+                "published_at": null,
+                "target_match": true,
+                "excerpt_masked": "햇살론15 [2025년 12월 31일 보증 종료]",
+                "is_independent": false,
+                "kb_snapshot_id": "9b3db2c6-0ada-4bb8-91b9-a1b5e77ec262",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": "#ConTitle",
+                  "assessed_on": "2026-09-09",
+                  "permitted_use": "REFUTE_CURRENT_OFFER",
+                  "schema_version": "1",
+                  "temporal_status": "ENDED",
+                  "product_end_date": "2025-12-31",
+                  "current_transaction_proof": false
+                },
+                "source_version": "html-status-v1:e04a6e5a3376d2bcf5914679",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+                "title": "햇살론15 공식 보증 종료 고지",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:07:15.26133+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:39.774495+00:00",
+                "incomplete": false,
+                "evidence_id": "322b88ca-33c2-404d-8689-dc56bf1133c2",
+                "official_id": "kinfa:hessalLoan",
+                "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+                "published_at": null,
+                "target_match": true,
+                "excerpt_masked": "햇살론15 [2025년 12월 31일 보증 종료]",
+                "is_independent": false,
+                "kb_snapshot_id": "9b3db2c6-0ada-4bb8-91b9-a1b5e77ec262",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": "#ConTitle",
+                  "assessed_on": "2026-09-09",
+                  "permitted_use": "REFUTE_CURRENT_OFFER",
+                  "schema_version": "1",
+                  "temporal_status": "ENDED",
+                  "product_end_date": "2025-12-31",
+                  "current_transaction_proof": false
+                },
+                "source_version": "html-status-v1:e04a6e5a3376d2bcf5914679",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+                "title": "햇살론15 공식 보증 종료 고지",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:07:30.078802+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:39.774495+00:00",
+                "incomplete": false,
+                "evidence_id": "773bd067-3fc8-4fc8-9a5c-e9cec0f64c07",
+                "official_id": "kinfa:hessalLoan",
+                "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+                "published_at": null,
+                "target_match": true,
+                "excerpt_masked": "햇살론15 [2025년 12월 31일 보증 종료]",
+                "is_independent": false,
+                "kb_snapshot_id": "9b3db2c6-0ada-4bb8-91b9-a1b5e77ec262",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": "#ConTitle",
+                  "assessed_on": "2026-09-09",
+                  "permitted_use": "REFUTE_CURRENT_OFFER",
+                  "schema_version": "1",
+                  "temporal_status": "ENDED",
+                  "product_end_date": "2025-12-31",
+                  "current_transaction_proof": false
+                },
+                "source_version": "html-status-v1:e04a6e5a3376d2bcf5914679",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf"
+              }
+            ],
+            "cove_status": "CONFIRMED",
+            "is_material": true,
+            "reason_code": "COVE_CONFIRMED",
+            "red_team_status": "COUNTER_EVIDENCE",
+            "statement_masked": "오늘 안에 신청해야 한다.",
+            "decision_summary_masked": "햇살론15는 2025.12.31 보증 종료되어 현재 신청 불가."
+          },
+          {
+            "id": "66385734-3df3-4c0e-9f69-c3a568d812eb",
+            "status": "CONTRADICTED",
+            "claim_id": "b517a63b-14fe-4e30-bd98-e2069ce9549b",
+            "evidences": [
+              {
+                "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+                "title": "햇살론15 공식 보증 종료 고지",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:06:27.230824+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:39.774495+00:00",
+                "incomplete": false,
+                "evidence_id": "b1445c50-71c3-499d-a345-b15b92421d04",
+                "official_id": "kinfa:hessalLoan",
+                "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+                "published_at": null,
+                "target_match": true,
+                "excerpt_masked": "햇살론15 [2025년 12월 31일 보증 종료]",
+                "is_independent": true,
+                "kb_snapshot_id": "9b3db2c6-0ada-4bb8-91b9-a1b5e77ec262",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": "#ConTitle",
+                  "assessed_on": "2026-09-09",
+                  "permitted_use": "REFUTE_CURRENT_OFFER",
+                  "schema_version": "1",
+                  "temporal_status": "ENDED",
+                  "product_end_date": "2025-12-31",
+                  "current_transaction_proof": false
+                },
+                "source_version": "html-status-v1:e04a6e5a3376d2bcf5914679",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+                "title": "햇살론15 공식 보증 종료 고지",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:06:27.279402+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:39.774495+00:00",
+                "incomplete": false,
+                "evidence_id": "b14de040-c41d-471e-9944-bca55ed9fee6",
+                "official_id": "kinfa:hessalLoan",
+                "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+                "published_at": null,
+                "target_match": true,
+                "excerpt_masked": "햇살론15 [2025년 12월 31일 보증 종료]",
+                "is_independent": false,
+                "kb_snapshot_id": "9b3db2c6-0ada-4bb8-91b9-a1b5e77ec262",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": "#ConTitle",
+                  "assessed_on": "2026-09-09",
+                  "permitted_use": "REFUTE_CURRENT_OFFER",
+                  "schema_version": "1",
+                  "temporal_status": "ENDED",
+                  "product_end_date": "2025-12-31",
+                  "current_transaction_proof": false
+                },
+                "source_version": "html-status-v1:e04a6e5a3376d2bcf5914679",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+                "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:06:36.59997+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+                "incomplete": false,
+                "evidence_id": "c25e9680-9515-4c26-8877-5e696f578117",
+                "official_id": "kinfa:notice:24020",
+                "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+                "published_at": "2021-05-27T00:00:00+00:00",
+                "target_match": true,
+                "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+                "is_independent": true,
+                "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": ".board-detail-con",
+                  "reviewed_at": "2026-09-08T11:31:40.000Z",
+                  "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+                  "review_due_at": "2026-09-15T11:31:40.000Z",
+                  "schema_version": "1",
+                  "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+                  "current_transaction_proof": false
+                },
+                "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+                "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:06:36.62852+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+                "incomplete": false,
+                "evidence_id": "637ce00d-5897-482c-a5da-087f07c1faa0",
+                "official_id": "kinfa:notice:24020",
+                "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+                "published_at": "2021-05-27T00:00:00+00:00",
+                "target_match": true,
+                "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+                "is_independent": false,
+                "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": ".board-detail-con",
+                  "reviewed_at": "2026-09-08T11:31:40.000Z",
+                  "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+                  "review_due_at": "2026-09-15T11:31:40.000Z",
+                  "schema_version": "1",
+                  "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+                  "current_transaction_proof": false
+                },
+                "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+                "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:06:46.554077+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+                "incomplete": false,
+                "evidence_id": "54075730-22f0-4f55-aab0-b29e704d3edc",
+                "official_id": "kinfa:notice:24020",
+                "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+                "published_at": "2021-05-27T00:00:00+00:00",
+                "target_match": true,
+                "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+                "is_independent": false,
+                "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": ".board-detail-con",
+                  "reviewed_at": "2026-09-08T11:31:40.000Z",
+                  "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+                  "review_due_at": "2026-09-15T11:31:40.000Z",
+                  "schema_version": "1",
+                  "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+                  "current_transaction_proof": false
+                },
+                "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+                "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:07:15.28776+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+                "incomplete": false,
+                "evidence_id": "a74398ca-5157-49aa-b3a2-fecc5def1fc5",
+                "official_id": "kinfa:notice:24020",
+                "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+                "published_at": "2021-05-27T00:00:00+00:00",
+                "target_match": true,
+                "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+                "is_independent": false,
+                "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": ".board-detail-con",
+                  "reviewed_at": "2026-09-08T11:31:40.000Z",
+                  "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+                  "review_due_at": "2026-09-15T11:31:40.000Z",
+                  "schema_version": "1",
+                  "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+                  "current_transaction_proof": false
+                },
+                "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+                "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:07:15.314543+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+                "incomplete": false,
+                "evidence_id": "c2ed3fa9-4b78-4d9d-a733-e3987e948c91",
+                "official_id": "kinfa:notice:24020",
+                "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+                "published_at": "2021-05-27T00:00:00+00:00",
+                "target_match": true,
+                "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+                "is_independent": false,
+                "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": ".board-detail-con",
+                  "reviewed_at": "2026-09-08T11:31:40.000Z",
+                  "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+                  "review_due_at": "2026-09-15T11:31:40.000Z",
+                  "schema_version": "1",
+                  "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+                  "current_transaction_proof": false
+                },
+                "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+                "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:07:30.105352+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+                "incomplete": false,
+                "evidence_id": "af85ebfc-a71c-4f26-bf68-3e2d890baf91",
+                "official_id": "kinfa:notice:24020",
+                "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+                "published_at": "2021-05-27T00:00:00+00:00",
+                "target_match": true,
+                "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+                "is_independent": false,
+                "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": ".board-detail-con",
+                  "reviewed_at": "2026-09-08T11:31:40.000Z",
+                  "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+                  "review_due_at": "2026-09-15T11:31:40.000Z",
+                  "schema_version": "1",
+                  "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+                  "current_transaction_proof": false
+                },
+                "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+              }
+            ],
+            "cove_status": "CONFIRMED",
+            "is_material": true,
+            "reason_code": "HIGH_RISK_REMOTE_CONTROL",
+            "red_team_status": "COUNTER_EVIDENCE",
+            "statement_masked": "상담원이 원격제어 앱을 설치해 달라고 요청했다.",
+            "decision_summary_masked": "권유문에 원격제어 앱 설치 요구가 있습니다. 설치를 멈추고 공식 창구로 확인하세요. 실제 발신자나 앱의 악성 여부를 확정한 결과는 아닙니다."
+          },
+          {
+            "id": "0e15223c-89b4-4407-9801-005899644f8d",
+            "status": "CONTRADICTED",
+            "claim_id": "e516d136-136f-4178-b6f0-a16cefc44167",
+            "evidences": [
+              {
+                "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+                "title": "햇살론15 공식 보증 종료 고지",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:06:27.230824+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:39.774495+00:00",
+                "incomplete": false,
+                "evidence_id": "b1445c50-71c3-499d-a345-b15b92421d04",
+                "official_id": "kinfa:hessalLoan",
+                "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+                "published_at": null,
+                "target_match": true,
+                "excerpt_masked": "햇살론15 [2025년 12월 31일 보증 종료]",
+                "is_independent": true,
+                "kb_snapshot_id": "9b3db2c6-0ada-4bb8-91b9-a1b5e77ec262",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": "#ConTitle",
+                  "assessed_on": "2026-09-09",
+                  "permitted_use": "REFUTE_CURRENT_OFFER",
+                  "schema_version": "1",
+                  "temporal_status": "ENDED",
+                  "product_end_date": "2025-12-31",
+                  "current_transaction_proof": false
+                },
+                "source_version": "html-status-v1:e04a6e5a3376d2bcf5914679",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+                "title": "햇살론15 공식 보증 종료 고지",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:06:27.279402+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:39.774495+00:00",
+                "incomplete": false,
+                "evidence_id": "b14de040-c41d-471e-9944-bca55ed9fee6",
+                "official_id": "kinfa:hessalLoan",
+                "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+                "published_at": null,
+                "target_match": true,
+                "excerpt_masked": "햇살론15 [2025년 12월 31일 보증 종료]",
+                "is_independent": false,
+                "kb_snapshot_id": "9b3db2c6-0ada-4bb8-91b9-a1b5e77ec262",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": "#ConTitle",
+                  "assessed_on": "2026-09-09",
+                  "permitted_use": "REFUTE_CURRENT_OFFER",
+                  "schema_version": "1",
+                  "temporal_status": "ENDED",
+                  "product_end_date": "2025-12-31",
+                  "current_transaction_proof": false
+                },
+                "source_version": "html-status-v1:e04a6e5a3376d2bcf5914679",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "7baee96f6714b7e3b244c3d486435de4b39571312c4bc09c87301b37c8bc04bf"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+                "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:06:36.59997+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+                "incomplete": false,
+                "evidence_id": "c25e9680-9515-4c26-8877-5e696f578117",
+                "official_id": "kinfa:notice:24020",
+                "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+                "published_at": "2021-05-27T00:00:00+00:00",
+                "target_match": true,
+                "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+                "is_independent": true,
+                "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": ".board-detail-con",
+                  "reviewed_at": "2026-09-08T11:31:40.000Z",
+                  "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+                  "review_due_at": "2026-09-15T11:31:40.000Z",
+                  "schema_version": "1",
+                  "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+                  "current_transaction_proof": false
+                },
+                "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+                "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:06:36.62852+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+                "incomplete": false,
+                "evidence_id": "637ce00d-5897-482c-a5da-087f07c1faa0",
+                "official_id": "kinfa:notice:24020",
+                "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+                "published_at": "2021-05-27T00:00:00+00:00",
+                "target_match": true,
+                "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+                "is_independent": false,
+                "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": ".board-detail-con",
+                  "reviewed_at": "2026-09-08T11:31:40.000Z",
+                  "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+                  "review_due_at": "2026-09-15T11:31:40.000Z",
+                  "schema_version": "1",
+                  "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+                  "current_transaction_proof": false
+                },
+                "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+                "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:06:46.554077+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+                "incomplete": false,
+                "evidence_id": "54075730-22f0-4f55-aab0-b29e704d3edc",
+                "official_id": "kinfa:notice:24020",
+                "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+                "published_at": "2021-05-27T00:00:00+00:00",
+                "target_match": true,
+                "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+                "is_independent": false,
+                "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": ".board-detail-con",
+                  "reviewed_at": "2026-09-08T11:31:40.000Z",
+                  "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+                  "review_due_at": "2026-09-15T11:31:40.000Z",
+                  "schema_version": "1",
+                  "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+                  "current_transaction_proof": false
+                },
+                "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+                "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:07:15.28776+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+                "incomplete": false,
+                "evidence_id": "a74398ca-5157-49aa-b3a2-fecc5def1fc5",
+                "official_id": "kinfa:notice:24020",
+                "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+                "published_at": "2021-05-27T00:00:00+00:00",
+                "target_match": true,
+                "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+                "is_independent": false,
+                "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": ".board-detail-con",
+                  "reviewed_at": "2026-09-08T11:31:40.000Z",
+                  "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+                  "review_due_at": "2026-09-15T11:31:40.000Z",
+                  "schema_version": "1",
+                  "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+                  "current_transaction_proof": false
+                },
+                "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+                "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:07:15.314543+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+                "incomplete": false,
+                "evidence_id": "c2ed3fa9-4b78-4d9d-a733-e3987e948c91",
+                "official_id": "kinfa:notice:24020",
+                "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+                "published_at": "2021-05-27T00:00:00+00:00",
+                "target_match": true,
+                "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+                "is_independent": false,
+                "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": ".board-detail-con",
+                  "reviewed_at": "2026-09-08T11:31:40.000Z",
+                  "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+                  "review_due_at": "2026-09-15T11:31:40.000Z",
+                  "schema_version": "1",
+                  "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+                  "current_transaction_proof": false
+                },
+                "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+                "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+                "citable": true,
+                "relation": "CONTRADICT",
+                "created_at": "2026-09-08T15:07:30.105352+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+                "incomplete": false,
+                "evidence_id": "af85ebfc-a71c-4f26-bf68-3e2d890baf91",
+                "official_id": "kinfa:notice:24020",
+                "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+                "published_at": "2021-05-27T00:00:00+00:00",
+                "target_match": true,
+                "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+                "is_independent": false,
+                "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": ".board-detail-con",
+                  "reviewed_at": "2026-09-08T11:31:40.000Z",
+                  "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+                  "review_due_at": "2026-09-15T11:31:40.000Z",
+                  "schema_version": "1",
+                  "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+                  "current_transaction_proof": false
+                },
+                "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+              }
+            ],
+            "cove_status": "CONFIRMED",
+            "is_material": true,
+            "reason_code": "HIGH_RISK_ADVANCE_PAYMENT",
+            "red_team_status": "COUNTER_EVIDENCE",
+            "statement_masked": "진행하려면 보증료 30만 원을 먼저 입금해야 한다.",
+            "decision_summary_masked": "권유문에 대출 전 비용을 먼저 보내라는 요구가 있습니다. 공식 예방 지침에 따라 입금 전에 공식 창구로 확인하세요. 실제 사기 여부를 확정한 결과는 아닙니다."
+          }
+        ],
+        "id": "ea4ef139-eb0d-4dce-90e9-152a184cf3b6"
+      }
+    ],
+    "events": [
+      {
+        "event_no": 1,
+        "to_state": "DRAFT",
+        "actor_type": "USER",
+        "created_at": "2026-09-08T15:05:33.922655+00:00",
+        "event_type": "CASE_CREATED",
+        "from_state": null
+      },
+      {
+        "event_no": 2,
+        "to_state": "INPUT_REVIEW",
+        "actor_type": "USER",
+        "created_at": "2026-09-08T15:06:09.883246+00:00",
+        "event_type": "CASE_LIFECYCLE_CHANGED",
+        "from_state": "DRAFT"
+      },
+      {
+        "event_no": 3,
+        "to_state": null,
+        "actor_type": "USER",
+        "created_at": "2026-09-08T15:06:09.883246+00:00",
+        "event_type": "CASE_INPUT_CLAIMS_CONFIRMED",
+        "from_state": null
+      },
+      {
+        "event_no": 4,
+        "to_state": "VERIFYING",
+        "actor_type": "SYSTEM",
+        "created_at": "2026-09-08T15:06:09.883246+00:00",
+        "event_type": "CASE_LIFECYCLE_CHANGED",
+        "from_state": "INPUT_REVIEW"
+      },
+      {
+        "event_no": 5,
+        "to_state": null,
+        "actor_type": "SYSTEM",
+        "created_at": "2026-09-08T15:06:09.883246+00:00",
+        "event_type": "RUN_CREATED",
+        "from_state": null
+      },
+      {
+        "event_no": 6,
+        "to_state": "VERIFIED",
+        "actor_type": "SYSTEM",
+        "created_at": "2026-09-08T15:07:39.58356+00:00",
+        "event_type": "CASE_LIFECYCLE_CHANGED",
+        "from_state": "VERIFYING"
+      },
+      {
+        "event_no": 7,
+        "to_state": null,
+        "actor_type": "SYSTEM",
+        "created_at": "2026-09-08T15:07:39.58356+00:00",
+        "event_type": "RUN_COMPLETED",
+        "from_state": null
+      }
+    ],
+    "assessments": [],
+    "checklists": []
+  }
+}

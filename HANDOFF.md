@@ -1,3 +1,11 @@
+## 2026-09-09 인용 실패 수정과 운영 반영 완료
+
+- 운영 주소는 e9d6e9d, 배포 dpl_EVipHpt7HpeJAtzTpjkFo2obb8zD, Manifest v12·Agent 프롬프트 v4·원격 Migration 0058이다. 기존 라벨 수정도 운영에 포함됐다. DB 구조 6종·설정 10항목과 운영 Runtime이 일치했다.
+- 같은 합성 PDF 6 Claim은 92.981초, 정상 예방 Text 4 Claim은 67.668초에 저장됐다. 두 Run COMPLETED·총 14 Agent/Judge SUCCEEDED·인용 오류 0이다. 개인 승인 정보 부족, 금리/한도 독립 근거 부족은 여전히 남는다. 전체 판단 품질 Gate 통과가 아니다.
+- 기본 687건·선택적 96건 skip·타입·빌드·격리 SQL 45까지 통과했다. PR #295 실제 병합 후보의 필수 검사 전체도 로컬에서 통과했으며 배포 코드 트리와 일치했다. 운영 브라우저·Passport·모바일·원본 삭제와 시험 계정 삭제를 확인했다. 비용 USD 0.468376·미정산 예약 0이다.
+- 중요: 사용자 승인으로 Actions 한도 장애에서 로컬 검사를 거쳐 직접 운영 승격했다. main은 아직 8f9b40a이고 PR #293·#295는 관리자 병합도 차단돼 열려 있다. 두 변경을 main에 통합하기 전 옛 main을 운영 재배포하지 않는다. 저장소 보호 규칙이나 원격 검사 상태를 조작하지 않았다.
+- [실제 검증과 제한](evidence/development/citation-contract/README.md)을 따른다. Implementation NO-GO·Release NOT-EVALUATED를 유지한다.
+
 ## 2026-09-09 Agent 인용 계약과 Actions 장애 우회 운영 절차
 
 - 사용자가 GitHub 한도 장애에서 로컬 검사 후 배포를 승인했다. PR #293의 실제 병합 후보에서 필수 검사 전체를 로컬 실행해 통과했지만 GitHub가 관리자 병합도 거부했다. 검사 성공 상태를 위조하거나 저장소 보호를 변경하지 않는다.

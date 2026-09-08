@@ -1,0 +1,71 @@
+{
+  "source": "운영 Supabase SQL Editor에서 합성 PDF Case만 조회",
+  "observed_at": "2026-09-08T15:11:04.813Z",
+  "case_id": "3f8ca3a7-d3d3-4052-b547-0a0ad1251cdb",
+  "rows": [
+    {
+      "agent_code": "PRODUCT_INSTITUTION",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 16866,
+      "input_tokens": 12482,
+      "output_tokens": 1489,
+      "cost_microunits": 39854
+    },
+    {
+      "agent_code": "FRAUD_CHANNEL",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 9241,
+      "input_tokens": 12272,
+      "output_tokens": 891,
+      "cost_microunits": 33454
+    },
+    {
+      "agent_code": "SALES_CONDUCT",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 9865,
+      "input_tokens": 11769,
+      "output_tokens": 952,
+      "cost_microunits": 33058
+    },
+    {
+      "agent_code": "REGULATION_DISPUTE",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 11550,
+      "input_tokens": 10228,
+      "output_tokens": 1012,
+      "cost_microunits": 30576
+    },
+    {
+      "agent_code": "COVE",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 17042,
+      "input_tokens": 13652,
+      "output_tokens": 1345,
+      "cost_microunits": 40754
+    },
+    {
+      "agent_code": "RED_TEAM",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 14704,
+      "input_tokens": 12298,
+      "output_tokens": 1163,
+      "cost_microunits": 36226
+    },
+    {
+      "agent_code": "EVIDENCE_JUDGE",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 9439,
+      "input_tokens": 14080,
+      "output_tokens": 1287,
+      "cost_microunits": 41030
+    }
+  ],
+  "total_agent_cost_microunits": 254952
+}

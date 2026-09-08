@@ -1,0 +1,3 @@
+{"stage":"cleanup","path":"/api/finshield/session","status":200,"elapsed_ms":3675,"types":["json"]}
+{"stage":"cleanup","path":"/api/finshield/account/delete","status":200,"elapsed_ms":3290,"types":["ACCESS_BLOCKED"]}
+{"stage":"cleanup","path":"/api/finshield/account/delete","status":200,"elapsed_ms":2998,"types":["ACCESS_BLOCKED"]}
