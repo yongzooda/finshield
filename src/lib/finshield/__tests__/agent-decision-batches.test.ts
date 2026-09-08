@@ -46,7 +46,7 @@ describe("독립 검토의 묶음 판단", () => {
   });
 });
 
-it("가입 후 모델 호출에는 현재 묶음의 계약 비교만 전달하고 모든 항목을 복원한다", async () => {
+it("가입 후 모델은 실제 계약 비교 항목을 판단하고 나머지 참조를 범위 밖에 보존한다", async () => {
   call.mockImplementation(async options => {
     const body = JSON.parse(options.user);
     expect(body.aftercare_context.comparison.every((row: {claim_ref:string}) => body.claims.some((claim: {claim_ref:string}) => claim.claim_ref === row.claim_ref))).toBe(true);
@@ -56,7 +56,8 @@ it("가입 후 모델 호출에는 현재 묶음의 계약 비교만 전달하�
   const output = await createAgentModel().decide({ system: "가입 후 검토", input: { ...input, agent_code: "SALES_CONDUCT",
     aftercare_context: { schema_version: "aftercare-review-v1", answers: { UNDERSTOOD_TERMS: "PARTIAL" },
       comparison: [{ claim_ref: "C6", before: "연 3%", contract: "연 8.2%", result: "DIFFERENT_TEXT" }] } }, evidence: [], observations: [] });
-  expect((output as { findings: {claim_ref:string}[] }).findings.map(f=>f.claim_ref)).toEqual(claims.map(c=>c.claim_ref));
+  expect((output as { findings: {claim_ref:string}[] }).findings.map(f=>f.claim_ref)).toEqual(["C6"]);
+  expect((output as {out_of_scope_claim_refs:string[]}).out_of_scope_claim_refs).toEqual(["C1","C2","C3","C4","C5"]);
 });
 
 import { modelEvidenceScope, coveOutputSchemaFor, providerJudgeSchemaFor } from "../agents/model-adapter";

@@ -1,0 +1,29 @@
+검사 시작: npm ci --ignore-scripts
+
+added 1023 packages, and audited 1030 packages in 12s
+
+391 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+검사 시작: DB 명세 검증
+Database spec validation passed: 100,451 chars, 29 datasets, D-001~D-032.
+검사 시작: Provider Stack ADR 검증
+Provider stack ADR validation passed: requirements 27ce706010344fbcedebe3abd707febff0f1dc26, 20 implementation blockers, Implementation NO-GO, Release NOT-EVALUATED.
+검사 시작: Provider ADR Validator Mutation Test
+node:fs:1231
+  return binding.rmSync(getValidatedPath(path), opts.maxRetries, opts.recursive, opts.retryDelay);
+                 ^
+
+Error: ENOTEMPTY, Directory not empty: /private/var/folders/sx/t6yfbxns0s7fh1777s7kjnj80000gn/T/finshield-provider-validator-n1sESr '/private/var/folders/sx/t6yfbxns0s7fh1777s7kjnj80000gn/T/finshield-provider-validator-n1sESr'
+    at rmSync (node:fs:1231:18)
+    at expectPartialEvidence (file:///private/tmp/finshield-review-merge-297/.github/scripts/test-provider-stack-adr-validator.mjs:541:5)
+    at async file:///private/tmp/finshield-review-merge-297/.github/scripts/test-provider-stack-adr-validator.mjs:566:3 {
+  errno: 66,
+  code: 'ENOTEMPTY',
+  path: '/private/var/folders/sx/t6yfbxns0s7fh1777s7kjnj80000gn/T/finshield-provider-validator-n1sESr',
+  syscall: 'rm'
+}
+
+Node.js v24.4.1
+검사 실패: Provider ADR Validator Mutation Test

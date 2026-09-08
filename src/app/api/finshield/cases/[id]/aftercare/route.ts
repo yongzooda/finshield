@@ -162,6 +162,8 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     } });
     const reviewJob = jobs[0] ? z.object({ id: z.uuid(), status: z.string(), assessment_id: z.uuid().nullable() }).passthrough().parse(jobs[0]) : null;
     if (requestedJob && !reviewJob) return jsonNoStore({ error: "이 점검을 찾을 수 없습니다" }, 404);
+    // 명시한 실행이 아직 결과를 만들지 않았으면 과거 결과로 바꿔 보이지 않는다.
+    if (requestedJob && reviewJob?.assessment_id === null) return jsonNoStore({ assessment: null, review_job: reviewJob });
     const assessments = z.array(z.object({id:z.uuid(),assessment_no:z.number(),base_passport_id:z.uuid(),result:z.string(),summary_masked:z.string(),finished_at:z.string(),assessment_schema_version:z.string()})).parse(await restSelect({ token, path: "precase_assessments", query: {
       select: "id,assessment_no,base_passport_id,result,summary_masked,finished_at,assessment_schema_version",
       case_id: `eq.${id}`, status: "in.(COMPLETED,PARTIAL)", order: "assessment_no.desc", limit: "1",

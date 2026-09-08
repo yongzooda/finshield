@@ -1,0 +1,8 @@
+01_case_invariants.sql FAIL
+NOTICE:  schema "fstest" already exists, skipping
+ERROR:  ACCOUNT_CLEANUP_REQUIRED
+CONTEXT:  PL/pgSQL function private.guard_profile_deletion() line 9 at RAISE
+SQL statement "DELETE FROM ONLY "public"."profiles" WHERE $1 OPERATOR(pg_catalog.=) "id""
+SQL statement "delete from auth.users where id in (user_a, user_b)"
+PL/pgSQL function inline_code_block line 6 at SQL statement
+

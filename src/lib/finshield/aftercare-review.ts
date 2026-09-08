@@ -67,9 +67,14 @@ export async function runAftercareReview(args: {
     const findings = result.output?.findings ?? [];
     if (findings.some(f => !args.context.claims.some(c => c.claim_ref === f.claim_ref))) throw new Error("AFTERCARE_FINDING_SCOPE_REJECTED");
     for (const f of findings) {
-      for (const text of [f.summary_masked, ...f.limits]) {
-        const gate = gateForModel(text);
-        if (!gate.ok || gate.masked.text !== text) throw new Error("AFTERCARE_OUTPUT_PII_REJECTED");
+      const gates = [f.summary_masked, ...f.limits].map(text => gateForModel(text));
+      if (gates.some((gate, index) => !gate.ok || gate.masked.text !== [f.summary_masked, ...f.limits][index])) {
+        // 출력의 개인정보 의심은 해당 항목만 보류한다. 원문은 저장하지
+        // 않으며 실제 조회와 다른 항목까지 잃거나 재호출하지 않는다.
+        f.state = "WITHHELD"; f.relation = "CONTEXT";
+        f.summary_masked = "이 항목의 설명에서 개인정보로 의심되는 표현이 감지되어 표시를 보류했습니다. 자료를 확인해 주세요.";
+        f.limits = ["출력 개인정보 검사로 이 항목의 설명을 표시하지 않았습니다."];
+        result.status = "PARTIAL"; result.reasonCode = "OUTPUT_PII_REJECTED";
       }
     }
     const tools = [];

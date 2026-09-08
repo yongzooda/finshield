@@ -55,3 +55,8 @@ it("가입 후 묶음에 다른 묶음의 Claim 참조가 섞이지 않는다", 
   expect(aftercareBatchContext(context, input.claims)?.comparison.map(c => c.claim_ref)).toEqual(["C1"]);
   expect(context.comparison).toHaveLength(2);
 });
+
+it("가입 후 실제 계약 문구가 있는 항목을 판단하고 원본 비교 목록은 보존한다",()=>{
+ const compared={...input,agent_code:"SALES_CONDUCT",claims:[...input.claims,{...input.claims[0],claim_ref:"C2"}],aftercare_context:{schema_version:"aftercare-review-v1" as const,answers:{UNDERSTOOD_TERMS:"PARTIAL"},comparison:[{claim_ref:"C1",before:"연 3%",contract:"연 8.2%",result:"DIFFERENT_TEXT"},{claim_ref:"C2",before:"한도",contract:"",result:"NOT_PROVIDED"}]}};
+ expect(domainClaims(compared).map(c=>c.claim_ref)).toEqual(["C1"]);expect(compared.aftercare_context.comparison).toHaveLength(2);
+});

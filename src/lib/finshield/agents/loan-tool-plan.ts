@@ -34,7 +34,13 @@ export function loanToolPlan(input: DomainAgentInput): ToolChoice[] | null {
 
 /** 고정 Agent의 책임 분리. Agent 수·순서와 CoVe의 전체 중요 항목은 유지한다. */
 export function domainClaims(input: DomainAgentInput) {
-  if (input.aftercare_context) return input.claims;
+  if (input.aftercare_context) {
+    const compared = new Set(input.aftercare_context.comparison.filter(row => row.result !== "NOT_PROVIDED").map(row => row.claim_ref));
+    const selected = input.claims.filter(claim => compared.has(claim.claim_ref));
+    // 실제 계약 문구가 제공된 항목을 점검한다. 미제공 비교는 설문 결과에
+    // 보존하고 거래 전 판단을 불필요하게 다시 실행하지 않는다.
+    return selected.length ? selected : input.claims;
+  }
   const types: Record<string, string[]> = {
     PRODUCT_INSTITUTION: ["PRODUCT_TERM", "ELIGIBILITY", "INSTITUTION"],
     FRAUD_CHANNEL: ["CONDUCT", "CHANNEL", "INSTITUTION", "OTHER"],

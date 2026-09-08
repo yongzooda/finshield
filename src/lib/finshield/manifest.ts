@@ -14,9 +14,9 @@
  */
 
 // 시험 fixture 와 같은 이름을 쓰지 않도록 제품 정의는 p0-v2 을 버전으로 쓴다.
-export const DEFINITION_VERSION = "p0-v10";
+export const DEFINITION_VERSION = "p0-v11";
 export const TOOL_DEFINITION_VERSION = "p0-v5";
-export const MANIFEST_VERSION = "finshield-p0-loan-v18";
+export const MANIFEST_VERSION = "finshield-p0-loan-v19";
 export const FINSHIELD_MODEL = "claude-sonnet-5";
 export const SCENARIO = "LOAN" as const;
 export const SCENARIO_VERSION = "sunshine15-v1";
@@ -86,7 +86,7 @@ export const TOOLS: readonly ToolSpec[] = Object.freeze([
 export const AGENTS: readonly AgentSpec[] = Object.freeze([
   {
     agentCode: "PRODUCT_INSTITUTION", logicalKey: "PRODUCT_INSTITUTION", role: "DOMAIN",
-    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "product-institution-v10",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "product-institution-v11",
     required: true,
     tools: [
       { toolCode: "search_financial_product", purposeCode: "VERIFY_PRODUCT" },
@@ -96,7 +96,7 @@ export const AGENTS: readonly AgentSpec[] = Object.freeze([
   },
   {
     agentCode: "FRAUD_CHANNEL", logicalKey: "FRAUD_CHANNEL", role: "DOMAIN",
-    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "fraud-channel-v10",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "fraud-channel-v11",
     required: true,
     tools: [
       { toolCode: "parse_url_host", purposeCode: "PARSE_URL" },
@@ -106,7 +106,7 @@ export const AGENTS: readonly AgentSpec[] = Object.freeze([
   },
   {
     agentCode: "SALES_CONDUCT", logicalKey: "SALES_CONDUCT", role: "DOMAIN",
-    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "sales-conduct-v10",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "sales-conduct-v11",
     required: true,
     tools: [
       { toolCode: "analyze_risk_pattern", purposeCode: "ASSESS_CONDUCT" },
@@ -115,7 +115,7 @@ export const AGENTS: readonly AgentSpec[] = Object.freeze([
   },
   {
     agentCode: "REGULATION_DISPUTE", logicalKey: "REGULATION_DISPUTE", role: "DOMAIN",
-    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "regulation-dispute-v10",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "regulation-dispute-v11",
     required: true,
     tools: [
       { toolCode: "lookup_statute", purposeCode: "LOOKUP_STATUTE" },
@@ -128,7 +128,7 @@ export const AGENTS: readonly AgentSpec[] = Object.freeze([
     // 결론에서 분리된 검색으로 Material Claim 을 다시 확인한다. 그래서 이 Agent 는
     // Domain Agent 의 판단을 보지 못하고 Claim 만 받는다.
     agentCode: "COVE", logicalKey: "COVE", role: "COVE",
-    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "cove-v10",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "cove-v11",
     required: true,
     tools: [
       { toolCode: "lookup_statute", purposeCode: "RECHECK_STATUTE" },
@@ -141,7 +141,7 @@ export const AGENTS: readonly AgentSpec[] = Object.freeze([
     // 규칙 3: Red Team 은 초기 결론을 뒤집을 공식 반대 근거를 찾는다.
     // 못 찾았다는 사실이 확인이 되지 않는다 (AI-011).
     agentCode: "RED_TEAM", logicalKey: "RED_TEAM", role: "RED_TEAM",
-    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "red-team-v10",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "red-team-v11",
     required: true,
     tools: [
       { toolCode: "search_financial_product", purposeCode: "FIND_COUNTER_PRODUCT" },
@@ -154,7 +154,7 @@ export const AGENTS: readonly AgentSpec[] = Object.freeze([
   {
     // AI-013: Judge 는 원문이 아니라 확인된 Claim·Evidence 구조만 본다. 그래서 Tool 이 없다.
     agentCode: "EVIDENCE_JUDGE", logicalKey: "EVIDENCE_JUDGE", role: "EVIDENCE_JUDGE",
-    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "evidence-judge-v10",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "evidence-judge-v11",
     required: true,
     tools: [],
   },
@@ -165,7 +165,7 @@ export const COVE_AGENT = AGENTS.find((agent) => agent.role === "COVE");
 export const RED_TEAM_AGENT = AGENTS.find((agent) => agent.role === "RED_TEAM");
 
 export const POLICY_VERSIONS = Object.freeze({
-  promptBundleVersion: "p0-loan-prompts-v10",
+  promptBundleVersion: "p0-loan-prompts-v11",
   schemaBundleVersion: "p0-loan-schemas-v1",
   evidencePolicyVersion: "evidence-policy-v1",
   resultMatrixVersion: "result-matrix-v2",
