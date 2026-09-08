@@ -182,7 +182,7 @@ export const judgeOutputSchemaFor = (evidence: ToolEvidence[]) => {
   });
 };
 
-export const JUDGE_CLAIM_BATCH_SIZE = 4;
+export const JUDGE_CLAIM_BATCH_SIZE = 3;
 
 export const buildJudgeBatches = (args: {
   claims: ConfirmedClaim[];

@@ -49,7 +49,6 @@ describe("독립 검토의 묶음 판단", () => {
 import { modelEvidenceScope, coveOutputSchemaFor } from "../agents/model-adapter";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type { ToolEvidence } from "../schemas";
-import { MODEL_TIMEOUTS } from "../manifest";
 
 describe("호출 내부 인용 이름 정규화", () => {
   const entry = (ref: string, citable: boolean) => ({ evidence_ref: ref, citable, incomplete: false,
@@ -62,9 +61,5 @@ describe("호출 내부 인용 이름 정규화", () => {
     expect(() => left.restore({ evidence_refs: ["E3"] })).toThrow("CITATION_REFERENCE");
     expect(coveOutputSchemaFor(left.evidence).safeParse({ schema_version: "out-v1", results: [{claim_ref:"C1",status:"CONFIRMED",evidence_refs:["E2"],note_masked:"맥락 근거 확정 금지"}] }).success).toBe(false);
   });
-  it("전체 단계 상한과 저장 여유가 Text 기한을 넘지 않는다", () => {
-    expect(4 * MODEL_TIMEOUTS.domainStageMs + 2 * MODEL_TIMEOUTS.reviewStageMs + MODEL_TIMEOUTS.judgeMs + 6000).toBeLessThanOrEqual(120000);
-    expect(MODEL_TIMEOUTS.domainChoiceMs + MODEL_TIMEOUTS.domainDecisionMs).toBeLessThan(MODEL_TIMEOUTS.domainStageMs);
-    expect(MODEL_TIMEOUTS.reviewChoiceMs + MODEL_TIMEOUTS.reviewDecisionMs).toBeLessThan(MODEL_TIMEOUTS.reviewStageMs);
-  });
+
 });

@@ -1,3 +1,4 @@
+import { createSharedRunDeadline } from "./run-deadline";
 import type { ModelUsage } from "./model-budget";
 /**
  * Run 오케스트레이터.
@@ -140,7 +141,8 @@ export const runVerification = async (args: {
   assertToolsImplemented();
   await loadManifest(args.ctx.sql);
 
-  const session = createRunSession(args.ctx);
+  const budget = createSharedRunDeadline(args.ctx.signal);
+  const session = createRunSession({ ...args.ctx, signal: budget.signal });
   const agentResults: OrchestratedRun["agentResults"] = [];
   let budgetExhausted = false;
   const findings: (DomainFinding & { agent_code: string })[] = [];
@@ -152,7 +154,7 @@ export const runVerification = async (args: {
     session.signal?.throwIfAborted();
     progress({ type: "agent_started", agentCode: agent.agentCode });
     const result = await runDomainAgent({
-      session,
+      session: { ...session, signal: budget.agentSignal() },
       agentCode: agent.agentCode,
       input: {
         schema_version: "in-v1",
@@ -197,7 +199,7 @@ export const runVerification = async (args: {
         return parsed.success ? ({ ok: true, value: parsed.data } as const) : ({ ok: false } as const);
       };
       const result = await runReviewAgent<CoveOutput | RedTeamOutput>({
-        session, agentCode: agent.agentCode, claims: materialClaims,
+        session: { ...session, signal: budget.agentSignal() }, agentCode: agent.agentCode, claims: materialClaims,
         journeyStage: args.journeyStage, model: args.agentModel, impls: TOOL_IMPLS,
         parse,
         refsOf: (value) => value.results.map((entry) => ({
@@ -241,9 +243,10 @@ export const runVerification = async (args: {
   let judged: JudgeOutput | null = null;
   let judgeReasonCode: string | null = null;
   const judgeStageSignal = AbortSignal.timeout(MODEL_TIMEOUTS.judgeMs);
+  const judgeSignal = session.signal ? AbortSignal.any([session.signal, judgeStageSignal]) : judgeStageSignal;
   try {
     // AI-013: Judge 에는 원문을 넣지 않는다. Agent 가 만든 구조와 근거만 넣는다.
-    const signal = session.signal ? AbortSignal.any([session.signal, judgeStageSignal]) : judgeStageSignal;
+    const signal = judgeSignal;
     signal.throwIfAborted();
     if (budgetExhausted) throw Object.assign(new Error("MODEL_BUDGET_BLOCKED"), {code:"MODEL_BUDGET_BLOCKED"});
     // 독립 검토 근거는 CoVe·Red Team 정책 단계에서 사용한다. Judge에는 Domain
@@ -263,7 +266,7 @@ export const runVerification = async (args: {
       judgeReasonCode = normalized.reasonCode;
     }
   } catch (error) {
-    judgeReasonCode = judgeFailureReason(error, judgeStageSignal);
+    judgeReasonCode = judgeFailureReason(error, judgeSignal);
   }
   await recordJudgeRun(session, { claims: args.claims, findings }, judged, judgeStartedAt, judgeReasonCode, args.judgeModel.usage?.());
   progress({ type: "judge_finished", status: judged ? "SUCCEEDED" : "FAILED" });

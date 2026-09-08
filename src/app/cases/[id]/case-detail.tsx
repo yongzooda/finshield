@@ -61,14 +61,20 @@ export function CaseDetail({ caseId }: { caseId: string }) {
     const token = readSessionToken();
     if (!ready || !token || sessionIdentity(token) !== sessionKey) return;
     let alive = true;
-    void (async () => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const refresh = async () => {
       const result = await fetchCase<Detail>(caseId, token);
       if (!alive) return;
-      if (result.ok) { setDetail(result.data); setNotice(null); return; }
+      if (result.ok) {
+        setDetail(result.data); setNotice(null);
+        if (["QUEUED", "RUNNING"].includes(result.data.runs[0]?.status)) timer = setTimeout(() => void refresh(), 4000);
+        return;
+      }
       if (result.status === 401) setToken(null);
       setNotice(result.error);
-    })();
-    return () => { alive = false; };
+    };
+    void refresh();
+    return () => { alive = false; clearTimeout(timer); };
   }, [ready, sessionKey, caseId, setToken]);
 
   if (!ready) return null;
@@ -113,7 +119,9 @@ export function CaseDetail({ caseId }: { caseId: string }) {
           <p className="fs-body mt-2">
             {partialReasons.length > 0
               ? `끝까지 확인하지 못한 단계가 있습니다. ${partialReasons.map(partialLabel).join(" · ")}`
-              : "이번 확인은 온전히 끝나지 않았습니다."}
+              : ["QUEUED", "RUNNING"].includes(latest.status)
+                ? "공식 자료와 대조하고 있습니다. 완료되면 이 화면에 결과가 표시됩니다."
+                : "이번 확인은 온전히 끝나지 않았습니다."}
           </p>
         </FsCard>
       ) : null}

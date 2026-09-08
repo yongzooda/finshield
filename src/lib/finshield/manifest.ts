@@ -15,7 +15,7 @@
 
 // 시험 fixture 와 같은 이름을 쓰지 않도록 제품 정의는 p0-v2 을 버전으로 쓴다.
 export const DEFINITION_VERSION = "p0-v3";
-export const MANIFEST_VERSION = "finshield-p0-loan-v9";
+export const MANIFEST_VERSION = "finshield-p0-loan-v10";
 export const FINSHIELD_MODEL = "claude-sonnet-5";
 export const SCENARIO = "LOAN" as const;
 export const SCENARIO_VERSION = "sunshine15-v1";
@@ -23,17 +23,19 @@ export const SCENARIO_VERSION = "sunshine15-v1";
 /**
  * 실제 Sonnet 5 응답 시간으로 확인한 단계별 상한이다.
  *
- * 선택과 판단의 합보다 바깥 단계 상한이 짧지 않게 두고, 공개 Demo의 110초
- * 전체 상한 안에서 여섯 Agent와 Judge가 순차 종결될 수 있게 한다.
+ * 단계 값은 개별 호출의 최대 대기다. 남은 전체 기한보다 우선하지 않는다.
+ * 빠른 앞 단계가 남긴 시간을 뒤 단계도 사용할 수 있게 하고, 전체 Run의
+ * AbortSignal(Text 120초·파일 180초, 저장 여유 별도)을 모든 호출에 합성한다.
  */
 export const MODEL_TIMEOUTS = Object.freeze({
-  domainChoiceMs: 4_000,
-  domainDecisionMs: 11_000,
-  domainStageMs: 16_000,
-  reviewChoiceMs: 5_000,
-  reviewDecisionMs: 12_000,
-  reviewStageMs: 18_000,
-  judgeMs: 12_000,
+  domainChoiceMs: 8_000,
+  domainDecisionMs: 15_000,
+  domainStageMs: 25_000,
+  reviewChoiceMs: 8_000,
+  reviewDecisionMs: 15_000,
+  reviewStageMs: 25_000,
+  judgeMs: 20_000,
+  judgeReserveMs: 10_000,
   demoRunMs: 115_000,
 });
 
