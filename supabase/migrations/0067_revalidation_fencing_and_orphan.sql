@@ -110,6 +110,9 @@ declare
   reason text;
   active_run record;
 begin
+  if coalesce(p_lease_seconds,0) not between 10 and 600 or octet_length(coalesce(p_worker,'')) not between 1 and 128 then
+    raise exception 'claim 인자 범위 위반' using errcode='23514';
+  end if;
   select x.* into j
     from public.revalidation_jobs x
    where x.id = p_job and x.owner_id = p_owner
@@ -149,11 +152,19 @@ begin
     return;
   end if;
 
-  return query
-    select claimed.job_id, claimed.lease_token, claimed.attempt_no,
-           claimed.owner_id, claimed.case_id, claimed.base_passport_id
-      from private.claim_case_revalidation_job_without_orphan_cleanup(
-        p_owner, p_job, p_worker, p_lease_seconds) claimed;
+  if j.id is null or j.status not in ('QUEUED','RUNNING') or rt.available_at>clock_timestamp()
+     or rt.attempt_no>=rt.max_attempts or rt.leased_until>=clock_timestamp() then return;end if;
+  if j.cancel_requested_at is not null then
+    perform private.settle_revalidation_cancel(j.id);return;
+  end if;
+  update public.revalidation_jobs set status='RUNNING',started_at=coalesce(started_at,clock_timestamp()) where id=j.id;
+  update private.revalidation_job_runtime
+    set lease_owner=p_worker,lease_token=gen_random_uuid(),
+        leased_until=clock_timestamp()+make_interval(secs=>p_lease_seconds),heartbeat_at=clock_timestamp(),
+        attempt_no=revalidation_job_runtime.attempt_no+1
+    where revalidation_job_runtime.job_id=j.id returning * into rt;
+  perform private.append_revalidation_event(j.id,'LEASED',jsonb_build_object('attempt_no',rt.attempt_no));
+  return query select j.id,rt.lease_token,rt.attempt_no,j.owner_id,j.case_id,j.base_passport_id;
 end
 $$;
 
@@ -164,3 +175,23 @@ grant execute on function private.claim_case_revalidation_job(uuid, uuid, text, 
 
 comment on function private.claim_case_revalidation_job(uuid, uuid, text, integer) is
   '현재 Lease 선점과 재시도 소진 Orphan 종결을 한 잠금 안에서 수행한다.';
+
+-- heartbeat도 잠금 뒤 실제 시각으로 만료를 검사하고 연장한다.
+create or replace function private.heartbeat_revalidation_job(p_job_id uuid,p_lease_token uuid,p_extend_seconds integer default 120)
+returns boolean language plpgsql security definer set search_path='' as $$
+declare j public.revalidation_jobs%rowtype;
+begin
+ if coalesce(p_extend_seconds,0) not between 10 and 600 then raise exception '임대 연장 범위 위반' using errcode='23514';end if;
+ select * into j from public.revalidation_jobs where id=p_job_id for update;
+ if not found or j.status<>'RUNNING' then return false;end if;
+ perform 1 from private.revalidation_job_runtime where job_id=p_job_id for update;
+ if not exists(select 1 from private.revalidation_job_runtime
+   where job_id=p_job_id and lease_token=p_lease_token and leased_until>clock_timestamp()) then return false;end if;
+ if j.cancel_requested_at is not null then perform private.settle_revalidation_cancel(p_job_id);return false;end if;
+ update private.revalidation_job_runtime
+   set heartbeat_at=clock_timestamp(),leased_until=clock_timestamp()+make_interval(secs=>p_extend_seconds)
+   where job_id=p_job_id and lease_token=p_lease_token;
+ return true;
+end $$;
+revoke all on function private.heartbeat_revalidation_job(uuid,uuid,integer) from public,anon,authenticated;
+grant execute on function private.heartbeat_revalidation_job(uuid,uuid,integer) to finshield_worker;

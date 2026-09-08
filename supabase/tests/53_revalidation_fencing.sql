@@ -40,6 +40,7 @@ begin
   update private.revalidation_job_runtime set leased_until = clock_timestamp() + interval '10 milliseconds' where job_id = job;
   perform pg_sleep(0.02);
 
+  if private.heartbeat_revalidation_job(job,old_lease,10) then raise exception '만료 Lease의 heartbeat 연장 허용';end if;
   begin
     perform private.fail_revalidation_job(job, old_lease, 'STALE_WORKER', null);
     raise exception '만료 Lease가 Job 실패 쓰기에 성공했다';

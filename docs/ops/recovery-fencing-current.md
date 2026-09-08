@@ -7,3 +7,5 @@ REV-001·N-AVL-005·N-OPS-004, 이슈 #282. PR #285의 0053을 운영 0065 뒤�
 격리 PostgreSQL 17에 Migration 64개와 SQL 시험 51파일이 통과했다. 현재 Lease 만료·회전·stale heartbeat·소진 Orphan·이전 Passport 보존·취소 멱등성을 확인했다. 별도의 실제 Worker DB 통합 시험 1개에서 Run 쓰기 SQL 오류 주입 전체 rollback, 잘못된 Lease 무변경, 재시도와 반복 호출 동일 종결, 과거 Job만 실패한 상태 복원이 통과했다. 이 시험은 실제 Vercel 배포 장애 20종 전체 시험이 아니다. B-JOB-01·B-DEADLINE-01 채택 상태는 유지한다.
 
 추가 보완: 원래 wrapper의 `now()`는 트랜잭션 시작 시각이라 대기 중 만료를 놓칠 수 있다. Job과 runtime을 먼저 잠그고 `clock_timestamp()`로 유효성을 확인한다. 같은 트랜잭션 안에서 10ms 임대를 만든 뒤 20ms 실제 대기한 시험도 실패·최종화 쓰기를 거부했다.
+
+시각 경계 시험의 첫 전체 실행은 만료 쓰기 거부 뒤 재선점 단계에서 실패했다(`fencing-migrations-final.txt`). 원래 선점·heartbeat에도 `now()`가 남아 있었기 때문이다. 두 경계를 같은 실제 시각 검사로 바꾼 뒤 Migration 64개·SQL 시험 51파일 전체와 OCR·재검증 DB 통합 2건이 통과했다. 실패 원본을 보존한다.
