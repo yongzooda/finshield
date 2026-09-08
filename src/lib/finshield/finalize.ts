@@ -15,6 +15,7 @@ import type postgres from "postgres";
 import type { ClaimState, ConfirmedClaim, CoveOutput, RedTeamOutput } from "./schemas";
 import { buildActionGuide } from "./action-guide";
 import type { OrchestratedRun } from "./orchestrator";
+import { highRiskAction, hasHighRiskAction } from "./high-risk-actions";
 
 type Sql = ReturnType<typeof postgres>;
 
@@ -102,7 +103,8 @@ export const buildFinalClaims = (args: {
       relationOf.set(`${claim.claim_ref}:${ref}`, coveResult?.status === "CONFIRMED" ? "SUPPORT"
         : coveResult?.status === "REFUTED" || redResult?.status === "COUNTER_EVIDENCE" ? "CONTRADICT" : "CONTEXT");
     }
-    const refs = [...new Set([...(judged?.evidence_refs ?? []), ...reviewRefs])];
+    const action = highRiskAction(claim.statement_masked, run.evidence);
+    const refs = [...new Set([...(judged?.evidence_refs ?? []), ...reviewRefs, ...(action ? [action.ref] : [])])];
     const seenSources = new Set<string>();
     const evidences = refs
       .map((ref) => ({ evidence_id: run.evidenceIds.get(ref), relation: relationOf.get(`${claim.claim_ref}:${ref}`) ?? "CONTEXT" }))
@@ -122,15 +124,15 @@ export const buildFinalClaims = (args: {
       claim_id: claim.claimId,
       claim_type: claim.claim_type,
       status: decided.state,
-      reason_code: decided.reasonCode,
+      reason_code: action?.code ?? decided.reasonCode,
       cove_status: cove === "INCONCLUSIVE" ? "UNRESOLVED"
         : cove === "FAILED" || cove === "NOT_REQUIRED" ? cove
         : decided.reasonCode === "COVE_CONFIRMED" ? "CONFIRMED" : "CHALLENGED",
       // NONE_FOUND 는 초기 결론 지지가 아니라 이번 검색에서 반증을 못 찾았다는 뜻이다.
       red_team_status: redTeam === "NONE_FOUND" ? "UNRESOLVED" : redTeam,
-      decision_summary_masked: decided.state !== base
+      decision_summary_masked: action?.summary ?? (decided.state !== base
         ? "독립 자료 확인이 충분하지 않아 이 항목을 확정하지 않았습니다."
-        : judged?.rationale_masked ?? "확인하지 못했습니다.",
+        : judged?.rationale_masked ?? "확인하지 못했습니다."),
       evidences,
     };
   });
@@ -152,8 +154,9 @@ export const buildAxisResults = (finals: FinalClaim[], hasProfile: boolean) => {
       limitation_codes: [],
     },
     {
-      axis: "TRANSACTION_SALES_RISK", result_code: risk === "CONFIRMED" ? "UNCERTAIN" : risk,
-      summary_masked: risks.length ? "접근 경로와 권유 방식에 해당하는 항목만 확인했습니다. 선입금·앱 설치 요구는 공식 창구에서 먼저 확인하세요." : "권유 방식·접근 경로에 대한 확인 항목이 없어 거래 위험을 확정하지 않았습니다.",
+      axis: "TRANSACTION_SALES_RISK", result_code: hasHighRiskAction(finals) ? "HIGH_RISK_ACTION" : risk === "CONFIRMED" ? "UNCERTAIN" : risk,
+      summary_masked: hasHighRiskAction(finals) ? "선입금 또는 원격제어 앱 설치 요구가 포함되어 있습니다. 송금·설치를 멈추고 공식 창구로 확인하세요. 범죄 사실을 확정한 판단은 아닙니다."
+        : risks.length ? "접근 경로와 권유 방식에 해당하는 항목만 확인했습니다. 선입금·앱 설치 요구는 공식 창구에서 먼저 확인하세요." : "권유 방식·접근 경로에 대한 확인 항목이 없어 거래 위험을 확정하지 않았습니다.",
       limitation_codes: ["PRE_TRANSACTION_SCOPE"],
     },
     {
@@ -183,7 +186,7 @@ export const finalizeRun = async (args: {
     .map((entry) => entry.reasonCode ?? "AGENT_PARTIAL");
   if (args.run.judgeReasonCode) partialReasons.push(args.run.judgeReasonCode);
   try {
-    const guide = await buildActionGuide(args.sql);
+    const guide = await buildActionGuide(args.sql, finals);
     const rows = await args.sql`
       select private.finalize_verification_run(${args.runId}::uuid,
         ${JSON.stringify(finals)}::text::jsonb, ${JSON.stringify(axes)}::text::jsonb, ${JSON.stringify(guide.stored)}::text::jsonb,

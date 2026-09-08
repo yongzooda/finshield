@@ -15,7 +15,7 @@
 
 // 시험 fixture 와 같은 이름을 쓰지 않도록 제품 정의는 p0-v2 을 버전으로 쓴다.
 export const DEFINITION_VERSION = "p0-v3";
-export const MANIFEST_VERSION = "finshield-p0-loan-v10";
+export const MANIFEST_VERSION = "finshield-p0-loan-v11";
 export const FINSHIELD_MODEL = "claude-sonnet-5";
 export const SCENARIO = "LOAN" as const;
 export const SCENARIO_VERSION = "sunshine15-v1";
@@ -167,7 +167,7 @@ export const POLICY_VERSIONS = Object.freeze({
   promptBundleVersion: "p0-loan-prompts-v3",
   schemaBundleVersion: "p0-loan-schemas-v1",
   evidencePolicyVersion: "evidence-policy-v1",
-  resultMatrixVersion: "result-matrix-v1",
+  resultMatrixVersion: "result-matrix-v2",
   coverageContractVersion: "coverage-contract-v1",
   profilePolicyVersion: "profile-policy-v2",
   piiPolicyVersion: "pii-policy-v1",
@@ -210,6 +210,9 @@ export const POLICIES = Object.freeze([
       // 하나라도 Material 이 반증되면 전체를 그 쪽으로 끌고 간다.
       material_contradicted_dominates: true,
       partial_agent_marks_run: "PARTIAL",
+      high_risk_reason_codes: ["HIGH_RISK_ADVANCE_PAYMENT", "HIGH_RISK_REMOTE_CONTROL"],
+      high_risk_evidence_scope: "reviewed-official-prevention-guidance",
+      high_risk_changes_claim_state: false,
     },
   },
   {

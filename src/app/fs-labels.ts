@@ -20,6 +20,7 @@ export const AXIS_LABEL: Record<string, string> = {
 export const AXIS_RESULT: Record<string, { label: string; tone: ChipTone }> = {
   CONFIRMED: { label: "확인됨", tone: "verified" },
   CONTRADICTED: { label: "사실과 다름", tone: "contra" },
+  HIGH_RISK_ACTION: { label: "위험한 행동 요구", tone: "contra" },
   CONFLICTING: { label: "자료가 엇갈림", tone: "caution" },
   UNCERTAIN: { label: "확정 못 함", tone: "neutral" },
   NEED_MORE_INFORMATION: { label: "정보 부족", tone: "caution" },
@@ -53,6 +54,8 @@ export const AGENT_LABEL: Record<string, string> = {
 /** 확정 상태를 그렇게 정한 이유. 낮춘 이유가 여기 남는다. */
 const REASON: Record<string, string> = {
   AS_JUDGED: "확인한 근거대로",
+  HIGH_RISK_ADVANCE_PAYMENT: "공식 예방 지침과 대조한 선입금 요구",
+  HIGH_RISK_REMOTE_CONTROL: "공식 예방 지침과 대조한 원격제어 요구",
   INDEPENDENT_REVIEW_FAILED: "독립 검토를 마치지 못해 보류함",
   COVE_CONFIRMED: "다른 검색으로 다시 확인함",
   COVE_REFUTED: "다시 확인했더니 결론이 달랐음",

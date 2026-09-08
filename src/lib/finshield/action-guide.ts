@@ -1,8 +1,9 @@
 import "server-only";
 import type postgres from "postgres";
+import { hasHighRiskAction } from "./high-risk-actions";
 
 /** RES-004·RES-007: 문구는 코드 규칙으로, 연락처는 승인 Registry에서만 가져온다. */
-export async function buildActionGuide(sql: ReturnType<typeof postgres>) {
+export async function buildActionGuide(sql: ReturnType<typeof postgres>, claims: {reason_code:string}[] = []) {
   const channels = await sql`
     select id, channel_type, display_value from kb.official_channel_registry
     where institution_code='INST_KINFA'
@@ -12,8 +13,9 @@ export async function buildActionGuide(sql: ReturnType<typeof postgres>) {
   const phone = channels.find(channel => channel.channel_type === "PHONE");
   const actions = [{
     action_no: 1, action_code: "VERIFY_OFFICIAL_CHANNEL",
-    title: "가입·송금·앱 설치 전에 공식 창구로 확인하세요",
-    detail: "권유자가 준 연락처 대신 공식 창구에 상품 조건과 선입금·원격제어 앱 요구를 확인하세요.",
+    title: hasHighRiskAction(claims) ? "송금·원격제어 앱 설치를 멈추고 공식 창구로 확인하세요" : "가입·송금·앱 설치 전에 공식 창구로 확인하세요",
+    detail: hasHighRiskAction(claims) ? "권유문에 위험한 행동 요구가 있습니다. 권유자가 준 연락처를 사용하지 말고 아래 공식 창구에서 확인하세요. 개별 사실 판정이 보류돼도 이 예방 안내를 먼저 따라 주세요."
+      : "권유자가 준 연락처 대신 공식 창구에 상품 조건과 선입금·원격제어 앱 요구를 확인하세요.",
   }];
   return {
     stored: {
