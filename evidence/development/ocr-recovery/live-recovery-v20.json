@@ -1,0 +1,242 @@
+{
+  "deployment": "dpl_35jKzWg58JSxnaSnLJJkYCF1LjyQ",
+  "commit": "2b6ae8a48991744e582b33ac4200eb1d18cb3289",
+  "http": {
+    "before": {
+      "label": "before",
+      "status": 200,
+      "elapsed_ms": 4548,
+      "data": {
+        "job": {
+          "diff": null,
+          "claims": [
+            {
+              "claim_id": "7edb0fd8-634b-4b33-b940-6052c3c50890",
+              "statement_masked": "햇살론15는 정부지원 승인 대상 상품이다."
+            },
+            {
+              "claim_id": "acc573b5-17ba-494a-a7fd-6e13dd1fc737",
+              "statement_masked": "햇살론15의 금리는 연 3% 고정금리이다."
+            },
+            {
+              "claim_id": "20ab765b-f18d-493b-a8e1-4ea0d0f0deaa",
+              "statement_masked": "햇살론15의 한도는 최대 2천만 원이다."
+            },
+            {
+              "claim_id": "9dd2f382-1183-4401-bedf-37b9726a7238",
+              "statement_masked": "햇살론15는 오늘 안에 신청해야 한다는 신청 시한이 있다."
+            },
+            {
+              "claim_id": "fc20ed5e-806a-4ad5-91eb-439b8080918f",
+              "statement_masked": "햇살론15 진행을 위해 보증료 30만 원을 먼저 입금해야 한다."
+            },
+            {
+              "claim_id": "4d59fa05-b064-4a61-98c3-dcc8344ec7f3",
+              "statement_masked": "상담원이 원격제어 앱을 설치하도록 요구한다."
+            }
+          ],
+          "events": [
+            {
+              "payload": {
+                "schema_version": "1",
+                "base_passport_id": "162d9c8d-a5ae-4a9c-beef-24a80b96ad76"
+              },
+              "event_type": "QUEUED"
+            },
+            {
+              "payload": {
+                "attempt_no": 1,
+                "schema_version": "1"
+              },
+              "event_type": "LEASED"
+            }
+          ],
+          "job_id": "be1a8542-bcf3-48c6-b167-909701ac540f",
+          "partial": false,
+          "job_status": "RUNNING",
+          "passport_id": null,
+          "reason_code": null,
+          "recovery_required": true
+        }
+      }
+    },
+    "parallel": [
+      {
+        "label": "device-a",
+        "status": 202,
+        "elapsed_ms": 2969,
+        "data": {
+          "job_id": "be1a8542-bcf3-48c6-b167-909701ac540f"
+        }
+      },
+      {
+        "label": "device-b",
+        "status": 202,
+        "elapsed_ms": 2948,
+        "data": {
+          "job_id": "be1a8542-bcf3-48c6-b167-909701ac540f"
+        }
+      }
+    ]
+  },
+  "restored": {
+    "label": "restored",
+    "status": 200,
+    "elapsed_ms": 2750,
+    "data": {
+      "job": {
+        "diff": null,
+        "claims": [
+          {
+            "claim_id": "7edb0fd8-634b-4b33-b940-6052c3c50890",
+            "statement_masked": "햇살론15는 정부지원 승인 대상 상품이다."
+          },
+          {
+            "claim_id": "acc573b5-17ba-494a-a7fd-6e13dd1fc737",
+            "statement_masked": "햇살론15의 금리는 연 3% 고정금리이다."
+          },
+          {
+            "claim_id": "20ab765b-f18d-493b-a8e1-4ea0d0f0deaa",
+            "statement_masked": "햇살론15의 한도는 최대 2천만 원이다."
+          },
+          {
+            "claim_id": "9dd2f382-1183-4401-bedf-37b9726a7238",
+            "statement_masked": "햇살론15는 오늘 안에 신청해야 한다는 신청 시한이 있다."
+          },
+          {
+            "claim_id": "fc20ed5e-806a-4ad5-91eb-439b8080918f",
+            "statement_masked": "햇살론15 진행을 위해 보증료 30만 원을 먼저 입금해야 한다."
+          },
+          {
+            "claim_id": "4d59fa05-b064-4a61-98c3-dcc8344ec7f3",
+            "statement_masked": "상담원이 원격제어 앱을 설치하도록 요구한다."
+          }
+        ],
+        "events": [
+          {
+            "payload": {
+              "schema_version": "1",
+              "base_passport_id": "162d9c8d-a5ae-4a9c-beef-24a80b96ad76"
+            },
+            "event_type": "QUEUED"
+          },
+          {
+            "payload": {
+              "attempt_no": 1,
+              "schema_version": "1"
+            },
+            "event_type": "LEASED"
+          },
+          {
+            "payload": {
+              "attempt_no": 2,
+              "schema_version": "1"
+            },
+            "event_type": "LEASED"
+          },
+          {
+            "payload": {
+              "error_code": null,
+              "reason_code": "PROVIDER_RESULT_UNKNOWN",
+              "schema_version": "1"
+            },
+            "event_type": "FAILED"
+          }
+        ],
+        "job_id": "be1a8542-bcf3-48c6-b167-909701ac540f",
+        "partial": false,
+        "job_status": "FAILED",
+        "passport_id": null,
+        "reason_code": "PROVIDER_RESULT_UNKNOWN",
+        "recovery_required": false
+      }
+    }
+  },
+  "other_device": {
+    "label": "other-device-restored",
+    "status": 200,
+    "elapsed_ms": 2400,
+    "data": {
+      "job": {
+        "diff": null,
+        "claims": [
+          {
+            "claim_id": "7edb0fd8-634b-4b33-b940-6052c3c50890",
+            "statement_masked": "햇살론15는 정부지원 승인 대상 상품이다."
+          },
+          {
+            "claim_id": "acc573b5-17ba-494a-a7fd-6e13dd1fc737",
+            "statement_masked": "햇살론15의 금리는 연 3% 고정금리이다."
+          },
+          {
+            "claim_id": "20ab765b-f18d-493b-a8e1-4ea0d0f0deaa",
+            "statement_masked": "햇살론15의 한도는 최대 2천만 원이다."
+          },
+          {
+            "claim_id": "9dd2f382-1183-4401-bedf-37b9726a7238",
+            "statement_masked": "햇살론15는 오늘 안에 신청해야 한다는 신청 시한이 있다."
+          },
+          {
+            "claim_id": "fc20ed5e-806a-4ad5-91eb-439b8080918f",
+            "statement_masked": "햇살론15 진행을 위해 보증료 30만 원을 먼저 입금해야 한다."
+          },
+          {
+            "claim_id": "4d59fa05-b064-4a61-98c3-dcc8344ec7f3",
+            "statement_masked": "상담원이 원격제어 앱을 설치하도록 요구한다."
+          }
+        ],
+        "events": [
+          {
+            "payload": {
+              "schema_version": "1",
+              "base_passport_id": "162d9c8d-a5ae-4a9c-beef-24a80b96ad76"
+            },
+            "event_type": "QUEUED"
+          },
+          {
+            "payload": {
+              "attempt_no": 1,
+              "schema_version": "1"
+            },
+            "event_type": "LEASED"
+          },
+          {
+            "payload": {
+              "attempt_no": 2,
+              "schema_version": "1"
+            },
+            "event_type": "LEASED"
+          },
+          {
+            "payload": {
+              "error_code": null,
+              "reason_code": "PROVIDER_RESULT_UNKNOWN",
+              "schema_version": "1"
+            },
+            "event_type": "FAILED"
+          }
+        ],
+        "job_id": "be1a8542-bcf3-48c6-b167-909701ac540f",
+        "partial": false,
+        "job_status": "FAILED",
+        "passport_id": null,
+        "reason_code": "PROVIDER_RESULT_UNKNOWN",
+        "recovery_required": false
+      }
+    }
+  },
+  "stale_worker": {
+    "stale_write_rejected": true
+  },
+  "ledger": {
+    "source": "실제 FinShield Supabase SQL Editor, 본 작업의 합성 Job만 조회",
+    "job_status": "FAILED",
+    "run_status": "FAILED",
+    "lease_released": true,
+    "failure_events": 1,
+    "stale_progress_events": 0,
+    "preserved_passports": 1,
+    "new_provider_reservations": 0
+  },
+  "scope": "실제 Vercel Workflow 복구 경계 표본. 장애 20종·P95·정식 Gate 채택 아님."
+}

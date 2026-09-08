@@ -1,3 +1,12 @@
+## 2026-09-09 05시 OCR·인용·복구 통합 운영 반영
+
+- 최신 공개 운영은 `547af19b5833e1d63c70a25b31b156059b0cdd7d`, 배포 `dpl_6G8wpYeQwGJyrosDbBX34hV2QQMJ`, Manifest v20·Agent v12·Tool v5다. 원격은 0069까지 적용했다. 이전 아래 기록은 시간별 과거 상태다.
+- 저신뢰 원본 대조 강제·페이지 강조·편집 후 재확인, 금융 문구 PII 오탐, Red Team 반박 인용 자격, 실제 시각 Lease·진행 기록 fencing·만료 작업 재연결을 통합했다. 스캔 PDF 6항목 59.439초·최종 PNG 6항목 50.806초 검증/저장·PARTIAL=false다. 전처리는 각각 18.219초·17.448초다. 첫 PNG 인용 실패와 중간 검사 실패를 보존했다.
+- 실제 Vercel Workflow의 두 동시 POST는 같은 Job으로 복구됐다. 미확정 기존 Run은 모델 재호출 없이 Job과 FAILED, 새 비용 예약 0, 실패 이벤트 1, 이전 Passport 보존, stale Worker 거부, 다른 세션 동일 상태를 확인했다. 전체 장애 20종 평가와 구분한다.
+- 공개 사이트의 실제 합성 회원 결과를 브라우저로 확인했다. 운영 Runtime·DB 구조/설정/권한 대조 통과. 시험 계정 탈퇴 COMPLETED, Auth·Profile·Case·임시 객체·Embedding·Storage 모두 0, 재로그인 401이다.
+- 727 기본 테스트·선택적 skip 96, 실제 Worker DB 통합 3건·66 Migration·52 SQL 파일 통과. 실제 병합 후보 `64fe019d`에서 필수 검사 전체 로컬 통과. PR #301에 통합하며 main은 GitHub 과금 차단으로 여전히 `8f9b40a`다. 운영 변경을 main에 병합하기 전 옛 main을 재배포하지 않는다.
+- 정식 OCR F1·검색·개인정보·Workflow/기한·전체 E2E/Claim 품질은 완료되지 않았다. Implementation NO-GO·Release NOT-EVALUATED 유지. [현재 요청별 상태](docs/ops/2026-09-09-current-service-status.md), [원본 검증 자료](evidence/development/ocr-recovery/)를 따른다.
+
 ## 2026-09-09 심사 체험 세 결함 운영 반영
 
 - 운영은 f9031ca, 배포 dpl_418rnextgdm4KLckt6XbfpM1f9rT, Manifest v19·Agent v11·Tool v5다. 원격 Migration 0065까지 추가 적용했고 운영 Runtime·구조 6종·설정 10항목의 정합성이 통과했다.

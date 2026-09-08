@@ -1,0 +1,68 @@
+{
+  "reports": [
+    {
+      "stage": "cleanup",
+      "path": "/api/finshield/session",
+      "status": 200,
+      "elapsed_ms": 3039,
+      "types": [
+        "json"
+      ]
+    },
+    {
+      "stage": "cleanup",
+      "path": "/api/finshield/account/delete",
+      "status": 200,
+      "elapsed_ms": 2988,
+      "types": [
+        "ACCESS_BLOCKED"
+      ]
+    },
+    {
+      "stage": "cleanup",
+      "path": "/api/finshield/account/delete",
+      "status": 200,
+      "elapsed_ms": 2781,
+      "types": [
+        "ACCESS_BLOCKED"
+      ]
+    },
+    {
+      "stage": "deletion-status",
+      "path": "/api/finshield/account/delete",
+      "status": 200,
+      "elapsed_ms": 2464,
+      "types": [
+        "ACCESS_BLOCKED"
+      ]
+    },
+    {
+      "stage": "deletion-status",
+      "path": "/api/finshield/account/delete",
+      "status": 200,
+      "elapsed_ms": 3080,
+      "types": [
+        "COMPLETED"
+      ]
+    },
+    {
+      "stage": "deletion-status",
+      "path": "/api/finshield/session",
+      "status": 401,
+      "elapsed_ms": 2273,
+      "types": [
+        "json"
+      ]
+    }
+  ],
+  "ledger": {
+    "source": "실제 Supabase SQL Editor에서 본 작업의 합성 owner만 조회",
+    "auth_users": 0,
+    "profiles": 0,
+    "cases": 0,
+    "input_objects": 0,
+    "case_embeddings": 0,
+    "raw_storage": 0
+  },
+  "limits": "전체 계정 삭제 장애 행렬·정식 Gate 채택과 구분"
+}

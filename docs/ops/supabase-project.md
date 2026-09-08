@@ -1,3 +1,7 @@
+## 2026-09-09 최신 운영 정합성
+
+원격은 0001~0050과 0054~0069를 적용했다. 0066·0067은 낮은 신뢰도 OCR 확인과 만료 Lease·Orphan, 0068은 Agent v12/Manifest v20, 0069는 진행 기록 Lease 권한이다. 0068/0069는 활성 재검증 0을 조회하고 트랜잭션 안에서도 작업 표를 잠가 RUNNING이 생기면 적용을 중단하도록 했다. 기존 0051~0053을 재실행하거나 소급 ledger를 쓰지 않았다. 새 격리 DB `finshield_latest`와 실제 운영의 구조 6종·설정 10종·RLS/권한·운영 Runtime이 일치한다. 원본: `evidence/development/ocr-recovery/public-alignment.json`. 아래 과거 기록의 미적용 표현과 구분한다.
+
 # FinShield Supabase 프로젝트 운영
 
 ## 2026-09-08 운영 배포 최종 대조
