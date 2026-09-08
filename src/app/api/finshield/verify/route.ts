@@ -145,8 +145,9 @@ export async function POST(request: Request): Promise<Response> {
     } catch (error) {
       const errorName = (error as { name?: string })?.name;
       const deadline = errorName === "AbortError" || errorName === "TimeoutError";
+      const clientDisconnected = abort.signal.aborted || request.signal.aborted;
       if (activeRunId) await fsql()`select id from private.fail_verification_run(${activeRunId}::uuid,
-        ${request.signal.aborted ? "CLIENT_DISCONNECTED" : deadline ? "DEADLINE_EXCEEDED" : "VERIFICATION_FAILED"},null)`.catch(()=>undefined);
+        ${clientDisconnected ? "CLIENT_DISCONNECTED" : deadline ? "DEADLINE_EXCEEDED" : "VERIFICATION_FAILED"},null)`.catch(()=>undefined);
       // 내부 사정을 화면에 흘리지 않는다. 무엇이 안 됐는지만 알린다.
       push({ type: "error", message: deadline
         ? "제한 시간 안에 검증을 끝내지 못했습니다. 같은 항목으로 다시 시도해 주세요."
