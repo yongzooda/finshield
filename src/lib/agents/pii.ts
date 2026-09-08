@@ -206,8 +206,11 @@ export function maskPii(input: string): MaskResult {
   }
 
   for (const [index,re] of NAME_RULES.entries()) {
-    text = text.replace(new RegExp(re.source, re.flags), (m, captured: string) => {
+    text = text.replace(new RegExp(re.source, re.flags), (m, captured: string, offset: number, source: string) => {
       if (NOT_NAMES.has(captured)) return m;
+      // 목적·수단 표현 뒤의 역할어는 이름 단서가 아니다. 명시한 성명 라벨은 아래 규칙이 가린다.
+      if (index === 1 && captured === "위해"
+        && /[을를]\s+$/.test(source.slice(0,offset))) return m;
       // 성씨만으로 추측하는 마지막 규칙에서만 일반 금융 명사·서술어를 제외한다.
       // 성명 라벨·호칭·직책으로 명시한 이름에는 이 예외를 적용하지 않는다.
       if (index === NAME_RULES.length - 1 && (captured === "권유문"

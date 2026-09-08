@@ -112,3 +112,10 @@ describe("금융 행동 문구와 명시한 성명 구분",()=>{
   }
  });
 });
+
+ it("목적·수단 표현은 보존하고 동형의 명시한 이름은 가린다",()=>{
+  for(const text of ["진행을 위해 상담원이 안내하는 앱입니다.","상담을 통해 담당자가 설명합니다."])
+   expect(maskPii(text).text).toBe(text);
+  for(const text of ["성명: 위해", "위해 상담원", "성명: 통해"])
+   expect(maskPii(text).text).toContain("[이름]");
+ });
