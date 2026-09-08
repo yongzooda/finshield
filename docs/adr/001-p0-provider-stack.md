@@ -629,9 +629,9 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `B-RETRIEVAL-01` | Metadata Filter·Keyword FTS·Vector·Rerank 종단 top 5 품질 | NOT-EVALUATED | §15.1 종단 Retrieval 합격 + query별 단계 원장; `B-SUPABASE-01` 선행 |
 | `B-OCR-01` | PDF.js·CLOVA 한국어 숫자·부정어·기관명·URL·표 Fixture | NOT-EVALUATED | §15.1 OCR·Parser 합격 + page별 diff |
 | `B-FILE-SAFETY` | encrypted/active/polyglot/bomb·격리 parser·dependency advisory | PASS | §15.1 File safety 합격 |
-| `B-CONSENT-01` | OCR 동의/거절·외부 전송·삭제 격리 prototype | PASS | §15.1 동의 거절 전송 0건 + 감사 row |
-| `B-STORAGE-01` | authenticated TUS·one-use slot·10 MiB·MIME/Magic Byte·cross-user/worker RLS | PASS | positive/negative test와 발급 URL/token 재사용 거부 |
-| `B-DELETE-01` | 확인·중단·Case 삭제·기발급 URL·24시간 cleanup | PASS | §15.1 물리 삭제 합격 + deletion ledger |
+| `B-CONSENT-01` | OCR 동의/거절·외부 전송·삭제 격리 prototype | NOT-EVALUATED | §15.1 동의 거절 전송 0건 + 감사 row |
+| `B-STORAGE-01` | authenticated TUS·one-use slot·10 MiB·MIME/Magic Byte·cross-user/worker RLS | NOT-EVALUATED | positive/negative test와 발급 URL/token 재사용 거부 |
+| `B-DELETE-01` | 확인·중단·Case 삭제·기발급 URL·24시간 cleanup | NOT-EVALUATED | §15.1 물리 삭제 합격 + deletion ledger |
 | `B-SUPABASE-01` | 전용 Project·최소권한 role·pooler 6543·pgvector·Migration/RLS | NOT-EVALUATED | §15.1 cross-user/worker 시험과 preflight 합격 |
 | `B-PROCESSOR-PRIVACY` | Anthropic·Cohere·CLOVA·Supabase 학습/보존/DPA/region/하위처리자·PII fail-closed | NOT-EVALUATED | §15.1 Processor privacy + 계약 inventory |
 | `B-PRIVACY-VERCEL` | Hobby plan·고객 콘텐츠 조건·region·Log 보존·Workflow RBAC과 실개인정보 미처리 강제 | NOT-EVALUATED | plan 조건 기록 + §15.1 Processor privacy 합격; 실데이터 운영 시 DPA plan 재평가 |
@@ -639,7 +639,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `B-SOURCE-02` | 공공데이터/FSS key·quota·pagination·license label | PASS | API response metadata와 source registry |
 | `B-SOURCE-03` | Demo `햇살론15` 정확 product/institution record | PASS | 두 API의 immutable snapshot과 official product URL |
 | `B-JOB-01` | Workflow deploy·replay·retry·orphan·fencing·cancel·ambiguous Provider | NOT-EVALUATED | §15.1 Workflow 합격 + fault run/DB state |
-| `B-RATE-01` | 원자 reserve/settle·multi-instance rate·CLOVA 기본 1 TPS | PASS | §15.1 Rate·Budget 합격 |
+| `B-RATE-01` | 원자 reserve/settle·multi-instance rate·CLOVA 기본 1 TPS | NOT-EVALUATED | §15.1 Rate·Budget 합격 |
 | `B-DEADLINE-01` | Text 120초·Image/PDF 180초 abort·status 조회·partial save | NOT-EVALUATED | §4.3 예산 합·§15.1 P95/단절 복원 합격 + terminal row |
 | `B-HEALTH-01` | 저비용 health와 cached provider status | PASS | §15.1 Health 합격 + provider 호출 없는 trace |
 | `B-RUNTIME-01` | Preview/Production 실제 Node minor/patch·deployment·region | PASS | §15.1 Runtime 합격 + manifest |

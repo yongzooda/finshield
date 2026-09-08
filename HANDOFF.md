@@ -1,3 +1,9 @@
+## 2026-09-08 회원 복수 Claim 실행 예산 변경
+
+- Production 실측에서 7개 Claim이 71.520초에 PARTIAL로 끝났고 인용 오류는 사라졌지만 Product/Institution Agent가 12.187초에 `DEADLINE_EXCEEDED`로 실패했다. Agent 선택 9초를 11초, Domain 단계 16초를 18초로 조정하고 전체 회원 Text 예산은 115초로 120초 상한 안에 유지했다.
+- Migration `0050`으로 실행 Manifest v7을 추가했다. 실제 FinShield DB에는 아직 적용하지 않았으며 적용·재배포 뒤 같은 합성 흐름을 다시 측정해야 한다.
+- Migration scope 변경으로 `B-CONSENT-01`·`B-STORAGE-01`·`B-DELETE-01`·`B-RATE-01`의 기존 PASS를 재사용하지 않고 과거 채택값을 `evidence/development/runtime/pre-0050-adopted-entries.json`에 보존했다. 현재 부분 PASS는 8/20, Implementation `NO-GO`, Release `NOT-EVALUATED`다.
+
 ## 2026-09-08 최신 main DB 경계 증거 재채택
 
 - main `fb360014e54647dd99d37970a1ed733ddb80fd5f`에서 Rate·Consent·Storage·Delete·Health를 다시 측정했다. run `34195224699`·`34195228845`·`34195233135`·`34195237392`·`34195239872`가 각 strict policy를 통과해 PR #271에서 채택한다.
