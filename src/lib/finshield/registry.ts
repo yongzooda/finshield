@@ -12,7 +12,7 @@
 import "server-only";
 import type postgres from "postgres";
 import {
-  AGENTS, DEFINITION_VERSION, MANIFEST_VERSION, FINSHIELD_MODEL, MODEL_TIMEOUTS,
+  AGENTS, DEFINITION_VERSION, TOOL_DEFINITION_VERSION, MANIFEST_VERSION, FINSHIELD_MODEL, MODEL_TIMEOUTS,
   TOOLS, POLICY_VERSIONS,
 } from "./manifest";
 
@@ -74,7 +74,7 @@ export const loadManifest = async (sql: Sql): Promise<ResolvedManifest> => {
   }
 
   const toolRows = await sql`
-    select tool_code, id from private.tool_definitions where version = ${DEFINITION_VERSION}`;
+    select tool_code, id from private.tool_definitions where version = ${TOOL_DEFINITION_VERSION}`;
   const toolIds: Record<string, string> = {};
   for (const row of toolRows) toolIds[row.tool_code as string] = row.id as string;
   for (const tool of TOOLS) {
@@ -87,7 +87,7 @@ export const loadManifest = async (sql: Sql): Promise<ResolvedManifest> => {
       from private.agent_tool_allowlists al
       join private.agent_definitions ad on ad.id = al.agent_definition_id
       join private.tool_definitions td on td.id = al.tool_definition_id
-     where ad.version = ${DEFINITION_VERSION} and td.version = ${DEFINITION_VERSION}`;
+     where ad.version = ${DEFINITION_VERSION} and td.version = ${TOOL_DEFINITION_VERSION}`;
   const allowed = new Set(allowRows.map((row) => `${row.agent_code}:${row.tool_code}:${row.purpose_code}`));
   for (const agent of AGENTS) {
     for (const tool of agent.tools) {

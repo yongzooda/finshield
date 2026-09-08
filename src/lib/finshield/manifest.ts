@@ -14,8 +14,9 @@
  */
 
 // 시험 fixture 와 같은 이름을 쓰지 않도록 제품 정의는 p0-v2 을 버전으로 쓴다.
-export const DEFINITION_VERSION = "p0-v3";
-export const MANIFEST_VERSION = "finshield-p0-loan-v11";
+export const DEFINITION_VERSION = "p0-v4";
+export const TOOL_DEFINITION_VERSION = "p0-v3";
+export const MANIFEST_VERSION = "finshield-p0-loan-v12";
 export const FINSHIELD_MODEL = "claude-sonnet-5";
 export const SCENARIO = "LOAN" as const;
 export const SCENARIO_VERSION = "sunshine15-v1";
@@ -68,24 +69,24 @@ export type ToolSpec = {
 
 // E-020: 내부 함수 등록부를 MCP 라고 부르지 않는다. 전송 방식이 FUNCTION 이면 그렇게 적는다.
 export const TOOLS: readonly ToolSpec[] = Object.freeze([
-  { toolCode: "search_financial_product", version: DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 262144, maxBatchSize: 20, timeoutMs: 20000, retryLimit: 1 },
-  { toolCode: "verify_financial_institution", version: DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 262144, maxBatchSize: 20, timeoutMs: 20000, retryLimit: 1 },
-  { toolCode: "get_source_snapshot", version: DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 1048576, maxBatchSize: 10, timeoutMs: 20000, retryLimit: 1 },
-  { toolCode: "parse_url_host", version: DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 8192, maxBatchSize: 20, timeoutMs: 2000, retryLimit: 0 },
-  { toolCode: "lookup_official_channel", version: DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 262144, maxBatchSize: 20, timeoutMs: 20000, retryLimit: 1 },
-  { toolCode: "search_consumer_warning", version: DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 524288, maxBatchSize: 20, timeoutMs: 20000, retryLimit: 1 },
-  { toolCode: "analyze_risk_pattern", version: DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 262144, maxBatchSize: 20, timeoutMs: 20000, retryLimit: 1 },
-  { toolCode: "check_documents", version: DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 262144, maxBatchSize: 20, timeoutMs: 20000, retryLimit: 1 },
-  { toolCode: "lookup_statute", version: DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 524288, maxBatchSize: 10, timeoutMs: 20000, retryLimit: 1 },
-  { toolCode: "search_precedent", version: DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 524288, maxBatchSize: 20, timeoutMs: 20000, retryLimit: 1 },
-  { toolCode: "search_dispute_case", version: DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 524288, maxBatchSize: 20, timeoutMs: 20000, retryLimit: 1 },
+  { toolCode: "search_financial_product", version: TOOL_DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 262144, maxBatchSize: 20, timeoutMs: 20000, retryLimit: 1 },
+  { toolCode: "verify_financial_institution", version: TOOL_DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 262144, maxBatchSize: 20, timeoutMs: 20000, retryLimit: 1 },
+  { toolCode: "get_source_snapshot", version: TOOL_DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 1048576, maxBatchSize: 10, timeoutMs: 20000, retryLimit: 1 },
+  { toolCode: "parse_url_host", version: TOOL_DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 8192, maxBatchSize: 20, timeoutMs: 2000, retryLimit: 0 },
+  { toolCode: "lookup_official_channel", version: TOOL_DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 262144, maxBatchSize: 20, timeoutMs: 20000, retryLimit: 1 },
+  { toolCode: "search_consumer_warning", version: TOOL_DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 524288, maxBatchSize: 20, timeoutMs: 20000, retryLimit: 1 },
+  { toolCode: "analyze_risk_pattern", version: TOOL_DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 262144, maxBatchSize: 20, timeoutMs: 20000, retryLimit: 1 },
+  { toolCode: "check_documents", version: TOOL_DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 262144, maxBatchSize: 20, timeoutMs: 20000, retryLimit: 1 },
+  { toolCode: "lookup_statute", version: TOOL_DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 524288, maxBatchSize: 10, timeoutMs: 20000, retryLimit: 1 },
+  { toolCode: "search_precedent", version: TOOL_DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 524288, maxBatchSize: 20, timeoutMs: 20000, retryLimit: 1 },
+  { toolCode: "search_dispute_case", version: TOOL_DEFINITION_VERSION, transport: "FUNCTION", inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", maxPayloadBytes: 524288, maxBatchSize: 20, timeoutMs: 20000, retryLimit: 1 },
 ]);
 
 // 실행 순서가 곧 배열 순서다. AI-020 에 따라 Orchestrator 는 결론을 만들지 않는다.
 export const AGENTS: readonly AgentSpec[] = Object.freeze([
   {
     agentCode: "PRODUCT_INSTITUTION", logicalKey: "PRODUCT_INSTITUTION", role: "DOMAIN",
-    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "product-institution-v3",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "product-institution-v4",
     required: true,
     tools: [
       { toolCode: "search_financial_product", purposeCode: "VERIFY_PRODUCT" },
@@ -95,7 +96,7 @@ export const AGENTS: readonly AgentSpec[] = Object.freeze([
   },
   {
     agentCode: "FRAUD_CHANNEL", logicalKey: "FRAUD_CHANNEL", role: "DOMAIN",
-    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "fraud-channel-v3",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "fraud-channel-v4",
     required: true,
     tools: [
       { toolCode: "parse_url_host", purposeCode: "PARSE_URL" },
@@ -105,7 +106,7 @@ export const AGENTS: readonly AgentSpec[] = Object.freeze([
   },
   {
     agentCode: "SALES_CONDUCT", logicalKey: "SALES_CONDUCT", role: "DOMAIN",
-    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "sales-conduct-v3",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "sales-conduct-v4",
     required: true,
     tools: [
       { toolCode: "analyze_risk_pattern", purposeCode: "ASSESS_CONDUCT" },
@@ -114,7 +115,7 @@ export const AGENTS: readonly AgentSpec[] = Object.freeze([
   },
   {
     agentCode: "REGULATION_DISPUTE", logicalKey: "REGULATION_DISPUTE", role: "DOMAIN",
-    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "regulation-dispute-v3",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "regulation-dispute-v4",
     required: true,
     tools: [
       { toolCode: "lookup_statute", purposeCode: "LOOKUP_STATUTE" },
@@ -127,7 +128,7 @@ export const AGENTS: readonly AgentSpec[] = Object.freeze([
     // 결론에서 분리된 검색으로 Material Claim 을 다시 확인한다. 그래서 이 Agent 는
     // Domain Agent 의 판단을 보지 못하고 Claim 만 받는다.
     agentCode: "COVE", logicalKey: "COVE", role: "COVE",
-    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "cove-v3",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "cove-v4",
     required: true,
     tools: [
       { toolCode: "lookup_statute", purposeCode: "RECHECK_STATUTE" },
@@ -140,7 +141,7 @@ export const AGENTS: readonly AgentSpec[] = Object.freeze([
     // 규칙 3: Red Team 은 초기 결론을 뒤집을 공식 반대 근거를 찾는다.
     // 못 찾았다는 사실이 확인이 되지 않는다 (AI-011).
     agentCode: "RED_TEAM", logicalKey: "RED_TEAM", role: "RED_TEAM",
-    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "red-team-v3",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "red-team-v4",
     required: true,
     tools: [
       { toolCode: "search_financial_product", purposeCode: "FIND_COUNTER_PRODUCT" },
@@ -153,7 +154,7 @@ export const AGENTS: readonly AgentSpec[] = Object.freeze([
   {
     // AI-013: Judge 는 원문이 아니라 확인된 Claim·Evidence 구조만 본다. 그래서 Tool 이 없다.
     agentCode: "EVIDENCE_JUDGE", logicalKey: "EVIDENCE_JUDGE", role: "EVIDENCE_JUDGE",
-    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "evidence-judge-v3",
+    version: DEFINITION_VERSION, inputSchemaVersion: "in-v1", outputSchemaVersion: "out-v1", promptVersion: "evidence-judge-v4",
     required: true,
     tools: [],
   },
@@ -164,7 +165,7 @@ export const COVE_AGENT = AGENTS.find((agent) => agent.role === "COVE");
 export const RED_TEAM_AGENT = AGENTS.find((agent) => agent.role === "RED_TEAM");
 
 export const POLICY_VERSIONS = Object.freeze({
-  promptBundleVersion: "p0-loan-prompts-v3",
+  promptBundleVersion: "p0-loan-prompts-v4",
   schemaBundleVersion: "p0-loan-schemas-v1",
   evidencePolicyVersion: "evidence-policy-v1",
   resultMatrixVersion: "result-matrix-v2",
