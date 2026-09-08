@@ -1,0 +1,83 @@
+{
+  "checked_at": "2026-09-08T13:44:17.852284+00:00",
+  "synthetic_case_count_before": 11,
+  "deletion_request_id": "a4f02a29-1827-491c-9c82-28fca277ca68",
+  "reports": [
+    {
+      "stage": "cleanup",
+      "path": "/api/finshield/session",
+      "status": 200,
+      "elapsed_ms": 4072,
+      "types": [
+        "json"
+      ]
+    },
+    {
+      "stage": "cleanup",
+      "path": "/api/finshield/account/delete",
+      "status": 200,
+      "elapsed_ms": 2947,
+      "types": [
+        "ACCESS_BLOCKED"
+      ]
+    },
+    {
+      "stage": "cleanup",
+      "path": "/api/finshield/account/delete",
+      "status": 200,
+      "elapsed_ms": 3841,
+      "types": [
+        "ACCESS_BLOCKED"
+      ]
+    },
+    {
+      "stage": "deletion-status",
+      "path": "/api/finshield/account/delete",
+      "status": 200,
+      "elapsed_ms": 2746,
+      "types": [
+        "ACCESS_BLOCKED"
+      ]
+    },
+    {
+      "stage": "deletion-status",
+      "path": "/api/finshield/account/delete",
+      "status": 200,
+      "elapsed_ms": 2709,
+      "types": [
+        "ACCESS_BLOCKED"
+      ]
+    },
+    {
+      "stage": "deletion-status",
+      "path": "/api/finshield/account/delete",
+      "status": 200,
+      "elapsed_ms": 2978,
+      "types": [
+        "COMPLETED"
+      ]
+    },
+    {
+      "stage": "deletion-status",
+      "path": "/api/finshield/session",
+      "status": 401,
+      "elapsed_ms": 2654,
+      "types": [
+        "json"
+      ]
+    }
+  ],
+  "sql_observed": {
+    "cases": 0,
+    "auth_users": 0,
+    "profiles": 0,
+    "originals": 0,
+    "ocr": 0,
+    "embeddings": 0,
+    "storage_objects": 0,
+    "deletion_status": "COMPLETED",
+    "completion_ledger": 1
+  },
+  "login_after_deletion_http_status": 401,
+  "scope": "이번 합성 계정과 그 소유 데이터만 조회·삭제"
+}

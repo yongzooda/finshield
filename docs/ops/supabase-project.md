@@ -1,5 +1,9 @@
 # FinShield Supabase 프로젝트 운영
 
+## 2026-09-08 운영 배포 최종 대조
+
+main 8f9b40ad5c8f577280f66d626888b3ddba75bed0의 v11 배포를 승격 전에 54 Migration 기준 DB와 대조했고 구조·구성이 일치했다. 공개 주소도 같은 SHA·icn1·Node 24.18.0을 반환했다. 합성 결과 복원과 계정 삭제 실제 부재를 확인했다. main의 원격 CI는 GitHub 결제·한도 차단 때문에 실행되지 않았으며, 운영 대조 결과와 구분한다.
+
 ## 2026-09-08 회원 근거 비교 복구 적용
 
 0001~0050에 이어 0054·0055·0056·0057을 순서대로 적용했다. v8~v11 Manifest와 result-matrix-v2를 추가하고 기존 버전을 보존했다. 다른 Draft의 0051~0053은 미적용이며 Migration ledger를 소급 생성하지 않았다. 코드 69415ae7 후보의 54 Migration 기준으로 원격 구조 digest 6개·구성 10항목이 일치했다. 실제 합성 PDF 저장과 정상 Text 종결을 확인했으며 상세·실패 범위는 [회원 근거 비교 복구](member-evidence-scope.md)를 따른다. 아래 50 Migration 기록은 이전 기준선이다.

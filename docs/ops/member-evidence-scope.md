@@ -72,3 +72,17 @@ Judge 수신 구조와 결과 채택 검사를 분리해, 한 항목의 문장 �
 기본 시험 676개 통과·선택적 96개 건너뜀, TypeScript와 lint 오류 0이다. lint의 기존 경고 두 개는 남아 있다. 빈 격리 DB에 54개 Migration을 적용하고 SQL 시험 44까지 통과했다. 운영 DB에는 0001~0050과 0054~0057이 적용돼 있다. 다른 Draft의 0051~0053은 적용하지 않았다. 후보 실행의 SHA·Node·region, 구조 digest 6개와 구성 10항목은 일치했다(candidate-alignment.json).
 
 이 자료는 사용자가 제시한 재현 사례의 결함 수정 증거다. Red Team 인용 품질, 다른 상품·문서·장애 표본, 정식 B-CLAIM-01과 전체 Release 평가 성공으로 채택하지 않는다. Implementation NO-GO·Release NOT-EVALUATED·부분 PASS 8/20을 유지한다. 운영 승격 후에는 실제 main SHA와 DB를 다시 대조하고, 저장 결과 복원 및 합성 계정 삭제를 확인한다.
+
+## main 운영 반영과 합성 데이터 정리
+
+PR #289의 필수 check run 34232472544와 Vercel 빌드가 통과한 뒤 squash merge했다. main 8f9b40ad5c8f577280f66d626888b3ddba75bed0를 Git 원본으로 빌드한 dpl_pBamsuHxoJv7XM5qjmsgPoFgRQB3를 운영에 승격했다. 승격 전에 실제 실행 SHA·Node 24.18.0·icn1과 운영 DB 구조 digest 여섯 개·구성 열 항목이 모두 일치했다. 공개 주소의 runtime-manifest도 같은 배포를 반환했다.
+
+운영 API에서 두 Case의 final_claims·axes·passports가 후보에서 저장한 값과 정확히 같음을 비교했다. PDF와 정상 Text의 HTTP 응답은 모두 200, Passport는 각각 1개다. 공개 주소에서 합성 회원 로그인과 두 결과 화면도 확인했다. 모델을 다시 호출한 운영 신규 실행 시험은 아니다. Health의 DB 확인은 51ms 성공이며 미관측 Provider는 unknown/degraded로 유지했다.
+
+탈퇴 API에서 동일 요청을 두 번 접수한 뒤 Workflow COMPLETED와 재로그인 401을 확인했다. 이번 시험의 11개 Case, Auth·Profile, 원본·OCR·Embedding·Storage 객체는 실제 DB에서 각각 0건이고 계정 삭제 완료 원장은 1건이다. 실패·부분 결과를 남긴 합성 데이터도 함께 삭제했다. 확정 비용은 USD 2.100536, 기존 응답 불명 예약은 USD 0.574104이며 사용자 일 상한 USD 3을 바꾸거나 예약을 임의 해제하지 않았다.
+
+병합 후 main check run 34232997678은 시험을 시작하지 못했다. GitHub annotation은 아래와 같다. 이는 병합 전 필수 PR 검사 통과와 구분한다. 후속 기록 PR은 이 결제·한도 문제가 해소된 뒤 필수 검사를 다시 수행하며, 우회 병합하지 않는다.
+
+> The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings
+
+운영 증거는 production-alignment.json·production-runtime.json·production-restored.json·production-ui.png·production-health.json·cleanup.json·cleanup-db.png다. main-ci-billing-block.json에 시작 차단 원문을 보존했다. 로컬 main은 /Users/yongju/Developer/finshield-main에서 origin/main과 일치하는 clean 상태로 맞췄다. 기존 사용자 작업 폴더와 기능 브랜치는 보존했다.
