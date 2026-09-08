@@ -1,3 +1,9 @@
+## 2026-09-08 운영 DB·배포 코드 불일치 복구
+
+- 운영 DB의 누락된 0045 재시도 함수와 0050 v7 Manifest를 복구했다. 0046 예산 함수는 누락 주석만 원본과 맞췄고 예산·Counter를 바꾸지 않았다. main `202825b2`의 50 Migration 기준으로 구조 digest 6개와 열·트리거·권한·Manifest 구성 10항목이 모두 일치했다.
+- 검증한 main 배포를 Production에 승격했다. 합성 회원가입·Text 검증·저장·운영 재조회가 성공했고, 연결 단절 후 명시 재시도는 47.039초에 전체 종결됐다. 이전 Run은 FAILED/CLIENT_RETRY, 새 Run은 COMPLETED, Passport는 1개다. 실패한 구버전 Revision 시험도 보존했다.
+- [복구·검증·다음 승격 절차](docs/ops/production-db-alignment.md)에 운영 실측과 재발 점검 명령을 남겼다. 아래 0045·0050 미적용 문장은 과거 기록이다. 정식 Evidence Adoption은 별도이며 부분 PASS 8/20·Implementation NO-GO·Release NOT-EVALUATED를 유지한다.
+
 ## 2026-09-08 회원 복수 Claim 실행 예산 변경
 
 - Production 실측에서 7개 Claim이 71.520초에 PARTIAL로 끝났고 인용 오류는 사라졌지만 Product/Institution Agent가 12.187초에 `DEADLINE_EXCEEDED`로 실패했다. Agent 선택 9초를 11초, Domain 단계 16초를 18초로 조정하고 전체 회원 Text 예산은 115초로 120초 상한 안에 유지했다.
