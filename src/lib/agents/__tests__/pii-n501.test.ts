@@ -97,3 +97,18 @@ describe("과잉 마스킹 대가", () => {
     expect(blocked, `정상 문장이 차단됨: ${blocked.join(" / ")}`).toHaveLength(0);
   });
 });
+
+
+describe("금융 행동 문구와 명시한 성명 구분",()=>{
+ it("입금 행동과 안내 문구를 이름으로 지우지 않는다",()=>{
+  const text="가상의 권유문입니다. 보증료를 먼저 입금하고\n상담원이 안내하는 앱을 설치해 주세요.";
+  expect(gateForModel(text).ok).toBe(true);
+  expect(maskPii(text).text).toBe(text);
+ });
+ it("서술어와 같은 이름도 성명 라벨·직책이 명시되면 가린다",()=>{
+  for(const text of ["성명: 안내하", "안내하 상담원", "홍길동\n상담원", "성명: 권유문"]){
+   const result=maskPii(text);expect(result.total).toBeGreaterThan(0);
+   expect(result.text).toContain("[이름]");
+  }
+ });
+});

@@ -119,7 +119,7 @@ const NAME_RULES: ReadonlyArray<RegExp> = [
   // 역할어가 붙은 경우. **성씨로 시작할 것을 요구한다** — 앞 어절이 용언이어도
   // 잡히기 때문이다(「작성하지 않았고 설계사가」에서 「않았고」가 이름이 됐다)
   new RegExp(
-    `([${SURNAMES}][가-힣]{1,3})(?=\\s*(?:설계사|모집인|상담원|담당자|과장|대리|팀장|부장|지점장))`,
+    `(?<=^|\\s|[,:：])([${SURNAMES}][가-힣]{1,3})(?=\\s*(?:설계사|모집인|상담원|담당자|과장|대리|팀장|부장|지점장))`,
     "g",
   ),
   // 라벨 + (조사) + 이름 — 「이름은 홍길동이고」·「성함이 김철수인데」
@@ -205,9 +205,13 @@ export function maskPii(input: string): MaskResult {
     });
   }
 
-  for (const re of NAME_RULES) {
+  for (const [index,re] of NAME_RULES.entries()) {
     text = text.replace(new RegExp(re.source, re.flags), (m, captured: string) => {
       if (NOT_NAMES.has(captured)) return m;
+      // 성씨만으로 추측하는 마지막 규칙에서만 일반 금융 명사·서술어를 제외한다.
+      // 성명 라벨·호칭·직책으로 명시한 이름에는 이 예외를 적용하지 않는다.
+      if (index === NAME_RULES.length - 1 && (captured === "권유문"
+        || /^(?:안내|신청|입금|송금|확인|설명|동의|설치|보장|적용|요구|제공)하$/u.test(captured))) return m;
       counts.NAME += 1;
       // 「성명: 홍길동」처럼 라벨이 함께 잡힌 규칙은 라벨을 남기고 값만 가린다
       return m.replace(captured, TOKEN.NAME);

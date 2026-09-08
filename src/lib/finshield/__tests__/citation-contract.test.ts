@@ -33,13 +33,18 @@ it("종료 자료·참고/오래된 자료를 섞어 가입 가능성을 확정�
  expect(JSON.stringify(sources)).toBe(before);
 });
 
-it("Domain·CoVe·Red Team 실제 모델 경계에 같은 항목별 계약과 분리된 미확정 상태를 전달한다", async () => {
+it("Domain·CoVe의 모델 계약과 Red Team의 반박 불가 경계를 구분한다", async () => {
  for (const code of ["PRODUCT_INSTITUTION","COVE","RED_TEAM"]) {
   call.mockReset();
   call.mockResolvedValue(code==="PRODUCT_INSTITUTION"
    ? {schema_version:"out-v1",findings:[{claim_ref:"C1",state:"NEED_MORE_INFORMATION",relation:"CONTEXT",evidence_refs:[],summary_masked:"개인 심사 자료 필요",limits:[]}],out_of_scope_claim_refs:[]}
    : {schema_version:"out-v1",results:[{claim_ref:"C1",status:code==="COVE"?"INCONCLUSIVE":"NONE_FOUND",evidence_refs:[],note_masked:"개인 심사 자료 필요"}]});
-  await createAgentModel().decide({system:"합성 Agent",input:{schema_version:"in-v1",agent_code:code,scenario:"LOAN",journey_stage:"PRE_TRANSACTION",claims:[claim("햇살론15 승인 대상이다.")],masked_intake:""},evidence:[source],observations:[]});
+  const output = await createAgentModel().decide({system:"합성 Agent",input:{schema_version:"in-v1",agent_code:code,scenario:"LOAN",journey_stage:"PRE_TRANSACTION",claims:[claim("햇살론15 승인 대상이다.")],masked_intake:""},evidence:[source],observations:[]});
+  if(code==="RED_TEAM"){
+    expect(call).not.toHaveBeenCalled();
+    expect(output).toMatchObject({results:[{claim_ref:"C1",status:"NONE_FOUND",evidence_refs:[]}]});
+    continue;
+  }
   const args=call.mock.calls[0][0];
   expect(JSON.parse(args.user).citation_contract).toEqual([{claim_ref:"C1",verified_refs:[],contradicted_refs:[],context_refs:["E1"]}]);
   expect(args.system).toContain("Red Team은 NONE_FOUND");
@@ -53,4 +58,14 @@ it("Judge에도 현재 묶음의 계약만 전달하고 실제 출력 ref는 원
  const result=await createJudgeModel().judge({claims:[claim("보증료 선입금이 필요하다.")],findings:[{agent_code:"FRAUD_CHANNEL",claim_ref:"C1",state:"CONTRADICTED",relation:"CONTRADICT",evidence_refs:["E41"],summary_masked:"공식 지침 비교",limits:[]}],evidence:[source]});
  expect(JSON.parse(call.mock.calls[0][0].user).citation_contract[0].contradicted_refs).toEqual(["E1"]);
  expect(judgeEnvelopeOutput.parse(result).claim_results[0].evidence_refs).toEqual(["E41"]);
+});
+
+
+it("Red Team 반박 판단에는 자격 있는 근거만 재번호화하고 반환 시 실제 ref로 복원한다",async()=>{
+ call.mockReset();call.mockResolvedValue({schema_version:"out-v1",results:[{claim_ref:"C1",status:"COUNTER_EVIDENCE",evidence_refs:["E1"],note_masked:"공식 예방 지침과 다름"}]});
+ const result=await createAgentModel().decide({system:"합성 Agent",input:{schema_version:"in-v1",agent_code:"RED_TEAM",scenario:"LOAN",journey_stage:"PRE_TRANSACTION",claims:[claim("보증료 선입금이 필요하다.")],masked_intake:""},evidence:[{...source,evidence_ref:"E40",reference_only:true},source],observations:[]});
+ const input=JSON.parse(call.mock.calls[0][0].user);
+ expect(input.evidence.map((x:{ref:string})=>x.ref)).toEqual(["E1"]);
+ expect(input.citation_contract[0].contradicted_refs).toEqual(["E1"]);
+ expect(result).toMatchObject({results:[{evidence_refs:["E41"]}]});
 });

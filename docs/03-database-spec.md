@@ -1915,3 +1915,7 @@ INP-006·INP-007: 마스킹 페이지별 저신뢰 필드 위치를 저장하고
 ### 재검증 만료 임대와 Orphan — 0067
 
 REV-001·N-AVL-005: 현재 token과 만료 시각을 함께 검사한 Worker만 실패·최종화한다. 최대 시도가 소진된 만료 Job을 기존 Run과 함께 종결하며 미확정 모델 응답을 재호출하지 않는다. PR #285의 0053은 현재 0067로 옮긴다. 실제 Vercel 장애 20종 검증과 정식 Gate 채택은 별도다.
+
+### 반박 인용과 진행 기록 — 0068·0069
+
+AI-012·REV-001: Agent v12·Manifest v20을 추가해 Claim별 반박 자격이 있는 자료를 판단에 전달한다. 기존 판정 정책·정의·Passport는 유지한다. 진행 기록 함수는 현재 Lease와 실제 만료 시각을 검증하고 기존 Worker의 token 없는 직접 이벤트 추가 권한을 회수한다. 상세는 `docs/ops/red-team-citation-scope.md`와 `docs/ops/recovery-fencing-current.md`를 따른다.

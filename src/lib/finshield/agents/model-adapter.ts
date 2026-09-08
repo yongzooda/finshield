@@ -56,6 +56,13 @@ export const citationContract = (claims: ConfirmedClaim[], evidence: ToolEvidenc
   }));
 };
 
+/** Red Team의 반박에는 Claim별로 반박에 쓸 수 있는 근거만 전달한다.
+ * 참고 근거를 섞은 뒤 사후에 성공으로 고치지 않고, 선택 전에 용도 경계를 고정한다. */
+export const redTeamDecisionEvidence = (claim: ConfirmedClaim, evidence: ToolEvidence[]) => {
+  const pool = new Map(evidence.map(item=>[item.evidence_ref,item]));
+  return evidence.filter(item=>citationProblems([item.evidence_ref],"CONTRADICTED",pool,claim.statement_masked).length===0);
+};
+
 /** 모델이 보는 근거 요약. 원문 전체가 아니라 인용에 필요한 만큼만 준다. */
 export const evidenceBrief = (evidence: ToolEvidence[]) => evidence.map((item) => ({
   ref: item.evidence_ref,
@@ -317,10 +324,16 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
   },
 
   async decide({ system, signal, input, evidence: originalEvidence, observations }) {
-    const scope = modelEvidenceScope(originalEvidence);
-    const evidence = scope.evidence;
     const assignedClaims = domainClaims(input);
     const outputs = await settleModelBatches(agentClaimBatches(assignedClaims).map(async claims => {
+      const decisionEvidence = input.agent_code === "RED_TEAM"
+        ? redTeamDecisionEvidence(claims[0],originalEvidence) : originalEvidence;
+      if(input.agent_code === "RED_TEAM" && decisionEvidence.length===0) {
+        return {schema_version:"out-v1" as const,results:claims.map(claim=>({claim_ref:claim.claim_ref,
+          status:"NONE_FOUND" as const,evidence_refs:[],note_masked:"조회한 공식 자료에서 이 항목을 반박할 수 있는 근거를 확보하지 못했습니다."}))};
+      }
+      const scope = modelEvidenceScope(decisionEvidence);
+      const evidence = scope.evidence;
       const output = await callFinshieldModel({
       model: FINSHIELD_MODEL,
       system: `${system}${input.aftercare_context ? `\n${AFTERCARE_CONTEXT_INSTRUCTION}` : ""}\n\n지금은 판단하는 단계다. 아래 근거 목록의 ref 만 인용한다. ${DECISIVE_CITATION_INSTRUCTION} summary_masked와 note_masked는 각각 80자 이내로 답한다. 상품 종료 고지가 있으면 현재 권유와 종료 전 조건을 구분해 설명한다. limits는 꼭 필요한 항목만 한 개 이하로 답한다.`,
