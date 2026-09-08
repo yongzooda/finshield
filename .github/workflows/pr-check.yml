@@ -99,7 +99,9 @@ jobs:
         run: node .github/scripts/test-file-safety-evidence.mjs
 
       - name: OCR 개발 진단 계약 시험
-        run: node .github/scripts/test-ocr-development-probe.mjs
+        run: |
+          node .github/scripts/test-ocr-development-probe.mjs
+          node .github/scripts/test-ocr-url-diagnostic.mjs
 
       - name: Retrieval Contract Test
         run: node .github/scripts/test-retrieval-evidence.mjs
