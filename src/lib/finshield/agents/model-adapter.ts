@@ -16,7 +16,7 @@ import { callFinshieldModel, emptyModelUsage, type ModelBudgetContext, type Mode
 import type { AgentModel } from "./runner";
 import type { JudgeModel } from "../orchestrator";
 import { JUDGE_SYSTEM } from "./prompts";
-import { coveOutput, redTeamOutput, domainAgentOutput, judgeOutput, requiresPersonalApprovalProof, type ToolEvidence, type ConfirmedClaim } from "../schemas";
+import { coveOutput, redTeamOutput, domainAgentOutput, judgeOutput, judgeEnvelopeOutput, requiresPersonalApprovalProof, type ToolEvidence, type ConfirmedClaim } from "../schemas";
 import type { ClaimExtractor } from "../intake";
 
 const MAX_EXCERPT = 1200;
@@ -196,9 +196,9 @@ export const providerAgentSchemaFor = (code: string) => {
   if (code === "RED_TEAM") return redTeamOutput.extend({ results: z.array(redTeamOutput.shape.results.element.extend({ evidence_refs: refs })) });
   return domainAgentOutput.extend({ findings: z.array(domainAgentOutput.shape.findings.element.extend({ evidence_refs: refs })) });
 };
-export const providerJudgeSchemaFor = () => judgeOutput.extend({
-  claim_results: z.array(judgeOutput.shape.claim_results.element.extend({ evidence_refs: providerRefs() })),
-  conflicts: z.array(judgeOutput.shape.conflicts.element.extend({ evidence_refs: providerRefs().min(2) })),
+export const providerJudgeSchemaFor = () => judgeEnvelopeOutput.extend({
+  claim_results: z.array(judgeEnvelopeOutput.shape.claim_results.element.extend({ evidence_refs: providerRefs() })),
+  conflicts: z.array(judgeEnvelopeOutput.shape.conflicts.element.extend({ evidence_refs: providerRefs() })),
 });
 
 export async function settleModelBatches<T>(promises: Promise<T>[]): Promise<T[]> {

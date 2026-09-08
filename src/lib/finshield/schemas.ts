@@ -118,6 +118,15 @@ export const judgeOutput = z.object({
 });
 export type JudgeOutput = z.infer<typeof judgeOutput>;
 
+/** 수신 구조와 채택 자격을 분리한다. 한 항목의 짧은/긴 문장이나 충돌 근거
+ * 누락은 normalizeJudgeOutput에서 해당 항목만 보류하고 정상 항목은 보존한다. */
+export const judgeEnvelopeOutput = z.object({
+  schema_version: z.literal("out-v1"),
+  claim_results: z.array(z.object({ claim_ref: z.string(), state: claimState, evidence_refs: z.array(z.string()),
+    withheld_reason: z.string().nullable(), rationale_masked: z.string() })),
+  conflicts: z.array(z.object({ claim_ref: z.string(), evidence_refs: z.array(z.string()), note_masked: z.string() })),
+});
+
 /**
  * 모델 출력이 인용한 근거가 실제로 존재하는지 확인한다.
  *

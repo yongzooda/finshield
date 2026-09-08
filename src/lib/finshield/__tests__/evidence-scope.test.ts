@@ -69,3 +69,15 @@ it('일부 묶음이 실패해도 다른 호출의 정산이 끝날 때까지 �
  await Promise.resolve();expect(rejected).toBe(false);
  finish();await result;expect(rejected).toBe(true);
 });
+
+it('한 항목의 잘못된 충돌·문장 형식을 다른 항목의 근거 있는 판단으로 전파하지 않는다',()=>{
+ const claims=['C1','C2'].map(claim_ref=>({claim_ref,claim_type:'PRODUCT_TERM',statement_masked:'합성 상품 조건',materiality:'MATERIAL' as const}));
+ const pool=new Map([['E1',{...evidence,locator:{}}]]);
+ const valid={claim_ref:'C2',state:'CONTRADICTED' as const,evidence_refs:['E1'],withheld_reason:null,rationale_masked:'공식 조건과 다름'};
+ const conflict=normalizeJudgeOutput({schema_version:'out-v1',claim_results:[{...valid,claim_ref:'C1',state:'CONFLICT'},valid],conflicts:[{claim_ref:'C1',evidence_refs:['E1'],note_masked:'하나로 충돌 주장'}]},claims,pool);
+ expect(conflict.output.claim_results.map(x=>x.state)).toEqual(['UNKNOWN','CONTRADICTED']);
+ expect(conflict.reasonCode).toBe('JUDGE_CITATION_INVALID');
+ const malformed=normalizeJudgeOutput({schema_version:'out-v1',claim_results:[{...valid,claim_ref:'C1',rationale_masked:''},valid],conflicts:[]},claims,pool);
+ expect(malformed.output.claim_results.map(x=>x.state)).toEqual(['WITHHELD','CONTRADICTED']);
+ expect(malformed.reasonCode).toBe('JUDGE_SCHEMA_INVALID');
+});

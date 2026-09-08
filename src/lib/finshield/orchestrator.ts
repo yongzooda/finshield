@@ -16,7 +16,7 @@ import "server-only";
 import { COVE_AGENT, DOMAIN_AGENTS, MODEL_TIMEOUTS, RED_TEAM_AGENT } from "./manifest";
 import { loadManifest } from "./registry";
 import {
-  citationProblems, coveOutput, judgeOutput, redTeamOutput, type ConfirmedClaim,
+  citationProblems, coveOutput, judgeOutput, judgeEnvelopeOutput, redTeamOutput, type ConfirmedClaim,
   type CoveOutput, type DomainFinding, type JudgeOutput, type RedTeamOutput, type ToolEvidence,
 } from "./schemas";
 import { createRunSession, type ToolCallContext } from "./tools/runtime";
@@ -75,6 +75,7 @@ export const normalizeJudgeOutput = (
   const grouped = new Map<string, JudgeOutput["claim_results"]>();
   let coverageInvalid = output.claim_results.some((entry) => !requested.has(entry.claim_ref));
   let citationInvalid = false;
+  let schemaInvalid = false;
 
   for (const entry of output.claim_results) {
     if (!requested.has(entry.claim_ref)) continue;
@@ -96,6 +97,11 @@ export const normalizeJudgeOutput = (
         rationale_masked: "이 항목의 판단 결과를 확인하지 못했습니다.",
       };
     }
+    if (!judgeOutput.shape.claim_results.element.safeParse(candidate).success) {
+      schemaInvalid = true;
+      return { claim_ref: claim.claim_ref, state: "WITHHELD" as const, evidence_refs: [],
+        withheld_reason: "최종 판단 문장 형식을 확인하지 못했습니다.", rationale_masked: "이 항목의 판단을 보류했습니다." };
+    }
     const problems = citationProblems(candidate.evidence_refs, candidate.state, evidence, claim.statement_masked);
     if (problems.length === 0) return candidate;
     citationInvalid = true;
@@ -108,19 +114,22 @@ export const normalizeJudgeOutput = (
     };
   });
 
+  const invalidConflictClaims = new Set<string>();
   const conflicts = output.conflicts.filter((conflict) => {
     const refs = [...new Set(conflict.evidence_refs)];
-    const valid = requested.has(conflict.claim_ref)
+    const valid = judgeOutput.shape.conflicts.element.safeParse(conflict).success && requested.has(conflict.claim_ref)
       && refs.length >= 2
       && refs.every((ref) => evidence.has(ref));
-    if (!valid) citationInvalid = true;
+    if (!valid) { citationInvalid = true; invalidConflictClaims.add(conflict.claim_ref); }
     return valid;
   });
 
   return {
-    output: { schema_version: "out-v1", claim_results: claimResults, conflicts },
+    output: { schema_version: "out-v1", claim_results: claimResults.map(result => invalidConflictClaims.has(result.claim_ref)
+      ? { ...result, state: "UNKNOWN" as const, withheld_reason: "충돌하는 공식 근거를 확인하지 못했습니다.",
+        rationale_masked: "공식 근거의 충돌 여부를 확정하지 않았습니다." } : result), conflicts },
     reasonCode: coverageInvalid ? "JUDGE_CLAIM_COVERAGE_INVALID"
-      : citationInvalid ? "JUDGE_CITATION_INVALID" : null,
+      : schemaInvalid ? "JUDGE_SCHEMA_INVALID" : citationInvalid ? "JUDGE_CITATION_INVALID" : null,
   };
 };
 
@@ -257,7 +266,7 @@ export const runVerification = async (args: {
     // 판단이 실제 인용한 근거만 보내 입력 크기와 잘못된 ref 선택 가능성을 줄인다.
     const judgeEvidence = selectJudgeEvidence(findings, evidence);
     const raw = await args.judgeModel.judge({ claims: args.claims, findings, evidence: judgeEvidence, signal });
-    const parsed = judgeOutput.safeParse(raw);
+    const parsed = judgeEnvelopeOutput.safeParse(raw);
     if (!parsed.success) {
       judgeReasonCode = "JUDGE_SCHEMA_INVALID";
     } else {
