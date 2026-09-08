@@ -13,13 +13,14 @@ import { readSessionToken, sessionIdentity } from "../../../session-client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CLAIM_STATE_VIEW, FsCard, FsChip } from "../../../fs-shell";
+import { FsCard, FsChip } from "../../../fs-shell";
+import { AxisLimitations, ClaimBadges, ClaimReviewDetails, ResultScopeNote, ReviewNotice } from "../../../result-explanation";
 import { FsLoginCard, useFsToken } from "../../../fs-session";
 import { OfficialActions, type StoredGuide } from "../../../official-actions";
 import { EvidenceCitation, type EvidenceCitationData } from "../../../evidence-citation";
 import { fetchCase } from "../../case-api";
 import {
-  AXIS_LABEL, axisResultOf, coveLabel, overallResultOf, partialLabel, reasonLabel, runStatusLabel,
+  AXIS_LABEL, axisResultOf, overallResultOf, runStatusLabel,
 } from "../../../fs-labels";
 
 type Passport = {
@@ -35,7 +36,7 @@ type Detail = {
     finished_at: string | null }[];
   final_claims: { id: string; verification_run_id: string; status: string; reason_code: string;
     cove_status: string; red_team_status: string; is_material: boolean; statement_masked: string; decision_summary_masked: string }[];
-  axes: { verification_run_id: string; axis: string; result_code: string; summary_masked: string; policy_evaluation?: { policy_version: string; checks: { rule_code: string; reason_masked: string; outcome: string; evidence_id?: string }[] } | null }[];
+  axes: { verification_run_id: string; axis: string; result_code: string; summary_masked: string; limitation_codes?: string[] | null; policy_evaluation?: { policy_version: string; checks: { rule_code: string; reason_masked: string; outcome: string; evidence_id?: string }[] } | null }[];
   claim_evidences: { final_claim_version_id: string; evidence_id: string; relation: string; is_independent: boolean }[];
   evidences: (EvidenceCitationData & { independence_key: string; citable: boolean })[];
   passports: Passport[];
@@ -118,21 +119,13 @@ export function PassportView({ caseId, requestedPassport = null }: { caseId: str
         ) : null}
       </header>
 
-      {(run?.partial_reason_codes ?? []).length > 0 ? (
-        <FsCard className="mt-8">
-          <FsChip tone="caution">일부만 확인</FsChip>
-          <p className="fs-body mt-2">
-            끝까지 확인하지 못한 단계가 있습니다. {(run?.partial_reason_codes ?? []).map(partialLabel).join(" · ")}
-          </p>
-        </FsCard>
-      ) : null}
-
-      <OfficialActions guide={passport.guide} />
+      <OfficialActions guide={passport.guide} title="지금 하실 일" />
+      {run ? <ReviewNotice status={run.status} reasons={run.partial_reason_codes ?? []} /> : null}
       <FsCard className="mt-8">
         <h2 className="fs-h2">세 가지 확인 결과</h2>
         <ul className="mt-4 space-y-3">
           {axes.map((axis) => {
-            const view = axisResultOf(axis.result_code);
+            const view = axisResultOf(axis.result_code, axis.axis);
             return (
               <li key={axis.axis} className="border-t border-[var(--fs-line)] pt-3 first:border-0 first:pt-0">
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -140,6 +133,7 @@ export function PassportView({ caseId, requestedPassport = null }: { caseId: str
                   <FsChip tone={view.tone}>{view.label}</FsChip>
                 </div>
                 <p className="fs-meta mt-1">{axis.summary_masked}</p>
+                <AxisLimitations codes={axis.limitation_codes} />
                 {axis.policy_evaluation ? <details className="mt-2">
                   <summary className="cursor-pointer text-sm underline">프로필 비교 이유와 확인하지 못한 조건</summary>
                   <p className="fs-meta mt-2">검증을 시작할 때 저장한 프로필을 사용했습니다. 현재 프로필을 수정해도 이 결과는 바뀌지 않습니다.</p>
@@ -156,23 +150,19 @@ export function PassportView({ caseId, requestedPassport = null }: { caseId: str
 
       <FsCard>
         <h2 className="fs-h2">항목별 확인 결과</h2>
+        <ResultScopeNote />
         <ul className="mt-4 space-y-4">
           {finals.map((row) => {
-            const view = CLAIM_STATE_VIEW[row.status] ?? { label: row.status, tone: "neutral" as const, help: "" };
             const links = detail.claim_evidences.filter((link) => link.final_claim_version_id === row.id);
             return (
               <li key={row.id} className="border-t border-[var(--fs-line)] pt-4 first:border-0 first:pt-0">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <p className="max-w-xl font-semibold leading-relaxed">{row.statement_masked}</p>
-                  <FsChip tone={view.tone}>{view.label}</FsChip>
+                  <ClaimBadges status={row.status} reason={row.reason_code} />
                 </div>
                 <p className="fs-body mt-2">{row.decision_summary_masked}</p>
-                <p className="fs-meta mt-1">
-                  이렇게 정한 이유: {reasonLabel(row.reason_code)} · 근거 {links.length}건
-                  (독립 {links.filter((l) => l.is_independent).length}건)
-                  {row.cove_status !== "NOT_REQUIRED" ? ` · 독립 재확인 ${coveLabel(row.cove_status)}` : ""}
-                  {row.red_team_status === "COUNTER_EVIDENCE" ? " · 반대 근거 있음" : ""}
-                </p>
+                <ClaimReviewDetails reason={row.reason_code} cove={row.cove_status} redTeam={row.red_team_status} />
+                <p className="fs-meta mt-2">근거 {links.length}건 · 독립성 확인 근거 {links.filter(link => link.is_independent).length}건</p>
                 <ul className="mt-3 space-y-2">{links.map(link => {
                   const evidence = detail.evidences.find(item => item.id === link.evidence_id);
                   return evidence ? <li key={evidence.id}><EvidenceCitation evidence={evidence} /></li> : null;

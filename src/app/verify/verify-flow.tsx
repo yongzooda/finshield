@@ -20,10 +20,11 @@ import { FileIntake } from "./file-intake";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { readRunStream } from "../run-stream";
-import { CLAIM_STATE_VIEW, FsCard, FsChip } from "../fs-shell";
+import { claimViewOf, FsCard, FsChip } from "../fs-shell";
+import { AxisLimitations, ClaimBadges, ClaimReviewDetails, ResultScopeNote, ReviewNotice } from "../result-explanation";
 import { FsLoginCard, useFsToken } from "../fs-session";
 import {
-  AGENT_LABEL, AXIS_LABEL, axisResultOf, DIRECTNESS_LABEL, FRESHNESS_LABEL, coveLabel, nextAction,
+  AGENT_LABEL, AXIS_LABEL, axisResultOf, DIRECTNESS_LABEL, FRESHNESS_LABEL, nextAction,
 } from "../fs-labels";
 import { resolveInitialRunRecovery } from "./run-recovery";
 
@@ -85,7 +86,8 @@ export function VerifyFlow() {
   const [claimResults, setClaimResults] = useState<ClaimResult[]>([]);
   const [evidence, setEvidence] = useState<Evidence[]>([]);
   const [officialChannels, setOfficialChannels] = useState<{ display_value: string }[]>([]);
-  const [axes, setAxes] = useState<{ axis: string; result_code: string; summary_masked: string }[]>([]);
+  const [axes, setAxes] = useState<{ axis: string; result_code: string; summary_masked: string; limitation_codes?: string[] | null }[]>([]);
+  const [reviewReasons, setReviewReasons] = useState<string[]>([]);
   const [partial, setPartial] = useState(false);
   const [saved, setSaved] = useState(true);
   const [opened, setOpened] = useState<Set<string>>(new Set());
@@ -212,6 +214,11 @@ export function VerifyFlow() {
             setClaimResults(merged);
             setEvidence(event.evidence);
             setPartial(event.partial);
+            setReviewReasons([
+              ...(event.agents ?? []).flatMap((agent: { agentCode: string; status: string; reasonCode?: string }) =>
+                agent.status === "SUCCEEDED" ? [] : [agent.reasonCode ?? "AGENT_PARTIAL", `AGENT_${agent.agentCode}_PARTIAL`]),
+              ...(event.judge_reason_code ? [event.judge_reason_code] : []),
+            ]);
             setActiveRunId(null);
             setStep("result");
             receivedTerminal = true;
@@ -400,15 +407,6 @@ export function VerifyFlow() {
               </p>
             </FsCard>
           ) : null}
-          {partial ? (
-            <FsCard className="mb-4">
-              <FsChip tone="caution">일부만 확인</FsChip>
-              <p className="fs-body mt-2">
-                끝까지 확인하지 못한 항목이 있습니다. 아래에서 확인한 범위와 확인하지 못한 범위를 함께 보실 수 있습니다.
-              </p>
-            </FsCard>
-          ) : null}
-
           {/* RES-005: 결론보다 행동을 먼저 놓는다. */}
           <FsCard>
             <p className="fs-eyebrow">지금 하실 일</p>
@@ -417,40 +415,38 @@ export function VerifyFlow() {
             {officialChannels.map(channel => <p key={channel.display_value} className="fs-body mt-3 font-semibold">공식 확인 창구: {channel.display_value}</p>)}
           </FsCard>
 
+          {partial ? <ReviewNotice status="PARTIAL" reasons={reviewReasons} /> : null}
           <FsCard>
             <h2 className="fs-h2">세 가지 확인 결과</h2>
             {axes.length === 0 ? <p className="fs-body mt-3" role="status">{saved ? "저장된 축 결과를 이번 응답에서 읽지 못했습니다. 내 기록의 Passport에서 확인해 주세요." : "축 결과가 저장되지 않아 확정된 판단으로 표시하지 않습니다."}</p> : null}
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               {axes.map(axis => <section key={axis.axis}>
                 <h3 className="font-bold">{AXIS_LABEL[axis.axis]}</h3>
-                <FsChip tone={axisResultOf(axis.result_code).tone}>{axisResultOf(axis.result_code).label}</FsChip>
+                <FsChip tone={axisResultOf(axis.result_code, axis.axis).tone}>{axisResultOf(axis.result_code, axis.axis).label}</FsChip>
                 <p className="fs-meta mt-2">{axis.summary_masked}</p>
+                <AxisLimitations codes={axis.limitation_codes} />
               </section>)}
             </div>
           </FsCard>
           <FsCard>
             <h2 className="fs-h2">항목별 확인 결과</h2>
+            <ResultScopeNote />
             <ul className="mt-5 space-y-5">
               {claimResults.map((result) => {
                 const claim = claims.find((item) => item.claim_ref === result.claim_ref);
-                const view = CLAIM_STATE_VIEW[result.state] ?? { label: result.state, tone: "neutral" as const, help: "" };
+                const view = claimViewOf(result.state, result.reason_code);
                 const items = evidenceOf(result.evidence_refs);
                 const isOpen = opened.has(result.claim_ref);
                 return (
                   <li key={result.claim_ref} className="border-t border-[var(--fs-line)] pt-5 first:border-0 first:pt-0">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <p className="max-w-xl leading-relaxed">{claim?.statement_masked ?? result.claim_ref}</p>
-                      <FsChip tone={view.tone}>{view.label}</FsChip>
+                      <ClaimBadges status={result.state} reason={result.reason_code} />
                     </div>
                     <p className="fs-body mt-2">{result.rationale_masked}</p>
                     {result.withheld_reason ? <p className="fs-meta mt-1">{result.withheld_reason}</p> : null}
                     <p className="fs-meta mt-1">{view.help}</p>
-                    {result.cove_status && result.cove_status !== "NOT_REQUIRED" ? (
-                      <p className="fs-meta mt-1">
-                        독립 재확인 {coveLabel(result.cove_status)}
-                        {result.red_team_status === "COUNTER_EVIDENCE" ? " · 반대 근거 있음" : ""}
-                      </p>
-                    ) : null}
+                    <ClaimReviewDetails reason={result.reason_code} cove={result.cove_status} redTeam={result.red_team_status} />
                     {items.length > 0 ? (
                       <>
                         <button type="button" className="fs-btn fs-btn--quiet mt-3 !px-3 !text-[0.9rem]"

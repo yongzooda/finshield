@@ -3,8 +3,7 @@
  *
  * 데이터베이스와 실행 기록은 코드로 남는다. 그 코드를 그대로 화면에 내보내면
  * 읽는 사람이 뜻을 짐작해야 한다. 그래서 화면에 나갈 자리에서는 여기서 우리말로
- * 바꾼다. 모르는 코드는 감추지 않고 그대로 보여 준다. 값이 사라지는 편보다
- * 낯선 값이 보이는 편이 낫다.
+ * 바꾼다. 새 내부 코드는 사용자용 일반 안내로 표시하며 원본은 실행 원장에 보존한다.
  */
 
 import type { ChipTone } from "./fs-shell";
@@ -12,14 +11,14 @@ import type { ChipTone } from "./fs-shell";
 const pick = (table: Record<string, string>, code: string): string => table[code] ?? code;
 
 export const AXIS_LABEL: Record<string, string> = {
-  AUTHENTICITY: "진위 확인",
+  AUTHENTICITY: "상품·기관 정보",
   TRANSACTION_SALES_RISK: "거래·권유 위험",
   SUITABILITY: "적합성",
 };
 
 export const AXIS_RESULT: Record<string, { label: string; tone: ChipTone }> = {
   CONFIRMED: { label: "확인됨", tone: "verified" },
-  CONTRADICTED: { label: "사실과 다름", tone: "contra" },
+  CONTRADICTED: { label: "공식 자료와 불일치", tone: "contra" },
   HIGH_RISK_ACTION: { label: "위험한 행동 요구", tone: "contra" },
   CONFLICTING: { label: "자료가 엇갈림", tone: "caution" },
   UNCERTAIN: { label: "확정 못 함", tone: "neutral" },
@@ -27,8 +26,11 @@ export const AXIS_RESULT: Record<string, { label: string; tone: ChipTone }> = {
   SUSPENDED: { label: "보류", tone: "neutral" },
 };
 
-export const axisResultOf = (code: string): { label: string; tone: ChipTone } =>
-  AXIS_RESULT[code] ?? { label: code, tone: "neutral" };
+export const axisResultOf = (code: string, axis?: string): { label: string; tone: ChipTone } => {
+  if (axis === "AUTHENTICITY" && code === "CONTRADICTED") return { label: "불일치 항목 있음", tone: "contra" };
+  if (axis === "SUITABILITY" && code === "UNCERTAIN") return { label: "적합성 판단 보류", tone: "caution" };
+  return AXIS_RESULT[code] ?? { label: "결과 확인 필요", tone: "neutral" };
+};
 
 export const RELATION_LABEL: Record<string, string> = {
   SUPPORT: "뒷받침", CONTRADICT: "반대", CONTEXT: "맥락",
@@ -49,11 +51,12 @@ export const AGENT_LABEL: Record<string, string> = {
   REGULATION_DISPUTE: "법령·분쟁 선례 확인",
   COVE: "독립 재확인",
   RED_TEAM: "반대 근거 찾기",
+  EVIDENCE_JUDGE: "최종 근거 판단",
 };
 
 /** 확정 상태를 그렇게 정한 이유. 낮춘 이유가 여기 남는다. */
 const REASON: Record<string, string> = {
-  AS_JUDGED: "확인한 근거대로",
+  AS_JUDGED: "조회한 공식 자료를 바탕으로 판단",
   HIGH_RISK_ADVANCE_PAYMENT: "공식 예방 지침과 대조한 선입금 요구",
   HIGH_RISK_REMOTE_CONTROL: "공식 예방 지침과 대조한 원격제어 요구",
   INDEPENDENT_REVIEW_FAILED: "독립 검토를 마치지 못해 보류함",
@@ -63,34 +66,58 @@ const REASON: Record<string, string> = {
   RED_TEAM_COUNTER_EVIDENCE: "반대되는 공식 근거를 찾음",
   NO_EVIDENCE: "인용할 근거를 찾지 못함",
 };
-export const reasonLabel = (code: string): string => pick(REASON, code);
+export const reasonLabel = (code: string): string => REASON[code] ?? "판단 근거의 추가 확인이 필요함";
 
 export const COVE_LABEL: Record<string, string> = {
   CHALLENGED: "다른 결론", UNRESOLVED: "판단 못 함", FAILED: "검토 실패",
   CONFIRMED: "같은 결론", REFUTED: "다른 결론", INCONCLUSIVE: "판단 못 함",
 };
-export const coveLabel = (code: string): string => pick(COVE_LABEL, code);
+export const coveLabel = (code: string): string => COVE_LABEL[code] ?? "검토 상태 확인 필요";
 
 /** 끝까지 가지 못한 이유. Agent 실행에서 나온 값이다. */
 const PARTIAL: Record<string, string> = {
-  AGENT_PARTIAL: "일부 단계가 끝나지 못함",
-  TOOL_CHOICE_FAILED: "어떤 자료를 볼지 정하지 못함",
-  TOOL_NOT_ALLOWED: "허용되지 않은 자료를 부르려 함",
-  TOOL_NOT_IMPLEMENTED: "아직 연결되지 않은 자료",
-  OUTPUT_SCHEMA_INVALID: "결과 형식이 맞지 않음",
-  CITATION_INVALID: "근거 없이 확정하려 해 막음",
-  MODEL_CALL_FAILED: "모델 호출이 실패함",
-  SOURCE_UNAVAILABLE: "공식 자료를 받지 못함",
+  CITATION_INVALID: "일부 근거가 해당 판단을 뒷받침하는지 확인하지 못했습니다.",
+  SOURCE_UNAVAILABLE: "일부 공식 자료를 가져오지 못했습니다.",
+  TOOL_NOT_IMPLEMENTED: "검증에 필요한 일부 자료가 아직 연결되지 않았습니다.",
+  TOOL_NOT_ALLOWED: "이번 검증 범위에서 사용할 수 없는 자료가 있었습니다.",
+  TOOL_CHOICE_FAILED: "추가 확인에 필요한 자료를 선택하지 못했습니다.",
 };
-export const partialLabel = (code: string): string => pick(PARTIAL, code);
+export const partialLabel = (code: string): string => {
+  if (PARTIAL[code]) return PARTIAL[code];
+  if (/CITATION/.test(code)) return PARTIAL.CITATION_INVALID;
+  if (/DEADLINE|TIMEOUT|TIMED_OUT/.test(code)) return "제한 시간 안에 일부 검토를 마치지 못했습니다.";
+  if (/BUDGET|QUOTA/.test(code)) return "이번 검증의 사용 한도에 도달해 일부 검토를 중단했습니다.";
+  if (/SCHEMA|OUTPUT|FORMAT|COVERAGE/.test(code)) return "일부 검토 결과의 형식이나 누락 항목을 확인하지 못했습니다.";
+  return "일부 검토 결과를 받지 못했습니다.";
+};
+
+/** RES-008: 같은 원인은 한 번만 설명하되, 영향을 받은 검토 범위는 남긴다. */
+export function partialExplanation(codes: readonly string[]) {
+  const areas: string[] = [];
+  const causes: string[] = [];
+  for (const code of codes) {
+    const match = code.match(/^AGENT_(.+)_(?:PARTIAL|FAILED)$/);
+    if (match && AGENT_LABEL[match[1]]) areas.push(AGENT_LABEL[match[1]]);
+    else causes.push(partialLabel(code));
+  }
+  return { areas: [...new Set(areas)], causes: [...new Set(causes)] };
+}
 
 /** 이번 실행이 보지 못한 범위. */
 const LIMITATION: Record<string, string> = {
   PRE_TRANSACTION_SCOPE: "가입 전이라 확인할 수 없는 항목이 있음",
   PROFILE_SKIPPED: "금융 프로필을 남기지 않음",
-  PARTIAL_SOURCE: "일부 자료만 받음",
+  PARTIAL_SOURCE: "일부 자료만 받아 전체 내용을 확인하지 못했습니다.",
+  CURRENT_PRODUCT_CONDITIONS_UNVERIFIED: "현재 유효한 상품 조건을 확인하지 못했습니다.",
+  REPAYMENT_AMOUNT_MISSING: "대출 실행액·월 상환액·필수 지출이 없어 상환 부담을 판단하지 못했습니다.",
+  ELIGIBILITY_NOT_ASSESSED: "연소득·신용평점 등 가입 요건을 확인하지 못했습니다.",
+  EARLY_REPAYMENT_TERMS_MISSING: "조기 상환 가능 여부와 수수료를 확인하지 못했습니다.",
+  NOT_CREDIT_APPROVAL: "금융회사의 대출 승인 여부를 판단한 결과는 아닙니다.",
+  PROFILE_SCHEMA_OR_SCENARIO_UNSUPPORTED: "이번 프로필 또는 상품 유형은 적합성 비교를 지원하지 않습니다.",
+  PROFILE_PARTIAL: "프로필에 입력하지 않은 정보가 있어 비교 범위가 제한됩니다.",
+  PROFILE_INCOMPLETE: "프로필에 입력하지 않은 정보가 있어 비교 범위가 제한됩니다.",
 };
-export const limitationLabel = (code: string): string => pick(LIMITATION, code);
+export const limitationLabel = (code: string): string => LIMITATION[code] ?? "추가로 확인해야 할 조건이 있습니다.";
 
 export const RUN_STATUS_LABEL: Record<string, string> = {
   QUEUED: "대기", RUNNING: "확인 중", COMPLETED: "완료", SUCCEEDED: "완료", PARTIAL: "일부만 확인",
@@ -217,10 +244,10 @@ export const ACTION_LABEL: Record<string, string> = {
 
 /** Claim 상태를 낱말로만 옮긴다. 칩이 필요 없는 자리에서 쓴다. */
 export const CLAIM_STATE_LABEL: Record<string, string> = {
-  VERIFIED: "확인됨",
-  CONTRADICTED: "사실과 다름",
+  VERIFIED: "공식 자료와 일치",
+  CONTRADICTED: "공식 자료와 불일치",
   CONFLICT: "자료가 엇갈림",
-  UNKNOWN: "확인 못 함",
-  NEED_MORE_INFORMATION: "정보 부족",
+  UNKNOWN: "확인 근거 부족",
+  NEED_MORE_INFORMATION: "추가 정보 필요",
   WITHHELD: "판단 보류",
 };
