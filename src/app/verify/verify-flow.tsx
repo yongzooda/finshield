@@ -16,7 +16,7 @@ import { sessionFetch } from "../session-client";
  */
 
 import { useEffect, useRef, useState } from "react";
-import { FileIntake } from "./file-intake";
+import { FileIntake, type OcrReviewField } from "./file-intake";
 import Link from "next/link";
 import { readRunStream } from "../run-stream";
 import { CLAIM_STATE_VIEW, FsCard, FsChip } from "../fs-shell";
@@ -28,6 +28,7 @@ import {
 type Claim = {
   claim_id: string; claim_ref: string; claim_type: string; expected_revision_no?: number;
   statement_masked: string; materiality: string; source_page_no?: number;
+  requires_review?: boolean; review_fields?: OcrReviewField[];
 };
 type Evidence = {
   ref: string; title: string; source: string; grade: string; official_id: string | null;
@@ -51,6 +52,9 @@ const STAGE_LABEL: Record<string, string> = {
   MASKED: "개인정보를 가렸습니다",
   CLAIMS_EXTRACTED: "확인할 항목을 뽑았습니다",
 };
+const OCR_FIELD_LABEL: Record<OcrReviewField["field_kind"],string> = {
+  URL:"주소",INSTITUTION:"기관명",PRODUCT:"상품명",NUMBER:"숫자",
+};
 
 /** 단계마다 덧붙일 한 줄. 원문은 넣지 않는다. */
 function stageDetail(event: { stage: string; masked_count?: number; claim_count?: number }): string {
@@ -70,9 +74,10 @@ export function VerifyFlow() {
   useEffect(() => () => intakeAbort.current?.abort(), []);
   const [notice, setNotice] = useState<string | null>(null);
   const [text, setText] = useState("");
-  const [filePages,setFilePages] = useState<{page_no:number;text:string}[]>([]);
+  const [filePages,setFilePages] = useState<{page_no:number;text:string;low_confidence_count?:number;low_confidence_fields?:OcrReviewField[]}[]>([]);
   const [claims, setClaims] = useState<Claim[]>([]);
   const [picked, setPicked] = useState<Set<string>>(new Set());
+  const [ocrReviewed,setOcrReviewed] = useState<Set<string>>(new Set());
   const [agents, setAgents] = useState<AgentLine[]>([]);
   const [claimResults, setClaimResults] = useState<ClaimResult[]>([]);
   const [evidence, setEvidence] = useState<Evidence[]>([]);
@@ -94,7 +99,7 @@ export function VerifyFlow() {
   const submitText = async () => {
     if (!token) { setNotice("다시 로그인해 주세요"); return; }
     const controller = new AbortController(); intakeAbort.current = controller;
-    setBusy(true); setNotice(null); setStages([]); setFilePages([]); setStep("extracting");
+    setBusy(true); setNotice(null); setStages([]); setFilePages([]); setOcrReviewed(new Set()); setStep("extracting");
     try {
       const response = await sessionFetch("/api/finshield/intake", token, {
         method: "POST", headers: authed(), body: JSON.stringify({ text }), signal: controller.signal,
@@ -148,7 +153,7 @@ export function VerifyFlow() {
       setNotice("중단 요청을 확인하지 못했습니다. 내 기록에서 처리 상태를 확인해 주세요.");
     } finally {
       setBusy(false);
-      setClaims([]); setPicked(new Set()); setStages([]);
+      setClaims([]); setPicked(new Set()); setOcrReviewed(new Set()); setStages([]);
       setCaseId(null); setInputId(null); setActiveRunId(null); masked.current = "";
       setStep("input");
     }
@@ -163,7 +168,9 @@ export function VerifyFlow() {
         body: JSON.stringify({
           case_id: caseId,
           ...(activeRunId ? { replace_run_id: activeRunId } : {}),
-          claims: claims.filter((claim) => picked.has(claim.claim_id)),
+          claims: claims.filter((claim) => picked.has(claim.claim_id)).map(claim=>({
+            ...claim,...(claim.requires_review?{ocr_reviewed:ocrReviewed.has(claim.claim_id)}:{})
+          })),
         }),
       });
       if (!response.ok || !response.body) {
@@ -240,7 +247,8 @@ export function VerifyFlow() {
             {busy ? "정리하는 중" : "다음 · 확인 항목 선택"}
           </button>
           <FileIntake token={token} onBusyChange={setFileBusy} onPrepared={result=>{
-            setClaims(result.claims);setPicked(new Set(result.claims.filter(c=>c.materiality==="MATERIAL").map(c=>c.claim_id)));
+            setClaims(result.claims);setPicked(new Set(result.claims.filter(c=>c.materiality==="MATERIAL"&&!c.requires_review).map(c=>c.claim_id)));
+            setOcrReviewed(new Set());
             setCaseId(result.case_id);setInputId(result.input_id);masked.current=result.masked_text;
             setFilePages(result.masked_pages);setNotice(null);setStep("claims");
           }}/>
@@ -281,6 +289,9 @@ export function VerifyFlow() {
           {filePages.length ? <details className="mt-4 rounded-lg border border-[var(--fs-line)] p-4">
             <summary className="cursor-pointer font-bold">페이지별 추출 내용과 대조하기</summary>
             {filePages.map(page=><section className="mt-4" key={page.page_no}><h3 className="font-bold">{page.page_no}쪽</h3>
+              {page.low_confidence_count ? <p className="fs-inline-notice mt-2" role="alert">
+                원본과 다시 볼 항목 {page.low_confidence_count}곳이 있습니다. 아래 문장과 본인 기기의 원본을 대조해 주세요.
+              </p>:null}
               <p className="fs-body mt-2 whitespace-pre-wrap">{page.text}</p></section>)}
           </details> : null}
           <ul className="mt-5 space-y-2">
@@ -288,6 +299,7 @@ export function VerifyFlow() {
               <li key={claim.claim_id}>
                 <div className="flex items-start gap-3 rounded-[10px] border border-[var(--fs-line)] px-4 py-3">
                   <input type="checkbox" aria-label={`${claim.claim_ref} 검증 대상으로 선택`} className="mt-1.5" checked={picked.has(claim.claim_id)}
+                    disabled={Boolean(claim.requires_review&&!ocrReviewed.has(claim.claim_id))}
                     onChange={(e) => setPicked((prev) => {
                       const next = new Set(prev);
                       if (e.target.checked) next.add(claim.claim_id); else next.delete(claim.claim_id);
@@ -299,6 +311,18 @@ export function VerifyFlow() {
                       maxLength={400} value={claim.statement_masked}
                       onChange={event => setClaims(prev => prev.map(item => item.claim_id === claim.claim_id
                         ? { ...item, statement_masked: event.target.value } : item))} />
+                    {claim.requires_review ? <div className="fs-inline-notice mt-2">
+                      <p>OCR이 이 페이지의 {claim.review_fields?.map(field=>OCR_FIELD_LABEL[field.field_kind]).filter((value,index,all)=>all.indexOf(value)===index).join("·")||"핵심 항목"}을 낮은 신뢰도로 읽었습니다. 문장을 원본과 대조하고 틀린 부분을 고쳐 주세요.</p>
+                      <label className="mt-2 flex items-start gap-2">
+                        <input type="checkbox" className="mt-1" checked={ocrReviewed.has(claim.claim_id)}
+                          onChange={event=>{
+                            const reviewed=event.target.checked;
+                            setOcrReviewed(prev=>{const next=new Set(prev);if(reviewed)next.add(claim.claim_id);else next.delete(claim.claim_id);return next;});
+                            if(!reviewed)setPicked(prev=>{const next=new Set(prev);next.delete(claim.claim_id);return next;});
+                          }}/>
+                        <span>본 기기의 원본 {claim.source_page_no}쪽과 대조했습니다</span>
+                      </label>
+                    </div>:null}
                     <span className="mt-1.5 inline-block">
                       <FsChip tone={claim.materiality === "MATERIAL" ? "caution" : "neutral"}>
                         {claim.materiality === "MATERIAL" ? "거래에 영향이 큼" : "참고 항목"}
@@ -310,7 +334,7 @@ export function VerifyFlow() {
             ))}
           </ul>
           <div className="mt-5 flex flex-wrap gap-3">
-            <button type="button" disabled={busy || picked.size === 0 || claims.some(claim => picked.has(claim.claim_id) && !claim.statement_masked.trim())} onClick={startRun}
+            <button type="button" disabled={busy || picked.size === 0 || claims.some(claim => picked.has(claim.claim_id) && (!claim.statement_masked.trim() || (claim.requires_review&&!ocrReviewed.has(claim.claim_id))))} onClick={startRun}
               className="fs-btn fs-btn--primary">{activeRunId ? "같은 항목 다시 검증하기" : "선택한 항목 검증하기"}</button>
             <button type="button" disabled={busy} onClick={() => void stopInput()}
               className="fs-btn fs-btn--quiet">중단하고 다시 입력</button>

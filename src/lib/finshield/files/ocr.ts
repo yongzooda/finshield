@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import type { ParsedPage } from "./parser";
 
-const field = z.object({ inferText: z.string().max(12000), lineBreak: z.boolean().optional(),
+const field = z.object({ inferText: z.string().max(12000), inferConfidence: z.number().min(0).max(1), lineBreak: z.boolean().optional(),
   boundingPoly: z.object({ vertices: z.array(z.object({ x: z.number().finite(), y: z.number().finite() })).min(4).max(4) }) });
 const responseSchema = z.object({ version: z.literal("V2"), requestId: z.string(), images: z.array(z.object({
   inferResult: z.literal("SUCCESS"), fields: z.array(field).max(15000),
@@ -21,7 +21,8 @@ export function decodeOcrResponse(raw: unknown, requestId: string, pageCount: nu
     if (!text || text.length > 12000) throw new Error("OCR_TEXT_INVALID");
     return { page_no: index + 1, text, words: image.fields.map(item => {
       const xs = item.boundingPoly.vertices.map(p => p.x), ys = item.boundingPoly.vertices.map(p => p.y);
-      return { text: item.inferText, bbox: [Math.min(...xs), Math.min(...ys), Math.max(...xs)-Math.min(...xs), Math.max(...ys)-Math.min(...ys)] };
+      return { text: item.inferText, confidence: item.inferConfidence,
+        bbox: [Math.min(...xs), Math.min(...ys), Math.max(...xs)-Math.min(...xs), Math.max(...ys)-Math.min(...ys)] };
     }) };
   }).sort((a,b) => a.page_no-b.page_no);
   if (pages.some((page,index) => page.page_no !== index+1)) throw new Error("OCR_PAGE_LOCATION_INVALID");
