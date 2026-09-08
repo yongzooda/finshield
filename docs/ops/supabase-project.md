@@ -1,5 +1,9 @@
 # FinShield Supabase 프로젝트 운영
 
+## 2026-09-08 현재 운영 기준
+
+운영 DB는 main `202825b2`의 Migration 0001~0050 기준으로 대조했다. 누락된 0045 재시도 함수·0050 v7 설정을 복구했고 여섯 구조 digest와 실행 연결이 일치한다. 아래 초기 적용 표는 과거 기록이다. 현재 사실과 검증 범위는 [운영 DB·배포 일치 복구](production-db-alignment.md)를 따른다. 정식 Gate 채택은 별도이며 Implementation NO-GO·Release NOT-EVALUATED를 유지한다.
+
 ## 프로젝트 사실
 
 DB 명세 7절이 `project_ref`·host·bucket·expected migration version을 secret 값 없이 배포 preflight inventory에 고정하도록 요구한다.

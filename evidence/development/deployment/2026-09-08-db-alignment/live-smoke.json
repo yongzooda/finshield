@@ -1,0 +1,221 @@
+{
+  "checked_at": "2026-09-08T11:08:14.024Z",
+  "synthetic": true,
+  "candidate": [
+    {
+      "stage": "signup",
+      "status": 200,
+      "elapsed_ms": 3661,
+      "types": [
+        "json"
+      ],
+      "path": "/api/finshield/signup"
+    },
+    {
+      "stage": "signup",
+      "status": 200,
+      "elapsed_ms": 3118,
+      "types": [
+        "json"
+      ],
+      "path": "/api/finshield/cases"
+    },
+    {
+      "stage": "intake",
+      "status": 200,
+      "elapsed_ms": 6700,
+      "types": [
+        "stage",
+        "stage",
+        "stage",
+        "stage",
+        "stage",
+        "done"
+      ],
+      "path": "/api/finshield/intake"
+    },
+    {
+      "stage": "verify",
+      "status": 200,
+      "elapsed_ms": 47647,
+      "types": [
+        "run_started",
+        "agent_started",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "judge_started",
+        "judge_finished",
+        "done"
+      ],
+      "path": "/api/finshield/verify"
+    },
+    {
+      "stage": "verify",
+      "status": 200,
+      "elapsed_ms": 3108,
+      "types": [
+        "json"
+      ],
+      "path": "/api/finshield/cases/<synthetic-case>"
+    }
+  ],
+  "candidate_result": {
+    "saved": true,
+    "partial": false,
+    "judge_reason_code": null,
+    "claim_count": 1,
+    "agent_statuses": [
+      {
+        "agent": "PRODUCT_INSTITUTION",
+        "status": "SUCCEEDED"
+      },
+      {
+        "agent": "FRAUD_CHANNEL",
+        "status": "SUCCEEDED"
+      },
+      {
+        "agent": "SALES_CONDUCT",
+        "status": "SUCCEEDED"
+      },
+      {
+        "agent": "REGULATION_DISPUTE",
+        "status": "SUCCEEDED"
+      },
+      {
+        "agent": "COVE",
+        "status": "SUCCEEDED"
+      },
+      {
+        "agent": "RED_TEAM",
+        "status": "SUCCEEDED"
+      }
+    ]
+  },
+  "production_read": [
+    {
+      "stage": "read",
+      "status": 200,
+      "elapsed_ms": 2902,
+      "types": [
+        "json"
+      ],
+      "path": "/api/finshield/cases/<synthetic-case>"
+    }
+  ],
+  "rejected_probe_attempts": [
+    {
+      "stale_revision": {
+        "step": "production_explicit_retry",
+        "status": 200,
+        "elapsed_ms": 120,
+        "errors": [
+          {
+            "code": "40001"
+          }
+        ],
+        "run_count": 0
+      },
+      "after_completed": {
+        "step": "production_retry_current_selection",
+        "status": 200,
+        "elapsed_ms": 230,
+        "errors": [
+          {
+            "code": "23514"
+          }
+        ]
+      },
+      "final_runs": [
+        {
+          "status": "COMPLETED",
+          "reason_code": null
+        }
+      ],
+      "passport_count": 1
+    }
+  ],
+  "production_retry": {
+    "step": "production_explicit_retry",
+    "status": 200,
+    "elapsed_ms": 47039,
+    "saved": true,
+    "partial": false,
+    "errors": [],
+    "run_count": 1
+  },
+  "retry_restored": {
+    "runs": [
+      {
+        "status": "COMPLETED",
+        "reason_code": null
+      },
+      {
+        "status": "FAILED",
+        "reason_code": "CLIENT_RETRY"
+      }
+    ],
+    "passport_count": 1,
+    "final_claim_count": 1
+  },
+  "cleanup": [
+    {
+      "stage": "cleanup",
+      "path": "/api/finshield/session",
+      "status": 200,
+      "elapsed_ms": 2885,
+      "types": [
+        "json"
+      ]
+    },
+    {
+      "stage": "cleanup",
+      "path": "/api/finshield/account/delete",
+      "status": 200,
+      "elapsed_ms": 3861,
+      "types": [
+        "ACCESS_BLOCKED"
+      ]
+    },
+    {
+      "stage": "cleanup",
+      "path": "/api/finshield/account/delete",
+      "status": 200,
+      "elapsed_ms": 3236,
+      "types": [
+        "ACCESS_BLOCKED"
+      ]
+    },
+    {
+      "stage": "deletion-status",
+      "path": "/api/finshield/account/delete",
+      "status": 200,
+      "elapsed_ms": 2848,
+      "types": [
+        "COMPLETED"
+      ]
+    },
+    {
+      "stage": "deletion-status",
+      "path": "/api/finshield/session",
+      "status": 401,
+      "elapsed_ms": 2406,
+      "types": [
+        "json"
+      ]
+    }
+  ]
+}
