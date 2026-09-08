@@ -92,7 +92,7 @@ export const normalizeJudgeOutput = (
         rationale_masked: "이 항목의 판단 결과를 확인하지 못했습니다.",
       };
     }
-    const problems = citationProblems(candidate.evidence_refs, candidate.state, evidence);
+    const problems = citationProblems(candidate.evidence_refs, candidate.state, evidence, claim.statement_masked);
     if (problems.length === 0) return candidate;
     citationInvalid = true;
     return {
@@ -202,6 +202,7 @@ export const runVerification = async (args: {
         parse,
         refsOf: (value) => value.results.map((entry) => ({
           refs: entry.evidence_refs,
+          state: entry.status === "CONFIRMED" ? "VERIFIED" : entry.status === "REFUTED" || entry.status === "COUNTER_EVIDENCE" ? "CONTRADICTED" : "UNKNOWN",
           // 확인·반증을 말하려면 근거가 있어야 한다. 못 찾았다는 상태는 근거가 없어도 된다.
           confirmed: entry.status === "CONFIRMED" || entry.status === "REFUTED"
             || entry.status === "COUNTER_EVIDENCE",

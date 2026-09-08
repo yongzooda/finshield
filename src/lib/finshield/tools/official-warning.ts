@@ -2,6 +2,7 @@ import 'server-only';
 import {createHash} from 'node:crypto';
 import {filterToolText} from '@/lib/tools/filter';
 import type {ToolCallContext,ToolOutcome} from './runtime';
+import { WARNING_REVIEW, reviewedWarningIsUsable } from './warning-review';
 
 const URL='https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020';
 const hash=(text:string)=>createHash('sha256').update(text).digest('hex');
@@ -36,12 +37,13 @@ export async function searchOfficialWarning(input:unknown,ctx:ToolCallContext):P
  try{for(;;){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>2*1024*1024)throw new Error('OFFICIAL_WARNING_TOO_LARGE');chunks.push(value);}}
  finally{await reader.cancel();}
  const section=extractWarningSection(Buffer.concat(chunks).toString('utf8'));const contentHash=hash(section.original);
- return {provenanceComplete:true,candidateCount:1,observations:{kind:'curated_warning_scope',document_count:1,published_at:section.publishedAt,limitation_code:'DATED_GUIDE_NOT_CURRENT_TRANSACTION_PROOF'},items:[{
+ const reviewed=reviewedWarningIsUsable(contentHash,Date.now());
+ return {provenanceComplete:true,candidateCount:1,observations:{kind:'curated_warning_scope',document_count:1,published_at:section.publishedAt,limitation_code:'GUIDANCE_NOT_CURRENT_TRANSACTION_PROOF',reviewed,review_due_at:WARNING_REVIEW.reviewDueAt},items:[{
   sourceType:'GUIDE',authorityGrade:'B',publisher:'서민금융진흥원',title:section.title,officialId:'kinfa:notice:24020',canonicalUrl:URL,
-  publishedAt:section.publishedAt,sourceVersion:`notice-html-v1:${contentHash.slice(0,24)}`,contentHash,fingerprint:hash(URL),
-  // 수동 경보의 다음 검토일이 등록되지 않았다. 최신 경보로 취급하지 않는다.
-  freshness:'STALE',licenseCode:null,isComplete:true,isCitable:false,
-  locator:{kind:'html_section',selector:'.board-detail-con',paragraph_selection:'financial-advertising-payment-app-guidance-v1'},
-  excerptMasked:section.excerpt,directness:'CONTEXT_ONLY',referenceOnly:true,selectionReasonCode:'CURATED_KINFA_GUIDE',
+  publishedAt:section.publishedAt,sourceVersion:`notice-html-${reviewed?'review-20260908':'v1'}:${contentHash.slice(0,24)}`,contentHash,fingerprint:hash(URL),
+  // 작성일은 유지한다. 검토 Hash·기한과 실제 재조회가 모두 맞는 일반 지침만 비교한다.
+  freshness:reviewed?'FRESH':'STALE',licenseCode:null,isComplete:true,isCitable:reviewed,
+  locator:{kind:'html_section',selector:'.board-detail-con',paragraph_selection:'financial-advertising-payment-app-guidance-v1',permitted_use:'PUBLIC_GUIDANCE_COMPARISON',current_transaction_proof:false,reviewed_at:WARNING_REVIEW.reviewedAt,review_due_at:WARNING_REVIEW.reviewDueAt},
+  excerptMasked:section.excerpt,directness:reviewed?'DIRECT':'CONTEXT_ONLY',referenceOnly:!reviewed,selectionReasonCode:'CURATED_KINFA_GUIDE',
  }]};
 }

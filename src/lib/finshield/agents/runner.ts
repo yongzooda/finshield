@@ -35,12 +35,12 @@ export type Decoded = { ok: true; value: unknown; reason?: string } | { ok: fals
  * Schema 를 통과해도 인용이 틀리면 받지 않는다. 지어낸 근거 이름과 근거 없는
  * 확정을 여기서 버린다. 규칙 1 의 마지막 관문이다.
  */
-export const decodeDomainOutput = (raw: unknown, session: RunSession): Decoded => {
+export const decodeDomainOutput = (raw: unknown, session: RunSession, claims: DomainAgentInput["claims"] = []): Decoded => {
   const parsed = domainAgentOutput.safeParse(raw);
   if (!parsed.success) return { ok: false, reason: "OUTPUT_SCHEMA_INVALID" };
   let citationInvalid = false;
   const findings = parsed.data.findings.map((finding) => {
-    const problems = citationProblems(finding.evidence_refs, finding.state, session.evidence);
+    const problems = citationProblems(finding.evidence_refs, finding.state, session.evidence, claims.find(claim => claim.claim_ref === finding.claim_ref)?.statement_masked);
     if (problems.length === 0) return finding;
     citationInvalid = true;
     // AI-015: 한 Claim의 잘못된 인용이 같은 Agent의 다른 정상 결과까지
@@ -189,7 +189,7 @@ export const runDomainAgent = async <T = DomainAgentOutput>(args: {
     // 다른 Schema 로 받는 Agent 는 자기 해독기를 준다. 없으면 Domain Schema 로 받는다.
     const decoded = args.decodeOutput
       ? args.decodeOutput(raw, evidence)
-      : decodeDomainOutput(raw, { ...session, evidence: new Map(evidence.map((entry) => [entry.evidence_ref, entry])) });
+      : decodeDomainOutput(raw, { ...session, evidence: new Map(evidence.map((entry) => [entry.evidence_ref, entry])) }, input.claims);
     if (!decoded.ok) {
       status = "FAILED";
       reasonCode = decoded.reason;
@@ -262,7 +262,7 @@ export const runReviewAgent = async <T>(args: {
   model: AgentModel;
   impls: Record<string, ToolImpl>;
   parse: (raw: unknown) => { ok: true; value: T } | { ok: false };
-  refsOf: (value: T) => { refs: string[]; confirmed: boolean }[];
+  refsOf: (value: T) => { refs: string[]; confirmed: boolean; state?: "VERIFIED" | "CONTRADICTED" | "UNKNOWN" }[];
   downgradeInvalid?: (value: T, invalidIndexes: Set<number>) => T;
 }): Promise<AgentRunResult<T>> => {
   const result = await runDomainAgent<T>({
@@ -287,7 +287,7 @@ export const runReviewAgent = async <T>(args: {
       const invalidIndexes = new Set<number>();
       const pool = new Map(evidence.map((entry) => [entry.evidence_ref, entry]));
       for (const [index, entry] of args.refsOf(parsed.value).entries()) {
-        const entryProblems = citationProblems(entry.refs, entry.confirmed ? "VERIFIED" : "UNKNOWN", pool);
+        const entryProblems = citationProblems(entry.refs, entry.state ?? (entry.confirmed ? "VERIFIED" : "UNKNOWN"), pool);
         if (entryProblems.length > 0) invalidIndexes.add(index);
         problems.push(...entryProblems);
       }

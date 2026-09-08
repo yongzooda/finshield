@@ -38,8 +38,8 @@ describe("근거 요약", () => {
     expect(JSON.stringify(claimBrief([input]))).not.toContain("private-");
   });
   it("본문은 인용에 필요한 만큼만 넘긴다", () => {
-    const [brief] = evidenceBrief([evidence()]);
-    expect(brief.excerpt.length).toBe(400);
+    const [brief] = evidenceBrief([evidence({ excerpt_masked: "가".repeat(1800) })]);
+    expect(brief.excerpt.length).toBe(1200);
   });
 
   it("locator 와 해시 같은 내부 값은 넘기지 않는다", () => {

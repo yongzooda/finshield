@@ -129,12 +129,21 @@ export const citationProblems = (
   refs: string[],
   state: ClaimState,
   pool: Map<string, ToolEvidence>,
+  statement?: string,
 ): string[] => {
   const problems: string[] = [];
   for (const ref of refs) {
     if (!pool.has(ref)) problems.push(`없는 근거를 인용했습니다: ${ref}`);
   }
+  if (state === "VERIFIED" && refs.some(ref => pool.get(ref)?.locator?.permitted_use === "REFUTE_CURRENT_OFFER")) {
+    problems.push("종료 고지를 현재 가입 가능성의 지지 근거로 썼습니다.");
+  }
   const known = refs.filter((ref) => pool.has(ref)).map((ref) => pool.get(ref) as ToolEvidence);
+  if ((state === "VERIFIED" || state === "CONTRADICTED") && statement
+    && /사기범|사기꾼|범죄자|사기(?:이다|다|임|가\s*맞|가\s*아)|위법(?:이다|다|임)|불법(?:이다|다|임)/u.test(statement)
+    && known.length > 0 && known.every(item => item.locator?.current_transaction_proof === false)) {
+    problems.push("일반 안내로 현재 거래의 범죄·위법 여부를 확정했습니다.");
+  }
   if ((state === "VERIFIED" || state === "CONTRADICTED") && known.length === 0) {
     problems.push("근거 없이 확정 상태를 썼습니다.");
   }
