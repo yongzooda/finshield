@@ -22,7 +22,7 @@ import type { ClaimExtractor } from "../intake";
 
 const MAX_EXCERPT = 1200;
 // AI-015: 같은 Agent의 판단 본문만 나눈다. 도구 선택·독립 검색·Agent 순서는 유지한다.
-export const AGENT_CLAIM_BATCH_SIZE = 2;
+export const AGENT_CLAIM_BATCH_SIZE = 1;
 export const agentClaimBatches = (claims: ConfirmedClaim[]) =>
   Array.from({ length: Math.ceil(claims.length / AGENT_CLAIM_BATCH_SIZE) }, (_, index) =>
     claims.slice(index * AGENT_CLAIM_BATCH_SIZE, (index + 1) * AGENT_CLAIM_BATCH_SIZE));
@@ -238,7 +238,7 @@ export async function settleModelBatches<T>(promises: Promise<T>[]): Promise<T[]
   return settled.map(result => (result as PromiseFulfilledResult<T>).value);
 }
 
-export const JUDGE_CLAIM_BATCH_SIZE = 2;
+export const JUDGE_CLAIM_BATCH_SIZE = 1;
 
 export const buildJudgeBatches = (args: {
   claims: ConfirmedClaim[];
