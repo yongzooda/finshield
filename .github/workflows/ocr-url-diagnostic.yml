@@ -51,7 +51,8 @@ jobs:
           test "$(git -C trusted rev-parse HEAD)" = "${WORKFLOW_HEAD_SHA}"
 
       - name: OCR URL 진단 계약 시험
-        run: node trusted/.github/scripts/test-ocr-url-diagnostic.mjs
+        working-directory: trusted
+        run: node .github/scripts/test-ocr-url-diagnostic.mjs
 
       - name: 합성 OCR URL 진단 실행
         env:
