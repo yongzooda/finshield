@@ -1,0 +1,2303 @@
+{
+  "schema_version": 3,
+  "blocker_id": "B-HEALTH-01",
+  "requirements_blob_sha": "27ce706010344fbcedebe3abd707febff0f1dc26",
+  "adr_decision_sha256": "3c2a5e2dac9d626fdeea0b70eaa16454dd97688b54ad6d101b9b1d8dccdce736",
+  "code_under_test_sha": "fb360014e54647dd99d37970a1ed733ddb80fd5f",
+  "workflow_head_sha": "fb360014e54647dd99d37970a1ed733ddb80fd5f",
+  "scope_sha256": "8650a8d3e12235a6a867e117ad119a95c4219554806ead63781584a5ea097fa0",
+  "run": {
+    "id": 34195239872,
+    "attempt": 1
+  },
+  "observations": {
+    "contract": {
+      "formula_version": "health-no-provider-http-v1",
+      "requests": 100,
+      "path": "/api/health",
+      "real_next_route": true,
+      "provider_network": "blocked-and-counted"
+    },
+    "requests": [
+      {
+        "sequence": 1,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 1148
+      },
+      {
+        "sequence": 2,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 184
+      },
+      {
+        "sequence": 3,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 181
+      },
+      {
+        "sequence": 4,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 180
+      },
+      {
+        "sequence": 5,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 179
+      },
+      {
+        "sequence": 6,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 182
+      },
+      {
+        "sequence": 7,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 181
+      },
+      {
+        "sequence": 8,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 180
+      },
+      {
+        "sequence": 9,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 179
+      },
+      {
+        "sequence": 10,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 179
+      },
+      {
+        "sequence": 11,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 179
+      },
+      {
+        "sequence": 12,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 13,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 14,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 15,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 180
+      },
+      {
+        "sequence": 16,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 17,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 18,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 179
+      },
+      {
+        "sequence": 19,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 20,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 21,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 22,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 23,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 181
+      },
+      {
+        "sequence": 24,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 25,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 26,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 27,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 28,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 179
+      },
+      {
+        "sequence": 29,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 30,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 31,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 32,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 33,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 34,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 35,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 36,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 37,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 38,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 39,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 179
+      },
+      {
+        "sequence": 40,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 41,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 42,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 43,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 44,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 45,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 46,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 47,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 48,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 49,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 50,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 51,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 52,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 53,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 54,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 55,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 56,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 57,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 58,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 176
+      },
+      {
+        "sequence": 59,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 60,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 61,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 62,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 63,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 64,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 65,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 66,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 67,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 68,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 69,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 70,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 71,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 72,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 73,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 74,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 75,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 76,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 77,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 78,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 79,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 176
+      },
+      {
+        "sequence": 80,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 81,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 82,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 83,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 84,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 85,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 86,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 87,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 88,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 89,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 90,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 91,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 92,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 93,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 94,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 95,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 96,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 178
+      },
+      {
+        "sequence": 97,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 98,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 99,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      },
+      {
+        "sequence": 100,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 200,
+        "status": "degraded",
+        "db_ok": true,
+        "db_detail": null,
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 177
+      }
+    ],
+    "faults": [
+      {
+        "sequence": 1,
+        "strict": false,
+        "response_shape_valid": true,
+        "http_status": 503,
+        "status": "down",
+        "db_ok": false,
+        "db_detail": "UNAVAILABLE",
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 90
+      },
+      {
+        "sequence": 2,
+        "strict": true,
+        "response_shape_valid": true,
+        "http_status": 503,
+        "status": "down",
+        "db_ok": false,
+        "db_detail": "UNAVAILABLE",
+        "provider_statuses": [
+          "unknown",
+          "unknown",
+          "unknown",
+          "unknown"
+        ],
+        "observed_times": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "elapsed_ms": 7
+      }
+    ],
+    "network": {
+      "normal": {
+        "processes": 1,
+        "fetch": 0,
+        "http": 0,
+        "https": 0
+      },
+      "fault": {
+        "processes": 1,
+        "fetch": 0,
+        "http": 0,
+        "https": 0
+      },
+      "control": {
+        "processes": 1,
+        "fetch": 1,
+        "http": 1,
+        "https": 1
+      }
+    },
+    "cache_states": [
+      "unknown",
+      "available",
+      "unknown",
+      "unavailable",
+      "unknown"
+    ]
+  },
+  "environment": {
+    "node_version": "v24.20.0",
+    "region": "github-hosted",
+    "transport": "loopback-http-and-supabase-tls"
+  },
+  "redactions_applied": true
+}
