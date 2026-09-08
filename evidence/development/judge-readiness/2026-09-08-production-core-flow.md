@@ -61,8 +61,11 @@ Production 회원 거래 전 검증에서 Run 준비 함수가 원격 Migration 
 | `ce2077a` | `67b076e4-d6c5-4728-9df0-1feec28b3f2c` | `PARTIAL`, 63.698초 | Citation 실패를 해당 Claim에만 격리해 6개 Claim 중 4개에 근거 버튼을 보존했다. Judge는 시간 안에 끝났지만 인용 정책 실패가 남았다. |
 | `fbc6d95` | `ee0f72a5-32b1-49e4-99ce-c617ddd1e2e2` | `PARTIAL`, 70.012초 | 모델 출력 Schema를 실제 전달 Evidence ref로 제한했다. Fraud는 종결됐지만 Judge가 `JUDGE_DEADLINE_EXCEEDED`로 끝나 최종 여섯 항목을 모두 확정하지 않았다. |
 | `ca513b9` | `6b76dbc6-9528-43e6-825d-ad6e51223fb8` | `PARTIAL`, 60.486초 | Judge 입력을 Claim 최대 4개씩 두 배치로 나눠 같은 12초 경계에서 병렬 실행했다. Judge 시간 초과가 사라졌고 최종 Claim 6건·Claim-Evidence 연결 4건·Evidence 3건·Passport 1건을 저장했다. |
+| `ba42700` | `a53b10f7-da93-4d16-9194-2f28e918d26f` | `PARTIAL`, 71.520초 | 판정 상태별 인용 자격을 출력 Schema에서 제한했다. `CITATION_INVALID`와 `JUDGE_CITATION_INVALID`는 발생하지 않았고 Product/Institution의 판단 호출만 9초 상한을 넘겨 `DEADLINE_EXCEEDED`로 끝났다. 나머지 Domain·CoVe·Red Team·Judge는 모두 성공했다. |
 
 마지막 실행의 부분 사유는 `CITATION_INVALID` 4건, `JUDGE_CITATION_INVALID` 1건과 Product·Fraud·CoVe·Red Team의 부분 상태다. 공식 근거 정책을 통과하지 못한 항목은 `UNKNOWN`으로 유지했고, 기준을 낮추거나 근거 없는 결론을 승격하지 않았다. 처리 중 5초와 약 30초에 실행 화면과 Agent 진행 상황이 유지됐고 약 1분 뒤 결과로 전환됐다. 2단계 회귀, 중복 버튼, Console 오류는 재현되지 않았다. 결과 화면은 [Production 회원 6 Claim 결과](2026-09-08-production-member-six-claim-result.png)에 보존한다.
+
+`ba42700` 후속 실행에서는 선택한 7개 Claim과 13개 Tool 호출이 모두 저장됐다. Product/Institution은 Tool 선택과 공식 상품·기관 조회까지 성공했지만 마지막 판단이 9초 제한을 넘겼다. 전체 실행은 결과 화면과 Passport로 종결됐고 2단계로 돌아가지 않았다. 이 실측을 근거로 선택 6초, 판단 11초, Domain 단계 18초, 순차 전체 115초의 `finshield-p0-loan-v7` Manifest를 별도 변경으로 만들었다. 새 Manifest의 로컬 적용과 시간 합 계약만 확인했으며 원격 DB 적용과 수정 후 Production 재실측 전에는 정상 전체 완료로 세지 않는다.
 
 같은 `/verify`에서 결과를 본 뒤 상단 `새 검증`을 누르면 Client Component 상태가 남아 이전 결과가 유지되는 문제도 재현했다. PR #263은 이 링크에서 문서 탐색을 수행하게 했고, Production에서 전송하지 않은 입력과 이전 결과가 사라진 1단계로 초기화되는 것을 확인했다.
 
