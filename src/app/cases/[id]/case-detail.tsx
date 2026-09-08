@@ -89,7 +89,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
   const passport = detail.passports.find((row) => row.verification_run_id === latest?.id);
   const partialReasons = latest?.partial_reason_codes ?? [];
   const assessments = detail.assessments ?? [];
-  const action = finals.length > 0 ? nextAction(finals.map((row) => row.status)) : null;
+  const action = finals.length > 0 ? nextAction(finals.map((row) => row.status), axes.some(axis => axis.result_code === "HIGH_RISK_ACTION")) : null;
   const evidenceOf = (finalId: string) => detail.claim_evidences
     .filter((link) => link.final_claim_version_id === finalId)
     .map((link) => ({ link, evidence: detail.evidences.find((row) => row.id === link.evidence_id) }))

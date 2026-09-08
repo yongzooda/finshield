@@ -139,7 +139,7 @@ export const ACTOR_LABEL: Record<string, string> = {
 export const actorLabel = (code: string): string => pick(ACTOR_LABEL, code);
 
 export const OVERALL_RESULT: Record<string, { label: string; tone: ChipTone }> = {
-  MATERIAL_RISK_FOUND: { label: "중요한 위험 확인", tone: "contra" },
+  MATERIAL_RISK_FOUND: { label: "중대한 위험 신호", tone: "contra" },
   HIGH_CAUTION: { label: "높은 주의 필요", tone: "caution" },
   INSUFFICIENT_INFORMATION: { label: "판단 정보 부족", tone: "neutral" },
   VERIFY_BEFORE_PROCEEDING: { label: "거래 전 추가 확인", tone: "caution" },
@@ -159,7 +159,11 @@ export const overallResultOf = (code: string): { label: string; tone: ChipTone }
  * 검증 직후 화면과 나중에 다시 연 기록 화면이 같은 말을 해야 한다. 그래서 두
  * 화면이 이 함수를 함께 쓴다.
  */
-export function nextAction(states: string[]): { title: string; detail: string } {
+export function nextAction(states: string[], highRiskAction = false): { title: string; detail: string } {
+  if (highRiskAction) return {
+    title: "송금·원격제어 앱 설치를 멈추세요",
+    detail: "권유문에 선입금 또는 원격제어 앱 설치 요구가 있습니다. 공식 예방 지침에 따라 먼저 공식 창구로 확인하세요. 아래의 미확인 사실과 별도로 주의할 행동 요구입니다.",
+  };
   if (states.includes("CONTRADICTED")) {
     return {
       title: "송금하거나 가입하기 전에 멈추세요",
