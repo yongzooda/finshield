@@ -894,7 +894,3 @@ Live 시험은 Preview 격리 환경에서 먼저 수행한 뒤 Production과 �
 - P0 범위에 저축·투자·OpenDART·URL Fetch 추가
 
 Implementation Gate 전환 PR에는 최소 한 명의 구현 검토와 한 명의 실패 안전성 검토를 남긴다. Implementation Gate가 `NO-GO`인 동안 허용되는 작업은 Spike harness, 격리 인프라, Fixture, CI, 관측성, 보안·삭제 검증이다. `GO` 뒤 기능명세와 P0 사용자 기능을 구현하되, 별도 Release Gate가 통과되기 전에는 Production Live 성공이나 출시 완료를 홍보하지 않는다.
-
-### 2026-09-09 심사 체험 결함 수정
-
-사용자 승인으로 기존 운영의 상품 조건 설명·지연·가입 후 공식 조회를 보완한다. 기존 Provider·고정 순차 Agent·예산·독립 검토와 Gate 값을 유지한다. 고정 Domain의 읽기 계획과 독립 검토 근거의 Judge 전달, 설명의무 원문 조회는 새 Manifest로 구분한다. 실제 검증은 `docs/ops/review-evidence-latency.md`를 따르며 정식 Retrieval 평가를 반복해 채택하는 작업이 아니다.
