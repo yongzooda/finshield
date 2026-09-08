@@ -1,0 +1,72 @@
+name: OCR URL Failure Diagnostic
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 실패한 합성 URL 한 가족을 1회 진단하며 Gate 증거가 아님을 확인
+        required: true
+        type: choice
+        options:
+          - failed-family-diagnostic
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ocr-url-diagnostic-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  diagnostic:
+    name: ocr-url-diagnostic
+    if: github.ref == 'refs/heads/main'
+    environment: provider-spike
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Checkout trusted diagnostic
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: trusted
+          persist-credentials: false
+          ref: ${{ github.sha }}
+
+      - name: Set up Node 24
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+
+      - name: Install trusted dependencies
+        run: npm --prefix trusted ci --ignore-scripts
+
+      - name: Validate trusted main commit
+        env:
+          WORKFLOW_HEAD_SHA: ${{ github.sha }}
+        run: |
+          if [[ "${GITHUB_REF}" != "refs/heads/main" || ! "${WORKFLOW_HEAD_SHA}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::development diagnostic must run from an immutable main commit"
+            exit 1
+          fi
+          test "$(git -C trusted rev-parse HEAD)" = "${WORKFLOW_HEAD_SHA}"
+
+      - name: OCR URL 진단 계약 시험
+        run: node trusted/.github/scripts/test-ocr-url-diagnostic.mjs
+
+      - name: 합성 OCR URL 진단 실행
+        env:
+          CLOVA_OCR_INVOKE_URL: ${{ secrets.CLOVA_OCR_INVOKE_URL }}
+          CLOVA_OCR_SECRET: ${{ secrets.CLOVA_OCR_SECRET }}
+          PROBE_OUTPUT_PATH: ${{ github.workspace }}/probe-output/ocr-url-diagnostic.json
+          TRUSTED_REPOSITORY: ${{ github.workspace }}/trusted
+        run: node trusted/.github/scripts/ocr-url-diagnostic.mjs
+
+      - name: OCR URL 진단 결과 업로드
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ocr-url-diagnostic-${{ github.sha }}
+          path: probe-output/ocr-url-diagnostic.json
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 9
