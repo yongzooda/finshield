@@ -46,7 +46,7 @@ describe("독립 검토의 묶음 판단", () => {
   });
 });
 
-import { modelEvidenceScope, coveOutputSchemaFor } from "../agents/model-adapter";
+import { modelEvidenceScope, coveOutputSchemaFor, providerJudgeSchemaFor } from "../agents/model-adapter";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type { ToolEvidence } from "../schemas";
 
@@ -63,6 +63,26 @@ describe("호출 내부 인용 이름 정규화", () => {
     expect(coveOutputSchemaFor(left.evidence).safeParse({ schema_version: "out-v1", results: [{claim_ref:"C1",status:"CONFIRMED",evidence_refs:["E2"],note_masked:"맥락 근거 확정 금지"}] }).success).toBe(false);
   });
 
+});
+
+it("Judge의 고정 형식은 미제공 인용을 서버에서 차단한다", () => {
+  const source = { evidence_ref: "E8", citable: true } as ToolEvidence;
+  expect(providerJudgeSchemaFor().safeParse({schema_version:"out-v1",claim_results:[],conflicts:[]}).success).toBe(true);
+  expect(()=>modelEvidenceScope([source]).restore({ evidence_refs: ["E2"] })).toThrow("MODEL_CITATION_REFERENCE_INVALID");
+});
+
+it("Judge 한 묶음의 시간 초과가 다른 묶음의 실제 판단을 버리지 않는다", async () => {
+  call.mockRejectedValueOnce(Object.assign(new Error("합성 시간 초과"),{name:"APIConnectionTimeoutError"}));
+  call.mockResolvedValueOnce({schema_version:"out-v1",conflicts:[],claim_results:claims.slice(3).map(claim=>({
+    claim_ref:claim.claim_ref,state:"NEED_MORE_INFORMATION",evidence_refs:[],withheld_reason:"개별 자료 없음",rationale_masked:"추가 자료 확인",
+  }))});
+  const model=createJudgeModel();
+  const result=await model.judge({claims,findings:[],evidence:[]});
+  expect(model.failureReason?.()).toBe("JUDGE_BATCH_DEADLINE_EXCEEDED");
+  expect(result).toMatchObject({claim_results:[
+    ...claims.slice(0,3).map(claim=>({claim_ref:claim.claim_ref,state:"UNKNOWN",evidence_refs:[],withheld_reason:"최종 판단 시간이 초과됐습니다."})),
+    ...claims.slice(3).map(claim=>({claim_ref:claim.claim_ref,state:"NEED_MORE_INFORMATION",rationale_masked:"추가 자료 확인"})),
+  ]});
 });
 
 it("Judge에게 전달하는 기존 판단과 근거가 같은 인용 번호를 쓰고 저장 번호로 복원된다", async () => {

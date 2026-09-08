@@ -46,7 +46,7 @@ it('실제 검토 본문을 재조회한 경우만 일반 지침 비교로 인�
 
 import { normalizeJudgeOutput } from '../orchestrator';
 import { decodeDomainOutput } from '../agents/runner';
-import { providerAgentSchemaFor, settleModelBatches } from '../agents/model-adapter';
+import { modelEvidenceScope, providerAgentSchemaFor, settleModelBatches } from '../agents/model-adapter';
 import type { RunSession } from '../tools/runtime';
 it('승인 대상 안내를 무조건 승인으로 바꾸지 않고 개인 심사 자료를 요구한다',()=>{
  const claim={claim_ref:'C1',claim_type:'ELIGIBILITY',statement_masked:'햇살론15 승인 대상이라고 안내받았다.',materiality:'MATERIAL' as const};
@@ -58,8 +58,8 @@ it('승인 대상 안내를 무조건 승인으로 바꾸지 않고 개인 심�
 it('평탄한 Provider 출력에도 알려진 ref와 모든 인용의 자격을 검사한다',()=>{
  const sources=[{...evidence,locator:{}},{...evidence,evidence_ref:'E2',citable:false,reference_only:true,locator:{}}];
  const raw={schema_version:'out-v1',findings:[{claim_ref:'C1',state:'VERIFIED',relation:'SUPPORT',evidence_refs:['E1','E2'],summary_masked:'합성 판단',limits:[]}],out_of_scope_claim_refs:[]};
- expect(providerAgentSchemaFor('PRODUCT_INSTITUTION',sources).safeParse(raw).success).toBe(true);
- expect(providerAgentSchemaFor('PRODUCT_INSTITUTION',sources).safeParse({...raw,findings:[{...raw.findings[0],evidence_refs:['E99']}]}).success).toBe(false);
+ expect(providerAgentSchemaFor('PRODUCT_INSTITUTION').safeParse(raw).success).toBe(true);
+ expect(()=>modelEvidenceScope(sources).restore({...raw,findings:[{...raw.findings[0],evidence_refs:['E99']}]})).toThrow('MODEL_CITATION_REFERENCE_INVALID');
  const decoded=decodeDomainOutput(raw,{evidence:new Map(sources.map(e=>[e.evidence_ref,e]))} as RunSession);
  expect(decoded).toMatchObject({ok:true,reason:'CITATION_INVALID',value:{findings:[{state:'UNKNOWN'}]}});
 });

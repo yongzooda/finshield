@@ -33,7 +33,7 @@ export function assertBatchCoverage(claims: ConfirmedClaim[], refs: string[]) {
   }
 }
 const AFTERCARE_CONTEXT_INSTRUCTION = "가입 후 점검의 답변과 계약 문구는 사용자 진술이며 공식 근거가 아니다. 기존 Claim과 계약 문구의 차이, 추가 설명과 공식 자료 확인 필요성을 자기 Agent 범위에서 검토한다. 문구 차이 또는 유사 사례만으로 위법·사기를 확정하지 않는다.";
-const DECISIVE_CITATION_INSTRUCTION = "VERIFIED·CONTRADICTED·CONFIRMED·REFUTED·COUNTER_EVIDENCE 상태에는 citable=true, incomplete=false, reference_only=false, freshness=FRESH, directness=DIRECT인 ref만 쓴다. 그런 ref가 없으면 불확실·보류 상태를 쓴다.";
+const DECISIVE_CITATION_INSTRUCTION = "VERIFIED·CONTRADICTED·CONFIRMED·REFUTED·COUNTER_EVIDENCE 상태에는 citable=true, incomplete=false, reference_only=false, freshness=FRESH, directness=DIRECT인 ref만 쓴다. 그런 ref가 없으면 불확실·보류 상태를 쓴다. PERSONAL_APPROVAL_REQUIRES_CASE_DOCUMENT 항목은 개인 심사 자료가 없으면 NEED_MORE_INFORMATION(독립 재확인은 INCONCLUSIVE)이다. 상품 종료 사실과 개인 승인 여부를 섞지 않는다.";
 
 /** 모델 입력에는 표시용 참조만 쓴다. DB 행 ID·부가 속성을 직렬화하지 않는다. */
 export const claimBrief = (claims: ConfirmedClaim[]) => claims.map(({claim_ref,claim_type,statement_masked,materiality}) =>
@@ -186,18 +186,19 @@ export const judgeOutputSchemaFor = (evidence: ToolEvidence[]) => {
   });
 };
 
-/** Provider에는 평탄한 구조와 알려진 ref 목록을 준다. 상태별 인용 자격은
- * 응답 뒤 citationProblems가 같은 기준으로 전부 검사한다. 중첩 union의
- * 최초 grammar 준비가 모델 대기 시간을 소진한 실제 실패를 보존했다. */
-export const providerAgentSchemaFor = (code: string, evidence: ToolEvidence[]) => {
-  const refs = citationReferenceSchema(evidence);
+/** Provider 출력 형식은 실제 근거 수에 따라 달라지지 않는다.
+ * 실제로 제공한 ref인지는 scope.restore가 전부 확인하고, 상태별 인용 자격은
+ * citationProblems가 검사한다. 형식만 맞는 미제공 ref를 근거로 채택하지 않는다. */
+const providerRefs = () => z.array(z.string().regex(/^E[1-9][0-9]*$/)).max(64);
+export const providerAgentSchemaFor = (code: string) => {
+  const refs = providerRefs();
   if (code === "COVE") return coveOutput.extend({ results: z.array(coveOutput.shape.results.element.extend({ evidence_refs: refs })) });
   if (code === "RED_TEAM") return redTeamOutput.extend({ results: z.array(redTeamOutput.shape.results.element.extend({ evidence_refs: refs })) });
   return domainAgentOutput.extend({ findings: z.array(domainAgentOutput.shape.findings.element.extend({ evidence_refs: refs })) });
 };
-export const providerJudgeSchemaFor = (evidence: ToolEvidence[]) => judgeOutput.extend({
-  claim_results: z.array(judgeOutput.shape.claim_results.element.extend({ evidence_refs: citationReferenceSchema(evidence) })),
-  conflicts: z.array(judgeOutput.shape.conflicts.element.extend({ evidence_refs: citationReferenceSchema(evidence).min(2) })),
+export const providerJudgeSchemaFor = () => judgeOutput.extend({
+  claim_results: z.array(judgeOutput.shape.claim_results.element.extend({ evidence_refs: providerRefs() })),
+  conflicts: z.array(judgeOutput.shape.conflicts.element.extend({ evidence_refs: providerRefs().min(2) })),
 });
 
 export async function settleModelBatches<T>(promises: Promise<T>[]): Promise<T[]> {
@@ -297,7 +298,7 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
         evidence: evidenceBrief(evidence),
         observations,
       }),
-      schema: providerAgentSchemaFor(input.agent_code, evidence),
+      schema: providerAgentSchemaFor(input.agent_code),
       maxTokens: 1000, effort: "low", signal, maxRetries: 0,
       timeoutMs: input.agent_code === "COVE" || input.agent_code === "RED_TEAM"
         ? MODEL_TIMEOUTS.reviewDecisionMs : MODEL_TIMEOUTS.domainDecisionMs,
@@ -321,19 +322,33 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
 
 export const createJudgeModel = (context?: ModelBudgetContext): JudgeModel => {
  const usage = emptyModelUsage();
- return ({ usage: () => usage,
+ let failureReason: string | null = null;
+ return ({ usage: () => usage, failureReason: () => failureReason,
   async judge({ claims, findings, evidence, signal }) {
+    failureReason = null;
     const batches = buildJudgeBatches({ claims, findings, evidence });
-    const outputs = await settleModelBatches(batches.map(async (batch) => {
+    const settled = await Promise.allSettled(batches.map(async (batch) => {
       const scope = modelEvidenceScope(batch.evidence);
       return scope.restore(await callFinshieldModel({
         model: FINSHIELD_MODEL,
         system: `${JUDGE_SYSTEM}\n${DECISIVE_CITATION_INSTRUCTION} 각 rationale_masked는 핵심 근거를 담은 40자 이내 한 문장이다. withheld_reason은 20자 이내다. 입력 Claim마다 정확히 한 결과를 낸다.`,
         user: JSON.stringify({ assessed_on: new Date().toISOString().slice(0, 10), claims: claimBrief(batch.claims), findings: scope.localize(batch.findings), evidence: evidenceBrief(scope.evidence) }),
-        schema: providerJudgeSchemaFor(scope.evidence),
+        schema: providerJudgeSchemaFor(),
         maxTokens: 1600, effort: "low", signal, maxRetries: 0, timeoutMs: MODEL_TIMEOUTS.judgeMs,
       }, context, usage));
     }));
+    const outputs = settled.map((entry, index) => {
+      if (entry.status === "fulfilled") return entry.value;
+      const timedOut = signal?.aborted || entry.reason?.name === "APIConnectionTimeoutError";
+      failureReason ??= timedOut ? "JUDGE_BATCH_DEADLINE_EXCEEDED" : "JUDGE_BATCH_CALL_FAILED";
+      return { schema_version: "out-v1" as const, conflicts: [],
+        claim_results: batches[index].claims.map(claim => ({ claim_ref: claim.claim_ref,
+          state: "UNKNOWN" as const, evidence_refs: [],
+          withheld_reason: timedOut ? "최종 판단 시간이 초과됐습니다." : "최종 판단 응답을 확인하지 못했습니다.",
+          rationale_masked: "이 항목의 최종 판단을 완료하지 못했습니다.",
+        })),
+      };
+    });
     const merged = mergeJudgeBatchOutputs(claims, outputs);
     return {
       schema_version: "out-v1" as const,

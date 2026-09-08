@@ -40,3 +40,7 @@ Migration 0055의 v9은 기존 v8을 보존한다. Domain 단계 16초, 독립 �
 다섯 번째 PDF는 45.694초에 SQL 23514로 실패했다. 네 Domain Agent는 모두 성공했지만, 법령 조회 두 건 중 두 번째 Evidence를 저장하지 못했다. 공식 법령 011359의 2026-09-08 시행 조문은 전날 UTC 기준으로 인용 불가 Snapshot이 만들어져 있었다. 오늘 실제 본문을 다시 읽고 인용 가능으로 판단해도 기존 불변 Snapshot이 반환돼 DB 방어가 차단했다. 원본 오류는 `pdf-fifth-failure.json`에 보존한다.
 
 국내 법령 시행일을 한국 날짜로 판단하고, Snapshot 버전에 시행 전·후 조회 자격을 함께 고정한다. 공식 시행 버전은 `effective_from`과 locator의 `official_source_version`에 그대로 남는다. 이전 Snapshot과 Passport는 변경하지 않으며 본문 Hash·출처 지문도 그대로라 독립 출처 수가 늘지 않는다. 격리 DB 시험 43은 과거 인용 불가 행 재사용을 재현하고, 새 시행 후 Snapshot·반복 조회·과거 불변성을 확인한다.
+
+여섯 번째 PDF는 법령 저장을 통과했으나 Judge 한 묶음의 20초 TIMEOUT으로 전체 판단을 버려 82.307초에 전부 보류됐다. 다른 Judge 묶음은 5.610초에 정상 정산됐다. `pdf-sixth-failure.json`에 실패를 보존한다. 최종 후보는 Judge 묶음별 실패를 격리해 성공 응답을 유지하며 실패 Claim은 UNKNOWN, Judge/Run은 부분 상태로 남긴다. 미확정 호출의 예약은 해제하지 않는다.
+
+Provider용 형식은 근거 수와 무관하게 고정한다. 제공한 ref의 정확한 목록 검사는 모델 응답 복원 시 전수 수행하고, 인용 자격·독립 검토는 그 뒤 그대로 적용한다. 형식만 맞는 미제공 ref도 저장·확정할 수 없다. 새 Schema의 준비 지연은 Provider 문서가 설명하지만, 이번 TIMEOUT의 내부 지연 원인을 직접 측정한 것으로 표현하지 않는다. 시간·금액 상한과 정식 Gate 합격식은 유지한다.

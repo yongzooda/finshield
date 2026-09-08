@@ -26,6 +26,8 @@ import { assertPromptsComplete } from "./agents/prompts";
 import { recordJudgeRun } from "./agents/judge-record";
 
 export type JudgeModel = {
+  /** 실제 모델 묶음 실패만 보고한다. 모델 응답의 임의 필드를 믿지 않는다. */
+  failureReason?: () => string | null;
   usage?: () => ModelUsage;
   judge: (args: {
     signal?: AbortSignal;
@@ -58,7 +60,7 @@ export type OrchestratedRun = {
 
 export const judgeFailureReason = (error: unknown, deadlineSignal: AbortSignal): string =>
   (error as { code?: string }).code === "MODEL_BUDGET_BLOCKED" ? "TOOL_BUDGET"
-    : deadlineSignal.aborted ? "JUDGE_DEADLINE_EXCEEDED" : "JUDGE_CALL_FAILED";
+    : deadlineSignal.aborted || (error as Error).name === "APIConnectionTimeoutError" ? "JUDGE_DEADLINE_EXCEEDED" : "JUDGE_CALL_FAILED";
 
 /**
  * Judge의 한 Claim에 잘못된 인용이나 누락이 있어도 다른 Claim의 검증된 결과는
@@ -265,13 +267,13 @@ export const runVerification = async (args: {
         new Map(judgeEvidence.map((item) => [item.evidence_ref, item])),
       );
       judged = normalized.output;
-      judgeReasonCode = normalized.reasonCode;
+      judgeReasonCode = normalized.reasonCode ?? args.judgeModel.failureReason?.() ?? null;
     }
   } catch (error) {
     judgeReasonCode = judgeFailureReason(error, judgeSignal);
   }
   await recordJudgeRun(session, { claims: args.claims, findings }, judged, judgeStartedAt, judgeReasonCode, args.judgeModel.usage?.());
-  progress({ type: "judge_finished", status: judged ? "SUCCEEDED" : "FAILED" });
+  progress({ type: "judge_finished", status: judged ? judgeReasonCode ? "PARTIAL" : "SUCCEEDED" : "FAILED" });
 
   return {
     agentResults,
