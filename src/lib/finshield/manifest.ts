@@ -15,7 +15,7 @@
 
 // 시험 fixture 와 같은 이름을 쓰지 않도록 제품 정의는 p0-v2 을 버전으로 쓴다.
 export const DEFINITION_VERSION = "p0-v3";
-export const MANIFEST_VERSION = "finshield-p0-loan-v8";
+export const MANIFEST_VERSION = "finshield-p0-loan-v9";
 export const FINSHIELD_MODEL = "claude-sonnet-5";
 export const SCENARIO = "LOAN" as const;
 export const SCENARIO_VERSION = "sunshine15-v1";
@@ -27,12 +27,12 @@ export const SCENARIO_VERSION = "sunshine15-v1";
  * 전체 상한 안에서 여섯 Agent와 Judge가 순차 종결될 수 있게 한다.
  */
 export const MODEL_TIMEOUTS = Object.freeze({
-  domainChoiceMs: 6_000,
+  domainChoiceMs: 4_000,
   domainDecisionMs: 11_000,
-  domainStageMs: 18_000,
+  domainStageMs: 16_000,
   reviewChoiceMs: 5_000,
-  reviewDecisionMs: 8_000,
-  reviewStageMs: 15_000,
+  reviewDecisionMs: 12_000,
+  reviewStageMs: 18_000,
   judgeMs: 12_000,
   demoRunMs: 115_000,
 });

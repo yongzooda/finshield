@@ -45,3 +45,26 @@ describe("독립 검토의 묶음 판단", () => {
     await expect(createAgentModel().decide({ system: "합성 검토", input, evidence: [], observations: [] })).rejects.toThrow("합성 시간 초과");
   });
 });
+
+import { modelEvidenceScope, coveOutputSchemaFor } from "../agents/model-adapter";
+import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
+import type { ToolEvidence } from "../schemas";
+import { MODEL_TIMEOUTS } from "../manifest";
+
+describe("호출 내부 인용 이름 정규화", () => {
+  const entry = (ref: string, citable: boolean) => ({ evidence_ref: ref, citable, incomplete: false,
+    reference_only: !citable, freshness_at_use: "FRESH", directness: "DIRECT" } as ToolEvidence);
+  it("실행 전역 번호가 달라도 같은 Schema를 쓰며 원래 인용으로 되돌린다", () => {
+    const left = modelEvidenceScope([entry("E10", false), entry("E33", true)]);
+    const right = modelEvidenceScope([entry("E201", false), entry("E303", true)]);
+    expect(zodOutputFormat(coveOutputSchemaFor(left.evidence)).schema).toEqual(zodOutputFormat(coveOutputSchemaFor(right.evidence)).schema);
+    expect(left.restore({ results: [{ evidence_refs: ["E1", "E2"] }] })).toEqual({ results: [{ evidence_refs: ["E33", "E10"] }] });
+    expect(() => left.restore({ evidence_refs: ["E3"] })).toThrow("CITATION_REFERENCE");
+    expect(coveOutputSchemaFor(left.evidence).safeParse({ schema_version: "out-v1", results: [{claim_ref:"C1",status:"CONFIRMED",evidence_refs:["E2"],note_masked:"맥락 근거 확정 금지"}] }).success).toBe(false);
+  });
+  it("전체 단계 상한과 저장 여유가 Text 기한을 넘지 않는다", () => {
+    expect(4 * MODEL_TIMEOUTS.domainStageMs + 2 * MODEL_TIMEOUTS.reviewStageMs + MODEL_TIMEOUTS.judgeMs + 6000).toBeLessThanOrEqual(120000);
+    expect(MODEL_TIMEOUTS.domainChoiceMs + MODEL_TIMEOUTS.domainDecisionMs).toBeLessThan(MODEL_TIMEOUTS.domainStageMs);
+    expect(MODEL_TIMEOUTS.reviewChoiceMs + MODEL_TIMEOUTS.reviewDecisionMs).toBeLessThan(MODEL_TIMEOUTS.reviewStageMs);
+  });
+});

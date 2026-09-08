@@ -86,6 +86,30 @@ export const decisiveEvidence = (evidence: ToolEvidence[]) => evidence.filter((i
   item.citable && !item.incomplete && !item.reference_only
   && item.freshness_at_use === "FRESH" && item.directness === "DIRECT");
 
+/** 인용 이름만 호출 내부의 연속 번호로 정규화한다. 제공한 근거 집합은 그대로다.
+ * 실행 전역 E번호가 바뀔 때마다 다른 JSON grammar가 생기는 것을 막는다.
+ * 출력은 원래 ref로 복원한 뒤 기존 인용·독립성 validator를 다시 거친다. */
+export function modelEvidenceScope(evidence: ToolEvidence[]) {
+  const sorted = [...evidence].sort((a, b) => Number(decisiveEvidence([b]).length > 0) - Number(decisiveEvidence([a]).length > 0));
+  const original = new Map(sorted.map((item, index) => [`E${index + 1}`, item.evidence_ref]));
+  return {
+    evidence: sorted.map((item, index) => ({ ...item, evidence_ref: `E${index + 1}` })),
+    restore<T>(output: T): T {
+      const walk = (value: unknown): unknown => {
+        if (Array.isArray(value)) return value.map(walk);
+        if (!value || typeof value !== "object") return value;
+        return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key,
+          key === "evidence_refs" && Array.isArray(entry) ? entry.map(ref => {
+            if (typeof ref !== "string" || !original.has(ref)) throw new Error("MODEL_CITATION_REFERENCE_INVALID");
+            return original.get(ref)!;
+          }) : walk(entry),
+        ]));
+      };
+      return walk(output) as T;
+    },
+  };
+}
+
 const decisiveCitationReferenceSchema = (evidence: ToolEvidence[]) =>
   citationReferenceSchema(decisiveEvidence(evidence)).min(1);
 
@@ -233,7 +257,9 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
     }));
   },
 
-  async decide({ system, signal, input, evidence, observations }) {
+  async decide({ system, signal, input, evidence: originalEvidence, observations }) {
+    const scope = modelEvidenceScope(originalEvidence);
+    const evidence = scope.evidence;
     const outputs = await Promise.all(agentClaimBatches(input.claims).map(async claims => {
       const output = await callFinshieldModel({
       model: FINSHIELD_MODEL,
@@ -256,7 +282,7 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
         ? [...output.findings.map(finding => finding.claim_ref), ...output.out_of_scope_claim_refs]
         : output.results.map(result => result.claim_ref);
       assertBatchCoverage(claims, refs);
-      return output;
+      return scope.restore(output);
     }));
     if (input.agent_code === "COVE" || input.agent_code === "RED_TEAM") {
       return { schema_version: "out-v1", results: outputs.map(output => "results" in output ? output.results : []).flat() };
@@ -274,13 +300,16 @@ export const createJudgeModel = (context?: ModelBudgetContext): JudgeModel => {
  return ({ usage: () => usage,
   async judge({ claims, findings, evidence, signal }) {
     const batches = buildJudgeBatches({ claims, findings, evidence });
-    const outputs = await Promise.all(batches.map((batch) => callFinshieldModel({
+    const outputs = await Promise.all(batches.map(async (batch) => {
+      const scope = modelEvidenceScope(batch.evidence);
+      return scope.restore(await callFinshieldModel({
         model: FINSHIELD_MODEL,
         system: `${JUDGE_SYSTEM}\n${DECISIVE_CITATION_INSTRUCTION} 각 rationale_masked는 핵심 근거를 담은 40자 이내 한 문장이다. withheld_reason은 20자 이내다. 입력 Claim마다 정확히 한 결과를 낸다.`,
-        user: JSON.stringify({ assessed_on: new Date().toISOString().slice(0, 10), claims: claimBrief(batch.claims), findings: batch.findings, evidence: evidenceBrief(batch.evidence) }),
-        schema: judgeOutputSchemaFor(batch.evidence),
+        user: JSON.stringify({ assessed_on: new Date().toISOString().slice(0, 10), claims: claimBrief(batch.claims), findings: batch.findings, evidence: evidenceBrief(scope.evidence) }),
+        schema: judgeOutputSchemaFor(scope.evidence),
         maxTokens: 1600, effort: "low", signal, maxRetries: 0, timeoutMs: MODEL_TIMEOUTS.judgeMs,
-      }, context, usage)));
+      }, context, usage));
+    }));
     const merged = mergeJudgeBatchOutputs(claims, outputs);
     return {
       schema_version: "out-v1" as const,
