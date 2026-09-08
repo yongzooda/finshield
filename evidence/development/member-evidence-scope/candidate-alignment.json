@@ -1,0 +1,225 @@
+{
+  "checked_at": "2026-09-08T13:20:07.412Z",
+  "expectedSha": "69415ae7d89b6a6fef3c6b57d6627991b38f64f2",
+  "manifest_version": "finshield-p0-loan-v11",
+  "baseline": {
+    "tracked_schemas": [
+      "public",
+      "private",
+      "kb",
+      "demo"
+    ],
+    "views": 6,
+    "view_digest": "1b2bad8eb7129587715934ba5292773adffe1fa43dd08dfd7d8bedc2796b6870",
+    "policies": 192,
+    "policy_digest": "ccfdd5edbc107e02d2bf0b9b594a065b79081d535327d34044db1b7e7a2ea710",
+    "routines": 135,
+    "routine_digest": "9d81dac219a63260c5cdbf512eed4078c83195db86065182cc1910295cb880e2",
+    "tables": 83,
+    "tables_digest": "7f38c882d03ecc8389970a969ff1ddcbf4f75c8723e473165ecb13f6d4024fbe",
+    "constraints": 767,
+    "constraint_digest": "8c528bcbe73c8553338ddbcf218cda6d3f0c110247dccb0a30abe6d214de7e57",
+    "indexes": 261,
+    "index_digest": "64b62bfa2d17559c62d672cea9b2d15c84b142119cedf9df7af066ff7e703d46",
+    "rls_total": 83,
+    "rls_enforced": 83,
+    "rls_missing": []
+  },
+  "observed": {
+    "host_role": "finshield_worker",
+    "pooler_port": 6543,
+    "schema": {
+      "tracked_schemas": [
+        "public",
+        "private",
+        "kb",
+        "demo"
+      ],
+      "views": 6,
+      "view_digest": "1b2bad8eb7129587715934ba5292773adffe1fa43dd08dfd7d8bedc2796b6870",
+      "policies": 192,
+      "policy_digest": "ccfdd5edbc107e02d2bf0b9b594a065b79081d535327d34044db1b7e7a2ea710",
+      "routines": 135,
+      "routine_digest": "9d81dac219a63260c5cdbf512eed4078c83195db86065182cc1910295cb880e2",
+      "tables": 83,
+      "tables_digest": "7f38c882d03ecc8389970a969ff1ddcbf4f75c8723e473165ecb13f6d4024fbe",
+      "constraints": 767,
+      "constraint_digest": "8c528bcbe73c8553338ddbcf218cda6d3f0c110247dccb0a30abe6d214de7e57",
+      "indexes": 261,
+      "index_digest": "64b62bfa2d17559c62d672cea9b2d15c84b142119cedf9df7af066ff7e703d46",
+      "rls_total": 83,
+      "rls_enforced": 83,
+      "rls_missing": []
+    },
+    "anon_leaks": [],
+    "exposed_grants": [],
+    "worker_denied_tables": [
+      "private.input_objects",
+      "private.ocr_artifacts",
+      "public.case_events",
+      "public.case_input_findings",
+      "public.case_input_pages",
+      "public.case_inputs",
+      "public.claim_revisions",
+      "public.claims",
+      "public.financial_cases",
+      "public.financial_profile_versions",
+      "public.financial_profiles",
+      "public.processing_consents",
+      "public.profiles"
+    ],
+    "worker_allowed_tables": [],
+    "storage": {
+      "buckets": [
+        {
+          "id": "finshield-kb",
+          "is_public": false,
+          "file_size_limit": null
+        },
+        {
+          "id": "finshield-quarantine",
+          "is_public": false,
+          "file_size_limit": 10485760
+        }
+      ],
+      "member_policies": [
+        {
+          "name": "finshield_quarantine__insert_open_slot",
+          "cmd": "INSERT",
+          "roles": [
+            "authenticated"
+          ]
+        }
+      ]
+    },
+    "extensions": {
+      "pgcrypto": {
+        "version": "1.3",
+        "schema": "extensions"
+      },
+      "vector": {
+        "version": "0.8.2",
+        "schema": "extensions"
+      },
+      "pg_trgm": {
+        "version": "1.6",
+        "schema": "extensions"
+      }
+    },
+    "roles": {
+      "worker_bypassrls": false,
+      "worker_login": true,
+      "postgres_bypassrls": true,
+      "legacy_roles": []
+    }
+  },
+  "localConfig": {
+    "columns": {
+      "count": 1065,
+      "digest": "043a58d94f9c017fc225868f8f46965bf7769a852e7c5c7b6566233095f10866"
+    },
+    "triggers": {
+      "count": 140,
+      "digest": "a22c73c4d3ee320cf01511b5304af82f13a5101affa9bd40f9e2698121508bf3"
+    },
+    "enums": {
+      "count": 98,
+      "digest": "4b6227630583fb314d57f7dc1a54247d7843690237d497c5fb46d79854ee1930"
+    },
+    "execute": {
+      "count": 405,
+      "digest": "1c40fd39262a32359ec9a3878fec9cd7555dddeb3ee4f8b7122143d761642702"
+    },
+    "manifest": {
+      "count": 1,
+      "digest": "1ee8aa89c0d23a85c0c12dca3b9f07ea0abe425050d4981d44da2816a9c8aafa"
+    },
+    "kb_release": {
+      "count": 1,
+      "digest": "f037dd79a160b77507b6d8919151d3ca28600477c10173d846af9f494d1a35d1"
+    },
+    "policies": {
+      "count": 5,
+      "digest": "e4ff16a56f50158cf12ddce3e15f4fc2500c9993362268a8a7b48cef83a2e47c"
+    },
+    "agents": {
+      "count": 7,
+      "digest": "d98ce3c9f0e282ee55a16c31f823ffe49462c718454b7ff4d666eea2d4328f61"
+    },
+    "tools": {
+      "count": 20,
+      "digest": "739e34306ca7e9660abaec4694fe7972efd80bb4ab25c733b82bd3368b3765a2"
+    },
+    "allowlists": {
+      "count": 20,
+      "digest": "13740a9e3b123005a8fff0aa8438990362d9fbeb7d147e425ebe9a4d0ad85d40"
+    }
+  },
+  "remoteConfig": {
+    "columns": {
+      "count": 1065,
+      "digest": "043a58d94f9c017fc225868f8f46965bf7769a852e7c5c7b6566233095f10866"
+    },
+    "triggers": {
+      "count": 140,
+      "digest": "a22c73c4d3ee320cf01511b5304af82f13a5101affa9bd40f9e2698121508bf3"
+    },
+    "enums": {
+      "count": 98,
+      "digest": "4b6227630583fb314d57f7dc1a54247d7843690237d497c5fb46d79854ee1930"
+    },
+    "execute": {
+      "count": 405,
+      "digest": "1c40fd39262a32359ec9a3878fec9cd7555dddeb3ee4f8b7122143d761642702"
+    },
+    "manifest": {
+      "count": 1,
+      "digest": "1ee8aa89c0d23a85c0c12dca3b9f07ea0abe425050d4981d44da2816a9c8aafa"
+    },
+    "kb_release": {
+      "count": 1,
+      "digest": "f037dd79a160b77507b6d8919151d3ca28600477c10173d846af9f494d1a35d1"
+    },
+    "policies": {
+      "count": 5,
+      "digest": "e4ff16a56f50158cf12ddce3e15f4fc2500c9993362268a8a7b48cef83a2e47c"
+    },
+    "agents": {
+      "count": 7,
+      "digest": "d98ce3c9f0e282ee55a16c31f823ffe49462c718454b7ff4d666eea2d4328f61"
+    },
+    "tools": {
+      "count": 20,
+      "digest": "739e34306ca7e9660abaec4694fe7972efd80bb4ab25c733b82bd3368b3765a2"
+    },
+    "allowlists": {
+      "count": 20,
+      "digest": "13740a9e3b123005a8fff0aa8438990362d9fbeb7d147e425ebe9a4d0ad85d40"
+    }
+  },
+  "configMatches": {
+    "columns": true,
+    "triggers": true,
+    "enums": true,
+    "execute": true,
+    "manifest": true,
+    "kb_release": true,
+    "policies": true,
+    "agents": true,
+    "tools": true,
+    "allowlists": true
+  },
+  "runtime": {
+    "schema_version": "1",
+    "node_version": "v24.18.0",
+    "node_major": 24,
+    "node_minor": 18,
+    "node_patch": 0,
+    "vercel_env": "production",
+    "vercel_region": "icn1",
+    "vercel_deployment_id": "dpl_6ZXqQuS7FCcYFHCPqq222jubw59Z",
+    "vercel_commit_sha": "69415ae7d89b6a6fef3c6b57d6627991b38f64f2",
+    "observed_at": "2026-09-08T13:20:01.637Z"
+  },
+  "failures": []
+}

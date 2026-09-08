@@ -62,3 +62,13 @@ Judge 수신 구조와 결과 채택 검사를 분리해, 한 항목의 문장 �
 여덟 번째 PDF는 71.755초에 행동 경고와 Passport를 저장했다. 선입금·원격제어 요구는 공식 지침과의 불일치로 판단했고, 종합 결과는 MATERIAL_RISK_FOUND, 거래 위험 축은 HIGH_RISK_ACTION이다. 개인 승인·금리·한도는 구분된 한계를 남겼다. Regulation의 항목 Coverage 실패와 Red Team 인용 일부 실패는 PARTIAL로 유지했다. 일반 예방 안내를 신청 기한의 직접 반증으로 쓴 문구도 발견해 결과를 전체 품질 성공으로 채택하지 않는다.
 
 개별 신청 기한을 일반 예방 지침만으로 확정하는 인용은 Domain·Judge·독립 검토 모두에서 차단한다. 인용 자격 때문에 낮춘 상태에는 이전 단정 문구도 남기지 않는다. `pdf-eighth-partial.json`에 원본을 보존하고 다음 시험에 정상 예방 Text를 다시 포함한다.
+
+## 최종 후보 재현과 검증 범위
+
+코드 `69415ae7`의 같은 PDF는 검증 접수부터 82.861초에 Passport를 저장했다. 업로드 슬롯 발급·파일 분석 시간은 별도로 기록했다. 네 Domain·CoVe·Judge는 성공했고 Red Team의 인용 일부 실패는 PARTIAL로 남았다. 선입금·원격제어 요구에는 공식 근거와 중단 행동을 표시하며 종합 결과는 MATERIAL_RISK_FOUND, 거래 위험 축은 HIGH_RISK_ACTION이다. 신청 기한은 공식 자료 부족, 개인 승인은 심사 자료 부족, 종료 상품의 금리·한도는 현재 조건 확인 불가로 구분했다. 근거 없는 확정으로 바꾸지 않았다.
+
+같은 후보의 정상 예방 Text는 61.599초에 모든 단계 성공·partial:false로 저장됐다. 선입금·원격제어를 하지 말라는 두 항목은 VERIFIED, 개인 승인·특정 앱의 개별 사실은 정보 부족이다. 위험 행동 요구로 뒤집힌 항목은 없다. 두 결과를 API에서 재조회했고 PDF는 실제 브라우저 새로고침·공식 근거 펼치기도 확인했다. 원본은 pdf-final-reproduction.json·negative-final-success.json·pdf-final-ui.png다. 앞선 여덟 시도의 실패·부분 결과를 모두 보존했다.
+
+기본 시험 676개 통과·선택적 96개 건너뜀, TypeScript와 lint 오류 0이다. lint의 기존 경고 두 개는 남아 있다. 빈 격리 DB에 54개 Migration을 적용하고 SQL 시험 44까지 통과했다. 운영 DB에는 0001~0050과 0054~0057이 적용돼 있다. 다른 Draft의 0051~0053은 적용하지 않았다. 후보 실행의 SHA·Node·region, 구조 digest 6개와 구성 10항목은 일치했다(candidate-alignment.json).
+
+이 자료는 사용자가 제시한 재현 사례의 결함 수정 증거다. Red Team 인용 품질, 다른 상품·문서·장애 표본, 정식 B-CLAIM-01과 전체 Release 평가 성공으로 채택하지 않는다. Implementation NO-GO·Release NOT-EVALUATED·부분 PASS 8/20을 유지한다. 운영 승격 후에는 실제 main SHA와 DB를 다시 대조하고, 저장 결과 복원 및 합성 계정 삭제를 확인한다.

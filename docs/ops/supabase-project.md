@@ -1,6 +1,10 @@
 # FinShield Supabase 프로젝트 운영
 
-## 2026-09-08 현재 운영 기준
+## 2026-09-08 회원 근거 비교 복구 적용
+
+0001~0050에 이어 0054·0055·0056·0057을 순서대로 적용했다. v8~v11 Manifest와 result-matrix-v2를 추가하고 기존 버전을 보존했다. 다른 Draft의 0051~0053은 미적용이며 Migration ledger를 소급 생성하지 않았다. 코드 69415ae7 후보의 54 Migration 기준으로 원격 구조 digest 6개·구성 10항목이 일치했다. 실제 합성 PDF 저장과 정상 Text 종결을 확인했으며 상세·실패 범위는 [회원 근거 비교 복구](member-evidence-scope.md)를 따른다. 아래 50 Migration 기록은 이전 기준선이다.
+
+## 2026-09-08 운영 정합성 복구 당시 기준
 
 운영 DB는 main `202825b2`의 Migration 0001~0050 기준으로 대조했다. 누락된 0045 재시도 함수·0050 v7 설정을 복구했고 여섯 구조 digest와 실행 연결이 일치한다. 아래 초기 적용 표는 과거 기록이다. 현재 사실과 검증 범위는 [운영 DB·배포 일치 복구](production-db-alignment.md)를 따른다. 정식 Gate 채택은 별도이며 Implementation NO-GO·Release NOT-EVALUATED를 유지한다.
 

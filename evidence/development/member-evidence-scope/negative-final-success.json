@@ -1,0 +1,1347 @@
+{
+  "kind": "부정문·정상 공식 앱 안내의 위험 요구 오탐 검사",
+  "candidate_code_sha": "69415ae7d89b6a6fef3c6b57d6627991b38f64f2",
+  "reports": [
+    {
+      "stage": "intake",
+      "path": "/api/finshield/intake",
+      "status": 200,
+      "elapsed_ms": 7640,
+      "types": [
+        "stage",
+        "stage",
+        "stage",
+        "stage",
+        "stage",
+        "done"
+      ]
+    },
+    {
+      "stage": "verify",
+      "path": "/api/finshield/verify",
+      "status": 200,
+      "elapsed_ms": 61599,
+      "types": [
+        "run_started",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "judge_started",
+        "heartbeat",
+        "judge_finished",
+        "done"
+      ]
+    },
+    {
+      "stage": "verify",
+      "path": "/api/finshield/cases/8a9a7f77-8bb3-4ad6-b8fe-cd6805772f15",
+      "status": 200,
+      "elapsed_ms": 2544,
+      "types": [
+        "json"
+      ]
+    }
+  ],
+  "result": {
+    "type": "done",
+    "guide": {
+      "actions": [
+        {
+          "action_no": 1,
+          "action_code": "VERIFY_OFFICIAL_CHANNEL",
+          "title": "가입·송금·앱 설치 전에 공식 창구로 확인하세요",
+          "detail": "권유자가 준 연락처 대신 공식 창구에 상품 조건과 선입금·원격제어 앱 요구를 확인하세요."
+        }
+      ],
+      "channels": [
+        {
+          "action_no": 1,
+          "display_value": "서민금융콜센터 1397 (국번 없이)"
+        }
+      ]
+    },
+    "axes": [
+      {
+        "axis": "AUTHENTICITY",
+        "result_code": "UNCERTAIN",
+        "summary_masked": "상품과 기관과 접근 경로가 공식 자료와 맞는지 본 결과입니다.",
+        "limitation_codes": [],
+        "policy_evaluation": null
+      },
+      {
+        "axis": "TRANSACTION_SALES_RISK",
+        "result_code": "UNCERTAIN",
+        "summary_masked": "접근 경로와 권유 방식에 해당하는 항목만 확인했습니다. 선입금·앱 설치 요구는 공식 창구에서 먼저 확인하세요.",
+        "limitation_codes": [
+          "PRE_TRANSACTION_SCOPE"
+        ],
+        "policy_evaluation": null
+      },
+      {
+        "axis": "SUITABILITY",
+        "result_code": "NEED_MORE_INFORMATION",
+        "summary_masked": "금융 프로필을 건너뛰어 적합성을 판단하지 않았습니다. 안전하다는 뜻이 아닙니다.",
+        "limitation_codes": [
+          "PROFILE_SKIPPED"
+        ],
+        "policy_evaluation": {
+          "checks": [],
+          "products": [],
+          "not_assessed": [
+            "CREDIT_APPROVAL",
+            "FULL_AFFORDABILITY",
+            "LOSS_TOLERANCE_FOR_NON_LOAN_PRODUCTS"
+          ],
+          "policy_version": "profile-policy-v2",
+          "schema_version": "2",
+          "profile_version_id": "26d334a1-06a6-4eeb-943d-4ca3fac01ae6",
+          "profile_content_hash": "aca4f35f41032cc795886052118ddbcf8372ad255e987cd1db905fbb6275b670",
+          "profile_schema_version": "v1"
+        }
+      }
+    ],
+    "axes_pending_restore": false,
+    "saved": true,
+    "save_reason": null,
+    "final_claims": [
+      {
+        "claim_ref": "C1",
+        "state": "VERIFIED",
+        "reason_code": "COVE_CONFIRMED",
+        "cove_status": "CONFIRMED",
+        "red_team_status": "UNRESOLVED",
+        "summary_masked": "공식 지침상 선입금·공탁금 요구는 정상 관행 아님."
+      },
+      {
+        "claim_ref": "C2",
+        "state": "VERIFIED",
+        "reason_code": "COVE_CONFIRMED",
+        "cove_status": "CONFIRMED",
+        "red_team_status": "UNRESOLVED",
+        "summary_masked": "출처 불분명 앱·URL 설치 금지가 공식 지침에 명시됨."
+      },
+      {
+        "claim_ref": "C3",
+        "state": "NEED_MORE_INFORMATION",
+        "reason_code": "AS_JUDGED",
+        "cove_status": "UNRESOLVED",
+        "red_team_status": "UNRESOLVED",
+        "summary_masked": "개인 신청·승인 가능 여부는 심사자료 없이 확인 불가."
+      },
+      {
+        "claim_ref": "C4",
+        "state": "NEED_MORE_INFORMATION",
+        "reason_code": "AS_JUDGED",
+        "cove_status": "UNRESOLVED",
+        "red_team_status": "UNRESOLVED",
+        "summary_masked": "개인 승인 여부는 심사 자료 없이 확인 불가, 신용·상환능력에 따라 결정됨."
+      }
+    ],
+    "run_id": "2574b08a-0a8c-4e73-8620-c3e8319bbcc9",
+    "partial": false,
+    "agents": [
+      {
+        "agentCode": "PRODUCT_INSTITUTION",
+        "status": "SUCCEEDED",
+        "reasonCode": null,
+        "toolCalls": 1
+      },
+      {
+        "agentCode": "FRAUD_CHANNEL",
+        "status": "SUCCEEDED",
+        "reasonCode": null,
+        "toolCalls": 3
+      },
+      {
+        "agentCode": "SALES_CONDUCT",
+        "status": "SUCCEEDED",
+        "reasonCode": null,
+        "toolCalls": 2
+      },
+      {
+        "agentCode": "REGULATION_DISPUTE",
+        "status": "SUCCEEDED",
+        "reasonCode": null,
+        "toolCalls": 0
+      },
+      {
+        "agentCode": "COVE",
+        "status": "SUCCEEDED",
+        "reasonCode": null,
+        "toolCalls": 3
+      },
+      {
+        "agentCode": "RED_TEAM",
+        "status": "SUCCEEDED",
+        "reasonCode": null,
+        "toolCalls": 1
+      }
+    ],
+    "claim_results": [
+      {
+        "claim_ref": "C1",
+        "state": "VERIFIED",
+        "evidence_refs": [
+          "E1"
+        ],
+        "withheld_reason": null,
+        "rationale_masked": "공식 지침상 선입금·공탁금 요구는 정상 관행 아님."
+      },
+      {
+        "claim_ref": "C2",
+        "state": "VERIFIED",
+        "evidence_refs": [
+          "E2"
+        ],
+        "withheld_reason": null,
+        "rationale_masked": "출처 불분명 앱·URL 설치 금지가 공식 지침에 명시됨."
+      },
+      {
+        "claim_ref": "C3",
+        "state": "NEED_MORE_INFORMATION",
+        "evidence_refs": [],
+        "withheld_reason": "개별 심사자료 없음",
+        "rationale_masked": "개인 신청·승인 가능 여부는 심사자료 없이 확인 불가."
+      },
+      {
+        "claim_ref": "C4",
+        "state": "NEED_MORE_INFORMATION",
+        "evidence_refs": [
+          "E1",
+          "E4"
+        ],
+        "withheld_reason": "개인 심사 자료 없음",
+        "rationale_masked": "개인 승인 여부는 심사 자료 없이 확인 불가, 신용·상환능력에 따라 결정됨."
+      }
+    ],
+    "conflicts": [],
+    "judge_reason_code": null,
+    "evidence": [
+      {
+        "ref": "E1",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "source": "GUIDE",
+        "grade": "B",
+        "official_id": "kinfa:notice:24020",
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "published_at": "2021-05-27",
+        "fetched_at": "2026-09-08T13:28:43.239Z",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+      },
+      {
+        "ref": "E2",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "source": "GUIDE",
+        "grade": "B",
+        "official_id": "kinfa:notice:24020",
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "published_at": "2021-05-27",
+        "fetched_at": "2026-09-08T13:28:43.282Z",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+      },
+      {
+        "ref": "E4",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "source": "GUIDE",
+        "grade": "B",
+        "official_id": "kinfa:notice:24020",
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "published_at": "2021-05-27",
+        "fetched_at": "2026-09-08T13:28:53.204Z",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+      },
+      {
+        "ref": "E3",
+        "title": "서민금융 사칭 신고센터 (서민금융진흥원)",
+        "source": "GUIDE",
+        "grade": "A",
+        "official_id": "kinfa:declare-center",
+        "url": "https://www.kinfa.or.kr/cyber/customerServiceCenter/customerDeclareCenter.do",
+        "published_at": null,
+        "fetched_at": "2026-09-07T19:39:47.125Z",
+        "content_hash": "0b7ff634837f01e9df7a760bd8ca72e6cc4cf80f9a205354ae686fb3e029d1b2",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "사칭유형: 서민금융진흥원·서민금융통합지원센터, 미소금융·햇살론 등 서민금융지원제도 명칭·로고를 사칭한 SNS 채널 및 불법광고. 서민금융 지원제도 관련 불법 전화 영업 및 문자 메시지 발송. 서민금융 사칭 애플리케이션. 피해 시 금융감독원 불법사금융 피해 신고센터 또는 금융감독원 콜센터 1332로 신고."
+      },
+      {
+        "ref": "E6",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "source": "GUIDE",
+        "grade": "B",
+        "official_id": "kinfa:notice:24020",
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "published_at": "2021-05-27",
+        "fetched_at": "2026-09-08T13:29:07.750Z",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+      },
+      {
+        "ref": "E5",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "source": "GUIDE",
+        "grade": "B",
+        "official_id": "kinfa:notice:24020",
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "published_at": "2021-05-27",
+        "fetched_at": "2026-09-08T13:29:07.733Z",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+      }
+    ]
+  },
+  "restored": {
+    "case": {
+      "id": "8a9a7f77-8bb3-4ad6-b8fe-cd6805772f15",
+      "owner_id": "040fae34-145f-4d72-8aae-ac1841be9d08",
+      "scenario": "LOAN",
+      "title_masked": "대출 권유 검증",
+      "lifecycle": "VERIFIED",
+      "resume_state": null,
+      "journey_stage": "PRE_TRANSACTION",
+      "enrollment_confirmed_at": null,
+      "aftercare_status": "NOT_STARTED",
+      "deletion_status": "ACTIVE",
+      "created_at": "2026-09-08T13:22:32.490299+00:00",
+      "updated_at": "2026-09-08T13:29:25.466065+00:00",
+      "initial_profile_version_id": "26d334a1-06a6-4eeb-943d-4ca3fac01ae6",
+      "latest_successful_run_id": "2574b08a-0a8c-4e73-8620-c3e8319bbcc9",
+      "latest_passport_id": "8a359482-0a9a-461a-9d55-01b369e7f2d5",
+      "inputs": [
+        {
+          "id": "351a7f7c-80fc-4bd0-8735-bab1190e3c8d",
+          "created_at": "2026-09-08T13:22:32.550291+00:00",
+          "input_type": "TEXT",
+          "page_count": null,
+          "size_bytes": 356,
+          "input_stage": "CLAIM_CONFIRMED",
+          "input_outcome": "ACTIVE",
+          "raw_deleted_at": null,
+          "pii_scan_status": "PASSED",
+          "raw_delete_status": "PENDING",
+          "claim_confirmed_at": "2026-09-08T13:28:29.482516+00:00"
+        }
+      ],
+      "runs": [
+        {
+          "kind": "INITIAL",
+          "run_id": "2574b08a-0a8c-4e73-8620-c3e8319bbcc9",
+          "run_no": 1,
+          "status": "COMPLETED",
+          "started_at": "2026-09-08T13:28:29.855324+00:00",
+          "deadline_at": "2026-09-08T13:30:29.482516+00:00",
+          "finished_at": "2026-09-08T13:29:25.466065+00:00",
+          "reason_code": null,
+          "overall_result": "INSUFFICIENT_INFORMATION",
+          "coverage_satisfied": false,
+          "partial_reason_codes": []
+        }
+      ],
+      "passports": [
+        {
+          "is_latest": true,
+          "created_at": "2026-09-08T13:29:25.466065+00:00",
+          "version_no": 1,
+          "passport_id": "8a359482-0a9a-461a-9d55-01b369e7f2d5",
+          "overall_result": "INSUFFICIENT_INFORMATION"
+        }
+      ],
+      "timeline": [
+        {
+          "event_no": 1,
+          "to_state": "DRAFT",
+          "actor_type": "USER",
+          "created_at": "2026-09-08T13:22:32.490299+00:00",
+          "event_type": "CASE_CREATED",
+          "from_state": null
+        },
+        {
+          "event_no": 2,
+          "to_state": null,
+          "actor_type": "USER",
+          "created_at": "2026-09-08T13:22:32.550291+00:00",
+          "event_type": "CASE_INPUT_CREATED",
+          "from_state": null
+        },
+        {
+          "event_no": 3,
+          "to_state": "INPUT_REVIEW",
+          "actor_type": "USER",
+          "created_at": "2026-09-08T13:28:29.482516+00:00",
+          "event_type": "CASE_LIFECYCLE_CHANGED",
+          "from_state": "DRAFT"
+        },
+        {
+          "event_no": 4,
+          "to_state": null,
+          "actor_type": "USER",
+          "created_at": "2026-09-08T13:28:29.482516+00:00",
+          "event_type": "CASE_INPUT_CLAIMS_CONFIRMED",
+          "from_state": null
+        },
+        {
+          "event_no": 5,
+          "to_state": "VERIFYING",
+          "actor_type": "SYSTEM",
+          "created_at": "2026-09-08T13:28:29.482516+00:00",
+          "event_type": "CASE_LIFECYCLE_CHANGED",
+          "from_state": "INPUT_REVIEW"
+        },
+        {
+          "event_no": 6,
+          "to_state": null,
+          "actor_type": "SYSTEM",
+          "created_at": "2026-09-08T13:28:29.482516+00:00",
+          "event_type": "RUN_CREATED",
+          "from_state": null
+        },
+        {
+          "event_no": 7,
+          "to_state": "VERIFIED",
+          "actor_type": "SYSTEM",
+          "created_at": "2026-09-08T13:29:25.466065+00:00",
+          "event_type": "CASE_LIFECYCLE_CHANGED",
+          "from_state": "VERIFYING"
+        },
+        {
+          "event_no": 8,
+          "to_state": null,
+          "actor_type": "SYSTEM",
+          "created_at": "2026-09-08T13:29:25.466065+00:00",
+          "event_type": "RUN_COMPLETED",
+          "from_state": null
+        }
+      ]
+    },
+    "claims": [
+      {
+        "id": "61c08ab4-1753-4133-b23e-97eea0883bad",
+        "claim_type": "CONDUCT",
+        "source_input_id": "351a7f7c-80fc-4bd0-8735-bab1190e3c8d",
+        "source_locator": {
+          "case_input_id": "351a7f7c-80fc-4bd0-8735-bab1190e3c8d",
+          "schema_version": "v1"
+        },
+        "created_at": "2026-09-08T13:22:37.431677+00:00"
+      },
+      {
+        "id": "736a4112-9cdc-4a73-874c-c4a84ebb03c5",
+        "claim_type": "CONDUCT",
+        "source_input_id": "351a7f7c-80fc-4bd0-8735-bab1190e3c8d",
+        "source_locator": {
+          "case_input_id": "351a7f7c-80fc-4bd0-8735-bab1190e3c8d",
+          "schema_version": "v1"
+        },
+        "created_at": "2026-09-08T13:22:37.431677+00:00"
+      },
+      {
+        "id": "b5355389-951a-4b78-81a7-f4bc6f33456b",
+        "claim_type": "ELIGIBILITY",
+        "source_input_id": "351a7f7c-80fc-4bd0-8735-bab1190e3c8d",
+        "source_locator": {
+          "case_input_id": "351a7f7c-80fc-4bd0-8735-bab1190e3c8d",
+          "schema_version": "v1"
+        },
+        "created_at": "2026-09-08T13:22:37.431677+00:00"
+      },
+      {
+        "id": "a2d785dd-05fc-4b89-918f-4098a661944a",
+        "claim_type": "CHANNEL",
+        "source_input_id": "351a7f7c-80fc-4bd0-8735-bab1190e3c8d",
+        "source_locator": {
+          "case_input_id": "351a7f7c-80fc-4bd0-8735-bab1190e3c8d",
+          "schema_version": "v1"
+        },
+        "created_at": "2026-09-08T13:22:37.431677+00:00"
+      }
+    ],
+    "runs": [
+      {
+        "kind": "INITIAL",
+        "run_id": "2574b08a-0a8c-4e73-8620-c3e8319bbcc9",
+        "run_no": 1,
+        "status": "COMPLETED",
+        "started_at": "2026-09-08T13:28:29.855324+00:00",
+        "deadline_at": "2026-09-08T13:30:29.482516+00:00",
+        "finished_at": "2026-09-08T13:29:25.466065+00:00",
+        "reason_code": null,
+        "overall_result": "INSUFFICIENT_INFORMATION",
+        "coverage_satisfied": false,
+        "partial_reason_codes": [],
+        "id": "2574b08a-0a8c-4e73-8620-c3e8319bbcc9"
+      }
+    ],
+    "final_claims": [
+      {
+        "id": "648b53de-fe17-41a6-b97f-41298cd8b1ff",
+        "status": "VERIFIED",
+        "claim_id": "61c08ab4-1753-4133-b23e-97eea0883bad",
+        "cove_status": "CONFIRMED",
+        "is_material": true,
+        "reason_code": "COVE_CONFIRMED",
+        "red_team_status": "UNRESOLVED",
+        "statement_masked": "대출 상담 시 선입금이나 보증료를 송금하지 말라는 안내가 있었다.",
+        "decision_summary_masked": "공식 지침상 선입금·공탁금 요구는 정상 관행 아님.",
+        "verification_run_id": "2574b08a-0a8c-4e73-8620-c3e8319bbcc9"
+      },
+      {
+        "id": "97841492-87fb-4d13-98b6-6dd7403b9191",
+        "status": "VERIFIED",
+        "claim_id": "736a4112-9cdc-4a73-874c-c4a84ebb03c5",
+        "cove_status": "CONFIRMED",
+        "is_material": true,
+        "reason_code": "COVE_CONFIRMED",
+        "red_team_status": "UNRESOLVED",
+        "statement_masked": "원격제어 앱을 설치하지 말라는 안내가 있었다.",
+        "decision_summary_masked": "출처 불분명 앱·URL 설치 금지가 공식 지침에 명시됨.",
+        "verification_run_id": "2574b08a-0a8c-4e73-8620-c3e8319bbcc9"
+      },
+      {
+        "id": "447c7081-61f1-4150-883e-69f07e04e902",
+        "status": "NEED_MORE_INFORMATION",
+        "claim_id": "a2d785dd-05fc-4b89-918f-4098a661944a",
+        "cove_status": "UNRESOLVED",
+        "is_material": true,
+        "reason_code": "AS_JUDGED",
+        "red_team_status": "UNRESOLVED",
+        "statement_masked": "은행 공식 앱에서 직접 대출을 신청할 수 있다는 안내를 받았다.",
+        "decision_summary_masked": "개인 신청·승인 가능 여부는 심사자료 없이 확인 불가.",
+        "verification_run_id": "2574b08a-0a8c-4e73-8620-c3e8319bbcc9"
+      },
+      {
+        "id": "ed10e019-f805-4a4a-b674-88c580973027",
+        "status": "NEED_MORE_INFORMATION",
+        "claim_id": "b5355389-951a-4b78-81a7-f4bc6f33456b",
+        "cove_status": "UNRESOLVED",
+        "is_material": true,
+        "reason_code": "AS_JUDGED",
+        "red_team_status": "UNRESOLVED",
+        "statement_masked": "대출 심사 결과를 확인하기 전에는 승인 여부를 알 수 없다.",
+        "decision_summary_masked": "개인 승인 여부는 심사 자료 없이 확인 불가, 신용·상환능력에 따라 결정됨.",
+        "verification_run_id": "2574b08a-0a8c-4e73-8620-c3e8319bbcc9"
+      }
+    ],
+    "axes": [
+      {
+        "axis": "AUTHENTICITY",
+        "result_code": "UNCERTAIN",
+        "summary_masked": "상품과 기관과 접근 경로가 공식 자료와 맞는지 본 결과입니다.",
+        "limitation_codes": [],
+        "policy_evaluation": null,
+        "verification_run_id": "2574b08a-0a8c-4e73-8620-c3e8319bbcc9"
+      },
+      {
+        "axis": "TRANSACTION_SALES_RISK",
+        "result_code": "UNCERTAIN",
+        "summary_masked": "접근 경로와 권유 방식에 해당하는 항목만 확인했습니다. 선입금·앱 설치 요구는 공식 창구에서 먼저 확인하세요.",
+        "limitation_codes": [
+          "PRE_TRANSACTION_SCOPE"
+        ],
+        "policy_evaluation": null,
+        "verification_run_id": "2574b08a-0a8c-4e73-8620-c3e8319bbcc9"
+      },
+      {
+        "axis": "SUITABILITY",
+        "result_code": "NEED_MORE_INFORMATION",
+        "summary_masked": "금융 프로필을 건너뛰어 적합성을 판단하지 않았습니다. 안전하다는 뜻이 아닙니다.",
+        "limitation_codes": [
+          "PROFILE_SKIPPED"
+        ],
+        "policy_evaluation": {
+          "checks": [],
+          "products": [],
+          "not_assessed": [
+            "CREDIT_APPROVAL",
+            "FULL_AFFORDABILITY",
+            "LOSS_TOLERANCE_FOR_NON_LOAN_PRODUCTS"
+          ],
+          "policy_version": "profile-policy-v2",
+          "schema_version": "2",
+          "profile_version_id": "26d334a1-06a6-4eeb-943d-4ca3fac01ae6",
+          "profile_content_hash": "aca4f35f41032cc795886052118ddbcf8372ad255e987cd1db905fbb6275b670",
+          "profile_schema_version": "v1"
+        },
+        "verification_run_id": "2574b08a-0a8c-4e73-8620-c3e8319bbcc9"
+      }
+    ],
+    "claim_evidences": [
+      {
+        "final_claim_version_id": "648b53de-fe17-41a6-b97f-41298cd8b1ff",
+        "evidence_id": "dc18d69e-f57b-43e8-82e2-26eb56668087",
+        "relation": "SUPPORT",
+        "is_independent": true
+      },
+      {
+        "final_claim_version_id": "648b53de-fe17-41a6-b97f-41298cd8b1ff",
+        "evidence_id": "4f73d48f-819c-4847-8579-a59306020c6e",
+        "relation": "SUPPORT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "97841492-87fb-4d13-98b6-6dd7403b9191",
+        "evidence_id": "84be4775-ba84-409f-a72a-029140162aa3",
+        "relation": "SUPPORT",
+        "is_independent": true
+      },
+      {
+        "final_claim_version_id": "97841492-87fb-4d13-98b6-6dd7403b9191",
+        "evidence_id": "4874bbd2-7307-44f8-97e7-be87e68fc3a0",
+        "relation": "SUPPORT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "ed10e019-f805-4a4a-b674-88c580973027",
+        "evidence_id": "dc18d69e-f57b-43e8-82e2-26eb56668087",
+        "relation": "CONTEXT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "ed10e019-f805-4a4a-b674-88c580973027",
+        "evidence_id": "5db7c62f-605b-4e92-b392-c86ff0c75002",
+        "relation": "CONTEXT",
+        "is_independent": false
+      },
+      {
+        "final_claim_version_id": "ed10e019-f805-4a4a-b674-88c580973027",
+        "evidence_id": "4f73d48f-819c-4847-8579-a59306020c6e",
+        "relation": "CONTEXT",
+        "is_independent": false
+      }
+    ],
+    "evidences": [
+      {
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "citable": true,
+        "created_at": "2026-09-08T13:28:49.958456+00:00",
+        "directness": "DIRECT",
+        "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+        "incomplete": false,
+        "official_id": "kinfa:notice:24020",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "published_at": "2021-05-27T00:00:00+00:00",
+        "target_match": true,
+        "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+        "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+        "publisher_name": "서민금융진흥원",
+        "reference_only": false,
+        "source_locator": {
+          "kind": "html_section",
+          "selector": ".board-detail-con",
+          "reviewed_at": "2026-09-08T11:31:40.000Z",
+          "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+          "review_due_at": "2026-09-15T11:31:40.000Z",
+          "schema_version": "1",
+          "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+          "current_transaction_proof": false
+        },
+        "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+        "authority_grade": "B",
+        "freshness_at_use": "FRESH",
+        "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3",
+        "id": "dc18d69e-f57b-43e8-82e2-26eb56668087"
+      },
+      {
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "citable": true,
+        "created_at": "2026-09-08T13:29:12.763401+00:00",
+        "directness": "DIRECT",
+        "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+        "incomplete": false,
+        "official_id": "kinfa:notice:24020",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "published_at": "2021-05-27T00:00:00+00:00",
+        "target_match": true,
+        "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+        "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+        "publisher_name": "서민금융진흥원",
+        "reference_only": false,
+        "source_locator": {
+          "kind": "html_section",
+          "selector": ".board-detail-con",
+          "reviewed_at": "2026-09-08T11:31:40.000Z",
+          "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+          "review_due_at": "2026-09-15T11:31:40.000Z",
+          "schema_version": "1",
+          "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+          "current_transaction_proof": false
+        },
+        "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+        "authority_grade": "B",
+        "freshness_at_use": "FRESH",
+        "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3",
+        "id": "4f73d48f-819c-4847-8579-a59306020c6e"
+      },
+      {
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "citable": true,
+        "created_at": "2026-09-08T13:28:49.980557+00:00",
+        "directness": "DIRECT",
+        "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+        "incomplete": false,
+        "official_id": "kinfa:notice:24020",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "published_at": "2021-05-27T00:00:00+00:00",
+        "target_match": true,
+        "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+        "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+        "publisher_name": "서민금융진흥원",
+        "reference_only": false,
+        "source_locator": {
+          "kind": "html_section",
+          "selector": ".board-detail-con",
+          "reviewed_at": "2026-09-08T11:31:40.000Z",
+          "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+          "review_due_at": "2026-09-15T11:31:40.000Z",
+          "schema_version": "1",
+          "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+          "current_transaction_proof": false
+        },
+        "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+        "authority_grade": "B",
+        "freshness_at_use": "FRESH",
+        "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3",
+        "id": "84be4775-ba84-409f-a72a-029140162aa3"
+      },
+      {
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "citable": true,
+        "created_at": "2026-09-08T13:29:12.783486+00:00",
+        "directness": "DIRECT",
+        "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+        "incomplete": false,
+        "official_id": "kinfa:notice:24020",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "published_at": "2021-05-27T00:00:00+00:00",
+        "target_match": true,
+        "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+        "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+        "publisher_name": "서민금융진흥원",
+        "reference_only": false,
+        "source_locator": {
+          "kind": "html_section",
+          "selector": ".board-detail-con",
+          "reviewed_at": "2026-09-08T11:31:40.000Z",
+          "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+          "review_due_at": "2026-09-15T11:31:40.000Z",
+          "schema_version": "1",
+          "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+          "current_transaction_proof": false
+        },
+        "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+        "authority_grade": "B",
+        "freshness_at_use": "FRESH",
+        "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3",
+        "id": "4874bbd2-7307-44f8-97e7-be87e68fc3a0"
+      },
+      {
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "citable": true,
+        "created_at": "2026-09-08T13:28:59.659038+00:00",
+        "directness": "DIRECT",
+        "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+        "incomplete": false,
+        "official_id": "kinfa:notice:24020",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "published_at": "2021-05-27T00:00:00+00:00",
+        "target_match": true,
+        "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+        "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+        "publisher_name": "서민금융진흥원",
+        "reference_only": false,
+        "source_locator": {
+          "kind": "html_section",
+          "selector": ".board-detail-con",
+          "reviewed_at": "2026-09-08T11:31:40.000Z",
+          "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+          "review_due_at": "2026-09-15T11:31:40.000Z",
+          "schema_version": "1",
+          "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+          "current_transaction_proof": false
+        },
+        "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+        "authority_grade": "B",
+        "freshness_at_use": "FRESH",
+        "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3",
+        "id": "5db7c62f-605b-4e92-b392-c86ff0c75002"
+      }
+    ],
+    "passports": [
+      {
+        "passport_id": "8a359482-0a9a-461a-9d55-01b369e7f2d5",
+        "owner_id": "040fae34-145f-4d72-8aae-ac1841be9d08",
+        "case_id": "8a9a7f77-8bb3-4ad6-b8fe-cd6805772f15",
+        "verification_run_id": "2574b08a-0a8c-4e73-8620-c3e8319bbcc9",
+        "passport_version_no": 1,
+        "previous_passport_id": null,
+        "overall_result": "INSUFFICIENT_INFORMATION",
+        "coverage_satisfied": false,
+        "passport_schema_version": "p1",
+        "manifest": {
+          "guide": {
+            "status": "COMPLETED",
+            "content_hash": "997c0381661197ae7c50f8e3c0523fcdaea8c2d38a1558532e69bc124acdc816",
+            "action_guide_id": "5f6b7f86-cda8-4424-b8c1-f10db59e5689"
+          },
+          "run_id": "2574b08a-0a8c-4e73-8620-c3e8319bbcc9",
+          "run_kind": "INITIAL",
+          "evidences": [
+            {
+              "evidence_id": "4874bbd2-7307-44f8-97e7-be87e68fc3a0",
+              "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+              "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+            },
+            {
+              "evidence_id": "4f73d48f-819c-4847-8579-a59306020c6e",
+              "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+              "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+            },
+            {
+              "evidence_id": "5db7c62f-605b-4e92-b392-c86ff0c75002",
+              "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+              "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+            },
+            {
+              "evidence_id": "84be4775-ba84-409f-a72a-029140162aa3",
+              "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+              "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+            },
+            {
+              "evidence_id": "dc18d69e-f57b-43e8-82e2-26eb56668087",
+              "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+              "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+            }
+          ],
+          "axis_results": [
+            {
+              "axis": "AUTHENTICITY",
+              "result_code": "UNCERTAIN",
+              "content_hash": "ee06e5b4792082532b18f98a6405cd9ba9e368cc3cf132c9af18c33f2732eca3"
+            },
+            {
+              "axis": "TRANSACTION_SALES_RISK",
+              "result_code": "UNCERTAIN",
+              "content_hash": "d5de4272b2c7cb96dae2d1bdde0fc4bd7f581304cb51d5f36df58c62466d4129"
+            },
+            {
+              "axis": "SUITABILITY",
+              "result_code": "NEED_MORE_INFORMATION",
+              "content_hash": "453a5a3a904bd6d30967194d5a68cd6876f982eb62d8fc61f0844b791b9e69c9"
+            }
+          ],
+          "final_claims": [
+            {
+              "status": "VERIFIED",
+              "claim_id": "61c08ab4-1753-4133-b23e-97eea0883bad",
+              "is_material": true,
+              "content_hash": "b04bbbe6424a16fee32a22908dbcf5f9cab538e05209f21fe17d84d0ac359e8c",
+              "final_claim_version_id": "648b53de-fe17-41a6-b97f-41298cd8b1ff"
+            },
+            {
+              "status": "VERIFIED",
+              "claim_id": "736a4112-9cdc-4a73-874c-c4a84ebb03c5",
+              "is_material": true,
+              "content_hash": "0281a5fcef6690c78c69afa26e833bf72e477561390f970dc022db6208ea4e20",
+              "final_claim_version_id": "97841492-87fb-4d13-98b6-6dd7403b9191"
+            },
+            {
+              "status": "NEED_MORE_INFORMATION",
+              "claim_id": "a2d785dd-05fc-4b89-918f-4098a661944a",
+              "is_material": true,
+              "content_hash": "39076756db9fe448e9915d20577a7246ef2bebf286910567e21de376a0c392dd",
+              "final_claim_version_id": "447c7081-61f1-4150-883e-69f07e04e902"
+            },
+            {
+              "status": "NEED_MORE_INFORMATION",
+              "claim_id": "b5355389-951a-4b78-81a7-f4bc6f33456b",
+              "is_material": true,
+              "content_hash": "12cf3eb979401adc7f1d1bb1a2bde62a309c82e12628dfacfd650064d875663f",
+              "final_claim_version_id": "ed10e019-f805-4a4a-b674-88c580973027"
+            }
+          ],
+          "kb_release_id": "0030fe96-bdd1-45af-a769-e6e54ebd1747",
+          "overall_result": "INSUFFICIENT_INFORMATION",
+          "schema_version": "1",
+          "policy_versions": {
+            "pii": "pii-policy-v1",
+            "profile": "profile-policy-v2",
+            "coverage": "coverage-contract-v1",
+            "evidence": "evidence-policy-v1",
+            "result_matrix": "result-matrix-v2"
+          },
+          "manifest_version": "finshield-p0-loan-v11",
+          "coverage_satisfied": false,
+          "profile_version_id": "26d334a1-06a6-4eeb-943d-4ca3fac01ae6",
+          "partial_reason_codes": [],
+          "execution_manifest_id": "f9b5f194-ec01-49c9-bb25-379034420962"
+        },
+        "payload_hash": "c606193cfe1915bc4b8ec869ac0388e1a49c1f4bdc7e5fa8672ba9521db23340",
+        "created_at": "2026-09-08T13:29:25.466065+00:00",
+        "is_latest": true,
+        "profile_version_id": "26d334a1-06a6-4eeb-943d-4ca3fac01ae6",
+        "execution_manifest_id": "f9b5f194-ec01-49c9-bb25-379034420962",
+        "axis_results": [
+          {
+            "axis": "AUTHENTICITY",
+            "result_code": "UNCERTAIN",
+            "summary_masked": "상품과 기관과 접근 경로가 공식 자료와 맞는지 본 결과입니다.",
+            "limitation_codes": [],
+            "policy_evaluation": null
+          },
+          {
+            "axis": "TRANSACTION_SALES_RISK",
+            "result_code": "UNCERTAIN",
+            "summary_masked": "접근 경로와 권유 방식에 해당하는 항목만 확인했습니다. 선입금·앱 설치 요구는 공식 창구에서 먼저 확인하세요.",
+            "limitation_codes": [
+              "PRE_TRANSACTION_SCOPE"
+            ],
+            "policy_evaluation": null
+          },
+          {
+            "axis": "SUITABILITY",
+            "result_code": "NEED_MORE_INFORMATION",
+            "summary_masked": "금융 프로필을 건너뛰어 적합성을 판단하지 않았습니다. 안전하다는 뜻이 아닙니다.",
+            "limitation_codes": [
+              "PROFILE_SKIPPED"
+            ],
+            "policy_evaluation": {
+              "checks": [],
+              "products": [],
+              "not_assessed": [
+                "CREDIT_APPROVAL",
+                "FULL_AFFORDABILITY",
+                "LOSS_TOLERANCE_FOR_NON_LOAN_PRODUCTS"
+              ],
+              "policy_version": "profile-policy-v2",
+              "schema_version": "2",
+              "profile_version_id": "26d334a1-06a6-4eeb-943d-4ca3fac01ae6",
+              "profile_content_hash": "aca4f35f41032cc795886052118ddbcf8372ad255e987cd1db905fbb6275b670",
+              "profile_schema_version": "v1"
+            }
+          }
+        ],
+        "guide": {
+          "status": "COMPLETED",
+          "actions": [
+            {
+              "title": "가입·송금·앱 설치 전에 공식 창구로 확인하세요",
+              "detail": "권유자가 준 연락처 대신 공식 창구에 상품 조건과 선입금·원격제어 앱 요구를 확인하세요.",
+              "action_no": 1,
+              "action_code": "VERIFY_OFFICIAL_CHANNEL"
+            }
+          ],
+          "channels": [
+            {
+              "valid_to": null,
+              "action_no": 1,
+              "valid_from": "2026-09-07",
+              "channel_type": "PHONE",
+              "display_order": 1,
+              "display_value": "서민금융콜센터 1397 (국번 없이)",
+              "institution_code": "INST_KINFA"
+            }
+          ],
+          "limitation_codes": []
+        },
+        "claims": [
+          {
+            "id": "648b53de-fe17-41a6-b97f-41298cd8b1ff",
+            "status": "VERIFIED",
+            "claim_id": "61c08ab4-1753-4133-b23e-97eea0883bad",
+            "evidences": [
+              {
+                "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+                "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+                "citable": true,
+                "relation": "SUPPORT",
+                "created_at": "2026-09-08T13:28:49.958456+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+                "incomplete": false,
+                "evidence_id": "dc18d69e-f57b-43e8-82e2-26eb56668087",
+                "official_id": "kinfa:notice:24020",
+                "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+                "published_at": "2021-05-27T00:00:00+00:00",
+                "target_match": true,
+                "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+                "is_independent": true,
+                "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": ".board-detail-con",
+                  "reviewed_at": "2026-09-08T11:31:40.000Z",
+                  "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+                  "review_due_at": "2026-09-15T11:31:40.000Z",
+                  "schema_version": "1",
+                  "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+                  "current_transaction_proof": false
+                },
+                "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+                "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+                "citable": true,
+                "relation": "SUPPORT",
+                "created_at": "2026-09-08T13:29:12.763401+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+                "incomplete": false,
+                "evidence_id": "4f73d48f-819c-4847-8579-a59306020c6e",
+                "official_id": "kinfa:notice:24020",
+                "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+                "published_at": "2021-05-27T00:00:00+00:00",
+                "target_match": true,
+                "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+                "is_independent": false,
+                "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": ".board-detail-con",
+                  "reviewed_at": "2026-09-08T11:31:40.000Z",
+                  "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+                  "review_due_at": "2026-09-15T11:31:40.000Z",
+                  "schema_version": "1",
+                  "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+                  "current_transaction_proof": false
+                },
+                "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+              }
+            ],
+            "cove_status": "CONFIRMED",
+            "is_material": true,
+            "reason_code": "COVE_CONFIRMED",
+            "red_team_status": "UNRESOLVED",
+            "statement_masked": "대출 상담 시 선입금이나 보증료를 송금하지 말라는 안내가 있었다.",
+            "decision_summary_masked": "공식 지침상 선입금·공탁금 요구는 정상 관행 아님."
+          },
+          {
+            "id": "97841492-87fb-4d13-98b6-6dd7403b9191",
+            "status": "VERIFIED",
+            "claim_id": "736a4112-9cdc-4a73-874c-c4a84ebb03c5",
+            "evidences": [
+              {
+                "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+                "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+                "citable": true,
+                "relation": "SUPPORT",
+                "created_at": "2026-09-08T13:28:49.980557+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+                "incomplete": false,
+                "evidence_id": "84be4775-ba84-409f-a72a-029140162aa3",
+                "official_id": "kinfa:notice:24020",
+                "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+                "published_at": "2021-05-27T00:00:00+00:00",
+                "target_match": true,
+                "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+                "is_independent": true,
+                "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": ".board-detail-con",
+                  "reviewed_at": "2026-09-08T11:31:40.000Z",
+                  "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+                  "review_due_at": "2026-09-15T11:31:40.000Z",
+                  "schema_version": "1",
+                  "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+                  "current_transaction_proof": false
+                },
+                "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+                "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+                "citable": true,
+                "relation": "SUPPORT",
+                "created_at": "2026-09-08T13:29:12.783486+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+                "incomplete": false,
+                "evidence_id": "4874bbd2-7307-44f8-97e7-be87e68fc3a0",
+                "official_id": "kinfa:notice:24020",
+                "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+                "published_at": "2021-05-27T00:00:00+00:00",
+                "target_match": true,
+                "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+                "is_independent": false,
+                "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": ".board-detail-con",
+                  "reviewed_at": "2026-09-08T11:31:40.000Z",
+                  "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+                  "review_due_at": "2026-09-15T11:31:40.000Z",
+                  "schema_version": "1",
+                  "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+                  "current_transaction_proof": false
+                },
+                "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+              }
+            ],
+            "cove_status": "CONFIRMED",
+            "is_material": true,
+            "reason_code": "COVE_CONFIRMED",
+            "red_team_status": "UNRESOLVED",
+            "statement_masked": "원격제어 앱을 설치하지 말라는 안내가 있었다.",
+            "decision_summary_masked": "출처 불분명 앱·URL 설치 금지가 공식 지침에 명시됨."
+          },
+          {
+            "id": "447c7081-61f1-4150-883e-69f07e04e902",
+            "status": "NEED_MORE_INFORMATION",
+            "claim_id": "a2d785dd-05fc-4b89-918f-4098a661944a",
+            "evidences": [],
+            "cove_status": "UNRESOLVED",
+            "is_material": true,
+            "reason_code": "AS_JUDGED",
+            "red_team_status": "UNRESOLVED",
+            "statement_masked": "은행 공식 앱에서 직접 대출을 신청할 수 있다는 안내를 받았다.",
+            "decision_summary_masked": "개인 신청·승인 가능 여부는 심사자료 없이 확인 불가."
+          },
+          {
+            "id": "ed10e019-f805-4a4a-b674-88c580973027",
+            "status": "NEED_MORE_INFORMATION",
+            "claim_id": "b5355389-951a-4b78-81a7-f4bc6f33456b",
+            "evidences": [
+              {
+                "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+                "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+                "citable": true,
+                "relation": "CONTEXT",
+                "created_at": "2026-09-08T13:28:49.958456+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+                "incomplete": false,
+                "evidence_id": "dc18d69e-f57b-43e8-82e2-26eb56668087",
+                "official_id": "kinfa:notice:24020",
+                "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+                "published_at": "2021-05-27T00:00:00+00:00",
+                "target_match": true,
+                "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+                "is_independent": false,
+                "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": ".board-detail-con",
+                  "reviewed_at": "2026-09-08T11:31:40.000Z",
+                  "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+                  "review_due_at": "2026-09-15T11:31:40.000Z",
+                  "schema_version": "1",
+                  "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+                  "current_transaction_proof": false
+                },
+                "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+                "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+                "citable": true,
+                "relation": "CONTEXT",
+                "created_at": "2026-09-08T13:28:59.659038+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+                "incomplete": false,
+                "evidence_id": "5db7c62f-605b-4e92-b392-c86ff0c75002",
+                "official_id": "kinfa:notice:24020",
+                "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+                "published_at": "2021-05-27T00:00:00+00:00",
+                "target_match": true,
+                "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+                "is_independent": false,
+                "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": ".board-detail-con",
+                  "reviewed_at": "2026-09-08T11:31:40.000Z",
+                  "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+                  "review_due_at": "2026-09-15T11:31:40.000Z",
+                  "schema_version": "1",
+                  "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+                  "current_transaction_proof": false
+                },
+                "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+              },
+              {
+                "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+                "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+                "citable": true,
+                "relation": "CONTEXT",
+                "created_at": "2026-09-08T13:29:12.763401+00:00",
+                "directness": "DIRECT",
+                "fetched_at": "2026-09-08T11:42:54.736198+00:00",
+                "incomplete": false,
+                "evidence_id": "4f73d48f-819c-4847-8579-a59306020c6e",
+                "official_id": "kinfa:notice:24020",
+                "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+                "published_at": "2021-05-27T00:00:00+00:00",
+                "target_match": true,
+                "excerpt_masked": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다.",
+                "is_independent": false,
+                "kb_snapshot_id": "85c0a1ae-f457-473e-b750-75b29ab5937b",
+                "publisher_name": "서민금융진흥원",
+                "reference_only": false,
+                "source_locator": {
+                  "kind": "html_section",
+                  "selector": ".board-detail-con",
+                  "reviewed_at": "2026-09-08T11:31:40.000Z",
+                  "permitted_use": "PUBLIC_GUIDANCE_COMPARISON",
+                  "review_due_at": "2026-09-15T11:31:40.000Z",
+                  "schema_version": "1",
+                  "paragraph_selection": "financial-advertising-payment-app-guidance-v1",
+                  "current_transaction_proof": false
+                },
+                "source_version": "notice-html-review-20260908:d584f37fa160619ab0f3c97b",
+                "authority_grade": "B",
+                "freshness_at_use": "FRESH",
+                "independence_key": "f926393a9accd73526646d38c53f1261170794f049bf68ad03e7f74f308447a3"
+              }
+            ],
+            "cove_status": "UNRESOLVED",
+            "is_material": true,
+            "reason_code": "AS_JUDGED",
+            "red_team_status": "UNRESOLVED",
+            "statement_masked": "대출 심사 결과를 확인하기 전에는 승인 여부를 알 수 없다.",
+            "decision_summary_masked": "개인 승인 여부는 심사 자료 없이 확인 불가, 신용·상환능력에 따라 결정됨."
+          }
+        ],
+        "id": "8a359482-0a9a-461a-9d55-01b369e7f2d5"
+      }
+    ],
+    "events": [
+      {
+        "event_no": 1,
+        "to_state": "DRAFT",
+        "actor_type": "USER",
+        "created_at": "2026-09-08T13:22:32.490299+00:00",
+        "event_type": "CASE_CREATED",
+        "from_state": null
+      },
+      {
+        "event_no": 2,
+        "to_state": null,
+        "actor_type": "USER",
+        "created_at": "2026-09-08T13:22:32.550291+00:00",
+        "event_type": "CASE_INPUT_CREATED",
+        "from_state": null
+      },
+      {
+        "event_no": 3,
+        "to_state": "INPUT_REVIEW",
+        "actor_type": "USER",
+        "created_at": "2026-09-08T13:28:29.482516+00:00",
+        "event_type": "CASE_LIFECYCLE_CHANGED",
+        "from_state": "DRAFT"
+      },
+      {
+        "event_no": 4,
+        "to_state": null,
+        "actor_type": "USER",
+        "created_at": "2026-09-08T13:28:29.482516+00:00",
+        "event_type": "CASE_INPUT_CLAIMS_CONFIRMED",
+        "from_state": null
+      },
+      {
+        "event_no": 5,
+        "to_state": "VERIFYING",
+        "actor_type": "SYSTEM",
+        "created_at": "2026-09-08T13:28:29.482516+00:00",
+        "event_type": "CASE_LIFECYCLE_CHANGED",
+        "from_state": "INPUT_REVIEW"
+      },
+      {
+        "event_no": 6,
+        "to_state": null,
+        "actor_type": "SYSTEM",
+        "created_at": "2026-09-08T13:28:29.482516+00:00",
+        "event_type": "RUN_CREATED",
+        "from_state": null
+      },
+      {
+        "event_no": 7,
+        "to_state": "VERIFIED",
+        "actor_type": "SYSTEM",
+        "created_at": "2026-09-08T13:29:25.466065+00:00",
+        "event_type": "CASE_LIFECYCLE_CHANGED",
+        "from_state": "VERIFYING"
+      },
+      {
+        "event_no": 8,
+        "to_state": null,
+        "actor_type": "SYSTEM",
+        "created_at": "2026-09-08T13:29:25.466065+00:00",
+        "event_type": "RUN_COMPLETED",
+        "from_state": null
+      }
+    ],
+    "assessments": [],
+    "checklists": []
+  }
+}
