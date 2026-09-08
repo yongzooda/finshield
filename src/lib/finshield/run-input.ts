@@ -10,7 +10,7 @@ export const selectionSchema = z.object({
   replace_run_id: z.uuid().optional(),
   claims: z.array(z.object({
     claim_id: z.uuid(), statement_masked: z.string().trim().min(1).max(400).optional(),
-    expected_revision_no: z.number().int().positive().optional(),
+    expected_revision_no: z.number().int().positive().optional(), ocr_reviewed: z.boolean().optional(),
   })).min(1).max(8),
 });
 

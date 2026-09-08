@@ -1,0 +1,9 @@
+{
+  "mode": "로컬 운영 빌드의 합성 API·TUS UI Fixture. 실제 업로드나 OCR 호출 없음.",
+  "checks": {
+    "unreviewed_disabled": true,
+    "reviewed_selectable": true,
+    "edit_clears_review": true,
+    "negation_highlight": true
+  }
+}

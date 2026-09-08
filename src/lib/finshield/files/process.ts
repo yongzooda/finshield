@@ -9,6 +9,7 @@ import { parseIsolatedFile, type ParsedPage } from "./parser";
 import { readQuarantinedFile } from "./storage";
 import { extractWithOcr } from "./ocr";
 import { cleanupCaseFiles } from "./cleanup";
+import { lowConfidenceFields, lowConfidenceFieldsForSpan } from "./ocr-review";
 
 export class FileInputAccessError extends Error {
   readonly code = "42501";
@@ -74,6 +75,7 @@ export async function processFileInput(args: {sql:Sql;ownerId:string;caseId:stri
     pages=await extractWithOcr({bytes,mime:parsed.mime,pageCount:pages.length,signal,
       authorize:async()=>{const [r]=await sql`select private.authorize_file_ocr(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid) as allowed`;return r.allowed===true;}});
   }
+  const reviewByPage=new Map<number,ReturnType<typeof lowConfidenceFields>>();
   const ocrArtifactIds: string[] = [];
   const pageIds=await sql.begin(async tx=>{
     await tx`select private.register_input_pages(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid,${pages.length},'SUCCEEDED','v1')`;
@@ -87,8 +89,13 @@ export async function processFileInput(args: {sql:Sql;ownerId:string;caseId:stri
   const maskedPages=pages.map(page=>{
     const gate=gateForModel(page.text);
     if(!gate.ok)throw new Error("PII_RESIDUAL");
-    return {page_no:page.page_no,text:gate.masked.text};
+    const reviewFields=lowConfidenceFields(page,gate.masked.text);
+    reviewByPage.set(page.page_no,reviewFields);
+    return {page_no:page.page_no,text:gate.masked.text,
+      low_confidence_count:reviewFields.length,low_confidence_fields:reviewFields};
   });
+  await sql`select private.record_input_page_review(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid,
+    ${JSON.stringify(maskedPages)}::text::jsonb)`;
   const maskedText=maskedPages.map(page=>page.text).join("\n\n");
   // 더 이상 사용하지 않는 원본 Buffer와 페이지 참조를 모델 호출 전에 해제한다.
   bytes.fill(0);
@@ -110,7 +117,10 @@ export async function processFileInput(args: {sql:Sql;ownerId:string;caseId:stri
     const gate=gateForModel(claim.statementMasked);
     if(!gate.ok)throw new Error("PII_RESIDUAL");
     if(!claim.sourceQuote)throw new Error("CLAIM_SOURCE_NOT_FOUND");
-    return {...claim,statementMasked:gate.masked.text,locator:locateFileQuote(maskedPages,claim.sourceQuote,claim.sourcePageNo)};
+    const locator=locateFileQuote(maskedPages,claim.sourceQuote,claim.sourcePageNo);
+    const reviewFields=lowConfidenceFieldsForSpan(reviewByPage.get(locator.page_no)??[],locator);
+    return {...claim,statementMasked:gate.masked.text,locator:{...locator,
+      review_required:reviewFields.length>0,review_fields:reviewFields}};
   });
   if(!located.length)throw new Error("CLAIMS_NOT_FOUND");
   signal.throwIfAborted();
@@ -121,7 +131,8 @@ export async function processFileInput(args: {sql:Sql;ownerId:string;caseId:stri
       const [saved]=await tx`select private.record_file_claim(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid,${pageId}::uuid,
         ${claim.claimType},${claim.statementMasked},${claim.materiality},${JSON.stringify(claim.locator)}::text::jsonb) as id`;
       results.push({claim_id:saved.id,claim_ref:`C${index+1}`,claim_type:claim.claimType,statement_masked:claim.statementMasked,
-        materiality:claim.materiality,expected_revision_no:1,source_page_no:claim.locator.page_no});
+        materiality:claim.materiality,expected_revision_no:1,source_page_no:claim.locator.page_no,
+        requires_review:claim.locator.review_required,review_fields:claim.locator.review_fields});
     }
     return results;
   });

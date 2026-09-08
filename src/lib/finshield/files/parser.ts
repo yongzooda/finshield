@@ -4,7 +4,10 @@ import { join } from "node:path";
 import { Sandbox } from "@vercel/sandbox";
 import { z } from "zod";
 
-const word=z.object({text:z.string(),bbox:z.array(z.number()).length(4)});
+const word=z.object({
+  text:z.string(),bbox:z.array(z.number().finite()).length(4),
+  confidence:z.number().min(0).max(1).optional(),
+});
 export const pageSchema=z.object({page_no:z.number().int().min(1).max(10),text:z.string().max(12000),words:z.array(word).max(15000)});
 const resultSchema=z.object({ok:z.literal(true),mime:z.enum(["application/pdf","image/png","image/jpeg"]),
   pages:z.array(pageSchema).min(1).max(10),needs_ocr:z.boolean(),parser_version:z.string().optional()});
