@@ -9,3 +9,5 @@ PC-003·PC-004·PC-005·PC-006·RES-005. 실제 검토가 종결돼도 일반 �
 PreCase 통합은 동일 Case·기준 Passport·회원 세션의 질문/계약 비교·두 Agent·Tool·점검 기록·공식 행동으로 구현돼 있다. `runAftercareReview`가 Sales Conduct와 Regulation & Dispute를 실제 재사용한다. `check_documents`·`lookup_statute`는 법령, `analyze_risk_pattern`은 공용 참고 검색과 공식 경고를 조회한다. `search_dispute_case`는 공용 KB Adapter이며 기존 PreCase 전체 데이터·성능의 이식 완료를 뜻하지 않는다. 기능 범위·정식 품질 Gate는 구분한다.
 
 DB·Agent 정의·Prompt·실행·비용·저장된 assessment/Passport를 변경하지 않았다. 기존 결과도 새 화면에서 다시 표현하므로 새 모델 호출이 필요 없다. 실제 저장된 합성 응답 기반 UI Fixture로 브라우저를 확인하며 새 Provider 품질 성공으로 표현하지 않는다. 기본 715건 통과·선택적 96건 생략, 타입·빌드·lint 오류 0(기존 경고 2건)이다. 상세 화면·정상/미입력/실패/부분/긴급·복사 거절 검증은 evidence/development/aftercare-clarity/를 따른다. 운영 반영은 후속 기록에서 확인한다.
+
+2026-09-09 운영 반영: 제품 SHA `8f118c4`, 배포 `dpl_96kmYvk5CPbb3g9L1e7TgYCEGMVf`를 공개 도메인에 승격했다. 공개 runtime SHA·운영 DB 정합성이 통과했다. 병합 후보 `cab08b7a4264e4f4481e0a085641b1898317f8a0`에서 필수 검사 전체가 로컬 통과했다. 운영 JS와 합성 API Fixture로 5.2%p·확인 요청·복사 버튼 표시를 확인했다. 첫 브라우저 시도는 새 Origin의 시험 세션을 준비하지 않아 로그인 화면으로 끝났고, 자체 Fixture 세션 설정 후 통과했다. 실제 회원 Agent 재실행 시험은 아니다. GitHub Actions 과금 차단으로 main 병합은 하지 않았으며 PR #299에서 통합을 추적한다.
