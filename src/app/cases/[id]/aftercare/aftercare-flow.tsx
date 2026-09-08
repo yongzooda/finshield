@@ -19,6 +19,7 @@ import { FsCard, FsChip, type ChipTone } from "../../../fs-shell";
 import { FsLoginCard, useFsToken } from "../../../fs-session";
 import { fetchCase } from "../../case-api";
 import type { ContractComparison, PriorClaim } from "@/lib/finshield/contract-comparison";
+import { AftercareInsights } from "./aftercare-insights";
 import { AftercareDocuments } from "./aftercare-documents";
 import { QUESTIONS } from "@/lib/finshield/aftercare";
 
@@ -26,7 +27,7 @@ type Action = {
   action_code: string; label: string; detail: string;
   required_material_codes: string[]; official_channel: string | null;
 };
-type Result = { assessment_no?: number; finished_at?: string; result: string; reasons: string[]; actions: Action[]; comparison?: ContractComparison[] };
+type Result = { assessment_no?: number; finished_at?: string; result: string; answers?: Record<string, string>; reasons: string[]; actions: Action[]; comparison?: ContractComparison[] };
 type ReviewJob = { id: string; status: string; request_key: string; base_passport_id: string; reason_code: string | null;
   input_masked: { answers: { question_code: string; answer_code: string }[]; comparison: ContractComparison[] };
   agent_trace: { agent_code: string; status: string; tools: { tool_code: string; sources: { ref: string; title: string; url: string | null; excerpt_masked: string; reference_only: boolean }[] }[] }[] };
@@ -200,7 +201,7 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
         <header>
           <p className="fs-eyebrow">가입 후 점검 결과{result.assessment_no ? ` · ${result.assessment_no}번째 점검` : ""}</p>
           {/* RES-005: 결론보다 행동을 먼저 놓는다. */}
-          <h1 className="fs-h1 mt-2">{view.label}</h1>
+          <h1 className="fs-h1 mt-2">{result.result === "CORRECTION_OR_INQUIRY" && result.comparison?.some(row => row.result === "DIFFERENT_TEXT") ? "설명과 다른 계약 조건을 확인해 주세요" : view.label}</h1>
           <div className="mt-3"><FsChip tone={view.tone}>{view.state}</FsChip></div>
           <p className="fs-lead mt-3">{view.lead}</p>
           {reviewJob?.status === "PARTIAL" ? <p className="fs-body mt-3" role="status">Agent 조회·판단 중 일부를 확인하지 못했습니다. 아래 결과는 확보된 답변과 근거 범위의 안내입니다.</p> : null}
@@ -211,19 +212,8 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
           </div>
         </header>
 
-        {(result.comparison ?? []).length > 0 ? <FsCard className="mt-8">
-          <h2 className="fs-h2">이전 권유와 계약 문구 비교</h2>
-          <p className="fs-meta mt-2">입력한 문구의 차이입니다. 조건 변경이나 위법 여부의 확정 판단은 아닙니다.</p>
-          <div className="mt-4 space-y-4">{result.comparison!.map(row => <section key={row.claim_id} className="border-t border-[var(--fs-line)] pt-3">
-            <FsChip tone={row.result === "DIFFERENT_TEXT" ? "caution" : "neutral"}>
-              {row.result === "DIFFERENT_TEXT" ? "문구 차이 · 확인 필요" : row.result === "SAME_TEXT" ? "입력 문구 일치" : "계약 문구 미입력"}
-            </FsChip>
-            <div className="mt-2 grid gap-3 md:grid-cols-2">
-              <p className="fs-body"><strong>이전 권유</strong><br />{row.before}</p>
-              <p className="fs-body"><strong>입력한 계약 문구</strong><br />{row.contract || "확인하지 못했습니다."}</p>
-            </div>
-          </section>)}</div>
-        </FsCard> : null}
+        {result.result !== "DISPUTE_PREPARATION" ? <AftercareInsights key={result.assessment_no ?? "legacy"} comparison={result.comparison ?? []}
+          answers={result.answers ?? answers}/> : null}
         <FsCard className="mt-8">
           <h2 className="fs-h2">지금 하실 일</h2>
           <ul className="mt-4 space-y-5">
@@ -245,10 +235,13 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
           </ul>
         </FsCard>
 
+        {result.result === "DISPUTE_PREPARATION" ? <AftercareInsights key={result.assessment_no ?? "legacy"} comparison={result.comparison ?? []}
+          answers={result.answers ?? answers} urgent/> : null}
         {reviewJob?.agent_trace?.length ? <FsCard>
           <h2 className="fs-h2">가입 후 검토 기록과 근거</h2>
           {reviewJob.agent_trace.map(agent => <section key={agent.agent_code} className="mt-4">
-            <h3 className="font-bold">{agent.agent_code === "SALES_CONDUCT" ? "판매 설명 점검" : "규정·분쟁 자료 점검"} · {agent.status === "SUCCEEDED" ? "검토 기록 저장" : "일부 미확인"}</h3>
+            <h3 className="font-bold">{agent.agent_code === "SALES_CONDUCT" ? "판매 설명 점검" : "규정·분쟁 자료 점검"} · {agent.status === "SUCCEEDED" && agent.tools.some(tool => tool.sources.length > 0) ? "공식 자료 조회 완료" : "일부 미확인"}</h3>
+            <p className="fs-body mt-2">{agent.agent_code === "SALES_CONDUCT" ? "설명해야 할 내용과 권유 과정의 주의사항을 확인하기 위해 아래 자료를 조회했습니다. 실제로 설명했는지는 당시 상담 기록과 대조해야 합니다." : "계약 관련 확인 요청과 후속 절차를 검토하기 위해 아래 법령 자료를 조회했습니다. 조회 사실만으로 이 계약의 위법 여부가 확정되지는 않습니다."}</p>
             {agent.tools.flatMap(tool => tool.sources).map(source => <details key={source.ref} className="mt-3">
               <summary>{source.title}{source.reference_only ? " · 참고 사례" : ""}</summary>
               <p className="fs-body mt-2">{source.excerpt_masked}</p>

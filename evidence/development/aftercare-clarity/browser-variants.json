@@ -1,0 +1,29 @@
+{
+  "mode": "UI_ONLY, no Provider calls",
+  "reports": [
+    {
+      "variant": "partial",
+      "passed": true
+    },
+    {
+      "variant": "normal",
+      "passed": true
+    },
+    {
+      "variant": "empty",
+      "passed": true
+    },
+    {
+      "variant": "failed",
+      "passed": true
+    },
+    {
+      "variant": "urgent",
+      "passed": true
+    },
+    {
+      "variant": "clipboard_denied",
+      "passed": true
+    }
+  ]
+}
