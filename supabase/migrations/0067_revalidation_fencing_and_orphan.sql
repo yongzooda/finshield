@@ -21,13 +21,15 @@ as $$
 declare
   result public.revalidation_jobs%rowtype;
 begin
-  perform 1
-    from public.revalidation_jobs j
-    join private.revalidation_job_runtime rt on rt.job_id = j.id
-   where j.id = p_job_id and j.status = 'RUNNING'
-     and rt.lease_token = p_lease_token and rt.leased_until >= now()
-   for update of j, rt;
-  if not found then
+  -- 먼저 Job·runtime을 잠근 뒤 현재 시각을 읽는다. now()는 긴 트랜잭션의 시작 시각이다.
+  perform 1 from public.revalidation_jobs j where j.id=p_job_id for update;
+  perform 1 from private.revalidation_job_runtime rt where rt.job_id=p_job_id for update;
+  if not exists (
+    select 1 from public.revalidation_jobs j
+    join private.revalidation_job_runtime rt on rt.job_id=j.id
+    where j.id=p_job_id and j.status='RUNNING' and rt.lease_token=p_lease_token
+      and rt.leased_until>clock_timestamp()
+  ) then
     raise exception '현재 유효한 재검증 Lease가 아니다' using errcode = 'lock_not_available';
   end if;
 
@@ -61,13 +63,15 @@ as $$
 declare
   result uuid;
 begin
-  perform 1
-    from public.revalidation_jobs j
-    join private.revalidation_job_runtime rt on rt.job_id = j.id
-   where j.id = p_job_id and j.status = 'RUNNING'
-     and rt.lease_token = p_lease_token and rt.leased_until >= now()
-   for update of j, rt;
-  if not found then
+  -- 먼저 Job·runtime을 잠근 뒤 현재 시각을 읽는다. now()는 긴 트랜잭션의 시작 시각이다.
+  perform 1 from public.revalidation_jobs j where j.id=p_job_id for update;
+  perform 1 from private.revalidation_job_runtime rt where rt.job_id=p_job_id for update;
+  if not exists (
+    select 1 from public.revalidation_jobs j
+    join private.revalidation_job_runtime rt on rt.job_id=j.id
+    where j.id=p_job_id and j.status='RUNNING' and rt.lease_token=p_lease_token
+      and rt.leased_until>clock_timestamp()
+  ) then
     raise exception '현재 유효한 재검증 Lease가 아니다' using errcode = 'lock_not_available';
   end if;
 
@@ -119,7 +123,7 @@ begin
 
   if found and j.status in ('QUEUED', 'RUNNING')
      and rt.attempt_no >= rt.max_attempts
-     and (rt.leased_until is null or rt.leased_until < now()) then
+     and (rt.leased_until is null or rt.leased_until < clock_timestamp()) then
     reason := case when exists (
       select 1 from public.verification_runs v
        where v.revalidation_job_id = j.id and v.status in ('QUEUED', 'RUNNING'))

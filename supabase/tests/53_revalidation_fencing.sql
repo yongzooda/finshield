@@ -37,7 +37,8 @@ begin
   run := private.create_verification_run(c.owner_id, c.id, manifest, 'fencing-expired-run',
     repeat('2', 64), 'REVALIDATION', job);
   perform private.start_verification_run(run);
-  update private.revalidation_job_runtime set leased_until = now() - interval '1 second' where job_id = job;
+  update private.revalidation_job_runtime set leased_until = clock_timestamp() + interval '10 milliseconds' where job_id = job;
+  perform pg_sleep(0.02);
 
   begin
     perform private.fail_revalidation_job(job, old_lease, 'STALE_WORKER', null);
