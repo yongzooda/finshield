@@ -33,7 +33,7 @@ it('검토 본문의 변경·만료·미래 검토일을 차단한다',()=>{
  expect(reviewedWarningIsUsable(WARNING_REVIEW.contentHash,now-2000)).toBe(false);
 });
 it('실제 검토 본문을 재조회한 경우만 일반 지침 비교로 인용한다',async()=>{
- const body=readFileSync('evidence/development/member-evidence-scope/kinfa-guidance-section.html','utf8');
+ const body=JSON.parse(readFileSync('evidence/development/member-evidence-scope/kinfa-guidance-section.json','utf8')).html;
  const html='<div class="board-detail-header"><p class="tit">서민금융 사칭 예방 안내</p><li>2021-05-27</li></div>'+body+'<div class="board-detail-footer">';
  vi.useFakeTimers();vi.setSystemTime(new Date(Date.parse(WARNING_REVIEW.reviewedAt)+1000));
  vi.stubGlobal('fetch',vi.fn(async()=>new Response(html)));
