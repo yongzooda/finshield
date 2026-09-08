@@ -21,6 +21,7 @@ import type { ClaimExtractor } from "../intake";
 
 const MAX_EXCERPT = 400;
 const AFTERCARE_CONTEXT_INSTRUCTION = "가입 후 점검의 답변과 계약 문구는 사용자 진술이며 공식 근거가 아니다. 기존 Claim과 계약 문구의 차이, 추가 설명과 공식 자료 확인 필요성을 자기 Agent 범위에서 검토한다. 문구 차이 또는 유사 사례만으로 위법·사기를 확정하지 않는다.";
+const DECISIVE_CITATION_INSTRUCTION = "VERIFIED·CONTRADICTED·CONFIRMED·REFUTED·COUNTER_EVIDENCE 상태에는 citable=true, incomplete=false, reference_only=false, freshness=FRESH, directness=DIRECT인 ref만 쓴다. 그런 ref가 없으면 불확실·보류 상태를 쓴다.";
 
 /** 모델 입력에는 표시용 참조만 쓴다. DB 행 ID·부가 속성을 직렬화하지 않는다. */
 export const claimBrief = (claims: ConfirmedClaim[]) => claims.map(({claim_ref,claim_type,statement_masked,materiality}) =>
@@ -63,39 +64,82 @@ export const citationReferenceSchema = (evidence: ToolEvidence[]) => {
   return z.array(z.enum(refs as [string, ...string[]])).max(refs.length);
 };
 
-export const domainOutputSchemaFor = (evidence: ToolEvidence[]) => domainAgentOutput.extend({
-  findings: z.array(domainAgentOutput.shape.findings.element.extend({
-    evidence_refs: citationReferenceSchema(evidence),
-  })),
-});
+/** 확정·반증에 실제로 쓸 수 있는 근거만 고른다. 사후 validator와 같은 기준이다. */
+export const decisiveEvidence = (evidence: ToolEvidence[]) => evidence.filter((item) =>
+  item.citable && !item.incomplete && !item.reference_only
+  && item.freshness_at_use === "FRESH" && item.directness === "DIRECT");
 
-export const coveOutputSchemaFor = (evidence: ToolEvidence[]) => coveOutput.extend({
-  results: z.array(coveOutput.shape.results.element.extend({
-    evidence_refs: citationReferenceSchema(evidence),
-  })),
-});
+const decisiveCitationReferenceSchema = (evidence: ToolEvidence[]) =>
+  citationReferenceSchema(decisiveEvidence(evidence)).min(1);
 
-export const redTeamOutputSchemaFor = (evidence: ToolEvidence[]) => redTeamOutput.extend({
-  results: z.array(redTeamOutput.shape.results.element.extend({
-    evidence_refs: citationReferenceSchema(evidence),
-  })),
-});
+export const domainOutputSchemaFor = (evidence: ToolEvidence[]) => {
+  const common = domainAgentOutput.shape.findings.element.omit({ state: true, evidence_refs: true });
+  const contextual = citationReferenceSchema(evidence);
+  const unresolved = z.union([
+    common.extend({ state: z.literal("CONFLICT"), evidence_refs: contextual }),
+    common.extend({ state: z.literal("UNKNOWN"), evidence_refs: contextual }),
+    common.extend({ state: z.literal("NEED_MORE_INFORMATION"), evidence_refs: contextual }),
+    common.extend({ state: z.literal("WITHHELD"), evidence_refs: contextual }),
+  ]);
+  const finding = decisiveEvidence(evidence).length === 0 ? unresolved : z.union([
+    common.extend({ state: z.literal("VERIFIED"), evidence_refs: decisiveCitationReferenceSchema(evidence) }),
+    common.extend({ state: z.literal("CONTRADICTED"), evidence_refs: decisiveCitationReferenceSchema(evidence) }),
+    unresolved,
+  ]);
+  return domainAgentOutput.extend({ findings: z.array(finding) });
+};
 
-export const judgeOutputSchemaFor = (evidence: ToolEvidence[]) => z.object({
-  schema_version: z.literal("out-v1"),
-  claim_results: z.array(z.object({
-    claim_ref: z.string(),
-    state: z.enum(["VERIFIED", "CONTRADICTED", "CONFLICT", "UNKNOWN", "NEED_MORE_INFORMATION", "WITHHELD"]),
-    evidence_refs: citationReferenceSchema(evidence),
-    withheld_reason: z.string().nullable(),
-    rationale_masked: z.string(),
-  })),
-  conflicts: z.array(z.object({
-    claim_ref: z.string(),
-    evidence_refs: citationReferenceSchema(evidence).min(2),
-    note_masked: z.string(),
-  })),
-});
+export const coveOutputSchemaFor = (evidence: ToolEvidence[]) => {
+  const common = coveOutput.shape.results.element.omit({ status: true, evidence_refs: true });
+  const inconclusive = common.extend({
+    status: z.literal("INCONCLUSIVE"), evidence_refs: citationReferenceSchema(evidence),
+  });
+  const result = decisiveEvidence(evidence).length === 0 ? inconclusive : z.union([
+    common.extend({ status: z.literal("CONFIRMED"), evidence_refs: decisiveCitationReferenceSchema(evidence) }),
+    common.extend({ status: z.literal("REFUTED"), evidence_refs: decisiveCitationReferenceSchema(evidence) }),
+    inconclusive,
+  ]);
+  return coveOutput.extend({ results: z.array(result) });
+};
+
+export const redTeamOutputSchemaFor = (evidence: ToolEvidence[]) => {
+  const common = redTeamOutput.shape.results.element.omit({ status: true, evidence_refs: true });
+  const noneFound = common.extend({
+    status: z.literal("NONE_FOUND"), evidence_refs: citationReferenceSchema(evidence),
+  });
+  const result = decisiveEvidence(evidence).length === 0 ? noneFound : z.union([
+    common.extend({ status: z.literal("COUNTER_EVIDENCE"), evidence_refs: decisiveCitationReferenceSchema(evidence) }),
+    noneFound,
+  ]);
+  return redTeamOutput.extend({ results: z.array(result) });
+};
+
+export const judgeOutputSchemaFor = (evidence: ToolEvidence[]) => {
+  const common = z.object({
+    claim_ref: z.string(), withheld_reason: z.string().nullable(), rationale_masked: z.string(),
+  });
+  const contextual = citationReferenceSchema(evidence);
+  const unresolved = z.union([
+    common.extend({ state: z.literal("CONFLICT"), evidence_refs: contextual }),
+    common.extend({ state: z.literal("UNKNOWN"), evidence_refs: contextual }),
+    common.extend({ state: z.literal("NEED_MORE_INFORMATION"), evidence_refs: contextual }),
+    common.extend({ state: z.literal("WITHHELD"), evidence_refs: contextual }),
+  ]);
+  const result = decisiveEvidence(evidence).length === 0 ? unresolved : z.union([
+    common.extend({ state: z.literal("VERIFIED"), evidence_refs: decisiveCitationReferenceSchema(evidence) }),
+    common.extend({ state: z.literal("CONTRADICTED"), evidence_refs: decisiveCitationReferenceSchema(evidence) }),
+    unresolved,
+  ]);
+  return z.object({
+    schema_version: z.literal("out-v1"),
+    claim_results: z.array(result),
+    conflicts: z.array(z.object({
+      claim_ref: z.string(),
+      evidence_refs: citationReferenceSchema(evidence).min(2),
+      note_masked: z.string(),
+    })),
+  });
+};
 
 export const JUDGE_CLAIM_BATCH_SIZE = 4;
 
@@ -174,7 +218,7 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
   async decide({ system, signal, input, evidence, observations }) {
     return callFinshieldModel({
       model: FINSHIELD_MODEL,
-      system: `${system}${input.aftercare_context ? `\n${AFTERCARE_CONTEXT_INSTRUCTION}` : ""}\n\n지금은 판단하는 단계다. 아래 근거 목록의 ref 만 인용한다. summary_masked와 note_masked는 각각 40자 이내 한 문장으로 답한다. limits는 꼭 필요한 항목만 한 개 이하로 답한다.`,
+      system: `${system}${input.aftercare_context ? `\n${AFTERCARE_CONTEXT_INSTRUCTION}` : ""}\n\n지금은 판단하는 단계다. 아래 근거 목록의 ref 만 인용한다. ${DECISIVE_CITATION_INSTRUCTION} summary_masked와 note_masked는 각각 40자 이내 한 문장으로 답한다. limits는 꼭 필요한 항목만 한 개 이하로 답한다.`,
       user: JSON.stringify({
         claims: claimBrief(input.claims),
         journey_stage: input.journey_stage,
@@ -199,7 +243,7 @@ export const createJudgeModel = (context?: ModelBudgetContext): JudgeModel => {
     const batches = buildJudgeBatches({ claims, findings, evidence });
     const outputs = await Promise.all(batches.map((batch) => callFinshieldModel({
         model: FINSHIELD_MODEL,
-        system: `${JUDGE_SYSTEM}\n각 rationale_masked는 핵심 근거를 담은 40자 이내 한 문장이다. withheld_reason은 20자 이내다. 입력 Claim마다 정확히 한 결과를 낸다.`,
+        system: `${JUDGE_SYSTEM}\n${DECISIVE_CITATION_INSTRUCTION} 각 rationale_masked는 핵심 근거를 담은 40자 이내 한 문장이다. withheld_reason은 20자 이내다. 입력 Claim마다 정확히 한 결과를 낸다.`,
         user: JSON.stringify({ claims: claimBrief(batch.claims), findings: batch.findings, evidence: evidenceBrief(batch.evidence) }),
         schema: judgeOutputSchemaFor(batch.evidence),
         maxTokens: 1600, effort: "low", signal, maxRetries: 0, timeoutMs: MODEL_TIMEOUTS.judgeMs,
