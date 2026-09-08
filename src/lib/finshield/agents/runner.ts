@@ -50,7 +50,7 @@ export const decodeDomainOutput = (raw: unknown, session: RunSession, claims: Do
       ...finding,
       state: problems.includes(APPROVAL_PROOF_REQUIRED) ? "NEED_MORE_INFORMATION" as const : "UNKNOWN" as const,
       relation: "CONTEXT" as const,
-      summary_masked: problems.includes(APPROVAL_PROOF_REQUIRED) ? APPROVAL_PROOF_REQUIRED : finding.summary_masked,
+      summary_masked: problems.includes(APPROVAL_PROOF_REQUIRED) ? APPROVAL_PROOF_REQUIRED : "제공된 근거로는 이 항목을 확정하지 않았습니다.",
       evidence_refs: knownRefs,
       limits: [...new Set([...finding.limits, "일부 근거 인용을 확인하지 못했습니다."])].slice(0, 5),
     };
@@ -263,7 +263,7 @@ export const runReviewAgent = async <T>(args: {
   model: AgentModel;
   impls: Record<string, ToolImpl>;
   parse: (raw: unknown) => { ok: true; value: T } | { ok: false };
-  refsOf: (value: T) => { refs: string[]; confirmed: boolean; state?: "VERIFIED" | "CONTRADICTED" | "UNKNOWN" }[];
+  refsOf: (value: T) => { refs: string[]; claimRef?: string; confirmed: boolean; state?: "VERIFIED" | "CONTRADICTED" | "UNKNOWN" }[];
   downgradeInvalid?: (value: T, invalidIndexes: Set<number>) => T;
 }): Promise<AgentRunResult<T>> => {
   const result = await runDomainAgent<T>({
@@ -288,7 +288,8 @@ export const runReviewAgent = async <T>(args: {
       const invalidIndexes = new Set<number>();
       const pool = new Map(evidence.map((entry) => [entry.evidence_ref, entry]));
       for (const [index, entry] of args.refsOf(parsed.value).entries()) {
-        const entryProblems = citationProblems(entry.refs, entry.state ?? (entry.confirmed ? "VERIFIED" : "UNKNOWN"), pool);
+        const entryProblems = citationProblems(entry.refs, entry.state ?? (entry.confirmed ? "VERIFIED" : "UNKNOWN"), pool,
+          args.claims.find(claim => claim.claim_ref === entry.claimRef)?.statement_masked);
         if (entryProblems.length > 0) invalidIndexes.add(index);
         problems.push(...entryProblems);
       }

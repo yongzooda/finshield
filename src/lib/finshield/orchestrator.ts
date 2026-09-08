@@ -108,7 +108,7 @@ export const normalizeJudgeOutput = (
     return {
       ...candidate,
       state: problems.includes(APPROVAL_PROOF_REQUIRED) ? "NEED_MORE_INFORMATION" as const : "UNKNOWN" as const,
-      rationale_masked: problems.includes(APPROVAL_PROOF_REQUIRED) ? APPROVAL_PROOF_REQUIRED : candidate.rationale_masked,
+      rationale_masked: problems.includes(APPROVAL_PROOF_REQUIRED) ? APPROVAL_PROOF_REQUIRED : "제공된 근거로는 이 항목을 확정하지 않았습니다.",
       evidence_refs: candidate.evidence_refs.filter((ref) => evidence.has(ref)),
       withheld_reason: problems.includes(APPROVAL_PROOF_REQUIRED) ? APPROVAL_PROOF_REQUIRED : "근거 인용을 확인하지 못했습니다.",
     };
@@ -216,6 +216,7 @@ export const runVerification = async (args: {
         journeyStage: args.journeyStage, model: args.agentModel, impls: TOOL_IMPLS,
         parse,
         refsOf: (value) => value.results.map((entry) => ({
+          claimRef: entry.claim_ref,
           refs: entry.evidence_refs,
           state: entry.status === "CONFIRMED" ? "VERIFIED" : entry.status === "REFUTED" || entry.status === "COUNTER_EVIDENCE" ? "CONTRADICTED" : "UNKNOWN",
           // 확인·반증을 말하려면 근거가 있어야 한다. 못 찾았다는 상태는 근거가 없어도 된다.

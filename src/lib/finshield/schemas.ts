@@ -154,6 +154,11 @@ export const citationProblems = (
   }
   const known = refs.filter((ref) => pool.has(ref)).map((ref) => pool.get(ref) as ToolEvidence);
   if ((state === "VERIFIED" || state === "CONTRADICTED") && statement
+    && /오늘|당일|마감|기한|긴급/u.test(statement)
+    && known.some(item => item.locator?.permitted_use === "PUBLIC_GUIDANCE_COMPARISON")) {
+    problems.push("일반 예방 지침으로 개별 신청 기한을 확정할 수 없습니다.");
+  }
+  if ((state === "VERIFIED" || state === "CONTRADICTED") && statement
     && /사기범|사기꾼|범죄자|사기(?:이다|다|임|가\s*맞|가\s*아)|위법(?:이다|다|임)|불법(?:이다|다|임)/u.test(statement)
     && known.length > 0 && known.every(item => item.locator?.current_transaction_proof === false)) {
     problems.push("일반 안내로 현재 거래의 범죄·위법 여부를 확정했습니다.");

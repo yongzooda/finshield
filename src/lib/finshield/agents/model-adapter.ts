@@ -16,7 +16,7 @@ import { callFinshieldModel, emptyModelUsage, type ModelBudgetContext, type Mode
 import type { AgentModel } from "./runner";
 import type { JudgeModel } from "../orchestrator";
 import { JUDGE_SYSTEM } from "./prompts";
-import { coveOutput, redTeamOutput, domainAgentOutput, judgeOutput, judgeEnvelopeOutput, requiresPersonalApprovalProof, type ToolEvidence, type ConfirmedClaim } from "../schemas";
+import { coveOutput, redTeamOutput, domainAgentOutput, judgeEnvelopeOutput, requiresPersonalApprovalProof, type ToolEvidence, type ConfirmedClaim } from "../schemas";
 import type { ClaimExtractor } from "../intake";
 
 const MAX_EXCERPT = 1200;

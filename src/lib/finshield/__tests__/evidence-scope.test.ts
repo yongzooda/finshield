@@ -81,3 +81,11 @@ it('한 항목의 잘못된 충돌·문장 형식을 다른 항목의 근거 있
  expect(malformed.output.claim_results.map(x=>x.state)).toEqual(['WITHHELD','CONTRADICTED']);
  expect(malformed.reasonCode).toBe('JUDGE_SCHEMA_INVALID');
 });
+
+it('예방 지침을 개별 신청 마감일의 근거로 승격하거나 단정 문구를 남기지 않는다',()=>{
+ const claim={claim_ref:'C1',claim_type:'CONDUCT',statement_masked:'오늘 안에 신청해야 한다.',materiality:'MATERIAL' as const};
+ const pool=new Map([['E1',{...evidence,locator:{permitted_use:'PUBLIC_GUIDANCE_COMPARISON'}}]]);
+ const result=normalizeJudgeOutput({schema_version:'out-v1',conflicts:[],claim_results:[{claim_ref:'C1',state:'CONTRADICTED',evidence_refs:['E1'],withheld_reason:null,rationale_masked:'모든 공식기관은 긴급성 압박을 하지 않는다.'}]},[claim],pool);
+ expect(result.output.claim_results[0]).toMatchObject({state:'UNKNOWN',rationale_masked:'제공된 근거로는 이 항목을 확정하지 않았습니다.'});
+ expect(result.reasonCode).toBe('JUDGE_CITATION_INVALID');
+});
