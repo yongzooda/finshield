@@ -284,6 +284,6 @@ export const runVerification = async (args: {
     cove,
     redTeam,
     evidenceIds,
-    partial: judged === null || agentResults.some((result) => result.status !== "SUCCEEDED"),
+    partial: judged === null || judgeReasonCode !== null || agentResults.some((result) => result.status !== "SUCCEEDED"),
   };
 };

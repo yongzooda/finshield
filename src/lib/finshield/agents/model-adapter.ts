@@ -340,7 +340,9 @@ export const createJudgeModel = (context?: ModelBudgetContext): JudgeModel => {
     const outputs = settled.map((entry, index) => {
       if (entry.status === "fulfilled") return entry.value;
       const timedOut = signal?.aborted || entry.reason?.name === "APIConnectionTimeoutError";
-      failureReason ??= timedOut ? "JUDGE_BATCH_DEADLINE_EXCEEDED" : "JUDGE_BATCH_CALL_FAILED";
+      const safeCode = String(entry.reason?.code ?? "");
+      failureReason ??= timedOut ? "JUDGE_BATCH_DEADLINE_EXCEEDED"
+        : /^MODEL_[A-Z_]{1,58}$/.test(safeCode) ? safeCode : "JUDGE_BATCH_CALL_FAILED";
       return { schema_version: "out-v1" as const, conflicts: [],
         claim_results: batches[index].claims.map(claim => ({ claim_ref: claim.claim_ref,
           state: "UNKNOWN" as const, evidence_refs: [],
