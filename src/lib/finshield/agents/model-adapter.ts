@@ -92,21 +92,23 @@ export const decisiveEvidence = (evidence: ToolEvidence[]) => evidence.filter((i
 export function modelEvidenceScope(evidence: ToolEvidence[]) {
   const sorted = [...evidence].sort((a, b) => Number(decisiveEvidence([b]).length > 0) - Number(decisiveEvidence([a]).length > 0));
   const original = new Map(sorted.map((item, index) => [`E${index + 1}`, item.evidence_ref]));
+  const remap = <T>(output: T, mapping: Map<string, string>): T => {
+    const walk = (value: unknown): unknown => {
+      if (Array.isArray(value)) return value.map(walk);
+      if (!value || typeof value !== "object") return value;
+      return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key,
+        key === "evidence_refs" && Array.isArray(entry) ? entry.map(ref => {
+          if (typeof ref !== "string" || !mapping.has(ref)) throw new Error("MODEL_CITATION_REFERENCE_INVALID");
+          return mapping.get(ref)!;
+        }) : walk(entry),
+      ]));
+    };
+    return walk(output) as T;
+  };
   return {
     evidence: sorted.map((item, index) => ({ ...item, evidence_ref: `E${index + 1}` })),
-    restore<T>(output: T): T {
-      const walk = (value: unknown): unknown => {
-        if (Array.isArray(value)) return value.map(walk);
-        if (!value || typeof value !== "object") return value;
-        return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key,
-          key === "evidence_refs" && Array.isArray(entry) ? entry.map(ref => {
-            if (typeof ref !== "string" || !original.has(ref)) throw new Error("MODEL_CITATION_REFERENCE_INVALID");
-            return original.get(ref)!;
-          }) : walk(entry),
-        ]));
-      };
-      return walk(output) as T;
-    },
+    localize: <T>(input: T): T => remap(input, new Map([...original].map(([local, ref]) => [ref, local]))),
+    restore: <T>(output: T): T => remap(output, original),
   };
 }
 
@@ -305,7 +307,7 @@ export const createJudgeModel = (context?: ModelBudgetContext): JudgeModel => {
       return scope.restore(await callFinshieldModel({
         model: FINSHIELD_MODEL,
         system: `${JUDGE_SYSTEM}\n${DECISIVE_CITATION_INSTRUCTION} 각 rationale_masked는 핵심 근거를 담은 40자 이내 한 문장이다. withheld_reason은 20자 이내다. 입력 Claim마다 정확히 한 결과를 낸다.`,
-        user: JSON.stringify({ assessed_on: new Date().toISOString().slice(0, 10), claims: claimBrief(batch.claims), findings: batch.findings, evidence: evidenceBrief(scope.evidence) }),
+        user: JSON.stringify({ assessed_on: new Date().toISOString().slice(0, 10), claims: claimBrief(batch.claims), findings: scope.localize(batch.findings), evidence: evidenceBrief(scope.evidence) }),
         schema: judgeOutputSchemaFor(scope.evidence),
         maxTokens: 1600, effort: "low", signal, maxRetries: 0, timeoutMs: MODEL_TIMEOUTS.judgeMs,
       }, context, usage));

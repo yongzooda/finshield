@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, afterEach } from "vitest";
 const call = vi.hoisted(() => vi.fn());
 vi.mock("../model-budget", () => ({ callFinshieldModel: call, emptyModelUsage: () => ({}) }));
-import { assertBatchCoverage, createAgentModel } from "../agents/model-adapter";
+import { assertBatchCoverage, createAgentModel, createJudgeModel } from "../agents/model-adapter";
 import type { DomainAgentInput } from "../schemas";
 
 const claims = Array.from({ length: 6 }, (_, index) => ({
@@ -57,9 +57,23 @@ describe("호출 내부 인용 이름 정규화", () => {
     const left = modelEvidenceScope([entry("E10", false), entry("E33", true)]);
     const right = modelEvidenceScope([entry("E201", false), entry("E303", true)]);
     expect(zodOutputFormat(coveOutputSchemaFor(left.evidence)).schema).toEqual(zodOutputFormat(coveOutputSchemaFor(right.evidence)).schema);
+    expect(left.localize([{ evidence_refs: ["E33", "E10"] }])).toEqual([{ evidence_refs: ["E1", "E2"] }]);
     expect(left.restore({ results: [{ evidence_refs: ["E1", "E2"] }] })).toEqual({ results: [{ evidence_refs: ["E33", "E10"] }] });
     expect(() => left.restore({ evidence_refs: ["E3"] })).toThrow("CITATION_REFERENCE");
     expect(coveOutputSchemaFor(left.evidence).safeParse({ schema_version: "out-v1", results: [{claim_ref:"C1",status:"CONFIRMED",evidence_refs:["E2"],note_masked:"맥락 근거 확정 금지"}] }).success).toBe(false);
   });
 
+});
+
+it("Judge에게 전달하는 기존 판단과 근거가 같은 인용 번호를 쓰고 저장 번호로 복원된다", async () => {
+  const source = { evidence_ref: "E33", citable: true, incomplete: false, reference_only: false,
+    freshness_at_use: "FRESH", directness: "DIRECT", locator: {}, excerpt_masked: "합성 공식 안내" } as ToolEvidence;
+  call.mockImplementation(async options => {
+    const body = JSON.parse(options.user);
+    expect(body.findings[0].evidence_refs).toEqual(["E1"]);
+    expect(body.evidence[0].ref).toBe("E1");
+    return { schema_version: "out-v1", claim_results: [{ claim_ref: "C1", state: "UNKNOWN", evidence_refs: ["E1"], withheld_reason: "추가 확인", rationale_masked: "합성 판단" }], conflicts: [] };
+  });
+  const result = await createJudgeModel().judge({ claims: [claims[0]], evidence: [source], findings: [{ claim_ref: "C1", evidence_refs: ["E33"], state: "UNKNOWN", relation: "CONTEXT", summary_masked: "합성 판단", limits: [], agent_code: "FRAUD_CHANNEL" }] });
+  expect(result).toMatchObject({ claim_results: [{ evidence_refs: ["E33"] }] });
 });
