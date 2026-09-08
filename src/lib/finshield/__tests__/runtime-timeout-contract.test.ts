@@ -10,11 +10,12 @@ describe("N-PERF-004·B-DEMO-01 모델 시간 제한 계약", () => {
       .toBeLessThan(MODEL_TIMEOUTS.reviewStageMs);
   });
 
-  it("순차 실행 최악 상한이 공개 Demo 전체 기한 안에 든다", () => {
+  it("순차 실행 최악 상한이 Text 120초와 공개 Demo 전체 기한 안에 든다", () => {
     const stageBudget = 4 * MODEL_TIMEOUTS.domainStageMs
       + 2 * MODEL_TIMEOUTS.reviewStageMs
       + MODEL_TIMEOUTS.judgeMs;
     expect(stageBudget).toBeLessThan(MODEL_TIMEOUTS.demoRunMs);
+    expect(MODEL_TIMEOUTS.demoRunMs).toBeLessThan(120_000);
   });
 
   it("Judge 시간 초과를 일반 호출 실패와 구분한다", () => {

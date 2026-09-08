@@ -15,7 +15,7 @@
 
 // 시험 fixture 와 같은 이름을 쓰지 않도록 제품 정의는 p0-v2 을 버전으로 쓴다.
 export const DEFINITION_VERSION = "p0-v2";
-export const MANIFEST_VERSION = "finshield-p0-loan-v6";
+export const MANIFEST_VERSION = "finshield-p0-loan-v7";
 export const FINSHIELD_MODEL = "claude-sonnet-5";
 export const SCENARIO = "LOAN" as const;
 export const SCENARIO_VERSION = "sunshine15-v1";
@@ -28,13 +28,13 @@ export const SCENARIO_VERSION = "sunshine15-v1";
  */
 export const MODEL_TIMEOUTS = Object.freeze({
   domainChoiceMs: 6_000,
-  domainDecisionMs: 9_000,
-  domainStageMs: 16_000,
+  domainDecisionMs: 11_000,
+  domainStageMs: 18_000,
   reviewChoiceMs: 5_000,
   reviewDecisionMs: 8_000,
   reviewStageMs: 15_000,
   judgeMs: 12_000,
-  demoRunMs: 110_000,
+  demoRunMs: 115_000,
 });
 
 export type AgentRole = "DOMAIN" | "COVE" | "RED_TEAM" | "EVIDENCE_JUDGE";
