@@ -8,13 +8,14 @@ describe("가입 후 점검 규칙", () => {
     HAS_CONTRACT_COPY: "YES", HAS_RECORDING: "YES",
   };
 
-  it("계약이 설명과 다르면 분쟁 준비로 올린다", () => {
+  it("계약 차이 답변만으로 사칭 신고를 권하지 않고 서면 확인과 정정 문의로 연결한다", () => {
     const decision = decideAftercare({
       answers: { ...allGood, CONTRACT_MATCHES_EXPLANATION: "DIFFERENT" },
       contradictedClaims: 0,
     });
-    expect(decision.result).toBe("DISPUTE_PREPARATION");
-    expect(decision.actions.map((a) => a.action_code)).toContain("REPORT_IMPERSONATION");
+    expect(decision.result).toBe("CORRECTION_OR_INQUIRY");
+    expect(decision.actions.map((a) => a.action_code)).not.toContain("REPORT_IMPERSONATION");
+    expect(decision.actions.map((a) => a.action_code)).toContain("REQUEST_WRITTEN_EXPLANATION");
   });
 
   it("거래 전에 사실과 다른 항목이 있었으면 답이 좋아도 문의로 남긴다", () => {

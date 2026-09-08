@@ -14,7 +14,7 @@ import { z } from "zod";
 import { FINSHIELD_MODEL, MODEL_TIMEOUTS } from "../manifest";
 import { callFinshieldModel, emptyModelUsage, type ModelBudgetContext, type ModelUsage } from "../model-budget";
 import type { AgentModel } from "./runner";
-import { loanToolPlan } from "./loan-tool-plan";
+import { domainClaims, loanToolPlan } from "./loan-tool-plan";
 import type { JudgeModel } from "../orchestrator";
 import { JUDGE_SYSTEM } from "./prompts";
 import { coveOutput, redTeamOutput, domainAgentOutput, judgeEnvelopeOutput, citationProblems, requiresPersonalApprovalProof, type ToolEvidence, type ConfirmedClaim } from "../schemas";
@@ -33,7 +33,9 @@ export function assertBatchCoverage(claims: ConfirmedClaim[], refs: string[]) {
     throw new Error("MODEL_OUTPUT_CLAIM_COVERAGE_INVALID");
   }
 }
-const AFTERCARE_CONTEXT_INSTRUCTION = "가입 후 점검의 답변과 계약 문구는 사용자 진술이며 공식 근거가 아니다. 기존 Claim과 계약 문구의 차이, 추가 설명과 공식 자료 확인 필요성을 자기 Agent 범위에서 검토한다. 문구 차이 또는 유사 사례만으로 위법·사기를 확정하지 않는다.";
+const AFTERCARE_CONTEXT_INSTRUCTION = "가입 후 점검의 답변과 계약 문구는 사용자 진술이며 공식 근거가 아니다. 거래 전 상품 진위 판단을 반복하지 말고 기존 Claim과 계약 문구의 차이, 설명 여부·이해도 답변, 추가 설명과 공식 자료 확인 필요성을 자기 Agent 범위에서 검토한다. 계약 비교가 주어진 Claim의 summary에는 양쪽 문구의 구체적 차이와 확인할 사항을 먼저 적는다. 실제 설명 이행을 입증할 수 없으면 UNKNOWN으로 두되 조회한 공식 의무와 요청할 자료는 설명할 수 있다. 문구 차이 또는 유사 사례만으로 위법·사기를 확정하지 않는다. 출력 참조는 현재 claims 목록 안에서만 쓰고 각 Claim을 findings 또는 out_of_scope_claim_refs 중 한 곳에 정확히 한 번 기록한다.";
+export const aftercareBatchContext = (context: import("../schemas").DomainAgentInput["aftercare_context"], claims: ConfirmedClaim[]) => context
+  ? { ...context, comparison: context.comparison.filter(row => claims.some(claim => claim.claim_ref === row.claim_ref)) } : undefined;
 const DECISIVE_CITATION_INSTRUCTION = "citation_contract는 Claim별 인용 자격 목록이다. VERIFIED/CONFIRMED는 verified_refs, CONTRADICTED/REFUTED/COUNTER_EVIDENCE는 contradicted_refs 안에서만 인용한다. 목록은 형식·출처 자격이며 해당 Claim을 실제로 지지·반박하는지는 원문과 별도로 대조한다. 자격 없는 참고 자료를 확정 인용에 함께 섞지 않는다. 해당 목록이 비어 있으면 Domain은 UNKNOWN 또는 NEED_MORE_INFORMATION, CoVe는 INCONCLUSIVE, Red Team은 NONE_FOUND를 선택한다. VERIFIED·CONTRADICTED·CONFIRMED·REFUTED·COUNTER_EVIDENCE 상태에는 citable=true, incomplete=false, reference_only=false, freshness=FRESH, directness=DIRECT인 ref만 쓴다. 그런 ref가 없으면 불확실·보류 상태를 쓴다. PERSONAL_APPROVAL_REQUIRES_CASE_DOCUMENT 항목은 개인 심사 자료가 없으면 NEED_MORE_INFORMATION(독립 재확인은 INCONCLUSIVE)이다. 상품 종료 사실과 개인 승인 여부를 섞지 않는다.";
 
 /** 모델 입력에는 표시용 참조만 쓴다. DB 행 ID·부가 속성을 직렬화하지 않는다. */
@@ -302,7 +304,8 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
   async decide({ system, signal, input, evidence: originalEvidence, observations }) {
     const scope = modelEvidenceScope(originalEvidence);
     const evidence = scope.evidence;
-    const outputs = await settleModelBatches(agentClaimBatches(input.claims).map(async claims => {
+    const assignedClaims = domainClaims(input);
+    const outputs = await settleModelBatches(agentClaimBatches(assignedClaims).map(async claims => {
       const output = await callFinshieldModel({
       model: FINSHIELD_MODEL,
       system: `${system}${input.aftercare_context ? `\n${AFTERCARE_CONTEXT_INSTRUCTION}` : ""}\n\n지금은 판단하는 단계다. 아래 근거 목록의 ref 만 인용한다. ${DECISIVE_CITATION_INSTRUCTION} summary_masked와 note_masked는 각각 80자 이내로 답한다. 상품 종료 고지가 있으면 현재 권유와 종료 전 조건을 구분해 설명한다. limits는 꼭 필요한 항목만 한 개 이하로 답한다.`,
@@ -310,7 +313,7 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
         assessed_on: new Date().toISOString().slice(0, 10),
         claims: claimBrief(claims),
         journey_stage: input.journey_stage,
-        ...(input.aftercare_context ? { aftercare_context: input.aftercare_context } : {}),
+        ...(input.aftercare_context ? { aftercare_context: aftercareBatchContext(input.aftercare_context, claims) } : {}),
         evidence: evidenceBrief(evidence),
         citation_contract: citationContract(claims, evidence),
         observations,
@@ -331,7 +334,8 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
     }
     return { schema_version: "out-v1",
       findings: outputs.flatMap(output => "findings" in output ? output.findings : []),
-      out_of_scope_claim_refs: outputs.flatMap(output => "out_of_scope_claim_refs" in output ? output.out_of_scope_claim_refs : []),
+      out_of_scope_claim_refs: [...input.claims.filter(c => !assignedClaims.includes(c)).map(c => c.claim_ref),
+        ...outputs.flatMap(output => "out_of_scope_claim_refs" in output ? output.out_of_scope_claim_refs : [])],
     };
   },
 });

@@ -1,6 +1,7 @@
 import { expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
-import { loanToolPlan } from "../agents/loan-tool-plan";
+import { loanToolPlan, domainClaims } from "../agents/loan-tool-plan";
+import { aftercareBatchContext } from "../agents/model-adapter";
 import { productDisclosure } from "../product-disclosure";
 import { reviewFindings, selectJudgeEvidence } from "../orchestrator";
 import { citationProblems, type DomainAgentInput, type ToolEvidence } from "../schemas";
@@ -40,4 +41,17 @@ it("종료 사실로 다른 상품·과거 계약을 반박하거나 현재 가�
     expect(citationProblems(["E2"], "CONTRADICTED", pool, statement).length).toBeGreaterThan(0);
   }
   expect(citationProblems(["E2"], "VERIFIED", pool, input.claims[0].statement_masked).length).toBeGreaterThan(0);
+});
+it("Domain 책임 밖의 반복 판단을 줄이면서 CoVe의 중요 Claim은 모두 유지한다", () => {
+  const mixed = { ...input, claims: [...input.claims, { ...input.claims[0], claim_ref: "C2", claim_type: "CONDUCT", statement_masked: "원격제어 앱을 설치하라" }] };
+  expect(domainClaims(mixed).map(c => c.claim_ref)).toEqual(["C1"]);
+  expect(domainClaims({ ...mixed, agent_code: "COVE" })).toEqual(mixed.claims);
+});
+it("가입 후 묶음에 다른 묶음의 Claim 참조가 섞이지 않는다", () => {
+  const context = { schema_version: "aftercare-review-v1" as const, answers: { UNDERSTOOD_TERMS: "NO" }, comparison: [
+    { claim_ref: "C1", before: "설명", contract: "계약", result: "DIFFERENT_TEXT" },
+    { claim_ref: "C4", before: "다른 설명", contract: "다른 계약", result: "DIFFERENT_TEXT" },
+  ] };
+  expect(aftercareBatchContext(context, input.claims)?.comparison.map(c => c.claim_ref)).toEqual(["C1"]);
+  expect(context.comparison).toHaveLength(2);
 });

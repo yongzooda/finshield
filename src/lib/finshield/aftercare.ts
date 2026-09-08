@@ -178,9 +178,9 @@ export const decideAftercare = (args: {
   let result: AftercareResult = "NORMAL_MANAGEMENT";
 
   if (mismatch) {
-    result = "DISPUTE_PREPARATION";
-    reasons.push("계약서가 설명과 다른 부분이 있다고 답하셨습니다.");
-    actions.push(ACTIONS.ASK_OFFICIAL_CHANNEL, ACTIONS.REPORT_IMPERSONATION);
+    result = "CORRECTION_OR_INQUIRY";
+    reasons.push("계약서가 설명과 다른 부분이 있다고 답하셨습니다. 차이가 난 조건과 적용 시점을 서면으로 확인하고 정정을 문의하세요. 이 답변만으로 위법이나 사칭이 확인된 것은 아닙니다.");
+    actions.push(ACTIONS.REQUEST_WRITTEN_EXPLANATION, ACTIONS.ASK_OFFICIAL_CHANNEL);
   } else if ((args.contractTextDifferences ?? 0) > 0) {
     result = "CORRECTION_OR_INQUIRY";
     reasons.push(`이전 권유와 다른 계약 문구가 ${args.contractTextDifferences}건 있습니다. 문구 차이가 실제 조건 변경인지 서면으로 확인해 주세요.`);
