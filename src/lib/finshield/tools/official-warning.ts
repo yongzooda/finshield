@@ -37,7 +37,7 @@ export async function searchOfficialWarning(input:unknown,ctx:ToolCallContext):P
  try{for(;;){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>2*1024*1024)throw new Error('OFFICIAL_WARNING_TOO_LARGE');chunks.push(value);}}
  finally{await reader.cancel();}
  const section=extractWarningSection(Buffer.concat(chunks).toString('utf8'));const contentHash=hash(section.original);
- const reviewed=reviewedWarningIsUsable(contentHash,Date.now());
+ const reviewed=reviewedWarningIsUsable(contentHash,Date.now()) && section.publishedAt === "2021-05-27";
  return {provenanceComplete:true,candidateCount:1,observations:{kind:'curated_warning_scope',document_count:1,published_at:section.publishedAt,limitation_code:'GUIDANCE_NOT_CURRENT_TRANSACTION_PROOF',reviewed,review_due_at:WARNING_REVIEW.reviewDueAt},items:[{
   sourceType:'GUIDE',authorityGrade:'B',publisher:'서민금융진흥원',title:section.title,officialId:'kinfa:notice:24020',canonicalUrl:URL,
   publishedAt:section.publishedAt,sourceVersion:`notice-html-${reviewed?'review-20260908':'v1'}:${contentHash.slice(0,24)}`,contentHash,fingerprint:hash(URL),
