@@ -107,24 +107,39 @@ export const decisiveEvidence = (evidence: ToolEvidence[]) => evidence.filter((i
  * 실행 전역 E번호가 바뀔 때마다 다른 JSON grammar가 생기는 것을 막는다.
  * 출력은 원래 ref로 복원한 뒤 기존 인용·독립성 validator를 다시 거친다. */
 export function modelEvidenceScope(evidence: ToolEvidence[]) {
-  const sorted = [...evidence].sort((a, b) => Number(decisiveEvidence([b]).length > 0) - Number(decisiveEvidence([a]).length > 0));
+  // 같은 출처·본문·위치·인용 자격을 여러 Agent가 재조회해도 판단 입력에는
+  // 한 번만 제시한다. 조회 원장과 원본 Evidence는 그대로 두고 참조만 합친다.
+  const aliases = new Map<string, string>();
+  const seen = new Map<string, string>();
+  const unique = evidence.filter(item => {
+    const { evidence_ref, tool_code, fetched_at, ...content } = item;
+    void tool_code; void fetched_at;
+    const key = item.content_hash && item.independence_key ? JSON.stringify(content) : evidence_ref;
+    const canonical = seen.get(key) ?? evidence_ref;
+    aliases.set(evidence_ref, canonical);
+    if (seen.has(key)) return false;
+    seen.set(key, canonical); return true;
+  });
+  const sorted = unique.sort((a, b) => Number(decisiveEvidence([b]).length > 0) - Number(decisiveEvidence([a]).length > 0));
   const original = new Map(sorted.map((item, index) => [`E${index + 1}`, item.evidence_ref]));
+  const local = new Map([...original].map(([ref, canonical]) => [canonical, ref]));
+  const localAliases = new Map([...aliases].map(([ref, canonical]) => [ref, local.get(canonical)!]));
   const remap = <T>(output: T, mapping: Map<string, string>): T => {
     const walk = (value: unknown): unknown => {
       if (Array.isArray(value)) return value.map(walk);
       if (!value || typeof value !== "object") return value;
       return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key,
-        key === "evidence_refs" && Array.isArray(entry) ? entry.map(ref => {
+        key === "evidence_refs" && Array.isArray(entry) ? [...new Set(entry.map(ref => {
           if (typeof ref !== "string" || !mapping.has(ref)) throw new Error("MODEL_CITATION_REFERENCE_INVALID");
           return mapping.get(ref)!;
-        }) : walk(entry),
+        }))] : walk(entry),
       ]));
     };
     return walk(output) as T;
   };
   return {
     evidence: sorted.map((item, index) => ({ ...item, evidence_ref: `E${index + 1}` })),
-    localize: <T>(input: T): T => remap(input, new Map([...original].map(([local, ref]) => [ref, local]))),
+    localize: <T>(input: T): T => remap(input, localAliases),
     restore: <T>(output: T): T => remap(output, original),
   };
 }

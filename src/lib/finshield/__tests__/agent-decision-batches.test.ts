@@ -110,3 +110,16 @@ it("Judge에게 전달하는 기존 판단과 근거가 같은 인용 번호를 
   const result = await createJudgeModel().judge({ claims: [claims[0]], evidence: [source], findings: [{ claim_ref: "C1", evidence_refs: ["E33"], state: "UNKNOWN", relation: "CONTEXT", summary_masked: "합성 판단", limits: [], agent_code: "FRAUD_CHANNEL" }] });
   expect(result).toMatchObject({ claim_results: [{ evidence_refs: ["E33"] }] });
 });
+
+it("동일 원문 재조회는 한 번 보여주되 다른 출처·위치·인용 자격은 합치지 않는다", () => {
+  const first: ToolEvidence = { source_type: "GUIDE", authority_grade: "B", title: "합성 원문", official_id: "official-a", url: "https://example.com/notice", published_at: null, evidence_ref: "E7", tool_code: "search_consumer_warning", fetched_at: "2026-09-09T00:00:00Z",
+    content_hash: "a".repeat(64), independence_key: "official-a", excerpt_masked: "합성 원문", locator: { kind: "article", page: 1 },
+    citable: true, incomplete: false, reference_only: false, freshness_at_use: "FRESH", directness: "DIRECT" };
+  const copy = { ...first, evidence_ref: "E8", fetched_at: "2026-09-09T00:01:00Z", tool_code: "analyze_risk_pattern" };
+  const scope = modelEvidenceScope([first, copy, { ...first, evidence_ref: "E9", independence_key: "official-b" },
+    { ...first, evidence_ref: "E10", locator: { kind: "article", page: 2 } }, { ...first, evidence_ref: "E11", citable: false }]);
+  expect(scope.evidence).toHaveLength(4);
+  expect(scope.localize({ evidence_refs: ["E7", "E8"] })).toEqual({ evidence_refs: ["E1"] });
+  expect(scope.restore({ evidence_refs: ["E1"] })).toEqual({ evidence_refs: ["E7"] });
+  expect(copy.evidence_ref).toBe("E8");
+});
