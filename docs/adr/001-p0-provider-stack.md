@@ -610,12 +610,12 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `EVID-SUPABASE-01` | 원격 Schema·RLS·SQL 불변식 | STALE | Migration 0038~0041로 DB scope가 바뀌어 새 main 측정과 별도 Adoption 전까지 재사용하지 않는다. 아래는 과거 채택 이력이다. Migration 0037 뒤 main run `34119203303`, artifact `10017518627`. Migration 37개·SQL 26파일·494개 검증과 여섯 digest가 일치했다. RLS/FORCE 81개·교차 Owner 거부 237건·anon 거부 81건·Worker 회원 본문 거부 13표다. 별도 Adoption PR #230이며 과거 원본은 이력으로 보존한다 |
 | `EVID-FILE-SAFETY-01` | Parser 이전 검사와 격리 실행 Fixture 행렬 | PASS | main run `34027891135`, artifact `9987651168`. 합성 Fixture 103건 중 위험 입력 82건이 모두 거부되고 정상 15건이 모두 통과했다. 판정 어긋남 0건, Parser 단계까지 간 실행 12건, 최장 8.3초다. 격리는 network namespace 와 Node 권한 모델을 함께 쓰며 worker 가 본 secret 형태 환경변수 0개, canary 유출 0건, network 시도 0건이다. 주입한 fault 6종이 모두 worker 안에서 끝났고 Parser 는 `pdfjs-dist` 6.3.289 를 lockfile 로 고정했다 |
 | `EVID-RETRIEVAL-01` | Metadata Filter·Keyword·Vector·Rerank 종단 top 5 | FAIL | 사전등록 8.2 의 Case 단위로 gate 20가족 100 Claim 을 두 번 쟀다. main run `34027686263` 은 Recall@5 0.900, 위험 핵심 Recall@5 0.967, slice freshness 0.800·mixed_name 0.800·fees 0.867·product 0.883 이었고 가족 `score_model_factors` 의 Precision@5 가 0.80 에 못 미쳤다. 그 뒤 재정렬의 신선도 규칙 오류와 Case 자리 배분을 고쳐 main run `34029362670` 에서 다시 쟀다. Recall@5 0.910, Precision@5 0.910, Provider 질의 P95 149ms 로 올랐고 slice product 는 0.900 으로 기준을 넘겼지만 위험 핵심 Recall@5 0.967, slice fees 0.867·freshness 0.850·mixed_name 0.800, 가족 `score_model_factors` Precision@5 미달이 남았다. ADR 15.1 미달 규칙에 따라 합격선을 낮추지 않고 blocker 를 열어 둔다. 두 수정이 첫 측정 뒤에 이뤄졌다는 사실을 함께 남긴다 |
-| `EVID-RATE-01` | 예산·Rate·Provider 직렬화 원장 | STALE | Migration 0038~0041로 DB scope가 바뀌어 새 main 측정과 별도 Adoption 전까지 재사용하지 않는다. 아래는 과거 채택 이력이다. Migration 0037 뒤 main run `34119206073`, artifact `10017517745`. 동시 예약 60회 상한 초과 0건·정산 불일치 0건, Rate 40회 중 10회 허용·30회 거부다. Provider 호출 없는 격리 DB 계약이다. 별도 Adoption PR #230이며 과거 원본은 이력으로 보존한다 |
-| `EVID-CONSENT-01` | 동의 격리와 원본 전송 경계 | STALE | Migration 0038~0041로 DB scope가 바뀌어 새 main 측정과 별도 Adoption 전까지 재사용하지 않는다. 아래는 과거 채택 이력이다. Migration 0037 뒤 main run `34119208728`, artifact `10017516939`. 거절 7경로의 전송 0건·허용 1경로 전송 1건과 감사 누락 0건이다. PII 132개 중 잔존 15개를 차단했고 정상 25개 오차단 0건이다. 외부 Provider를 호출하지 않은 prototype 검증이다. 별도 Adoption PR #230이며 과거 원본은 이력으로 보존한다 |
-| `EVID-STORAGE-01` | 인증 사용자 Storage 권한과 발급 token 재사용 | STALE | Migration 0038~0041로 DB scope가 바뀌어 새 main 측정과 별도 Adoption 전까지 재사용하지 않는다. 아래는 과거 채택 이력이다. Migration 0037 뒤 main run `34119211665`, artifact `10017509884`. 실제 회원 업로드 1건과 거부 8경로가 통과했다. 부당 읽기·쓰기·덮어쓰기·닫힌 TUS 재사용 허용 0건이다. 별도 Adoption PR #230이며 과거 원본은 이력으로 보존한다 |
-| `EVID-DELETE-01` | 원본·OCR·Case vector 물리 삭제 | STALE | Migration 0038~0041로 DB scope가 바뀌어 새 main 측정과 별도 Adoption 전까지 재사용하지 않는다. 아래는 과거 채택 이력이다. Migration 0037 뒤 main run `34119341918`, artifact `10017776294`. 합성 40 Case 중 대상 35건의 원본·OCR·Vector·기발급 URL 접근이 남지 않았다. 경계 이전 5건 보존, 최대 삭제 214초, teardown 객체 잔존 0건이다. 24시간 전체 대기나 Vercel Workflow 장애 증거는 아니다. 별도 Adoption PR #230이며 과거 원본은 이력으로 보존한다 |
+| `EVID-RATE-01` | 예산·Rate·Provider 직렬화 원장 | PASS | main run `34195224699`, artifact `10043645651`, Adoption PR #271. 동시 예약 60회에서 상한 초과 허용 0건·정산 불일치 0건이며 Rate 40회 중 10회 허용·30회 거부다. Provider 슬롯 최소 간격은 1,000ms다. 외부 Provider 호출 없는 격리 DB 계약이다 |
+| `EVID-CONSENT-01` | 동의 격리와 원본 전송 경계 | PASS | main run `34195228845`, artifact `10043648574`, Adoption PR #271. 거절·철회 등 7경로의 전송 0건·허용 1경로 전송 1건·감사 누락 0건이다. PII 132개 중 마스킹 뒤 잔존 15개는 전송을 차단했고 정상 25개 오차단은 0건이다. 외부 Provider를 호출하지 않은 prototype 검증이다 |
+| `EVID-STORAGE-01` | 인증 사용자 Storage 권한과 발급 token 재사용 | PASS | main run `34195233135`, artifact `10043645920`, Adoption PR #271. 실제 회원 업로드 1건과 거부 8경로가 통과했다. 부당 읽기·쓰기·덮어쓰기·닫힌 TUS 재사용 허용은 0건이며 RLS 우회 키를 쓰지 않았다 |
+| `EVID-DELETE-01` | 원본·OCR·Case vector 물리 삭제 | PASS | main run `34195237392`, artifact `10043815404`, Adoption PR #271. 합성 40 Case 중 대상 35건의 원본·OCR·Vector·기발급 URL 접근이 남지 않았다. 만료 전 5건은 보존했고 최대 삭제는 199초, teardown 객체 잔존은 0건이다. 24시간 전체 대기나 Vercel Workflow 장애 증거는 아니다 |
 | `EVID-RUNTIME-01` | Preview·Production 실제 Node·region·deployment | PASS | main run `34044111706`, artifact `9992567920`. 배포 안에 둔 관측 endpoint 를 Preview 와 Production 배포 3개씩에서 불렀다. 여섯 배포 모두 Node 판과 region 과 deployment ID 를 돌려줘 기록률이 100% 다. 배포가 스스로 적은 deployment ID 가 Vercel API 의 값과 여섯 건 모두 같아 응답의 출처가 고정된다. 실제 Node 는 v24.18.0 이고 region 은 icn1 이다. major 24 는 8.2 와 맞고 minor·patch 는 로컬과 달라 고정 Snapshot 으로 적지 않는다는 판단이 근거를 얻었다. 배포 보호는 Vercel 자동화 우회 비밀로 열었고 그 값은 결과에 남기지 않았다 |
-| `EVID-HEALTH-01` | 저비용 Health 실제 HTTP·DB 장애·외부 전송 계측 | STALE | main 채택은 유지되지만 이 격리 기능 브랜치의 Workflow Next 설정이 측정 scope와 달라 재사용하지 않는다. 과거 main run `34084937234`, artifact `10004899299`. 실제 Next HTTP 100회에서 외부 fetch·HTTP·HTTPS 시도는 모두 0회다. 끊긴 DB의 기본·엄격 응답은 503이며 계측 제어는 세 경로를 각각 1회 검출했다. 미관측·정상·만료·실패·시계 역행 Cache 상태를 검증했다. 외부 Provider 상태는 실제 관측이 없으면 unknown으로 유지하며 제품 전체 정상이나 Provider 품질 증거로 확대하지 않는다 |
+| `EVID-HEALTH-01` | 저비용 Health 실제 HTTP·DB 장애·외부 전송 계측 | PASS | main run `34195239872`, artifact `10043669488`, Adoption PR #271. 실제 Next HTTP 100회에서 외부 fetch·HTTP·HTTPS 시도는 모두 0회다. DB 장애의 기본·엄격 응답은 503이며 계측 제어가 세 경로를 각각 1회 검출했다. 미관측 Provider 상태는 unknown으로 유지하며 제품 전체 정상이나 Provider 품질 증거로 확대하지 않는다 |
 | `EVID-OCR-01` | 합성 32문서·112쪽 Parser·OCR 정확도 | FAIL | main run `34086750192`, artifact `10005519681`. 지원 112/112쪽, 숫자 TP 560·부정 표현 TP 336의 FP/FN은 0이고 10쪽 P95는 19,743ms다. 필드는 TP 329·FP 7·FN 7로 F1 0.9791666667이며 기준 0.98에 미달했다. 스캔 한 가족의 URL 7쪽 차이를 실패 진단 원본으로 보존했다. 합격선·정답을 바꾸거나 반복 결과를 선택하지 않는다 |
 
 위 PASS는 제품 Live Vertical Slice PASS가 아니다. GitHub의 Vercel status는 build/deploy 성공을 뜻하며 Provider key·OCR·RLS·Workflow 기능 성공을 증명하지 않는다.
@@ -629,9 +629,9 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `B-RETRIEVAL-01` | Metadata Filter·Keyword FTS·Vector·Rerank 종단 top 5 품질 | NOT-EVALUATED | §15.1 종단 Retrieval 합격 + query별 단계 원장; `B-SUPABASE-01` 선행 |
 | `B-OCR-01` | PDF.js·CLOVA 한국어 숫자·부정어·기관명·URL·표 Fixture | NOT-EVALUATED | §15.1 OCR·Parser 합격 + page별 diff |
 | `B-FILE-SAFETY` | encrypted/active/polyglot/bomb·격리 parser·dependency advisory | PASS | §15.1 File safety 합격 |
-| `B-CONSENT-01` | OCR 동의/거절·외부 전송·삭제 격리 prototype | NOT-EVALUATED | §15.1 동의 거절 전송 0건 + 감사 row |
-| `B-STORAGE-01` | authenticated TUS·one-use slot·10 MiB·MIME/Magic Byte·cross-user/worker RLS | NOT-EVALUATED | positive/negative test와 발급 URL/token 재사용 거부 |
-| `B-DELETE-01` | 확인·중단·Case 삭제·기발급 URL·24시간 cleanup | NOT-EVALUATED | §15.1 물리 삭제 합격 + deletion ledger |
+| `B-CONSENT-01` | OCR 동의/거절·외부 전송·삭제 격리 prototype | PASS | §15.1 동의 거절 전송 0건 + 감사 row |
+| `B-STORAGE-01` | authenticated TUS·one-use slot·10 MiB·MIME/Magic Byte·cross-user/worker RLS | PASS | positive/negative test와 발급 URL/token 재사용 거부 |
+| `B-DELETE-01` | 확인·중단·Case 삭제·기발급 URL·24시간 cleanup | PASS | §15.1 물리 삭제 합격 + deletion ledger |
 | `B-SUPABASE-01` | 전용 Project·최소권한 role·pooler 6543·pgvector·Migration/RLS | NOT-EVALUATED | §15.1 cross-user/worker 시험과 preflight 합격 |
 | `B-PROCESSOR-PRIVACY` | Anthropic·Cohere·CLOVA·Supabase 학습/보존/DPA/region/하위처리자·PII fail-closed | NOT-EVALUATED | §15.1 Processor privacy + 계약 inventory |
 | `B-PRIVACY-VERCEL` | Hobby plan·고객 콘텐츠 조건·region·Log 보존·Workflow RBAC과 실개인정보 미처리 강제 | NOT-EVALUATED | plan 조건 기록 + §15.1 Processor privacy 합격; 실데이터 운영 시 DPA plan 재평가 |
@@ -639,9 +639,9 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `B-SOURCE-02` | 공공데이터/FSS key·quota·pagination·license label | PASS | API response metadata와 source registry |
 | `B-SOURCE-03` | Demo `햇살론15` 정확 product/institution record | PASS | 두 API의 immutable snapshot과 official product URL |
 | `B-JOB-01` | Workflow deploy·replay·retry·orphan·fencing·cancel·ambiguous Provider | NOT-EVALUATED | §15.1 Workflow 합격 + fault run/DB state |
-| `B-RATE-01` | 원자 reserve/settle·multi-instance rate·CLOVA 기본 1 TPS | NOT-EVALUATED | §15.1 Rate·Budget 합격 |
+| `B-RATE-01` | 원자 reserve/settle·multi-instance rate·CLOVA 기본 1 TPS | PASS | §15.1 Rate·Budget 합격 |
 | `B-DEADLINE-01` | Text 120초·Image/PDF 180초 abort·status 조회·partial save | NOT-EVALUATED | §4.3 예산 합·§15.1 P95/단절 복원 합격 + terminal row |
-| `B-HEALTH-01` | 저비용 health와 cached provider status | NOT-EVALUATED | §15.1 Health 합격 + provider 호출 없는 trace |
+| `B-HEALTH-01` | 저비용 health와 cached provider status | PASS | §15.1 Health 합격 + provider 호출 없는 trace |
 | `B-RUNTIME-01` | Preview/Production 실제 Node minor/patch·deployment·region | PASS | §15.1 Runtime 합격 + manifest |
 | `B-SPIKE-01` | 실제 Provider·Source·Storage·DB·Workflow component vertical | NOT-EVALUATED | §15.1 합성 Text·Image·PDF spike 합격; 제품 UI 요구 없음 |
 
