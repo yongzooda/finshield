@@ -16,8 +16,20 @@
 // 시험 fixture 와 같은 이름을 쓰지 않도록 제품 정의는 p0-v2 을 버전으로 쓴다.
 export const DEFINITION_VERSION = "p0-v12";
 export const TOOL_DEFINITION_VERSION = "p0-v5";
-export const MANIFEST_VERSION = "finshield-p0-loan-v20";
+export const MANIFEST_VERSION = "finshield-p0-loan-v21";
 export const FINSHIELD_MODEL = "claude-sonnet-5";
+export const RETRIEVAL_POLICY = Object.freeze({
+  embeddingModel: "embed-v4.0",
+  rerankModel: "rerank-v4.0-fast",
+  keywordCandidatePool: 20,
+  vectorCandidatePool: 20,
+  maxRerankCandidates: 40,
+  topK: 5,
+  maxQueryBytes: 8192,
+  maxDocumentBytes: 32768,
+  maxTokensPerDocument: 4096,
+  pricingVersion: "cohere-text-usd-20260907",
+});
 export const SCENARIO = "LOAN" as const;
 export const SCENARIO_VERSION = "sunshine15-v1";
 

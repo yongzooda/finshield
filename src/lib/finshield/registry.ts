@@ -13,6 +13,7 @@ import "server-only";
 import type postgres from "postgres";
 import {
   AGENTS, DEFINITION_VERSION, TOOL_DEFINITION_VERSION, MANIFEST_VERSION, FINSHIELD_MODEL, MODEL_TIMEOUTS,
+  RETRIEVAL_POLICY,
   TOOLS, POLICY_VERSIONS,
 } from "./manifest";
 
@@ -48,6 +49,19 @@ export const loadManifest = async (sql: Sql): Promise<ResolvedManifest> => {
   const timeoutPolicy = bundle?.timeout_policy;
   if (!timeoutPolicy || Object.entries(MODEL_TIMEOUTS).some(([key, value]) => timeoutPolicy[key] !== value)) {
     throw new ManifestDriftError("Manifest 모델 시간 제한이 코드와 다르다");
+  }
+  const retrieval = bundle?.retrieval;
+  if (!retrieval || retrieval.embedding_model !== RETRIEVAL_POLICY.embeddingModel
+    || retrieval.rerank_model !== RETRIEVAL_POLICY.rerankModel
+    || retrieval.keyword_candidate_pool !== RETRIEVAL_POLICY.keywordCandidatePool
+    || retrieval.vector_candidate_pool !== RETRIEVAL_POLICY.vectorCandidatePool
+    || retrieval.max_rerank_candidates !== RETRIEVAL_POLICY.maxRerankCandidates
+    || retrieval.top_k !== RETRIEVAL_POLICY.topK
+    || retrieval.max_query_bytes !== RETRIEVAL_POLICY.maxQueryBytes
+    || retrieval.max_document_bytes !== RETRIEVAL_POLICY.maxDocumentBytes
+    || retrieval.max_tokens_per_document !== RETRIEVAL_POLICY.maxTokensPerDocument
+    || retrieval.pricing_version !== RETRIEVAL_POLICY.pricingVersion) {
+    throw new ManifestDriftError("Manifest Retrieval 구성이 코드와 다르다");
   }
   const manifestId = manifests[0].id as string;
   const kbReleaseId = manifests[0].kb_release_id as string;

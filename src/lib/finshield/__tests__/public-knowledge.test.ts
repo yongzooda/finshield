@@ -23,6 +23,11 @@ it("종료·미래 적용·만료 수집 상태를 현재 유효 근거로 바�
 it("동일 원문의 다른 Chunk와 재게시본을 독립 근거로 중복 계산하지 않는다", () => {
   expect(rankKnowledge([row, { ...row, chunk_id: "chunk-2", id: "repost" }])).toHaveLength(1);
 });
+it("Fast relevance를 권위·적용 시점과 합성해 최종 순서를 정한다", () => {
+  const relevant = { ...row, chunk_id: "chunk-relevant", id: "snapshot-relevant",
+    source_fingerprint: "c".repeat(64), authority_level: "C" as const, effective_from: "2026-01-01" };
+  expect(rankKnowledge([row, relevant], [.1, .95])[0].chunk_id).toBe("chunk-relevant");
+});
 it("자료 준비 안내를 실제 소유 문서나 법적 판단으로 표현하지 않는다", async () => {
   sql.mockResolvedValueOnce([{ documents: 0 }]).mockResolvedValueOnce([]);
   const result = await checkDocuments({ query: "대출 수수료" }, ctx);
