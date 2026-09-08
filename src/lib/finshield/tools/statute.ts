@@ -36,7 +36,9 @@ const yyyymmdd = (value: unknown): string | null => {
 
 const isEffective = (effectiveFrom: string | null): boolean => {
   if (!effectiveFrom) return false;
-  return effectiveFrom <= new Date().toISOString().slice(0, 10);
+  // 국내 법령의 시행일은 한국 날짜다. UTC 자정까지 9시간 보류하지 않는다.
+  const koreanDate = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  return effectiveFrom <= koreanDate;
 };
 
 const articleNo = (unit: LawArticle): string | null => {
@@ -121,6 +123,7 @@ export const lookupStatute = async (input: unknown, ctx?: ToolCallContext): Prom
     if (!article) continue;
 
     const canonical = JSON.stringify({ lawId, name, articleNo: article.articleNo, effectiveFrom, excerpt: article.excerpt });
+    const effective = isEffective(effectiveFrom);
     items.push({
       sourceType: "LAW",
       authorityGrade: "A",
@@ -132,16 +135,19 @@ export const lookupStatute = async (input: unknown, ctx?: ToolCallContext): Prom
       articleNo: article.articleNo,
       publishedAt: null,
       effectiveFrom,
-      sourceVersion: effectiveFrom ?? "unknown",
+      // 시행 전 수집한 불변 Snapshot의 인용 불가 상태를 덮어쓰거나 재사용하지 않는다.
+      // 원문 시행 버전은 locator에 보존하며, 조회 자격이 바뀔 때 새 Snapshot을 만든다.
+      sourceVersion: `${effectiveFrom ?? "unknown"}:${effective ? "effective" : "pending"}`,
       contentHash: sha256(canonical),
       // 같은 법령의 같은 시행일은 어디서 받아도 같은 원문이다.
       fingerprint: sha256(`law.go.kr:${lawId}:${article.articleNo}:${effectiveFrom ?? "unknown"}`),
       // 시행일이 지나지 않았으면 현행이 아니다. 최신으로 오인하지 않게 표시한다.
-      freshness: isEffective(effectiveFrom) ? "FRESH" : "UNKNOWN",
+      freshness: effective ? "FRESH" : "UNKNOWN",
       licenseCode: "LAW_GO_KR_PUBLIC",
       isComplete: true,
-      isCitable: isEffective(effectiveFrom),
-      locator: { kind: "statute", law_id: lawId, article_no: article.articleNo, effective_from: effectiveFrom },
+      isCitable: effective,
+      locator: { kind: "statute", law_id: lawId, article_no: article.articleNo, effective_from: effectiveFrom,
+        official_source_version: effectiveFrom, assessment_timezone: "Asia/Seoul", eligibility: effective ? "EFFECTIVE" : "PENDING" },
       excerptMasked: article.excerpt,
       directness: "DIRECT",
       referenceOnly: false,

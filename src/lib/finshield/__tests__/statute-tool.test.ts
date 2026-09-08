@@ -1,4 +1,4 @@
-import { beforeEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
 const { lawSearch, lawService } = vi.hoisted(() => ({
   lawSearch: vi.fn(),
@@ -12,6 +12,8 @@ vi.mock("@/lib/tools/law_client", () => ({
 }));
 
 import { lookupStatute } from "../tools/statute";
+
+afterEach(() => vi.useRealTimers());
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -74,4 +76,23 @@ it("조문 번호와 본문을 모두 확정하지 못하면 제목만으로 인
   expect(result.items).toEqual([]);
   expect(result.reasonCode).toBe("NO_MATCH");
   expect(result.candidateCount).toBe(1);
+});
+
+it("한국 시행일 자정 전후 Snapshot을 구분하고 원문 지문은 보존한다", async () => {
+  vi.useFakeTimers();
+  lawSearch.mockResolvedValue({ LawSearch: { law: [
+    { 법령명한글: "전기통신금융사기 피해 방지 및 피해자산 환급에 관한 특별법", 법령ID: "011359", 시행일자: "20260908" },
+  ] } });
+  lawService.mockResolvedValue({ 법령: { 조문: { 조문단위: [
+    { 조문번호: "2", 조문내용: "제2조(정의) 합성 조문 본문" },
+  ] } } });
+  vi.setSystemTime(new Date("2026-09-07T14:59:59Z"));
+  const before = (await lookupStatute({ query: "특별법 제2조" })).items[0];
+  vi.setSystemTime(new Date("2026-09-07T15:00:00Z"));
+  const after = (await lookupStatute({ query: "특별법 제2조" })).items[0];
+  expect(before).toMatchObject({ sourceVersion: "2026-09-08:pending", isCitable: false, freshness: "UNKNOWN" });
+  expect(after).toMatchObject({ sourceVersion: "2026-09-08:effective", isCitable: true, freshness: "FRESH" });
+  expect(after.contentHash).toBe(before.contentHash);
+  expect(after.fingerprint).toBe(before.fingerprint);
+  expect(after.locator).toMatchObject({ official_source_version: "2026-09-08", assessment_timezone: "Asia/Seoul" });
 });
