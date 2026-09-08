@@ -1,0 +1,9 @@
+
+ RUN  v4.1.10 /Users/yongju/.codex/worktrees/30ea/finshield
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  04:17:12
+   Duration  214ms (transform 31ms, setup 11ms, import 35ms, tests 101ms, environment 0ms)
+
