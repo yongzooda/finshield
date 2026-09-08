@@ -224,6 +224,17 @@ Migration 0038~0041과 SQL 시험을 기능 Draft #192에서 분리했다. 새 �
 
 # FinShield HANDOFF
 
+## 2026-09-08 Fast Retrieval v6 사전등록
+
+- v5 종단 Retrieval Gate 두 번의 실패는 보존한다. 새 20가족·100 Claim·240문서와
+  재게시 중복 20건을 쓰는 v6 계약을 사전등록했다.
+- 현재 경로는 Metadata Filter → Keyword 20 → Vector 20 → Cohere
+  `rerank-v4.0-fast` → Authority/Freshness/Fingerprint → Case top 5다. Embed와 Fast
+  합산 P95, 요청 203개, Fast search unit 100개와 총 USD 0.25 상한을 검증한다.
+- 사전등록을 main에 병합한 뒤 첫 attempt 한 번만 실행하고 별도 Adoption 전에는
+  `B-RETRIEVAL-01`을 `PASS`로 표시하지 않는다. Production에는 Migration
+  0045·0050·0051·0052와 `COHERE_API_KEY`가 적용되기 전까지 이 경로를 배포하지 않는다.
+
 ## 2026-09-07 제출 이후 개발 재개
 
 - 사용자가 제출본 확정 후 커밋·푸시를 요청했고, 클로드 이동 요청을 취소한 뒤 현재 작업의 개발 계속을 요청했다.

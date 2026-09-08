@@ -12,7 +12,7 @@
 | `ops/supabase-evidence.md` | `B-SUPABASE-01` Migration digest·RLS 행렬 증거 harness 계약| Migration 0035·run `34080993706` 재채택 |
 | `ops/source-snapshot-spike.md` | `B-SOURCE-02`·`B-SOURCE-03` 햇살론15 상품·취급기관 Snapshot harness 계약 | run `33981161310`·`33981225371` 채택 완료 |
 | `ops/file-safety-spike.md` | `B-FILE-SAFETY` Parser 이전 검사·격리 실행 증거 harness 계약 | run `34027891135` 채택 완료 |
-| `ops/retrieval-spike.md` | `B-RETRIEVAL-01` 종단 Filter·Keyword·Vector·Rerank 증거 harness 계약 | gate 두 번 측정, 두 번 다 미달 |
+| `ops/retrieval-spike.md` | `B-RETRIEVAL-01` 종단 Filter·Keyword·Vector·Fast 증거 harness 계약 | v5 두 번 미달 보존·v6 Fast 재평가 사전등록 |
 | `ops/rate-budget-spike.md` | `B-RATE-01` 예산·Rate·Provider 직렬화 원장 증거 harness 계약| run `34032841560` 채택 완료 |
 | `ops/consent-isolation-spike.md` | `B-CONSENT-01` 동의 격리·원본 전송 경계 증거 harness 계약| run `34033055193` 채택 완료 |
 | `ops/storage-spike.md` | `B-STORAGE-01` 인증 사용자 Storage 권한·발급 token 재사용 증거 harness 계약| run `34034102812` 채택 완료 |

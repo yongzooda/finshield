@@ -14,6 +14,11 @@
 
 개발 split 4가족·20 Claim의 run `34128723611`은 Fast macro Recall·Precision 1.00, P95 382ms, Embed 포함 USD 0.040829였다. 이 값은 변경 선택의 근거이며 Gate PASS가 아니다. 노출되지 않은 새 가족과 기존 합격선을 먼저 고정하고 main에서 한 번 측정해야 한다.
 
+새 v6 재평가 계약은 `retrieval-blocker-preregistration.md` 9절에 고정했다. 기존 평가와
+겹치지 않는 20가족·100 Claim·240문서, 재게시 중복 20건, Embed와 Fast 합산 P95,
+Fast search unit과 총 USD 0.25 비용 상한을 포함한다. 이 계약은 아직 Provider로
+실행하지 않았고 main 병합 뒤 첫 attempt 한 번만 Gate로 사용한다.
+
 ## 실패와 비용 경계
 
 - Embed 또는 Fast가 실패하면 기존 Keyword·Vector 또는 Keyword 순서를 참고 결과로 보존할 수 있지만 Tool 원장에는 `RETRIEVAL_DEGRADED`와 구체 이유를 남긴다.
