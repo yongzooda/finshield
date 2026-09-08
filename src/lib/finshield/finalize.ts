@@ -128,7 +128,9 @@ export const buildFinalClaims = (args: {
         : decided.reasonCode === "COVE_CONFIRMED" ? "CONFIRMED" : "CHALLENGED",
       // NONE_FOUND 는 초기 결론 지지가 아니라 이번 검색에서 반증을 못 찾았다는 뜻이다.
       red_team_status: redTeam === "NONE_FOUND" ? "UNRESOLVED" : redTeam,
-      decision_summary_masked: judged?.rationale_masked ?? "확인하지 못했습니다.",
+      decision_summary_masked: decided.state !== base
+        ? "독립 자료 확인이 충분하지 않아 이 항목을 확정하지 않았습니다."
+        : judged?.rationale_masked ?? "확인하지 못했습니다.",
       evidences,
     };
   });

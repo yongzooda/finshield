@@ -15,7 +15,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { AGENTS } from "../manifest";
 import {
-  citationProblems, domainAgentOutput, type DomainAgentInput, type DomainAgentOutput,
+  APPROVAL_PROOF_REQUIRED, citationProblems, domainAgentOutput, type DomainAgentInput, type DomainAgentOutput,
   type ToolEvidence,
 } from "../schemas";
 import { executeTool, persistToolRuns, type PendingToolRun, type RunSession, type ToolImpl } from "../tools/runtime";
@@ -48,8 +48,9 @@ export const decodeDomainOutput = (raw: unknown, session: RunSession, claims: Do
     const knownRefs = finding.evidence_refs.filter((ref) => session.evidence.has(ref));
     return {
       ...finding,
-      state: "UNKNOWN" as const,
+      state: problems.includes(APPROVAL_PROOF_REQUIRED) ? "NEED_MORE_INFORMATION" as const : "UNKNOWN" as const,
       relation: "CONTEXT" as const,
+      summary_masked: problems.includes(APPROVAL_PROOF_REQUIRED) ? APPROVAL_PROOF_REQUIRED : finding.summary_masked,
       evidence_refs: knownRefs,
       limits: [...new Set([...finding.limits, "일부 근거 인용을 확인하지 못했습니다."])].slice(0, 5),
     };
@@ -199,7 +200,7 @@ export const runDomainAgent = async <T = DomainAgentOutput>(args: {
     }
   } catch (error) {
     status = "FAILED";
-    reasonCode = (error as {code?:string}).code === "MODEL_BUDGET_BLOCKED" ? "TOOL_BUDGET" : decisionSignal.aborted ? "DEADLINE_EXCEEDED" : "MODEL_CALL_FAILED";
+    reasonCode = (error as {code?:string}).code === "MODEL_BUDGET_BLOCKED" ? "TOOL_BUDGET" : decisionSignal.aborted || (error as Error).name === "APIConnectionTimeoutError" ? "DEADLINE_EXCEEDED" : (error as Error).message === "MODEL_OUTPUT_CLAIM_COVERAGE_INVALID" ? "OUTPUT_CLAIM_COVERAGE_INVALID" : "MODEL_CALL_FAILED";
   }
 
   if (status === "SUCCEEDED" && reasonCode) status = "PARTIAL";

@@ -16,7 +16,7 @@ import { callFinshieldModel, emptyModelUsage, type ModelBudgetContext, type Mode
 import type { AgentModel } from "./runner";
 import type { JudgeModel } from "../orchestrator";
 import { JUDGE_SYSTEM } from "./prompts";
-import { coveOutput, redTeamOutput, domainAgentOutput, type ToolEvidence, type ConfirmedClaim } from "../schemas";
+import { coveOutput, redTeamOutput, domainAgentOutput, judgeOutput, requiresPersonalApprovalProof, type ToolEvidence, type ConfirmedClaim } from "../schemas";
 import type { ClaimExtractor } from "../intake";
 
 const MAX_EXCERPT = 1200;
@@ -37,7 +37,9 @@ const DECISIVE_CITATION_INSTRUCTION = "VERIFIED·CONTRADICTED·CONFIRMED·REFUTE
 
 /** 모델 입력에는 표시용 참조만 쓴다. DB 행 ID·부가 속성을 직렬화하지 않는다. */
 export const claimBrief = (claims: ConfirmedClaim[]) => claims.map(({claim_ref,claim_type,statement_masked,materiality}) =>
-  ({claim_ref,claim_type,statement_masked,materiality}));
+  ({claim_ref,claim_type,statement_masked,materiality,
+    ...(requiresPersonalApprovalProof(statement_masked) ? { verification_scope: "PERSONAL_APPROVAL_REQUIRES_CASE_DOCUMENT" } : {}),
+  }));
 
 /** 모델이 보는 근거 요약. 원문 전체가 아니라 인용에 필요한 만큼만 준다. */
 export const evidenceBrief = (evidence: ToolEvidence[]) => evidence.map((item) => ({
@@ -184,6 +186,27 @@ export const judgeOutputSchemaFor = (evidence: ToolEvidence[]) => {
   });
 };
 
+/** Provider에는 평탄한 구조와 알려진 ref 목록을 준다. 상태별 인용 자격은
+ * 응답 뒤 citationProblems가 같은 기준으로 전부 검사한다. 중첩 union의
+ * 최초 grammar 준비가 모델 대기 시간을 소진한 실제 실패를 보존했다. */
+export const providerAgentSchemaFor = (code: string, evidence: ToolEvidence[]) => {
+  const refs = citationReferenceSchema(evidence);
+  if (code === "COVE") return coveOutput.extend({ results: z.array(coveOutput.shape.results.element.extend({ evidence_refs: refs })) });
+  if (code === "RED_TEAM") return redTeamOutput.extend({ results: z.array(redTeamOutput.shape.results.element.extend({ evidence_refs: refs })) });
+  return domainAgentOutput.extend({ findings: z.array(domainAgentOutput.shape.findings.element.extend({ evidence_refs: refs })) });
+};
+export const providerJudgeSchemaFor = (evidence: ToolEvidence[]) => judgeOutput.extend({
+  claim_results: z.array(judgeOutput.shape.claim_results.element.extend({ evidence_refs: citationReferenceSchema(evidence) })),
+  conflicts: z.array(judgeOutput.shape.conflicts.element.extend({ evidence_refs: citationReferenceSchema(evidence).min(2) })),
+});
+
+export async function settleModelBatches<T>(promises: Promise<T>[]): Promise<T[]> {
+  const settled = await Promise.allSettled(promises);
+  const failure = settled.find(result => result.status === "rejected");
+  if (failure?.status === "rejected") throw failure.reason;
+  return settled.map(result => (result as PromiseFulfilledResult<T>).value);
+}
+
 export const JUDGE_CLAIM_BATCH_SIZE = 3;
 
 export const buildJudgeBatches = (args: {
@@ -262,7 +285,7 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
   async decide({ system, signal, input, evidence: originalEvidence, observations }) {
     const scope = modelEvidenceScope(originalEvidence);
     const evidence = scope.evidence;
-    const outputs = await Promise.all(agentClaimBatches(input.claims).map(async claims => {
+    const outputs = await settleModelBatches(agentClaimBatches(input.claims).map(async claims => {
       const output = await callFinshieldModel({
       model: FINSHIELD_MODEL,
       system: `${system}${input.aftercare_context ? `\n${AFTERCARE_CONTEXT_INSTRUCTION}` : ""}\n\n지금은 판단하는 단계다. 아래 근거 목록의 ref 만 인용한다. ${DECISIVE_CITATION_INSTRUCTION} summary_masked와 note_masked는 각각 40자 이내 한 문장으로 답한다. limits는 꼭 필요한 항목만 한 개 이하로 답한다.`,
@@ -274,8 +297,7 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
         evidence: evidenceBrief(evidence),
         observations,
       }),
-      schema: input.agent_code === "COVE" ? coveOutputSchemaFor(evidence)
-        : input.agent_code === "RED_TEAM" ? redTeamOutputSchemaFor(evidence) : domainOutputSchemaFor(evidence),
+      schema: providerAgentSchemaFor(input.agent_code, evidence),
       maxTokens: 1000, effort: "low", signal, maxRetries: 0,
       timeoutMs: input.agent_code === "COVE" || input.agent_code === "RED_TEAM"
         ? MODEL_TIMEOUTS.reviewDecisionMs : MODEL_TIMEOUTS.domainDecisionMs,
@@ -302,13 +324,13 @@ export const createJudgeModel = (context?: ModelBudgetContext): JudgeModel => {
  return ({ usage: () => usage,
   async judge({ claims, findings, evidence, signal }) {
     const batches = buildJudgeBatches({ claims, findings, evidence });
-    const outputs = await Promise.all(batches.map(async (batch) => {
+    const outputs = await settleModelBatches(batches.map(async (batch) => {
       const scope = modelEvidenceScope(batch.evidence);
       return scope.restore(await callFinshieldModel({
         model: FINSHIELD_MODEL,
         system: `${JUDGE_SYSTEM}\n${DECISIVE_CITATION_INSTRUCTION} 각 rationale_masked는 핵심 근거를 담은 40자 이내 한 문장이다. withheld_reason은 20자 이내다. 입력 Claim마다 정확히 한 결과를 낸다.`,
         user: JSON.stringify({ assessed_on: new Date().toISOString().slice(0, 10), claims: claimBrief(batch.claims), findings: scope.localize(batch.findings), evidence: evidenceBrief(scope.evidence) }),
-        schema: judgeOutputSchemaFor(scope.evidence),
+        schema: providerJudgeSchemaFor(scope.evidence),
         maxTokens: 1600, effort: "low", signal, maxRetries: 0, timeoutMs: MODEL_TIMEOUTS.judgeMs,
       }, context, usage));
     }));

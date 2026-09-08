@@ -1,3 +1,4 @@
+import { APPROVAL_PROOF_REQUIRED } from "./schemas";
 import { createSharedRunDeadline } from "./run-deadline";
 import type { ModelUsage } from "./model-budget";
 /**
@@ -98,9 +99,10 @@ export const normalizeJudgeOutput = (
     citationInvalid = true;
     return {
       ...candidate,
-      state: "UNKNOWN" as const,
+      state: problems.includes(APPROVAL_PROOF_REQUIRED) ? "NEED_MORE_INFORMATION" as const : "UNKNOWN" as const,
+      rationale_masked: problems.includes(APPROVAL_PROOF_REQUIRED) ? APPROVAL_PROOF_REQUIRED : candidate.rationale_masked,
       evidence_refs: candidate.evidence_refs.filter((ref) => evidence.has(ref)),
-      withheld_reason: "근거 인용을 확인하지 못했습니다.",
+      withheld_reason: problems.includes(APPROVAL_PROOF_REQUIRED) ? APPROVAL_PROOF_REQUIRED : "근거 인용을 확인하지 못했습니다.",
     };
   });
 

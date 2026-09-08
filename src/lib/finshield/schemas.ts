@@ -125,6 +125,11 @@ export type JudgeOutput = z.infer<typeof judgeOutput>;
  * 확정 상태(VERIFIED·CONTRADICTED)에는 근거가 최소 하나 있어야 하고,
  * 그 근거는 참고용이 아니어야 한다 (EV-007, EV-008).
  */
+export const APPROVAL_PROOF_REQUIRED = "개인 승인 여부를 확인할 심사 자료가 없습니다.";
+export const requiresPersonalApprovalProof = (statement: string) =>
+  /승인(?:이|을|\s)*\s*(?:대상|완료|확정|되|됐)|선정(?:되|됐)/u.test(statement)
+  && !/누구나|무조건|심사\s*없이|신용[\s\S]{0,15}(?:관계없|무관)/u.test(statement);
+
 export const citationProblems = (
   refs: string[],
   state: ClaimState,
@@ -144,13 +149,18 @@ export const citationProblems = (
     && known.length > 0 && known.every(item => item.locator?.current_transaction_proof === false)) {
     problems.push("일반 안내로 현재 거래의 범죄·위법 여부를 확정했습니다.");
   }
+  if ((state === "VERIFIED" || state === "CONTRADICTED") && statement
+    && requiresPersonalApprovalProof(statement)
+    && !known.some(item => item.locator?.current_transaction_proof === true)) {
+    problems.push(APPROVAL_PROOF_REQUIRED);
+  }
   if ((state === "VERIFIED" || state === "CONTRADICTED") && known.length === 0) {
     problems.push("근거 없이 확정 상태를 썼습니다.");
   }
   if ((state === "VERIFIED" || state === "CONTRADICTED") && known.every((item) => item.reference_only)) {
     problems.push("참고용 자료만으로 확정 상태를 썼습니다.");
   }
-  if ((state === "VERIFIED" || state === "CONTRADICTED") && !known.some(item =>
+  if ((state === "VERIFIED" || state === "CONTRADICTED") && !known.every(item =>
     item.citable && !item.incomplete && !item.reference_only
     && item.freshness_at_use === "FRESH" && item.directness === "DIRECT")) {
     problems.push("완전하고 유효한 직접 판단 근거가 없습니다.");

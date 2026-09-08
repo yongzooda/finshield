@@ -43,3 +43,29 @@ it('실제 검토 본문을 재조회한 경우만 일반 지침 비교로 인�
  vi.stubGlobal('fetch',vi.fn(async()=>new Response(html.replace('정상적인 금융기관','정상적인 금융기관 수정'))));
  expect((await searchOfficialWarning({query:'선입금'},{} as ToolCallContext)).items[0].isCitable).toBe(false);
 });
+
+import { normalizeJudgeOutput } from '../orchestrator';
+import { decodeDomainOutput } from '../agents/runner';
+import { providerAgentSchemaFor, settleModelBatches } from '../agents/model-adapter';
+import type { RunSession } from '../tools/runtime';
+it('승인 대상 안내를 무조건 승인으로 바꾸지 않고 개인 심사 자료를 요구한다',()=>{
+ const claim={claim_ref:'C1',claim_type:'ELIGIBILITY',statement_masked:'햇살론15 승인 대상이라고 안내받았다.',materiality:'MATERIAL' as const};
+ const pool=new Map([['E1',{...evidence,locator:{permitted_use:'PUBLIC_GUIDANCE_COMPARISON',current_transaction_proof:false}}]]);
+ const result=normalizeJudgeOutput({schema_version:'out-v1',conflicts:[],claim_results:[{claim_ref:'C1',state:'CONTRADICTED',evidence_refs:['E1'],rationale_masked:'무조건 승인 안내와 배치',withheld_reason:null}]},[claim],pool);
+ expect(result.output.claim_results[0]).toMatchObject({state:'NEED_MORE_INFORMATION',rationale_masked:'개인 승인 여부를 확인할 심사 자료가 없습니다.'});
+ expect(citationProblems(['E1'],'CONTRADICTED',pool,'심사 없이 누구나 승인 대상이다.')).toEqual([]);
+});
+it('평탄한 Provider 출력에도 알려진 ref와 모든 인용의 자격을 검사한다',()=>{
+ const sources=[{...evidence,locator:{}},{...evidence,evidence_ref:'E2',citable:false,reference_only:true,locator:{}}];
+ const raw={schema_version:'out-v1',findings:[{claim_ref:'C1',state:'VERIFIED',relation:'SUPPORT',evidence_refs:['E1','E2'],summary_masked:'합성 판단',limits:[]}],out_of_scope_claim_refs:[]};
+ expect(providerAgentSchemaFor('PRODUCT_INSTITUTION',sources).safeParse(raw).success).toBe(true);
+ expect(providerAgentSchemaFor('PRODUCT_INSTITUTION',sources).safeParse({...raw,findings:[{...raw.findings[0],evidence_refs:['E99']}]}).success).toBe(false);
+ const decoded=decodeDomainOutput(raw,{evidence:new Map(sources.map(e=>[e.evidence_ref,e]))} as RunSession);
+ expect(decoded).toMatchObject({ok:true,reason:'CITATION_INVALID',value:{findings:[{state:'UNKNOWN'}]}});
+});
+it('일부 묶음이 실패해도 다른 호출의 정산이 끝날 때까지 기다린다',async()=>{
+ let finish!:()=>void, rejected=false;
+ const result=settleModelBatches([Promise.reject(new Error('합성 실패')),new Promise<void>(resolve=>{finish=resolve;})]).catch(()=>{rejected=true;});
+ await Promise.resolve();expect(rejected).toBe(false);
+ finish();await result;expect(rejected).toBe(true);
+});
