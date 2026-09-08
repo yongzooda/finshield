@@ -1,0 +1,17 @@
+[
+  {
+    "source_adapter": "check_documents",
+    "outcome": "UNCHANGED",
+    "request_key": "2d532af3-ba2c-4c18-b604-5a519dbcdfd9:law.go.kr:013704:제19조"
+  },
+  {
+    "source_adapter": "analyze_risk_pattern",
+    "outcome": "UNCHANGED",
+    "request_key": "2d532af3-ba2c-4c18-b604-5a519dbcdfd9:kinfa:notice:24020"
+  },
+  {
+    "source_adapter": "lookup_statute",
+    "outcome": "UNCHANGED",
+    "request_key": "2d532af3-ba2c-4c18-b604-5a519dbcdfd9:law.go.kr:013704:제23조"
+  }
+]

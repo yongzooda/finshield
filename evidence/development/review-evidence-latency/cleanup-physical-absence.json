@@ -1,0 +1,16 @@
+{
+  "observed_at": "2026-09-08T17:08:05.784Z",
+  "project": "exarejrwvjochjdminzo",
+  "owner": "e23cbd40-2ccb-49df-9403-a7a32e03b128",
+  "method": "Authenticated Supabase SQL Editor, own synthetic account only",
+  "remaining": {
+    "auth": 0,
+    "profile": 0,
+    "cases": 0,
+    "inputs": 0,
+    "ocr_active": 0,
+    "embedding": 0,
+    "storage": 0,
+    "input_objects_active": 0
+  }
+}

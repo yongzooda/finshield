@@ -46,3 +46,9 @@ v18 첫 PDF 6항목은 검증·저장 57.733초, 정상 Text 4항목은 53.814�
 같은 v18의 가입 후 세 번째 표본은 FAILED였다. Sales는 성공했지만 Regulation의 모델 응답 뒤 결과 저장이 없었다. 정확한 원문 실패 원인은 저장되지 않아 확정하지 않는다. 개인정보 출력 검사에서 한 항목만 거부돼도 전체 Job이 실패하는 경계와, 실패 Job GET에 과거 성공 assessment가 섞이는 결함을 코드에서 확인했다. 실패 원본은 aftercare-third-failure.json에 보존했다.
 
 v19는 실제 계약 비교가 제공된 항목을 두 가입 후 Agent의 판단 범위로 삼는다. 비교가 없으면 기존 일반 질문 범위를 유지한다. 개인정보 출력이 발견된 finding은 원문을 저장하지 않고 WITHHELD·CONTEXT로 보류하며 Agent를 PARTIAL로 남긴다. 나머지 공식 조회와 다음 Agent 실행은 보존한다. 요청한 Job에 assessment가 없으면 과거 assessment를 반환하지 않는다. 거래 전 모델 판단 경로는 v18과 동일하다. Migration 0065는 과거 Manifest·Passport를 변경하지 않는 추가 등록이다. 이 수정의 실제 배포 후 가입 후 재평가는 아직 진행 전이다.
+
+v19 실제 후속은 Job 2d532af3-ba2c-4c18-b604-5a519dbcdfd9 COMPLETED, Sales·Regulation 모두 SUCCEEDED이고 실제 공식 조회 3건을 보존했다. 두 모델 호출은 정산됐고 새 점검은 CORRECTION_OR_INQUIRY로 저장했다. 같은 요청 키가 같은 Job을 반환하고 새 로그인 후 네 답변·금리 비교·같은 assessment가 복원됐다. 기존 Passport는 불변이다. 이전 FAILED Job의 GET은 assessment null이며 과거 성공을 반환하지 않는다.
+
+실제 병합 후보 2a266ae에서 저장소 필수 검사 전체를 로컬 실행해 통과했다. GitHub 원격 check는 결제·한도 장애로 실패 상태다. 사용자 승인 절차로 f9031ca 후보 dpl_418rnextgdm4KLckt6XbfpM1f9rT를 운영 주소에 승격했다. 공개 Runtime·DB 구조 6종·설정 10항목 모두 일치했다. 운영 브라우저에서 PDF 결과·Passport·가입 후 결과·답변 편집 복원·정상 Text를 확인했고 390px 가로 넘침과 브라우저 오류는 0이다. 새 후보의 모든 표본이 실제 사실을 확정했다는 뜻은 아니다. main·PR 병합은 원격 필수 검사 차단 상태로 남는다.
+
+최종 합성 계정 탈퇴는 COMPLETED·재로그인 401이며 실제 Auth·Profile·Case·Input·활성 OCR·Embedding·Storage·활성 input object 잔여물은 모두 0이다. 전체 모델 소비 USD 2.315500·미정산 예약 0으로 기존 USD 3 상한 안에서 끝냈다.
