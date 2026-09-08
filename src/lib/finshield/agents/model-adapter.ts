@@ -14,6 +14,7 @@ import { z } from "zod";
 import { FINSHIELD_MODEL, MODEL_TIMEOUTS } from "../manifest";
 import { callFinshieldModel, emptyModelUsage, type ModelBudgetContext, type ModelUsage } from "../model-budget";
 import type { AgentModel } from "./runner";
+import { loanToolPlan } from "./loan-tool-plan";
 import type { JudgeModel } from "../orchestrator";
 import { JUDGE_SYSTEM } from "./prompts";
 import { coveOutput, redTeamOutput, domainAgentOutput, judgeEnvelopeOutput, citationProblems, requiresPersonalApprovalProof, type ToolEvidence, type ConfirmedClaim } from "../schemas";
@@ -268,6 +269,9 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
   return ({
   usage: usageFor,
   async chooseTools({ system, signal, input, evidence, observations, availableTools }) {
+    signal?.throwIfAborted();
+    const plan = loanToolPlan(input);
+    if (plan && plan.every(call => availableTools.some(tool => tool.toolCode === call.toolCode))) return plan;
     const result = await callFinshieldModel({
       model: FINSHIELD_MODEL,
       system: `${system}${input.aftercare_context ? `\n${AFTERCARE_CONTEXT_INSTRUCTION}` : ""}\n\n지금은 도구를 고르는 단계다. 확인이 더 필요하면 부를 도구를 고르고,\n충분하거나 필요한 자료가 미연결·조회 실패 상태면 calls 를 빈 배열로 둔다. 같은 도구에 같은 입력을 반복하지 않는다. 목록에 없는 도구 이름을 쓰지 않는다. query에는 도구에 맞는 짧은 핵심어를 넣는다. 상품 조회는 상품명, 법령 조회는 정확한 법령명과 필요한 조문 번호 하나, 소비자 안내는 권유의 행동 요구를 쓴다. 법령명 뒤에는 조문 번호 외 검색어를 붙이지 않는다. 이유는 20자 이내다.`,
@@ -301,7 +305,7 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
     const outputs = await settleModelBatches(agentClaimBatches(input.claims).map(async claims => {
       const output = await callFinshieldModel({
       model: FINSHIELD_MODEL,
-      system: `${system}${input.aftercare_context ? `\n${AFTERCARE_CONTEXT_INSTRUCTION}` : ""}\n\n지금은 판단하는 단계다. 아래 근거 목록의 ref 만 인용한다. ${DECISIVE_CITATION_INSTRUCTION} summary_masked와 note_masked는 각각 40자 이내 한 문장으로 답한다. limits는 꼭 필요한 항목만 한 개 이하로 답한다.`,
+      system: `${system}${input.aftercare_context ? `\n${AFTERCARE_CONTEXT_INSTRUCTION}` : ""}\n\n지금은 판단하는 단계다. 아래 근거 목록의 ref 만 인용한다. ${DECISIVE_CITATION_INSTRUCTION} summary_masked와 note_masked는 각각 80자 이내로 답한다. 상품 종료 고지가 있으면 현재 권유와 종료 전 조건을 구분해 설명한다. limits는 꼭 필요한 항목만 한 개 이하로 답한다.`,
       user: JSON.stringify({
         assessed_on: new Date().toISOString().slice(0, 10),
         claims: claimBrief(claims),
