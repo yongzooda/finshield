@@ -103,13 +103,21 @@ const RETRIEVAL_HARNESS_PATH = ".github/scripts/run-retrieval-evidence.mjs";
 const RETRIEVAL_POLICY_PATH = ".github/scripts/retrieval-evidence-policy.mjs";
 const RETRIEVAL_PIPELINE_PATH = ".github/scripts/retrieval-pipeline.mjs";
 const RETRIEVAL_CORPUS_PATH = ".github/scripts/retrieval-corpus.mjs";
+const RETRIEVAL_FIXTURE_PATH = ".github/fixtures/retrieval-fast-v6.json";
+const RETRIEVAL_GENERATOR_PATH = ".github/scripts/generate-retrieval-fast-v6.mjs";
+const RETRIEVAL_RERANK_PATH = ".github/scripts/provider-rerank-spike.mjs";
+const RETRIEVAL_FAST_RANKING_PATH = ".github/scripts/rerank-fast-development-ranking.mjs";
 const RETRIEVAL_OPS_PATH = "docs/ops/retrieval-spike.md";
 const RETRIEVAL_PREREG_PATH = "docs/ops/retrieval-blocker-preregistration.md";
-const TRUSTED_RETRIEVAL_WORKFLOW_BLOB = "77aad6a9f1c8d73598b01bd0469565e9bde822c1";
-const TRUSTED_RETRIEVAL_HARNESS_BLOB = "91905cfc636dd8c4570277d17093fb644021288b";
-const TRUSTED_RETRIEVAL_POLICY_BLOB = "69245a8ba32dbd7611a8de27f77bc865e99ead59";
+const TRUSTED_RETRIEVAL_WORKFLOW_BLOB = "425fe1d69129bdd324d02bd5bd9c00157cf01eef";
+const TRUSTED_RETRIEVAL_HARNESS_BLOB = "a2c7925f8e669daad7e64ff3fa3afea9e9391a84";
+const TRUSTED_RETRIEVAL_POLICY_BLOB = "d4299ef23912340379474edf19b0127e17ec3371";
 const TRUSTED_RETRIEVAL_PIPELINE_BLOB = "3b160aa495615a7644914653f7e75c7a59f6eb99";
-const TRUSTED_RETRIEVAL_CORPUS_BLOB = "9523430cc41073758d3e37f48c532a1ff9db1f02";
+const TRUSTED_RETRIEVAL_CORPUS_BLOB = "2ac15226826558b11dca12c082d73980fbd825c6";
+const TRUSTED_RETRIEVAL_FIXTURE_BLOB = "5d87123a9aac50e2256f60861c9f686a39128695";
+const TRUSTED_RETRIEVAL_GENERATOR_BLOB = "b88efd42ca47fdda8362fd208f1176e630bd3e07";
+const TRUSTED_RETRIEVAL_RERANK_BLOB = "04b2aea18e637ad256d24b7e488ac6a67572ad12";
+const TRUSTED_RETRIEVAL_FAST_RANKING_BLOB = "97d937cae1be35e9289fd2eb373ceddbacff37ba";
 const RATE_WORKFLOW_PATH = ".github/workflows/rate-evidence.yml";
 const RATE_HARNESS_PATH = ".github/scripts/run-rate-evidence.mjs";
 const RATE_POLICY_PATH = ".github/scripts/rate-evidence-policy.mjs";
@@ -425,16 +433,22 @@ const retrievalEvidencePolicy = {
     Object.freeze({ path: RETRIEVAL_POLICY_PATH, blobSha: TRUSTED_RETRIEVAL_POLICY_BLOB }),
     Object.freeze({ path: RETRIEVAL_PIPELINE_PATH, blobSha: TRUSTED_RETRIEVAL_PIPELINE_BLOB }),
     Object.freeze({ path: RETRIEVAL_CORPUS_PATH, blobSha: TRUSTED_RETRIEVAL_CORPUS_BLOB }),
-    Object.freeze({ path: EMBED_FIXTURE_PATH, blobSha: TRUSTED_EMBED_FIXTURE_BLOB }),
+    Object.freeze({ path: RETRIEVAL_FIXTURE_PATH, blobSha: TRUSTED_RETRIEVAL_FIXTURE_BLOB }),
+    Object.freeze({ path: RETRIEVAL_GENERATOR_PATH, blobSha: TRUSTED_RETRIEVAL_GENERATOR_BLOB }),
     Object.freeze({ path: EMBED_SPIKE_PATH, blobSha: TRUSTED_EMBED_SPIKE_BLOB }),
+    Object.freeze({ path: RETRIEVAL_RERANK_PATH, blobSha: TRUSTED_RETRIEVAL_RERANK_BLOB }),
+    Object.freeze({ path: RETRIEVAL_FAST_RANKING_PATH, blobSha: TRUSTED_RETRIEVAL_FAST_RANKING_BLOB }),
     Object.freeze({ path: ADR_DIGEST_PATH, blobSha: TRUSTED_ADR_DIGEST_BLOB }),
   ]),
   jobName: "retrieval-evidence / B-RETRIEVAL-01",
   scopePaths: Object.freeze([
     ...supabaseExpectedInventory(resolve(fileURLToPath(new URL("../../", import.meta.url)))).migrations.map((file) => `supabase/migrations/${file}`),
     "supabase/tests/00_supabase_stub.sql",
-    EMBED_FIXTURE_PATH,
+    RETRIEVAL_FIXTURE_PATH,
+    RETRIEVAL_GENERATOR_PATH,
     EMBED_SPIKE_PATH,
+    RETRIEVAL_RERANK_PATH,
+    RETRIEVAL_FAST_RANKING_PATH,
     ADR_DIGEST_PATH,
     RETRIEVAL_CORPUS_PATH,
     RETRIEVAL_POLICY_PATH,

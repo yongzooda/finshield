@@ -9,14 +9,6 @@ on:
         type: choice
         options:
           - B-RETRIEVAL-01
-      mode:
-        description: gate 는 증거를 만들고 development 는 개발용 split 진단만 한다
-        required: true
-        default: gate
-        type: choice
-        options:
-          - gate
-          - development
 
 permissions:
   contents: read
@@ -90,10 +82,9 @@ jobs:
           RETRIEVAL_DATABASE_URL: postgres://postgres:baseline@127.0.0.1:5432/finshield_eval
           TRUSTED_REPOSITORY: ${{ github.workspace }}/trusted
           WORKFLOW_HEAD_SHA: ${{ github.sha }}
-        run: node trusted/.github/scripts/run-retrieval-evidence.mjs "--${{ inputs.mode == 'development' && 'dev' || 'run' }}"
+        run: node trusted/.github/scripts/run-retrieval-evidence.mjs --run
 
       - name: Validate raw evidence
-        if: inputs.mode == 'gate'
         env:
           BLOCKER_ID: ${{ inputs.blocker_id }}
           CODE_UNDER_TEST_SHA: ${{ github.sha }}
@@ -104,7 +95,6 @@ jobs:
         run: node trusted/.github/scripts/run-retrieval-evidence.mjs --validate
 
       - name: Upload evidence artifact
-        if: inputs.mode == 'gate'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: provider-evidence-${{ inputs.blocker_id }}-${{ github.sha }}

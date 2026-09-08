@@ -104,3 +104,25 @@ ADR 15.1 은 미달일 때 최적화·범위 변경·Provider 변경 중에서 �
 ## 2026-09-08 Provider 변경
 
 후속 개발 run `34128723611`에서 Cohere `rerank-v4.0-fast`를 개발 split 20 Claim에 적용해 네 가족의 macro Recall·Precision 1.00을 관측했다. 이 결과는 Gate가 아니며 기존 두 실패를 덮지 않는다. ADR Provider 변경과 제품 실패 계약은 `retrieval-fast-runtime-decision.md`에 기록했다. 다음 정식 평가는 기존 gate 가족을 재사용하지 않고 새 평가 가족과 합격식을 먼저 병합한 뒤 한 번 실행한다.
+
+## 2026-09-08 v6 정식 재평가 절차
+
+위의 v5 계약·두 실패·개발 진단은 변경 이력으로 보존한다. 현재 다음 정식 실행 계약은
+`retrieval-blocker-preregistration.md` 9절과 v6 코드가 정본이다.
+
+- 새 평가셋은 전부 Gate인 20가족·100 Claim·240문서다. 기존 v5와 개발 run에 노출된
+  가족을 재사용하지 않는다.
+- Metadata Filter 뒤 Keyword 20개와 Vector 20개의 합집합 최대 40개를
+  `rerank-v4.0-fast`에 보내 Case top 5를 만든다.
+- 각 Claim의 Embed+Fast 합산 지연과 Fast 단독 지연, 203개 Provider 요청의 고유 ID
+  digest, Embed token, Fast search unit, 단계별 후보 수, 비용을 원장에 남긴다.
+- 재게시 fingerprint 20개를 실제 후보로 포함하며 모든 가족에서 중복 제거가 관측돼야
+  한다.
+- workflow의 `mode` 입력은 제거했다. main에 사전등록을 병합한 뒤
+  `B-RETRIEVAL-01`을 한 번 dispatch한다.
+- 정책 미달이면 성공 artifact가 생성되지 않는다. 실패 run을 보존하고 같은 v6을 결과에
+  맞춰 수정하거나 반복하지 않는다.
+
+품질 기준은 기존 값과 같다. Claim별 Embed+Fast 합산 P95와 Fast 단독 P95는 각각
+1,500ms 이하, 총 Provider 비용은 USD 0.25 이하여야 한다. 통과 뒤에도 별도 Adoption이
+끝날 때까지 상태는 `NOT-EVALUATED`다.
