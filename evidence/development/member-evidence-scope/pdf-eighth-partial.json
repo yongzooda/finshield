@@ -1,0 +1,669 @@
+{
+  "kind": "행동 경고·저장 복구, 일부 검토 실패와 신청 기한 과잉 해석 발견",
+  "candidate_code_sha": "3c11a077f21535b4294572d8352ec7b22b9d8b83",
+  "reports": [
+    {
+      "stage": "file",
+      "path": "/api/finshield/files/slot",
+      "status": 200,
+      "elapsed_ms": 4480,
+      "types": [
+        "json"
+      ]
+    },
+    {
+      "stage": "file",
+      "path": "/api/finshield/files/process",
+      "status": 200,
+      "elapsed_ms": 15526,
+      "types": [
+        "json"
+      ]
+    },
+    {
+      "stage": "verify",
+      "path": "/api/finshield/verify",
+      "status": 200,
+      "elapsed_ms": 71755,
+      "types": [
+        "run_started",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "judge_started",
+        "heartbeat",
+        "judge_finished",
+        "done"
+      ]
+    },
+    {
+      "stage": "verify",
+      "path": "/api/finshield/cases/0fe55d1b-c1e3-4f9e-8421-063d87f47fb6",
+      "status": 200,
+      "elapsed_ms": 3878,
+      "types": [
+        "json"
+      ]
+    }
+  ],
+  "result": {
+    "type": "done",
+    "guide": {
+      "actions": [
+        {
+          "action_no": 1,
+          "action_code": "VERIFY_OFFICIAL_CHANNEL",
+          "title": "송금·원격제어 앱 설치를 멈추고 공식 창구로 확인하세요",
+          "detail": "권유문에 위험한 행동 요구가 있습니다. 권유자가 준 연락처를 사용하지 말고 아래 공식 창구에서 확인하세요. 개별 사실 판정이 보류돼도 이 예방 안내를 먼저 따라 주세요."
+        }
+      ],
+      "channels": [
+        {
+          "action_no": 1,
+          "display_value": "서민금융콜센터 1397 (국번 없이)"
+        }
+      ]
+    },
+    "axes": [
+      {
+        "axis": "AUTHENTICITY",
+        "result_code": "UNCERTAIN",
+        "summary_masked": "상품과 기관과 접근 경로가 공식 자료와 맞는지 본 결과입니다.",
+        "limitation_codes": [],
+        "policy_evaluation": null
+      },
+      {
+        "axis": "TRANSACTION_SALES_RISK",
+        "result_code": "HIGH_RISK_ACTION",
+        "summary_masked": "선입금 또는 원격제어 앱 설치 요구가 포함되어 있습니다. 송금·설치를 멈추고 공식 창구로 확인하세요. 범죄 사실을 확정한 판단은 아닙니다.",
+        "limitation_codes": [
+          "PRE_TRANSACTION_SCOPE"
+        ],
+        "policy_evaluation": null
+      },
+      {
+        "axis": "SUITABILITY",
+        "result_code": "NEED_MORE_INFORMATION",
+        "summary_masked": "금융 프로필을 건너뛰어 적합성을 판단하지 않았습니다. 안전하다는 뜻이 아닙니다.",
+        "limitation_codes": [
+          "PROFILE_SKIPPED"
+        ],
+        "policy_evaluation": {
+          "checks": [],
+          "products": [],
+          "not_assessed": [
+            "CREDIT_APPROVAL",
+            "FULL_AFFORDABILITY",
+            "LOSS_TOLERANCE_FOR_NON_LOAN_PRODUCTS"
+          ],
+          "policy_version": "profile-policy-v2",
+          "schema_version": "2",
+          "profile_version_id": "c3fed4e7-a0b8-4d42-9677-40434180594d",
+          "profile_content_hash": "aca4f35f41032cc795886052118ddbcf8372ad255e987cd1db905fbb6275b670",
+          "profile_schema_version": "v1"
+        }
+      }
+    ],
+    "axes_pending_restore": false,
+    "saved": true,
+    "save_reason": null,
+    "final_claims": [
+      {
+        "claim_ref": "C1",
+        "state": "CONTRADICTED",
+        "reason_code": "HIGH_RISK_ADVANCE_PAYMENT",
+        "cove_status": "CONFIRMED",
+        "red_team_status": "COUNTER_EVIDENCE",
+        "summary_masked": "권유문에 대출 전 비용을 먼저 보내라는 요구가 있습니다. 공식 예방 지침에 따라 입금 전에 공식 창구로 확인하세요. 실제 사기 여부를 확정한 결과는 아닙니다."
+      },
+      {
+        "claim_ref": "C2",
+        "state": "UNKNOWN",
+        "reason_code": "AS_JUDGED",
+        "cove_status": "CHALLENGED",
+        "red_team_status": "UNRESOLVED",
+        "summary_masked": "보증 종료 상품으로 현재 금리 확인 불가"
+      },
+      {
+        "claim_ref": "C3",
+        "state": "CONTRADICTED",
+        "reason_code": "HIGH_RISK_REMOTE_CONTROL",
+        "cove_status": "CONFIRMED",
+        "red_team_status": "COUNTER_EVIDENCE",
+        "summary_masked": "권유문에 원격제어 앱 설치 요구가 있습니다. 설치를 멈추고 공식 창구로 확인하세요. 실제 발신자나 앱의 악성 여부를 확정한 결과는 아닙니다."
+      },
+      {
+        "claim_ref": "C4",
+        "state": "CONTRADICTED",
+        "reason_code": "COVE_CONFIRMED",
+        "cove_status": "CONFIRMED",
+        "red_team_status": "COUNTER_EVIDENCE",
+        "summary_masked": "공식기관은 전화·문자 대출광고 및 긴급성 압박 안 함"
+      },
+      {
+        "claim_ref": "C5",
+        "state": "NEED_MORE_INFORMATION",
+        "reason_code": "AS_JUDGED",
+        "cove_status": "UNRESOLVED",
+        "red_team_status": "COUNTER_EVIDENCE",
+        "summary_masked": "보증 종료됨, 개인 승인여부는 심사자료 필요해 확정 불가"
+      },
+      {
+        "claim_ref": "C6",
+        "state": "UNKNOWN",
+        "reason_code": "COVE_INCONCLUSIVE",
+        "cove_status": "UNRESOLVED",
+        "red_team_status": "UNRESOLVED",
+        "summary_masked": "독립 자료 확인이 충분하지 않아 이 항목을 확정하지 않았습니다."
+      }
+    ],
+    "run_id": "c389376d-0aaa-4ab7-99c1-06f56629cd34",
+    "partial": true,
+    "agents": [
+      {
+        "agentCode": "PRODUCT_INSTITUTION",
+        "status": "SUCCEEDED",
+        "reasonCode": null,
+        "toolCalls": 2
+      },
+      {
+        "agentCode": "FRAUD_CHANNEL",
+        "status": "SUCCEEDED",
+        "reasonCode": null,
+        "toolCalls": 2
+      },
+      {
+        "agentCode": "SALES_CONDUCT",
+        "status": "SUCCEEDED",
+        "reasonCode": null,
+        "toolCalls": 2
+      },
+      {
+        "agentCode": "REGULATION_DISPUTE",
+        "status": "FAILED",
+        "reasonCode": "OUTPUT_CLAIM_COVERAGE_INVALID",
+        "toolCalls": 2
+      },
+      {
+        "agentCode": "COVE",
+        "status": "SUCCEEDED",
+        "reasonCode": null,
+        "toolCalls": 3
+      },
+      {
+        "agentCode": "RED_TEAM",
+        "status": "PARTIAL",
+        "reasonCode": "CITATION_INVALID",
+        "toolCalls": 3
+      }
+    ],
+    "claim_results": [
+      {
+        "claim_ref": "C1",
+        "state": "CONTRADICTED",
+        "evidence_refs": [
+          "E13",
+          "E14"
+        ],
+        "withheld_reason": null,
+        "rationale_masked": "공식지침상 정상 금융기관은 선입금·보증료 요구 안함"
+      },
+      {
+        "claim_ref": "C2",
+        "state": "UNKNOWN",
+        "evidence_refs": [
+          "E12"
+        ],
+        "withheld_reason": "현재 금리 공식근거 없음",
+        "rationale_masked": "보증 종료 상품으로 현재 금리 확인 불가"
+      },
+      {
+        "claim_ref": "C3",
+        "state": "CONTRADICTED",
+        "evidence_refs": [
+          "E13",
+          "E14"
+        ],
+        "withheld_reason": null,
+        "rationale_masked": "공식지침은 출처불명 앱 설치 금지, 안내와 불일치"
+      },
+      {
+        "claim_ref": "C4",
+        "state": "CONTRADICTED",
+        "evidence_refs": [
+          "E13",
+          "E14"
+        ],
+        "withheld_reason": null,
+        "rationale_masked": "공식기관은 전화·문자 대출광고 및 긴급성 압박 안 함"
+      },
+      {
+        "claim_ref": "C5",
+        "state": "NEED_MORE_INFORMATION",
+        "evidence_refs": [
+          "E12"
+        ],
+        "withheld_reason": "개인 심사자료 없음",
+        "rationale_masked": "보증 종료됨, 개인 승인여부는 심사자료 필요해 확정 불가"
+      },
+      {
+        "claim_ref": "C6",
+        "state": "CONTRADICTED",
+        "evidence_refs": [
+          "E12"
+        ],
+        "withheld_reason": null,
+        "rationale_masked": "한도 2천만원은 2025.12.31 종료된 보증 조건임"
+      }
+    ],
+    "conflicts": [],
+    "judge_reason_code": null,
+    "evidence": [
+      {
+        "ref": "E11",
+        "title": "햇살론15 공식 상품 안내 (보증 종료 자료)",
+        "source": "PRODUCT",
+        "grade": "B",
+        "official_id": "kinfa:hessalLoan",
+        "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+        "published_at": null,
+        "fetched_at": "2026-09-08T13:11:46.620Z",
+        "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+        "freshness": "FRESH",
+        "directness": "CONTEXT_ONLY",
+        "reference_only": false,
+        "excerpt": "햇살론15 공유하기 프린트 대부업·불법사금융 등 고금리 대출을 이용할 수 밖에 없는 최저신용자가 최소한의 기준만 충족하면 은행 대출을 편이하게 이용할 수 있도록 지원하는 서민금융진흥원 보증 정책서민금융상품 [2025년 12월 31일 보증 종료] 대출한도 최대 2000만원 대출금리 연 15.9% (단일금리) 대출기간 3년 또는 5년 우대금리 성실상환시 1년마다 금리 인하 (3년 선택시 3.0%p씩, 5년 선택시 1.5%p씩 인하) 상환방법 원리금균등분할상환 지원대상 ① 개인신용평점이 하위 100분의 20*에 해당하는 자 (연소득 3천5백만원 이하는 개인신용평점 제한 없음) ② 연소득 4천5백만원 이하"
+      },
+      {
+        "ref": "E12",
+        "title": "햇살론15 공식 보증 종료 고지",
+        "source": "PRODUCT",
+        "grade": "B",
+        "official_id": "kinfa:hessalLoan",
+        "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+        "published_at": null,
+        "fetched_at": "2026-09-08T13:11:46.620Z",
+        "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "햇살론15 [2025년 12월 31일 보증 종료]"
+      },
+      {
+        "ref": "E1",
+        "title": "국민은행 햇살론15 취급기관",
+        "source": "INSTITUTION",
+        "grade": "A",
+        "official_id": "data.go.kr:15074508:1:140229acbd36",
+        "url": "https://www.data.go.kr/data/15074508/openapi.do",
+        "published_at": null,
+        "fetched_at": "2026-09-05T17:30:50.912Z",
+        "content_hash": "61c24bf6cca6361250bd10572a456613d0fb53fc94d7ec12f576d1340da54e08",
+        "freshness": "STALE",
+        "directness": "CONTEXT_ONLY",
+        "reference_only": false,
+        "excerpt": "국민은행 햇살론15 취급기관"
+      },
+      {
+        "ref": "E2",
+        "title": "신한은행 햇살론15 취급기관",
+        "source": "INSTITUTION",
+        "grade": "A",
+        "official_id": "data.go.kr:15074508:10:664bb1cb8c07",
+        "url": "https://www.data.go.kr/data/15074508/openapi.do",
+        "published_at": null,
+        "fetched_at": "2026-09-05T17:30:50.912Z",
+        "content_hash": "a983758a4bd2c3a0ae31331d51abbbca3a14495955cd6fa217c654a9b8b2ecae",
+        "freshness": "STALE",
+        "directness": "CONTEXT_ONLY",
+        "reference_only": false,
+        "excerpt": "신한은행 햇살론15 취급기관"
+      },
+      {
+        "ref": "E3",
+        "title": "우리은행 햇살론15 취급기관",
+        "source": "INSTITUTION",
+        "grade": "A",
+        "official_id": "data.go.kr:15074508:11:392538c7e03b",
+        "url": "https://www.data.go.kr/data/15074508/openapi.do",
+        "published_at": null,
+        "fetched_at": "2026-09-05T17:30:50.912Z",
+        "content_hash": "dc4e393a34547443719836ec86eddd1ad722889a658fc8a86998c2f40104c988",
+        "freshness": "STALE",
+        "directness": "CONTEXT_ONLY",
+        "reference_only": false,
+        "excerpt": "우리은행 햇살론15 취급기관"
+      },
+      {
+        "ref": "E4",
+        "title": "전북은행 햇살론15 취급기관",
+        "source": "INSTITUTION",
+        "grade": "A",
+        "official_id": "data.go.kr:15074508:12:3b33518ce05c",
+        "url": "https://www.data.go.kr/data/15074508/openapi.do",
+        "published_at": null,
+        "fetched_at": "2026-09-05T17:30:50.912Z",
+        "content_hash": "ed344f42204eda21942a59788413491469b6640ce714f846fef6e1c44013a327",
+        "freshness": "STALE",
+        "directness": "CONTEXT_ONLY",
+        "reference_only": false,
+        "excerpt": "전북은행 햇살론15 취급기관"
+      },
+      {
+        "ref": "E5",
+        "title": "제주은행 햇살론15 취급기관",
+        "source": "INSTITUTION",
+        "grade": "A",
+        "official_id": "data.go.kr:15074508:13:685b493e75e3",
+        "url": "https://www.data.go.kr/data/15074508/openapi.do",
+        "published_at": null,
+        "fetched_at": "2026-09-05T17:30:50.912Z",
+        "content_hash": "1d1c05a15ca3c702d4b3db7a62476a66e97c1ca22266d46578bde5c194236adf",
+        "freshness": "STALE",
+        "directness": "CONTEXT_ONLY",
+        "reference_only": false,
+        "excerpt": "제주은행 햇살론15 취급기관"
+      },
+      {
+        "ref": "E6",
+        "title": "씨티은행 햇살론15 취급기관",
+        "source": "INSTITUTION",
+        "grade": "A",
+        "official_id": "data.go.kr:15074508:14:984cb6310416",
+        "url": "https://www.data.go.kr/data/15074508/openapi.do",
+        "published_at": null,
+        "fetched_at": "2026-09-05T17:30:50.912Z",
+        "content_hash": "cc1464a29a766062b154e8d426ec0e5200b9b4fef4090811fcc3a3f60c5bb8b9",
+        "freshness": "STALE",
+        "directness": "CONTEXT_ONLY",
+        "reference_only": false,
+        "excerpt": "씨티은행 햇살론15 취급기관"
+      },
+      {
+        "ref": "E7",
+        "title": "SC제일은행 햇살론15 취급기관",
+        "source": "INSTITUTION",
+        "grade": "A",
+        "official_id": "data.go.kr:15074508:15:d6cd2d7c07b4",
+        "url": "https://www.data.go.kr/data/15074508/openapi.do",
+        "published_at": null,
+        "fetched_at": "2026-09-05T17:30:50.912Z",
+        "content_hash": "55a1047a5a9b32ebe53be2ae0e8eef3d02d228667ad475d018d08c329575ccf2",
+        "freshness": "STALE",
+        "directness": "CONTEXT_ONLY",
+        "reference_only": false,
+        "excerpt": "SC제일은행 햇살론15 취급기관"
+      },
+      {
+        "ref": "E8",
+        "title": "카카오뱅크 햇살론15 취급기관",
+        "source": "INSTITUTION",
+        "grade": "A",
+        "official_id": "data.go.kr:15074508:16:530320937b92",
+        "url": "https://www.data.go.kr/data/15074508/openapi.do",
+        "published_at": null,
+        "fetched_at": "2026-09-05T17:30:50.912Z",
+        "content_hash": "944248cd5631ada32a7cd7a48f0ac1989fc88d619f95ff8e627a629e833959dc",
+        "freshness": "STALE",
+        "directness": "CONTEXT_ONLY",
+        "reference_only": false,
+        "excerpt": "카카오뱅크 햇살론15 취급기관"
+      },
+      {
+        "ref": "E9",
+        "title": "기업은행 햇살론15 취급기관",
+        "source": "INSTITUTION",
+        "grade": "A",
+        "official_id": "data.go.kr:15074508:2:a860cee373e6",
+        "url": "https://www.data.go.kr/data/15074508/openapi.do",
+        "published_at": null,
+        "fetched_at": "2026-09-05T17:30:50.912Z",
+        "content_hash": "18baba2c3012f2805af76e23522711f103441616c6693aeca1f0c064db55eec8",
+        "freshness": "STALE",
+        "directness": "CONTEXT_ONLY",
+        "reference_only": false,
+        "excerpt": "기업은행 햇살론15 취급기관"
+      },
+      {
+        "ref": "E10",
+        "title": "하나은행 햇살론15 취급기관",
+        "source": "INSTITUTION",
+        "grade": "A",
+        "official_id": "data.go.kr:15074508:3:50b6b106eaab",
+        "url": "https://www.data.go.kr/data/15074508/openapi.do",
+        "published_at": null,
+        "fetched_at": "2026-09-05T17:30:50.912Z",
+        "content_hash": "6bed085cb1555b627e4ad45d3b3a2b78bc730687426e617ffee490d47e6324bb",
+        "freshness": "STALE",
+        "directness": "CONTEXT_ONLY",
+        "reference_only": false,
+        "excerpt": "하나은행 햇살론15 취급기관"
+      },
+      {
+        "ref": "E13",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "source": "GUIDE",
+        "grade": "B",
+        "official_id": "kinfa:notice:24020",
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "published_at": "2021-05-27",
+        "fetched_at": "2026-09-08T13:11:58.482Z",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+      },
+      {
+        "ref": "E14",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "source": "GUIDE",
+        "grade": "B",
+        "official_id": "kinfa:notice:24020",
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "published_at": "2021-05-27",
+        "fetched_at": "2026-09-08T13:12:08.514Z",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+      },
+      {
+        "ref": "E15",
+        "title": "햇살론15 공식 상품 안내 (보증 종료 자료)",
+        "source": "PRODUCT",
+        "grade": "B",
+        "official_id": "kinfa:hessalLoan",
+        "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+        "published_at": null,
+        "fetched_at": "2026-09-08T13:12:27.972Z",
+        "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+        "freshness": "FRESH",
+        "directness": "CONTEXT_ONLY",
+        "reference_only": false,
+        "excerpt": "햇살론15 공유하기 프린트 대부업·불법사금융 등 고금리 대출을 이용할 수 밖에 없는 최저신용자가 최소한의 기준만 충족하면 은행 대출을 편이하게 이용할 수 있도록 지원하는 서민금융진흥원 보증 정책서민금융상품 [2025년 12월 31일 보증 종료] 대출한도 최대 2000만원 대출금리 연 15.9% (단일금리) 대출기간 3년 또는 5년 우대금리 성실상환시 1년마다 금리 인하 (3년 선택시 3.0%p씩, 5년 선택시 1.5%p씩 인하) 상환방법 원리금균등분할상환 지원대상 ① 개인신용평점이 하위 100분의 20*에 해당하는 자 (연소득 3천5백만원 이하는 개인신용평점 제한 없음) ② 연소득 4천5백만원 이하"
+      },
+      {
+        "ref": "E16",
+        "title": "햇살론15 공식 보증 종료 고지",
+        "source": "PRODUCT",
+        "grade": "B",
+        "official_id": "kinfa:hessalLoan",
+        "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+        "published_at": null,
+        "fetched_at": "2026-09-08T13:12:27.972Z",
+        "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "햇살론15 [2025년 12월 31일 보증 종료]"
+      },
+      {
+        "ref": "E18",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "source": "GUIDE",
+        "grade": "B",
+        "official_id": "kinfa:notice:24020",
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "published_at": "2021-05-27",
+        "fetched_at": "2026-09-08T13:12:28.054Z",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+      },
+      {
+        "ref": "E17",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "source": "GUIDE",
+        "grade": "B",
+        "official_id": "kinfa:notice:24020",
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "published_at": "2021-05-27",
+        "fetched_at": "2026-09-08T13:12:28.037Z",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+      },
+      {
+        "ref": "E19",
+        "title": "햇살론15 공식 상품 안내 (보증 종료 자료)",
+        "source": "PRODUCT",
+        "grade": "B",
+        "official_id": "kinfa:hessalLoan",
+        "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+        "published_at": null,
+        "fetched_at": "2026-09-08T13:12:39.202Z",
+        "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+        "freshness": "FRESH",
+        "directness": "CONTEXT_ONLY",
+        "reference_only": false,
+        "excerpt": "햇살론15 공유하기 프린트 대부업·불법사금융 등 고금리 대출을 이용할 수 밖에 없는 최저신용자가 최소한의 기준만 충족하면 은행 대출을 편이하게 이용할 수 있도록 지원하는 서민금융진흥원 보증 정책서민금융상품 [2025년 12월 31일 보증 종료] 대출한도 최대 2000만원 대출금리 연 15.9% (단일금리) 대출기간 3년 또는 5년 우대금리 성실상환시 1년마다 금리 인하 (3년 선택시 3.0%p씩, 5년 선택시 1.5%p씩 인하) 상환방법 원리금균등분할상환 지원대상 ① 개인신용평점이 하위 100분의 20*에 해당하는 자 (연소득 3천5백만원 이하는 개인신용평점 제한 없음) ② 연소득 4천5백만원 이하"
+      },
+      {
+        "ref": "E20",
+        "title": "햇살론15 공식 보증 종료 고지",
+        "source": "PRODUCT",
+        "grade": "B",
+        "official_id": "kinfa:hessalLoan",
+        "url": "https://www.kinfa.or.kr/financialProduct/hessalLoan.do",
+        "published_at": null,
+        "fetched_at": "2026-09-08T13:12:39.202Z",
+        "content_hash": "e04a6e5a3376d2bcf5914679bb8aebedcdffecfb119aa3cceeeef85c0eb84b96",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "햇살론15 [2025년 12월 31일 보증 종료]"
+      },
+      {
+        "ref": "E21",
+        "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+        "source": "GUIDE",
+        "grade": "B",
+        "official_id": "kinfa:notice:24020",
+        "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+        "published_at": "2021-05-27",
+        "fetched_at": "2026-09-08T13:12:39.242Z",
+        "content_hash": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+        "freshness": "FRESH",
+        "directness": "DIRECT",
+        "reference_only": false,
+        "excerpt": "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다.\n정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다.\n‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다.\n출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+      }
+    ]
+  },
+  "claims": [
+    {
+      "id": "9085a53c-e0cf-4e37-91cc-ebd80eccfb6f",
+      "status": "CONTRADICTED",
+      "claim_id": "043f1df7-3d5f-40b8-8bdf-63efe45cdcba",
+      "cove_status": "CONFIRMED",
+      "is_material": true,
+      "reason_code": "HIGH_RISK_ADVANCE_PAYMENT",
+      "red_team_status": "COUNTER_EVIDENCE",
+      "statement_masked": "햇살론15 대출 진행을 위해 보증료 30만 원을 먼저 입금하라고 안내함",
+      "decision_summary_masked": "권유문에 대출 전 비용을 먼저 보내라는 요구가 있습니다. 공식 예방 지침에 따라 입금 전에 공식 창구로 확인하세요. 실제 사기 여부를 확정한 결과는 아닙니다.",
+      "verification_run_id": "c389376d-0aaa-4ab7-99c1-06f56629cd34"
+    },
+    {
+      "id": "3f7aea54-8628-49a2-803b-ecc2a6fcad41",
+      "status": "UNKNOWN",
+      "claim_id": "283b04b8-52d9-480f-ab99-dcb07ea04ad7",
+      "cove_status": "CHALLENGED",
+      "is_material": true,
+      "reason_code": "AS_JUDGED",
+      "red_team_status": "UNRESOLVED",
+      "statement_masked": "햇살론15 대출 금리는 연 3% 고정금리라고 안내함",
+      "decision_summary_masked": "보증 종료 상품으로 현재 금리 확인 불가",
+      "verification_run_id": "c389376d-0aaa-4ab7-99c1-06f56629cd34"
+    },
+    {
+      "id": "bdc23879-1399-4470-a253-b7c0d338d2a3",
+      "status": "CONTRADICTED",
+      "claim_id": "56f30a3d-bcc5-4237-b955-29d0a2376652",
+      "cove_status": "CONFIRMED",
+      "is_material": true,
+      "reason_code": "HIGH_RISK_REMOTE_CONTROL",
+      "red_team_status": "COUNTER_EVIDENCE",
+      "statement_masked": "햇살론15 대출 상담을 위해 원격제어 앱을 설치하라고 안내함",
+      "decision_summary_masked": "권유문에 원격제어 앱 설치 요구가 있습니다. 설치를 멈추고 공식 창구로 확인하세요. 실제 발신자나 앱의 악성 여부를 확정한 결과는 아닙니다.",
+      "verification_run_id": "c389376d-0aaa-4ab7-99c1-06f56629cd34"
+    },
+    {
+      "id": "7e0e73f2-238c-4e78-9498-9f342d9d0fc2",
+      "status": "CONTRADICTED",
+      "claim_id": "af96de79-1936-458d-adeb-7835308766a3",
+      "cove_status": "CONFIRMED",
+      "is_material": true,
+      "reason_code": "COVE_CONFIRMED",
+      "red_team_status": "COUNTER_EVIDENCE",
+      "statement_masked": "햇살론15 대출은 오늘 안에 신청해야 한다고 안내함",
+      "decision_summary_masked": "공식기관은 전화·문자 대출광고 및 긴급성 압박 안 함",
+      "verification_run_id": "c389376d-0aaa-4ab7-99c1-06f56629cd34"
+    },
+    {
+      "id": "0d4db161-7274-49b6-90b4-7dd14214031d",
+      "status": "NEED_MORE_INFORMATION",
+      "claim_id": "b27562a3-a9ce-4fc0-a468-0ca3e965e199",
+      "cove_status": "UNRESOLVED",
+      "is_material": true,
+      "reason_code": "AS_JUDGED",
+      "red_team_status": "COUNTER_EVIDENCE",
+      "statement_masked": "햇살론15 정부지원 대출 승인 대상이라고 안내함",
+      "decision_summary_masked": "보증 종료됨, 개인 승인여부는 심사자료 필요해 확정 불가",
+      "verification_run_id": "c389376d-0aaa-4ab7-99c1-06f56629cd34"
+    },
+    {
+      "id": "66e29b1e-b937-42e3-9448-0576b7086535",
+      "status": "UNKNOWN",
+      "claim_id": "d56bf6fc-48b2-4b4c-a2b2-6ec33e7f7b26",
+      "cove_status": "UNRESOLVED",
+      "is_material": true,
+      "reason_code": "COVE_INCONCLUSIVE",
+      "red_team_status": "UNRESOLVED",
+      "statement_masked": "햇살론15 대출 한도는 최대 2천만 원이라고 안내함",
+      "decision_summary_masked": "독립 자료 확인이 충분하지 않아 이 항목을 확정하지 않았습니다.",
+      "verification_run_id": "c389376d-0aaa-4ab7-99c1-06f56629cd34"
+    }
+  ]
+}

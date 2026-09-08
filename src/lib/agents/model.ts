@@ -44,7 +44,7 @@ if (process.env.NODE_ENV !== "production") {
 export type Effort = "low" | "medium" | "high";
 
 export class ModelFormatError extends Error {
-  constructor(message: string) {
+  constructor(message: string, readonly code = "MODEL_SCHEMA_INVALID") {
     super(message);
     this.name = "ModelFormatError";
   }
@@ -104,7 +104,9 @@ export async function callStructured<T extends z.ZodType>(
   opts: StructuredCallOptions<T>,
 ): Promise<z.infer<T>> {
   const startedAt = Date.now();
-  const res = await anthropic.messages.parse({
+  // SDK parse는 사용량을 돌려주기 전에 로컬 형식 오류를 던진다.
+  // 응답을 먼저 받아 비용을 정산한 뒤 검증해야 수신된 응답을 TIMEOUT으로 오기하지 않는다.
+  const res = await anthropic.messages.create({
     model: opts.model ?? env.ANTHROPIC_MODEL,
     max_tokens: opts.maxTokens ?? 8_000,
     system: opts.system,
@@ -119,22 +121,33 @@ export async function callStructured<T extends z.ZodType>(
 
   // ⚠️ **계량이 결과 판정보다 먼저다** (N-204). 거절이든 토큰 상한이든 토큰은
   // 이미 쓰였다. 성공한 호출만 세면 실패가 잦을수록 쿼터가 실제보다 낮게 보인다.
+  let parsed: z.infer<T> | undefined;
+  let formatError: ModelFormatError | null = null;
+  if (res.stop_reason === "refusal") formatError = new ModelFormatError("모델이 응답을 거절했다", "MODEL_REFUSAL");
+  else if (res.stop_reason === "max_tokens") formatError = new ModelFormatError("응답이 토큰 상한에서 잘렸다", "MODEL_OUTPUT_TRUNCATED");
+  else {
+    const texts = res.content.filter((block): block is Anthropic.TextBlock => block.type === "text");
+    try {
+      if (texts.length !== 1) throw new Error("TEXT_BLOCK_COUNT");
+      const result = opts.schema.safeParse(JSON.parse(texts[0].text));
+      if (!result.success) {
+        // 모델 문장·값은 오류나 로그에 넣지 않는다. 고정 Schema 경로와 위반 종류만 남긴다.
+        const issue = result.error.issues[0];
+        const fields = new Set(["claim_results", "conflicts", "results", "findings", "evidence_refs", "rationale_masked",
+          "withheld_reason", "note_masked", "state", "status", "summary_masked", "schema_version", "out_of_scope_claim_refs"]);
+        const field = issue.path.filter(part => typeof part === "string" && fields.has(part)).join("_");
+        formatError = new ModelFormatError("구조화 출력 형식 위반", `MODEL_SCHEMA_${field}_${issue.code}`.toUpperCase().slice(0,64));
+      } else parsed = result.data;
+    } catch {
+      formatError = new ModelFormatError("구조화 JSON 출력 파싱 실패", "MODEL_JSON_INVALID");
+    }
+  }
   if (!opts.skipLegacyMeter) meter(res.usage, opts.model);
   await opts.onUsage?.({ usage: res.usage, elapsedMs: Date.now() - startedAt, requestId: res.id,
     statusCategory: res.stop_reason === "refusal" ? "REFUSAL"
-      : res.stop_reason === "max_tokens" || res.parsed_output == null ? "SCHEMA_ERROR" : "OK" });
-
-  // 안전 분류기가 거절하면 content가 비거나 부분적이다. 먼저 본다.
-  if (res.stop_reason === "refusal") {
-    throw new ModelFormatError("모델이 응답을 거절했다 (안전 분류기)");
-  }
-  if (res.stop_reason === "max_tokens") {
-    throw new ModelFormatError("응답이 토큰 상한에서 잘렸다 — max_tokens 상향 필요");
-  }
-  if (res.parsed_output == null) {
-    throw new ModelFormatError("구조화 출력 파싱 실패");
-  }
-  return res.parsed_output as z.infer<T>;
+      : formatError ? "SCHEMA_ERROR" : "OK" });
+  if (formatError) throw formatError;
+  return parsed as z.infer<T>;
 }
 
 export type TextCallOptions = {

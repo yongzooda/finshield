@@ -36,7 +36,7 @@ export const loadManifest = async (sql: Sql): Promise<ResolvedManifest> => {
     select id, kb_release_id, model_bundle, profile_policy_version from private.execution_manifests
      where manifest_version = ${MANIFEST_VERSION}`;
   if (manifests.length !== 1) {
-    throw new ManifestDriftError(`실행 Manifest ${MANIFEST_VERSION} 이 DB 에 없다. Migration 0041 을 적용했는지 확인할 것`);
+    throw new ManifestDriftError(`실행 Manifest ${MANIFEST_VERSION} 이 DB 에 없다. 해당 배포의 Migration과 실행 설정을 적용했는지 확인할 것`);
   }
   if (manifests[0].profile_policy_version !== POLICY_VERSIONS.profilePolicyVersion) {
     throw new ManifestDriftError("Manifest 프로필 정책이 코드와 다르다");

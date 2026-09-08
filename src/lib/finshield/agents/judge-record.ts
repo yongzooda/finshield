@@ -8,7 +8,7 @@ import type { RunSession } from "../tools/runtime";
 /** AI-020·PASS-001: Judge도 실제 실행 이력을 남겨 완결성을 검사할 수 있게 한다. */
 export async function recordJudgeRun(session: RunSession, input: unknown, output: unknown, startedAt: number, reasonCode: string | null, usage?: ModelUsage) {
   const spec = AGENTS.find(agent => agent.agentCode === "EVIDENCE_JUDGE")!;
-  const status = output ? "SUCCEEDED" : "FAILED";
+  const status = output ? reasonCode ? "PARTIAL" : "SUCCEEDED" : "FAILED";
   const digest = (value: unknown) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
   if (session.recorder) {
     await session.recorder.agentRun({ agentCode: spec.agentCode, version: spec.version, logicalKey: spec.logicalKey,

@@ -1,3 +1,5 @@
+import { APPROVAL_PROOF_REQUIRED } from "./schemas";
+import { createSharedRunDeadline } from "./run-deadline";
 import type { ModelUsage } from "./model-budget";
 /**
  * Run 오케스트레이터.
@@ -14,7 +16,7 @@ import "server-only";
 import { COVE_AGENT, DOMAIN_AGENTS, MODEL_TIMEOUTS, RED_TEAM_AGENT } from "./manifest";
 import { loadManifest } from "./registry";
 import {
-  citationProblems, coveOutput, judgeOutput, redTeamOutput, type ConfirmedClaim,
+  citationProblems, coveOutput, judgeOutput, judgeEnvelopeOutput, redTeamOutput, type ConfirmedClaim,
   type CoveOutput, type DomainFinding, type JudgeOutput, type RedTeamOutput, type ToolEvidence,
 } from "./schemas";
 import { createRunSession, type ToolCallContext } from "./tools/runtime";
@@ -24,6 +26,8 @@ import { assertPromptsComplete } from "./agents/prompts";
 import { recordJudgeRun } from "./agents/judge-record";
 
 export type JudgeModel = {
+  /** 실제 모델 묶음 실패만 보고한다. 모델 응답의 임의 필드를 믿지 않는다. */
+  failureReason?: () => string | null;
   usage?: () => ModelUsage;
   judge: (args: {
     signal?: AbortSignal;
@@ -56,7 +60,7 @@ export type OrchestratedRun = {
 
 export const judgeFailureReason = (error: unknown, deadlineSignal: AbortSignal): string =>
   (error as { code?: string }).code === "MODEL_BUDGET_BLOCKED" ? "TOOL_BUDGET"
-    : deadlineSignal.aborted ? "JUDGE_DEADLINE_EXCEEDED" : "JUDGE_CALL_FAILED";
+    : deadlineSignal.aborted || (error as Error).name === "APIConnectionTimeoutError" ? "JUDGE_DEADLINE_EXCEEDED" : "JUDGE_CALL_FAILED";
 
 /**
  * Judge의 한 Claim에 잘못된 인용이나 누락이 있어도 다른 Claim의 검증된 결과는
@@ -71,6 +75,7 @@ export const normalizeJudgeOutput = (
   const grouped = new Map<string, JudgeOutput["claim_results"]>();
   let coverageInvalid = output.claim_results.some((entry) => !requested.has(entry.claim_ref));
   let citationInvalid = false;
+  let schemaInvalid = false;
 
   for (const entry of output.claim_results) {
     if (!requested.has(entry.claim_ref)) continue;
@@ -92,30 +97,39 @@ export const normalizeJudgeOutput = (
         rationale_masked: "이 항목의 판단 결과를 확인하지 못했습니다.",
       };
     }
-    const problems = citationProblems(candidate.evidence_refs, candidate.state, evidence);
+    if (!judgeOutput.shape.claim_results.element.safeParse(candidate).success) {
+      schemaInvalid = true;
+      return { claim_ref: claim.claim_ref, state: "WITHHELD" as const, evidence_refs: [],
+        withheld_reason: "최종 판단 문장 형식을 확인하지 못했습니다.", rationale_masked: "이 항목의 판단을 보류했습니다." };
+    }
+    const problems = citationProblems(candidate.evidence_refs, candidate.state, evidence, claim.statement_masked);
     if (problems.length === 0) return candidate;
     citationInvalid = true;
     return {
       ...candidate,
-      state: "UNKNOWN" as const,
+      state: problems.includes(APPROVAL_PROOF_REQUIRED) ? "NEED_MORE_INFORMATION" as const : "UNKNOWN" as const,
+      rationale_masked: problems.includes(APPROVAL_PROOF_REQUIRED) ? APPROVAL_PROOF_REQUIRED : "제공된 근거로는 이 항목을 확정하지 않았습니다.",
       evidence_refs: candidate.evidence_refs.filter((ref) => evidence.has(ref)),
-      withheld_reason: "근거 인용을 확인하지 못했습니다.",
+      withheld_reason: problems.includes(APPROVAL_PROOF_REQUIRED) ? APPROVAL_PROOF_REQUIRED : "근거 인용을 확인하지 못했습니다.",
     };
   });
 
+  const invalidConflictClaims = new Set<string>();
   const conflicts = output.conflicts.filter((conflict) => {
     const refs = [...new Set(conflict.evidence_refs)];
-    const valid = requested.has(conflict.claim_ref)
+    const valid = judgeOutput.shape.conflicts.element.safeParse(conflict).success && requested.has(conflict.claim_ref)
       && refs.length >= 2
       && refs.every((ref) => evidence.has(ref));
-    if (!valid) citationInvalid = true;
+    if (!valid) { citationInvalid = true; invalidConflictClaims.add(conflict.claim_ref); }
     return valid;
   });
 
   return {
-    output: { schema_version: "out-v1", claim_results: claimResults, conflicts },
+    output: { schema_version: "out-v1", claim_results: claimResults.map(result => invalidConflictClaims.has(result.claim_ref)
+      ? { ...result, state: "UNKNOWN" as const, withheld_reason: "충돌하는 공식 근거를 확인하지 못했습니다.",
+        rationale_masked: "공식 근거의 충돌 여부를 확정하지 않았습니다." } : result), conflicts },
     reasonCode: coverageInvalid ? "JUDGE_CLAIM_COVERAGE_INVALID"
-      : citationInvalid ? "JUDGE_CITATION_INVALID" : null,
+      : schemaInvalid ? "JUDGE_SCHEMA_INVALID" : citationInvalid ? "JUDGE_CITATION_INVALID" : null,
   };
 };
 
@@ -140,7 +154,8 @@ export const runVerification = async (args: {
   assertToolsImplemented();
   await loadManifest(args.ctx.sql);
 
-  const session = createRunSession(args.ctx);
+  const budget = createSharedRunDeadline(args.ctx.signal);
+  const session = createRunSession({ ...args.ctx, signal: budget.signal });
   const agentResults: OrchestratedRun["agentResults"] = [];
   let budgetExhausted = false;
   const findings: (DomainFinding & { agent_code: string })[] = [];
@@ -152,7 +167,7 @@ export const runVerification = async (args: {
     session.signal?.throwIfAborted();
     progress({ type: "agent_started", agentCode: agent.agentCode });
     const result = await runDomainAgent({
-      session,
+      session: { ...session, signal: budget.agentSignal() },
       agentCode: agent.agentCode,
       input: {
         schema_version: "in-v1",
@@ -197,11 +212,13 @@ export const runVerification = async (args: {
         return parsed.success ? ({ ok: true, value: parsed.data } as const) : ({ ok: false } as const);
       };
       const result = await runReviewAgent<CoveOutput | RedTeamOutput>({
-        session, agentCode: agent.agentCode, claims: materialClaims,
+        session: { ...session, signal: budget.agentSignal() }, agentCode: agent.agentCode, claims: materialClaims,
         journeyStage: args.journeyStage, model: args.agentModel, impls: TOOL_IMPLS,
         parse,
         refsOf: (value) => value.results.map((entry) => ({
+          claimRef: entry.claim_ref,
           refs: entry.evidence_refs,
+          state: entry.status === "CONFIRMED" ? "VERIFIED" : entry.status === "REFUTED" || entry.status === "COUNTER_EVIDENCE" ? "CONTRADICTED" : "UNKNOWN",
           // 확인·반증을 말하려면 근거가 있어야 한다. 못 찾았다는 상태는 근거가 없어도 된다.
           confirmed: entry.status === "CONFIRMED" || entry.status === "REFUTED"
             || entry.status === "COUNTER_EVIDENCE",
@@ -240,16 +257,17 @@ export const runVerification = async (args: {
   let judged: JudgeOutput | null = null;
   let judgeReasonCode: string | null = null;
   const judgeStageSignal = AbortSignal.timeout(MODEL_TIMEOUTS.judgeMs);
+  const judgeSignal = session.signal ? AbortSignal.any([session.signal, judgeStageSignal]) : judgeStageSignal;
   try {
     // AI-013: Judge 에는 원문을 넣지 않는다. Agent 가 만든 구조와 근거만 넣는다.
-    const signal = session.signal ? AbortSignal.any([session.signal, judgeStageSignal]) : judgeStageSignal;
+    const signal = judgeSignal;
     signal.throwIfAborted();
     if (budgetExhausted) throw Object.assign(new Error("MODEL_BUDGET_BLOCKED"), {code:"MODEL_BUDGET_BLOCKED"});
     // 독립 검토 근거는 CoVe·Red Team 정책 단계에서 사용한다. Judge에는 Domain
     // 판단이 실제 인용한 근거만 보내 입력 크기와 잘못된 ref 선택 가능성을 줄인다.
     const judgeEvidence = selectJudgeEvidence(findings, evidence);
     const raw = await args.judgeModel.judge({ claims: args.claims, findings, evidence: judgeEvidence, signal });
-    const parsed = judgeOutput.safeParse(raw);
+    const parsed = judgeEnvelopeOutput.safeParse(raw);
     if (!parsed.success) {
       judgeReasonCode = "JUDGE_SCHEMA_INVALID";
     } else {
@@ -259,13 +277,13 @@ export const runVerification = async (args: {
         new Map(judgeEvidence.map((item) => [item.evidence_ref, item])),
       );
       judged = normalized.output;
-      judgeReasonCode = normalized.reasonCode;
+      judgeReasonCode = normalized.reasonCode ?? args.judgeModel.failureReason?.() ?? null;
     }
   } catch (error) {
-    judgeReasonCode = judgeFailureReason(error, judgeStageSignal);
+    judgeReasonCode = judgeFailureReason(error, judgeSignal);
   }
   await recordJudgeRun(session, { claims: args.claims, findings }, judged, judgeStartedAt, judgeReasonCode, args.judgeModel.usage?.());
-  progress({ type: "judge_finished", status: judged ? "SUCCEEDED" : "FAILED" });
+  progress({ type: "judge_finished", status: judged ? judgeReasonCode ? "PARTIAL" : "SUCCEEDED" : "FAILED" });
 
   return {
     agentResults,
@@ -276,6 +294,6 @@ export const runVerification = async (args: {
     cove,
     redTeam,
     evidenceIds,
-    partial: judged === null || agentResults.some((result) => result.status !== "SUCCEEDED"),
+    partial: judged === null || judgeReasonCode !== null || agentResults.some((result) => result.status !== "SUCCEEDED"),
   };
 };

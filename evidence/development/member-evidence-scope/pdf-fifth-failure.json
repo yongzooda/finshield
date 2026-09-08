@@ -1,0 +1,159 @@
+{
+  "kind": "다섯 번째 합성 PDF DB 제약 실패 보존",
+  "candidate_code_sha": "9a12adc8728bc173d4c61b59ef186e6f080019ab",
+  "reports": [
+    {
+      "stage": "file",
+      "path": "/api/finshield/files/slot",
+      "status": 200,
+      "elapsed_ms": 5152,
+      "types": [
+        "json"
+      ]
+    },
+    {
+      "stage": "file",
+      "path": "/api/finshield/files/process",
+      "status": 200,
+      "elapsed_ms": 14946,
+      "types": [
+        "json"
+      ]
+    },
+    {
+      "stage": "verify",
+      "path": "/api/finshield/verify",
+      "status": 200,
+      "elapsed_ms": 45694,
+      "types": [
+        "run_started",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "agent_finished",
+        "agent_started",
+        "heartbeat",
+        "heartbeat",
+        "error"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "type": "run_started",
+      "run_id": "2bf5bacc-1e77-4c65-9daf-52b815577585",
+      "claims": [
+        {
+          "claim_type": "ELIGIBILITY",
+          "statement_masked": "정부지원 햇살론15 승인 대상이라고 안내한다.",
+          "materiality": "MATERIAL",
+          "claim_id": "22a39f5e-a117-451d-ae25-0057e4f32341",
+          "claimId": "22a39f5e-a117-451d-ae25-0057e4f32341",
+          "claim_ref": "C1"
+        },
+        {
+          "claim_type": "CHANNEL",
+          "statement_masked": "상담원이 원격제어 앱을 설치해 달라고 요청한다.",
+          "materiality": "MATERIAL",
+          "claim_id": "2cfab3ad-d621-424f-8681-8441f23b6616",
+          "claimId": "2cfab3ad-d621-424f-8681-8441f23b6616",
+          "claim_ref": "C2"
+        },
+        {
+          "claim_type": "PRODUCT_TERM",
+          "statement_masked": "햇살론15는 연 3% 고정금리로 제공된다.",
+          "materiality": "MATERIAL",
+          "claim_id": "31e67ed2-6daf-4a62-b2e7-4aef25ae10e0",
+          "claimId": "31e67ed2-6daf-4a62-b2e7-4aef25ae10e0",
+          "claim_ref": "C3"
+        },
+        {
+          "claim_type": "CONDUCT",
+          "statement_masked": "진행을 위해 보증료 30만 원을 먼저 입금해야 한다.",
+          "materiality": "MATERIAL",
+          "claim_id": "37703a50-ad2d-4666-90d4-d93b5aa71b4e",
+          "claimId": "37703a50-ad2d-4666-90d4-d93b5aa71b4e",
+          "claim_ref": "C4"
+        },
+        {
+          "claim_type": "PRODUCT_TERM",
+          "statement_masked": "햇살론15는 최대 2천만 원까지 대출 가능하다.",
+          "materiality": "MATERIAL",
+          "claim_id": "6998408e-0770-4641-87aa-ac8d6824585e",
+          "claimId": "6998408e-0770-4641-87aa-ac8d6824585e",
+          "claim_ref": "C5"
+        },
+        {
+          "claim_type": "CONDUCT",
+          "statement_masked": "오늘 안에 신청해야 한다는 시한을 제시한다.",
+          "materiality": "MATERIAL",
+          "claim_id": "b9d69073-96a8-4ed2-b099-3033fec9b7ef",
+          "claimId": "b9d69073-96a8-4ed2-b099-3033fec9b7ef",
+          "claim_ref": "C6"
+        }
+      ]
+    },
+    {
+      "type": "agent_started",
+      "agentCode": "PRODUCT_INSTITUTION"
+    },
+    {
+      "type": "heartbeat"
+    },
+    {
+      "type": "agent_finished",
+      "agentCode": "PRODUCT_INSTITUTION",
+      "status": "SUCCEEDED",
+      "findings": 5,
+      "toolCalls": 2
+    },
+    {
+      "type": "agent_started",
+      "agentCode": "FRAUD_CHANNEL"
+    },
+    {
+      "type": "heartbeat"
+    },
+    {
+      "type": "agent_finished",
+      "agentCode": "FRAUD_CHANNEL",
+      "status": "SUCCEEDED",
+      "findings": 6,
+      "toolCalls": 3
+    },
+    {
+      "type": "agent_started",
+      "agentCode": "SALES_CONDUCT"
+    },
+    {
+      "type": "heartbeat"
+    },
+    {
+      "type": "agent_finished",
+      "agentCode": "SALES_CONDUCT",
+      "status": "SUCCEEDED",
+      "findings": 6,
+      "toolCalls": 2
+    },
+    {
+      "type": "agent_started",
+      "agentCode": "REGULATION_DISPUTE"
+    },
+    {
+      "type": "heartbeat"
+    },
+    {
+      "type": "heartbeat"
+    },
+    {
+      "type": "error",
+      "message": "검증을 끝내지 못했습니다. 같은 항목으로 다시 시도해 주세요.",
+      "code": "23514"
+    }
+  ]
+}

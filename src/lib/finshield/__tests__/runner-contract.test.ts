@@ -49,3 +49,17 @@ it('E-011·EC-015 모델 예산 거부 뒤에 다음 Agent와 Judge를 호출하
  expect(chooseTools).toHaveBeenCalledTimes(1);expect(decide).not.toHaveBeenCalled();expect(judge).not.toHaveBeenCalled();
  expect(result.judgeReasonCode).toBe('TOOL_BUDGET');expect(result.judgeOutput).toBeNull();expect(result.partial).toBe(true);
 });
+
+it('Judge 묶음 실패는 Domain 성공과 관계없이 원장·진행·Run에 부분 상태로 남는다',async()=>{
+ const {runVerification}=await import('../orchestrator');
+ const ctx=makeSession(),agentRun=vi.fn(async()=> 'fixture'),progress=vi.fn();
+ ctx.recorder!.agentRun=agentRun;
+ const result=await runVerification({ctx,claims:[{...input.claims[0],materiality:'NON_MATERIAL'}],maskedIntake:'',journeyStage:'PRE_TRANSACTION',progress,
+  agentModel:{chooseTools:async()=>[],decide:async()=>output},
+  judgeModel:{failureReason:()=> 'JUDGE_BATCH_DEADLINE_EXCEEDED',judge:async()=>({schema_version:'out-v1',claim_results:[{claim_ref:'C1',state:'UNKNOWN',evidence_refs:[],withheld_reason:'최종 판단 시간 초과',rationale_masked:'확정하지 못했다'}],conflicts:[]})}});
+ expect(result.agentResults.every(agent=>agent.status==='SUCCEEDED')).toBe(true);
+ expect(result.partial).toBe(true);
+ expect(result.judgeReasonCode).toBe('JUDGE_BATCH_DEADLINE_EXCEEDED');
+ expect(agentRun).toHaveBeenCalledWith(expect.objectContaining({agentCode:'EVIDENCE_JUDGE',status:'PARTIAL',reasonCode:'JUDGE_BATCH_DEADLINE_EXCEEDED'}));
+ expect(progress).toHaveBeenCalledWith({type:'judge_finished',status:'PARTIAL'});
+});

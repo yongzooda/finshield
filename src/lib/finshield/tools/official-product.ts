@@ -48,12 +48,26 @@ export async function readOfficialProduct(_input: unknown, ctx: ToolCallContext)
   const day = (type: string) => parts.find(part => part.type === type)!.value;
   const asOf = `${day("year")}-${day("month")}-${day("day")}`;
   const temporal = productTemporalStatus(text, asOf);
-  return {provenanceComplete:true,candidateCount:1,items:[{
+  const items: ToolOutcome["items"] = [{
     sourceType:"PRODUCT",authorityGrade:"B",publisher:"서민금융진흥원",title:temporal.citable ? "햇살론15 공식 상품 안내" : temporal.status === "ENDED" ? "햇살론15 공식 상품 안내 (보증 종료 자료)" : "햇살론15 공식 상품 안내 (종료 시점 확인 필요)",
     officialId:"kinfa:hessalLoan",canonicalUrl:PRODUCT_URL,publishedAt:null,
     sourceVersion:`html-section-v1:${contentHash.slice(0,24)}`,contentHash,fingerprint:hash(PRODUCT_URL),
     freshness:"FRESH",licenseCode:null,isComplete:true,isCitable:temporal.citable,
     locator:{kind:"html_section",selector:"#ConTitle",end_marker:"일반보증이란?",normalization_version:"html-text-v1",temporal_status:temporal.status,product_end_date:temporal.endDate,assessed_on:asOf,profile_terms:extractProfileTerms(text)},
     excerptMasked:text,directness:temporal.citable ? "DIRECT" : "CONTEXT_ONLY",referenceOnly:false,selectionReasonCode:temporal.citable ? "OFFICIAL_PRODUCT_BODY" : "PRODUCT_END_NOTICE",
-  }]};
+  }];
+  // EV-004: 종료 전 조건은 계속 맥락용이다. 현재 확인한 종료 사실만 별도 발췌한다.
+  if (temporal.status === "ENDED" && temporal.endDate) {
+    const notice = text.match(/\[\s*\d{4}년\s*\d{1,2}월\s*\d{1,2}일\s*보증\s*종료\s*\]/u)?.[0];
+    if (notice) items.push({
+      ...items[0], title: "햇살론15 공식 보증 종료 고지", isCitable: true, directness: "DIRECT",
+      sourceVersion: `html-status-v1:${contentHash.slice(0,24)}`,
+      excerptMasked: `햇살론15 ${notice}`,
+      locator: { kind: "html_section", selector: "#ConTitle", temporal_status: "ENDED",
+        product_end_date: temporal.endDate, assessed_on: asOf, permitted_use: "REFUTE_CURRENT_OFFER",
+        current_transaction_proof: false },
+      selectionReasonCode: "OFFICIAL_PRODUCT_ENDED_NOTICE",
+    });
+  }
+  return { provenanceComplete: true, candidateCount: items.length, items };
 }

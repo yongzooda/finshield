@@ -38,8 +38,8 @@ describe("근거 요약", () => {
     expect(JSON.stringify(claimBrief([input]))).not.toContain("private-");
   });
   it("본문은 인용에 필요한 만큼만 넘긴다", () => {
-    const [brief] = evidenceBrief([evidence()]);
-    expect(brief.excerpt.length).toBe(400);
+    const [brief] = evidenceBrief([evidence({ excerpt_masked: "가".repeat(1800) })]);
+    expect(brief.excerpt.length).toBe(1200);
   });
 
   it("locator 와 해시 같은 내부 값은 넘기지 않는다", () => {
@@ -157,7 +157,7 @@ describe("AI-017 모델 출력 Citation 목록", () => {
 });
 
 describe("N-PERF-009 Evidence Judge Claim 배치", () => {
-  it("최대 여덟 Claim을 네 개 이하 두 묶음으로 제한한다", () => {
+  it("최대 여덟 Claim을 세 개 이하 묶음으로 제한한다", () => {
     const inputClaims = Array.from({ length: 8 }, (_, index) => ({
       claim_ref: `C${index + 1}`,
       claim_type: "PRODUCT_TERM",
@@ -165,7 +165,7 @@ describe("N-PERF-009 Evidence Judge Claim 배치", () => {
       materiality: "MATERIAL" as const,
     }));
     const batches = buildJudgeBatches({ claims: inputClaims, findings: [], evidence: [] });
-    expect(batches.map((batch) => batch.claims.length)).toEqual([4, 4]);
+    expect(batches.map((batch) => batch.claims.length)).toEqual([3, 3, 2]);
     expect(batches.flatMap((batch) => batch.claims).map((claim) => claim.claim_ref))
       .toEqual(inputClaims.map((claim) => claim.claim_ref));
   });
@@ -183,9 +183,9 @@ describe("N-PERF-009 Evidence Judge Claim 배치", () => {
     }));
     const evidences = inputClaims.map((_, index) => evidence({ evidence_ref: `E${index + 1}` }));
     const batches = buildJudgeBatches({ claims: inputClaims, findings, evidence: evidences });
-    expect(batches.map((batch) => batch.claims.length)).toEqual([4, 2]);
-    expect(batches[0].evidence.map((item) => item.evidence_ref)).toEqual(["E1", "E2", "E3", "E4"]);
-    expect(batches[1].evidence.map((item) => item.evidence_ref)).toEqual(["E5", "E6"]);
+    expect(batches.map((batch) => batch.claims.length)).toEqual([3, 3]);
+    expect(batches[0].evidence.map((item) => item.evidence_ref)).toEqual(["E1", "E2", "E3"]);
+    expect(batches[1].evidence.map((item) => item.evidence_ref)).toEqual(["E4", "E5", "E6"]);
   });
 
   it("동시에 끝난 묶음의 결과를 원래 Claim 순서로 합친다", () => {

@@ -1,5 +1,6 @@
 import "server-only";
 import { z } from "zod";
+import { searchOfficialWarning } from "./official-warning";
 import { queryWithSignal } from "../query-signal";
 import { embedQuery, RetrievalProviderError } from "../retrieval-provider";
 import { gateForModel } from "@/lib/agents/pii";
@@ -132,8 +133,14 @@ export async function checkDocuments(input: unknown, ctx: ToolCallContext): Prom
 
 /** 관련 공식 경보·사례의 패턴을 찾는다. 빈 결과나 문서 빈도를 안전 확률로 바꾸지 않는다. */
 export async function analyzeRiskPattern(input: unknown, ctx: ToolCallContext): Promise<ToolOutcome> {
-  const outcome = await searchPublicKnowledge(input, ctx, ["ALERT", "DISPUTE", "PRECASE_CASE"]);
-  return { ...outcome, items: outcome.items.map(item => ({ ...item, referenceOnly: true, isCitable: false, directness: "CONTEXT_ONLY" })),
+  const [outcome, guidance] = await Promise.all([
+    searchPublicKnowledge(input, ctx, ["ALERT", "DISPUTE", "PRECASE_CASE"]),
+    ctx.allowedSourceSnapshotIds?.length ? Promise.resolve(null) : searchOfficialWarning(input, ctx),
+  ]);
+  return { ...outcome, items: [
+    ...outcome.items.map(item => ({ ...item, referenceOnly: true, isCitable: false, directness: "CONTEXT_ONLY" as const })),
+    ...(guidance?.items ?? []),
+  ], candidateCount: outcome.candidateCount + (guidance?.candidateCount ?? 0),
     observations: { ...outcome.observations, kind: "REFERENCE_PATTERN_SEARCH", probability_estimated: false,
       current_transaction_proof: false, result: outcome.items.length ? "RELATED_REFERENCE_FOUND" : "INSUFFICIENT_PATTERN_DATA" } };
 }

@@ -118,6 +118,15 @@ export const judgeOutput = z.object({
 });
 export type JudgeOutput = z.infer<typeof judgeOutput>;
 
+/** 수신 구조와 채택 자격을 분리한다. 한 항목의 짧은/긴 문장이나 충돌 근거
+ * 누락은 normalizeJudgeOutput에서 해당 항목만 보류하고 정상 항목은 보존한다. */
+export const judgeEnvelopeOutput = z.object({
+  schema_version: z.literal("out-v1"),
+  claim_results: z.array(z.object({ claim_ref: z.string(), state: claimState, evidence_refs: z.array(z.string()),
+    withheld_reason: z.string().nullable(), rationale_masked: z.string() })),
+  conflicts: z.array(z.object({ claim_ref: z.string(), evidence_refs: z.array(z.string()), note_masked: z.string() })),
+});
+
 /**
  * 모델 출력이 인용한 근거가 실제로 존재하는지 확인한다.
  *
@@ -125,23 +134,47 @@ export type JudgeOutput = z.infer<typeof judgeOutput>;
  * 확정 상태(VERIFIED·CONTRADICTED)에는 근거가 최소 하나 있어야 하고,
  * 그 근거는 참고용이 아니어야 한다 (EV-007, EV-008).
  */
+export const APPROVAL_PROOF_REQUIRED = "개인 승인 여부를 확인할 심사 자료가 없습니다.";
+export const requiresPersonalApprovalProof = (statement: string) =>
+  /승인(?:이|을|\s)*\s*(?:대상|완료|확정|되|됐)|선정(?:되|됐)/u.test(statement)
+  && !/누구나|무조건|심사\s*없이|신용[\s\S]{0,15}(?:관계없|무관)/u.test(statement);
+
 export const citationProblems = (
   refs: string[],
   state: ClaimState,
   pool: Map<string, ToolEvidence>,
+  statement?: string,
 ): string[] => {
   const problems: string[] = [];
   for (const ref of refs) {
     if (!pool.has(ref)) problems.push(`없는 근거를 인용했습니다: ${ref}`);
   }
+  if (state === "VERIFIED" && refs.some(ref => pool.get(ref)?.locator?.permitted_use === "REFUTE_CURRENT_OFFER")) {
+    problems.push("종료 고지를 현재 가입 가능성의 지지 근거로 썼습니다.");
+  }
   const known = refs.filter((ref) => pool.has(ref)).map((ref) => pool.get(ref) as ToolEvidence);
+  if ((state === "VERIFIED" || state === "CONTRADICTED") && statement
+    && /오늘|당일|마감|기한|긴급/u.test(statement)
+    && known.some(item => item.locator?.permitted_use === "PUBLIC_GUIDANCE_COMPARISON")) {
+    problems.push("일반 예방 지침으로 개별 신청 기한을 확정할 수 없습니다.");
+  }
+  if ((state === "VERIFIED" || state === "CONTRADICTED") && statement
+    && /사기범|사기꾼|범죄자|사기(?:이다|다|임|가\s*맞|가\s*아)|위법(?:이다|다|임)|불법(?:이다|다|임)/u.test(statement)
+    && known.length > 0 && known.every(item => item.locator?.current_transaction_proof === false)) {
+    problems.push("일반 안내로 현재 거래의 범죄·위법 여부를 확정했습니다.");
+  }
+  if ((state === "VERIFIED" || state === "CONTRADICTED") && statement
+    && requiresPersonalApprovalProof(statement)
+    && !known.some(item => item.locator?.current_transaction_proof === true)) {
+    problems.push(APPROVAL_PROOF_REQUIRED);
+  }
   if ((state === "VERIFIED" || state === "CONTRADICTED") && known.length === 0) {
     problems.push("근거 없이 확정 상태를 썼습니다.");
   }
   if ((state === "VERIFIED" || state === "CONTRADICTED") && known.every((item) => item.reference_only)) {
     problems.push("참고용 자료만으로 확정 상태를 썼습니다.");
   }
-  if ((state === "VERIFIED" || state === "CONTRADICTED") && !known.some(item =>
+  if ((state === "VERIFIED" || state === "CONTRADICTED") && !known.every(item =>
     item.citable && !item.incomplete && !item.reference_only
     && item.freshness_at_use === "FRESH" && item.directness === "DIRECT")) {
     problems.push("완전하고 유효한 직접 판단 근거가 없습니다.");

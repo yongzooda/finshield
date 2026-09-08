@@ -257,7 +257,7 @@ export function VerifyFlow() {
   };
 
   const evidenceOf = (refs: string[]) => evidence.filter((item) => refs.includes(item.ref));
-  const action = claimResults.length > 0 ? nextAction(claimResults.map((row) => row.state)) : null;
+  const action = claimResults.length > 0 ? nextAction(claimResults.map((row) => row.state), axes.some(axis => axis.result_code === "HIGH_RISK_ACTION")) : null;
 
   if (!ready) return null;
   if (!token) return <FsLoginCard onToken={setToken} />;

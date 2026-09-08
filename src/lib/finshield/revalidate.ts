@@ -45,7 +45,7 @@ export const finalizeRevalidation = async (args: {
     .filter((entry) => entry.status !== "SUCCEEDED")
     .map((entry) => entry.reasonCode ?? "AGENT_PARTIAL");
   try {
-    const guide = await buildActionGuide(args.sql);
+    const guide = await buildActionGuide(args.sql, finals);
     await args.sql`
       select private.finalize_revalidation(${args.jobId}::uuid, ${args.leaseToken}::uuid,
         ${args.runId}::uuid, ${JSON.stringify(finals)}::text::jsonb,
