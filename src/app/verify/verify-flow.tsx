@@ -18,12 +18,14 @@ import { sessionFetch } from "../session-client";
 import { useEffect, useRef, useState } from "react";
 import { FileIntake } from "./file-intake";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { readRunStream } from "../run-stream";
 import { CLAIM_STATE_VIEW, FsCard, FsChip } from "../fs-shell";
 import { FsLoginCard, useFsToken } from "../fs-session";
 import {
   AGENT_LABEL, AXIS_LABEL, axisResultOf, DIRECTNESS_LABEL, FRESHNESS_LABEL, coveLabel, nextAction,
 } from "../fs-labels";
+import { resolveInitialRunRecovery } from "./run-recovery";
 
 type Claim = {
   claim_id: string; claim_ref: string; claim_type: string; expected_revision_no?: number;
@@ -60,14 +62,20 @@ function stageDetail(event: { stage: string; masked_count?: number; claim_count?
 }
 
 export function VerifyFlow() {
+  const router = useRouter();
   const [token, setToken, ready] = useFsToken();
   const [step, setStep] = useState<"input" | "extracting" | "claims" | "running" | "result">("input");
   const [stages, setStages] = useState<{ stage: string; detail: string }[]>([]);
   const [busy, setBusy] = useState(false);
+  const [stopping, setStopping] = useState(false);
   const [fileBusy, setFileBusy] = useState(false);
   const intakeAbort = useRef<AbortController | null>(null);
+  const verifyAbort = useRef<AbortController | null>(null);
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
-  useEffect(() => () => intakeAbort.current?.abort(), []);
+  useEffect(() => () => {
+    intakeAbort.current?.abort();
+    verifyAbort.current?.abort();
+  }, []);
   const [notice, setNotice] = useState<string | null>(null);
   const [text, setText] = useState("");
   const [filePages,setFilePages] = useState<{page_no:number;text:string}[]>([]);
@@ -133,8 +141,10 @@ export function VerifyFlow() {
   /** 사용자가 중단하면 원본을 지우기 시작한다. 화면에서 물러나는 것이 아니다 (규칙 4). */
   const stopInput = async () => {
     intakeAbort.current?.abort();
+    verifyAbort.current?.abort();
     if (!token) { setNotice("다시 로그인해 주세요"); return; }
     if (!caseId || !inputId) { setStep("input"); return; }
+    setStopping(true);
     setBusy(true);
     try {
       const response = await sessionFetch(`/api/finshield/cases/${caseId}/stop`, token, {
@@ -147,6 +157,7 @@ export function VerifyFlow() {
     } catch {
       setNotice("중단 요청을 확인하지 못했습니다. 내 기록에서 처리 상태를 확인해 주세요.");
     } finally {
+      setStopping(false);
       setBusy(false);
       setClaims([]); setPicked(new Set()); setStages([]);
       setCaseId(null); setInputId(null); setActiveRunId(null); masked.current = "";
@@ -156,10 +167,14 @@ export function VerifyFlow() {
 
   const startRun = async () => {
     if (!token) { setNotice("다시 로그인해 주세요"); return; }
+    const controller = new AbortController();
+    verifyAbort.current = controller;
+    let streamedRunId = activeRunId;
+    let receivedTerminal = false;
     setBusy(true); setNotice(null); setAgents([]); setStep("running");
     try {
       const response = await sessionFetch("/api/finshield/verify", token, {
-        method: "POST", headers: authed(),
+        method: "POST", headers: authed(), signal: controller.signal,
         body: JSON.stringify({
           case_id: caseId,
           ...(activeRunId ? { replace_run_id: activeRunId } : {}),
@@ -174,6 +189,7 @@ export function VerifyFlow() {
       await readRunStream(response, (line) => {
           const event = JSON.parse(line);
           if (event.type === "run_started" && event.claims) {
+            streamedRunId = event.run_id as string;
             setActiveRunId(event.run_id as string);
             setClaims(event.claims);
           } else if (event.type === "agent_started") {
@@ -198,13 +214,46 @@ export function VerifyFlow() {
             setPartial(event.partial);
             setActiveRunId(null);
             setStep("result");
+            receivedTerminal = true;
           } else if (event.type === "error") {
+            receivedTerminal = true;
             setNotice(event.message); setStep("claims");
           }
       });
     } catch {
-      setNotice("완료 결과를 받지 못했습니다. 내 기록에서 처리 상태를 확인해 주세요."); setStep("claims");
-    } finally { setBusy(false); }
+      if (controller.signal.aborted) return;
+      if (!receivedTerminal && streamedRunId && caseId) {
+        let recovery: ReturnType<typeof resolveInitialRunRecovery> = { kind: "UNKNOWN" };
+        for (let attempt = 0; attempt < 2; attempt += 1) {
+          if (attempt > 0) await new Promise(resolve => setTimeout(resolve, 750));
+          const response = await sessionFetch(`/api/finshield/cases/${caseId}`, token, {
+            headers: authed(), signal: AbortSignal.timeout(5_000),
+          }).catch(() => null);
+          if (!response?.ok) continue;
+          const detail = await response.json().catch(() => null);
+          recovery = resolveInitialRunRecovery(detail ?? {}, streamedRunId);
+          if (recovery.kind !== "PENDING") break;
+        }
+        if (recovery.kind === "PASSPORT") {
+          router.push(`/cases/${caseId}/passport?passport_id=${recovery.passportId}`);
+          return;
+        }
+        setActiveRunId(streamedRunId);
+        setNotice(recovery.kind === "RETRY" && recovery.reasonCode === "DEADLINE_EXCEEDED"
+          ? "제한 시간 안에 검증을 끝내지 못했습니다. 같은 항목으로 다시 시도해 주세요."
+          : recovery.kind === "RETRY" && recovery.reasonCode === "CLIENT_DISCONNECTED"
+            ? "연결이 끊겨 검증을 안전하게 중단했습니다. 같은 항목으로 다시 시도해 주세요."
+            : recovery.kind === "PENDING"
+              ? "연결은 끊겼고 서버가 실행 상태를 정리하고 있습니다. 잠시 후 같은 항목으로 다시 시도해 주세요."
+              : "완료 결과를 받지 못했습니다. 내 기록에서 처리 상태를 확인하거나 같은 항목으로 다시 시도해 주세요.");
+        setStep("claims");
+      } else if (!receivedTerminal) {
+        setNotice("완료 결과를 받지 못했습니다. 내 기록에서 처리 상태를 확인해 주세요."); setStep("claims");
+      }
+    } finally {
+      if (verifyAbort.current === controller) verifyAbort.current = null;
+      setBusy(false);
+    }
   };
 
   const evidenceOf = (refs: string[]) => evidence.filter((item) => refs.includes(item.ref));
@@ -324,7 +373,7 @@ export function VerifyFlow() {
       {step === "running" ? (
         <FsCard>
           <h2 className="fs-h2">확인하는 중</h2>
-          <p className="fs-body mt-2">공식 자료를 조회하고 판단 근거를 검토하고 있습니다. 이 화면을 유지해 주세요.</p>
+          <p className="fs-body mt-2">공식 자료를 조회하고 판단 근거를 검토하고 있습니다.</p>
           <ul className="fs-steps mt-5" aria-live="polite">
             {agents.map((agent) => (
               <li key={agent.agentCode} data-state={agent.status === "RUNNING" ? "running" : "done"}>
@@ -336,6 +385,8 @@ export function VerifyFlow() {
               </li>
             ))}
           </ul>
+          <button type="button" disabled={stopping} onClick={() => void stopInput()}
+            className="fs-btn fs-btn--quiet mt-5">{stopping ? "중단하는 중" : "중단하고 올린 내용 지우기"}</button>
         </FsCard>
       ) : null}
 
