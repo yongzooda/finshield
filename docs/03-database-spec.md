@@ -896,7 +896,7 @@ PK는 `(action_guide_id, official_channel_registry_id, action_no)`이며 Guide�
 | `available_at` | `timestamptz NN` | Backoff 후 실행 가능 시각 |
 | `updated_at` | `timestamptz NN` | 상태 갱신 |
 
-Worker는 `FOR UPDATE SKIP LOCKED`로 Job을 Claim한다. 최종화는 현재 `lease_token`이 일치할 때만 성공해 만료된 Worker의 늦은 Commit을 차단한다.
+Worker는 `FOR UPDATE SKIP LOCKED`로 Job을 Claim한다. 실패 기록과 최종화는 현재 `lease_token`이 일치하고 `leased_until >= now()`인 동안에만 성공해 만료된 Worker의 늦은 Commit을 차단한다. 만료된 Job이 `max_attempts`를 소진하면 다음 Claim 시도에서 새 실행을 만들지 않고 Job을 `WORKFLOW_RETRY_EXHAUSTED`로 종결한다. 이미 활성 Run이 있으면 Provider 결과를 확정할 수 없으므로 Run과 Job을 함께 `PROVIDER_RESULT_UNKNOWN`으로 종결하며 이전 Passport는 유지한다.
 
 ### `public.revalidation_events`
 
@@ -1777,7 +1777,8 @@ FinShield Production이 아직 없으므로 기존 `0001~0006`을 새 FinShield 
 - 동일 Idempotency Key 동시 요청 2건은 Resource 하나.
 - 같은 Key·다른 Payload는 `409`.
 - Case당 초기 Run·재검증 Job 동시 생성은 각각 하나.
-- Lease 만료 후 과거 Worker의 늦은 Finalize 거부.
+- Lease 만료 후 새 Worker 선점 전과 token 회전 후 모두 과거 Worker의 늦은 실패 기록·Finalize 거부.
+- 재시도 횟수를 소진한 만료 Job은 Run 유무에 맞는 실패 이유로 Run·Job을 함께 종결하고 이전 Passport를 보존.
 - Passport version 동시 할당에 중복 없음.
 - Run 중 Claim·Profile 수정이 해당 Run의 pinned revision·version을 바꾸지 않음.
 - Run 중 Case 삭제가 후속 Passport·알림 생성을 차단.

@@ -1,3 +1,8 @@
+## 2026-09-08 재검증 만료 Lease와 소진 Orphan 보완
+
+- `REV-001`·`N-AVL-005`·`N-OPS-004`: 재검증 실패 기록과 최종화는 token 일치뿐 아니라 현재 Lease가 만료되지 않았을 때만 허용한다. 최대 시도를 소진한 만료 Job은 새 모델 실행 없이 Run 유무에 맞춰 Run·Job을 함께 실패 종결하고 이전 Passport를 보존한다.
+- Migration `0053`과 SQL 회귀 시험을 추가했다. 실제 FinShield Supabase 적용, 실제 Vercel 장애 20종과 Deadline 검증은 남아 있으므로 `B-JOB-01`·`B-DEADLINE-01`을 채택하지 않으며 Implementation `NO-GO`, Release `NOT-EVALUATED`를 유지한다. [검증 범위](docs/ops/revalidation-fencing.md)를 따른다.
+
 ## 2026-09-08 회원 복수 Claim 실행 예산 변경
 
 - Production 실측에서 7개 Claim이 71.520초에 PARTIAL로 끝났고 인용 오류는 사라졌지만 Product/Institution Agent가 12.187초에 `DEADLINE_EXCEEDED`로 실패했다. Agent 선택 9초를 11초, Domain 단계 16초를 18초로 조정하고 전체 회원 Text 예산은 115초로 120초 상한 안에 유지했다.

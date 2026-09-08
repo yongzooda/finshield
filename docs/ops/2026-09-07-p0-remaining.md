@@ -32,7 +32,7 @@ Fast 개발 실제 완료: main run 34128723611, 4가족 20 Claim, USD 0.040829(
 | AUTH-005·D-014·SEC-PRI-005 | Migration 0036 선행 정리 Guard, Draft Case 삭제·반복 요청 실제 확인 | 전체 계정 탈퇴·신규 작업 경합·Auth 마지막 삭제 구현 및 격리 검증, Live 미검증 |
 | INP-001~013·CLM-001~004·B-OCR-01 | Draft native PDF·PNG·10쪽 스캔의 실제 처리·물리 삭제 연결 | 정식 field F1 0.9791667 실패 유지, 개발 진단·새 가족 사전등록 평가·OCR 확인 UX 필요 |
 | AI-006~008·EV-002~009·B-RETRIEVAL-01 | 후보 생성 PASS, 종단 두 차례 미달. 이번 실제 worker 조회에서 KB 문서·청크·Embedding 각 0건 | 기존 gate 재측정 금지, 범위/Provider 별도 결정·공식 자료 적재·미연결 도구 필요 |
-| REV-001~007·N-PERF-005/009·B-JOB-01·B-DEADLINE-01 | Draft 실제 재검증 NO_CHANGE·과거 판 보존, 격리 DB 종결 rollback·중복 복구 | 실제 배포 장애 20종·Lease·취소 경합·기한·Orphan·TTL 검증 및 Gate 미채택 |
+| REV-001~007·N-PERF-005/009·B-JOB-01·B-DEADLINE-01 | Draft 실제 재검증 NO_CHANGE·과거 판 보존, 격리 DB 종결 rollback·중복 복구, 만료 Lease 쓰기 차단·재시도 소진 Orphan 종결 | 실제 Supabase 적용, Vercel 장애 20종·취소/완료 경합·전체 기한·TTL 검증 및 Gate 미채택 |
 | AI-009~021·EV-001~016·RES-001 | Draft 단일 Claim 실제 실행·저장과 실패 안전 상태 | 복수 Claim은 부분 결과, 독립 검토 품질·실질적 적합성·일반 상품 유효 시점 미완료 |
 | PC-001~011 | Draft 가입 사실·계약 문구·설문 4개 저장·복원 실제 확인 | Sales/Regulation Agent 재사용·가입 후 파일 경계·법적 표현 품질 미완료 |
 | PASS-002/004·CASE-004/006·REV-005 | Draft 이전 Passport·새 판·새로고침 복원 | 프로필 변경 불변성·다른 기기 완료 기록·50건 이후 목록·Outbox Orphan 검증 필요 |
