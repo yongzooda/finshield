@@ -1,9 +1,10 @@
 /** 모델에 넘기는 것은 인용에 필요한 만큼이다 */
 
 import { describe, expect, it } from "vitest";
+import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import {
-  buildJudgeBatches, citationReferenceSchema, claimBrief, domainOutputSchemaFor, evidenceBrief, judgeOutputSchemaFor,
-  mergeJudgeBatchOutputs,
+  buildJudgeBatches, citationReferenceSchema, claimBrief, coveOutputSchemaFor, decisiveEvidence,
+  domainOutputSchemaFor, evidenceBrief, judgeOutputSchemaFor, mergeJudgeBatchOutputs, redTeamOutputSchemaFor,
 } from "../agents/model-adapter";
 import type { ToolEvidence } from "../schemas";
 
@@ -87,6 +88,71 @@ describe("AI-017 모델 출력 Citation 목록", () => {
       claim_results: [{ claim_ref: "C1", state: "UNKNOWN", evidence_refs: ["E99"], withheld_reason: "합성 보류", rationale_masked: "합성 판단" }],
       conflicts: [],
     }).success).toBe(false);
+  });
+
+  it("확정 상태는 신선하고 완전한 직접 근거만 인용하게 한다", () => {
+    const direct = evidence({ evidence_ref: "E1" });
+    const reference = evidence({
+      evidence_ref: "E2", citable: false, reference_only: true,
+      freshness_at_use: "STALE", directness: "INDIRECT",
+    });
+    const domain = domainOutputSchemaFor([direct, reference]);
+    const finding = {
+      claim_ref: "C1", relation: "SUPPORT", summary_masked: "합성 판단", limits: [],
+    };
+    expect(decisiveEvidence([direct, reference]).map((item) => item.evidence_ref)).toEqual(["E1"]);
+    expect(domain.safeParse({
+      schema_version: "out-v1", findings: [{ ...finding, state: "VERIFIED", evidence_refs: ["E1"] }],
+      out_of_scope_claim_refs: [],
+    }).success).toBe(true);
+    expect(domain.safeParse({
+      schema_version: "out-v1", findings: [{ ...finding, state: "VERIFIED", evidence_refs: ["E2"] }],
+      out_of_scope_claim_refs: [],
+    }).success).toBe(false);
+    expect(domain.safeParse({
+      schema_version: "out-v1", findings: [{ ...finding, state: "UNKNOWN", evidence_refs: ["E2"] }],
+      out_of_scope_claim_refs: [],
+    }).success).toBe(true);
+  });
+
+  it("직접 판단 근거가 없으면 확정·확인·반대근거 상태 자체를 허용하지 않는다", () => {
+    const reference = evidence({
+      evidence_ref: "E2", citable: false, reference_only: true,
+      freshness_at_use: "STALE", directness: "INDIRECT",
+    });
+    const domain = domainOutputSchemaFor([reference]);
+    const judge = judgeOutputSchemaFor([reference]);
+    const cove = coveOutputSchemaFor([reference]);
+    const redTeam = redTeamOutputSchemaFor([reference]);
+    expect(domain.safeParse({
+      schema_version: "out-v1",
+      findings: [{ claim_ref: "C1", state: "VERIFIED", relation: "SUPPORT", evidence_refs: ["E2"], summary_masked: "합성 판단", limits: [] }],
+      out_of_scope_claim_refs: [],
+    }).success).toBe(false);
+    expect(judge.safeParse({
+      schema_version: "out-v1",
+      claim_results: [{ claim_ref: "C1", state: "CONTRADICTED", evidence_refs: ["E2"], withheld_reason: null, rationale_masked: "합성 판단" }],
+      conflicts: [],
+    }).success).toBe(false);
+    expect(cove.safeParse({
+      schema_version: "out-v1",
+      results: [{ claim_ref: "C1", status: "CONFIRMED", evidence_refs: ["E2"], note_masked: "합성 판단" }],
+    }).success).toBe(false);
+    expect(redTeam.safeParse({
+      schema_version: "out-v1",
+      results: [{ claim_ref: "C1", status: "COUNTER_EVIDENCE", evidence_refs: ["E2"], note_masked: "합성 판단" }],
+    }).success).toBe(false);
+  });
+
+  it("상태별 Citation 계약을 Anthropic Structured Output 형식으로 변환한다", () => {
+    const pool = [evidence({ evidence_ref: "E1" }), evidence({
+      evidence_ref: "E2", citable: false, reference_only: true,
+      freshness_at_use: "STALE", directness: "INDIRECT",
+    })];
+    expect(() => zodOutputFormat(domainOutputSchemaFor(pool))).not.toThrow();
+    expect(() => zodOutputFormat(coveOutputSchemaFor(pool))).not.toThrow();
+    expect(() => zodOutputFormat(redTeamOutputSchemaFor(pool))).not.toThrow();
+    expect(() => zodOutputFormat(judgeOutputSchemaFor(pool))).not.toThrow();
   });
 });
 
