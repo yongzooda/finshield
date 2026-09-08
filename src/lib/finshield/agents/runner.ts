@@ -200,7 +200,7 @@ export const runDomainAgent = async <T = DomainAgentOutput>(args: {
     }
   } catch (error) {
     status = "FAILED";
-    reasonCode = (error as {code?:string}).code === "MODEL_BUDGET_BLOCKED" ? "TOOL_BUDGET" : decisionSignal.aborted || (error as Error).name === "APIConnectionTimeoutError" ? "DEADLINE_EXCEEDED" : (error as Error).message === "MODEL_OUTPUT_CLAIM_COVERAGE_INVALID" ? "OUTPUT_CLAIM_COVERAGE_INVALID" : "MODEL_CALL_FAILED";
+    reasonCode = (error as {code?:string}).code === "MODEL_BUDGET_BLOCKED" ? "TOOL_BUDGET" : decisionSignal.aborted || (error as Error).name === "APIConnectionTimeoutError" ? "DEADLINE_EXCEEDED" : (error as Error).message === "MODEL_OUTPUT_CLAIM_COVERAGE_INVALID" ? "OUTPUT_CLAIM_COVERAGE_INVALID" : /^MODEL_[A-Z_]{1,58}$/.test(String((error as {code?: string}).code ?? "")) ? String((error as {code: string}).code) : "MODEL_CALL_FAILED";
   }
 
   if (status === "SUCCEEDED" && reasonCode) status = "PARTIAL";

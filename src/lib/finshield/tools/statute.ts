@@ -49,11 +49,13 @@ const articleNo = (unit: LawArticle): string | null => {
 };
 
 const articleText = (unit: LawArticle): string => {
+  const content = (value: unknown): string[] => Array.isArray(value) ? value.flatMap(content)
+    : typeof value === "string" ? [value.trim()] : [];
   const collect = (value: unknown): string[] => {
     if (Array.isArray(value)) return value.flatMap(collect);
     if (!value || typeof value !== "object") return [];
     return Object.entries(value).flatMap(([key, entry]) =>
-      /^(항|호|목)내용$/u.test(key) && typeof entry === "string" ? [entry.trim()] : collect(entry));
+      /^(항|호|목)내용$/u.test(key) ? content(entry) : collect(entry));
   };
   const paragraphs = collect(unit.항).filter(Boolean);
   return [String(unit.조문내용 ?? "").trim(), ...paragraphs].filter(Boolean).join("\n");

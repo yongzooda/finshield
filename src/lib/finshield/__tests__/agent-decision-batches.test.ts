@@ -18,7 +18,7 @@ describe("독립 검토의 묶음 판단", () => {
     const pending: (() => void)[] = [];
     call.mockImplementation(async (options) => {
       const body = JSON.parse(options.user);
-      expect(body.claims).toHaveLength(3);
+      expect(body.claims).toHaveLength(2);
       expect(body.assessed_on).toMatch(/^\d{4}-\d{2}-\d{2}$/);
       expect(body).not.toHaveProperty("findings");
       expect(options.signal).toBe(controller.signal);
@@ -28,8 +28,8 @@ describe("독립 검토의 묶음 판단", () => {
       })) };
     });
     const result = createAgentModel().decide({ system: "합성 검토", signal: controller.signal, input, evidence: [], observations: [] });
-    expect(call).toHaveBeenCalledTimes(2);
-    pending[1](); pending[0]();
+    expect(call).toHaveBeenCalledTimes(3);
+    pending[2](); pending[1](); pending[0]();
     expect(await result).toMatchObject({ results: claims.map(claim => ({ claim_ref: claim.claim_ref })) });
   });
   it("다른 묶음의 항목이나 중복·누락을 정상 완료로 합치지 않는다", () => {
@@ -39,7 +39,7 @@ describe("독립 검토의 묶음 판단", () => {
   });
   it("한 묶음의 실패를 전체 검토 성공으로 바꾸지 않는다", async () => {
     call.mockRejectedValueOnce(new Error("합성 시간 초과"));
-    call.mockResolvedValueOnce({ schema_version: "out-v1", results: claims.slice(3).map(claim => ({
+    call.mockResolvedValue({ schema_version: "out-v1", results: claims.slice(2,4).map(claim => ({
       claim_ref: claim.claim_ref, status: "INCONCLUSIVE", evidence_refs: [], note_masked: "근거 없음",
     })) });
     await expect(createAgentModel().decide({ system: "합성 검토", input, evidence: [], observations: [] })).rejects.toThrow("합성 시간 초과");
@@ -86,15 +86,15 @@ it("Judge의 고정 형식은 미제공 인용을 서버에서 차단한다", ()
 
 it("Judge 한 묶음의 시간 초과가 다른 묶음의 실제 판단을 버리지 않는다", async () => {
   call.mockRejectedValueOnce(Object.assign(new Error("합성 시간 초과"),{name:"APIConnectionTimeoutError"}));
-  call.mockResolvedValueOnce({schema_version:"out-v1",conflicts:[],claim_results:claims.slice(3).map(claim=>({
+  call.mockImplementation(async options => ({schema_version:"out-v1",conflicts:[],claim_results:JSON.parse(options.user).claims.map((claim: {claim_ref:string})=>({
     claim_ref:claim.claim_ref,state:"NEED_MORE_INFORMATION",evidence_refs:[],withheld_reason:"개별 자료 없음",rationale_masked:"추가 자료 확인",
-  }))});
+  }))}));
   const model=createJudgeModel();
   const result=await model.judge({claims,findings:[],evidence:[]});
   expect(model.failureReason?.()).toBe("JUDGE_BATCH_DEADLINE_EXCEEDED");
   expect(result).toMatchObject({claim_results:[
-    ...claims.slice(0,3).map(claim=>({claim_ref:claim.claim_ref,state:"UNKNOWN",evidence_refs:[],withheld_reason:"최종 판단 시간이 초과됐습니다."})),
-    ...claims.slice(3).map(claim=>({claim_ref:claim.claim_ref,state:"NEED_MORE_INFORMATION",rationale_masked:"추가 자료 확인"})),
+    ...claims.slice(0,2).map(claim=>({claim_ref:claim.claim_ref,state:"UNKNOWN",evidence_refs:[],withheld_reason:"최종 판단 시간이 초과됐습니다."})),
+    ...claims.slice(2).map(claim=>({claim_ref:claim.claim_ref,state:"NEED_MORE_INFORMATION",rationale_masked:"추가 자료 확인"})),
   ]});
 });
 

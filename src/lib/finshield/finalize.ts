@@ -123,6 +123,14 @@ export const buildFinalClaims = (args: {
           policy_reason_code: independent ? "FIRST_CANONICAL_SOURCE" : eligible ? "DUPLICATE_CANONICAL_SOURCE" : "CONTEXT_ONLY_SOURCE" };
       });
 
+    // EV-005·DB 7.3: 판단 불가와 자료 충돌을 구분한다. 한쪽 관계만 있는
+    // 모델 CONFLICT를 DB에 보내 전체 Run 저장을 실패시키지 않는다.
+    if (decided.state === "CONFLICT" && !(evidences.some(e => e.relation === "SUPPORT")
+      && evidences.some(e => e.relation === "CONTRADICT"))) {
+      decided.state = "UNKNOWN";
+      decided.reasonCode = "CONFLICT_EVIDENCE_INCOMPLETE";
+    }
+
     return {
       claim_id: claim.claimId,
       claim_type: claim.claim_type,

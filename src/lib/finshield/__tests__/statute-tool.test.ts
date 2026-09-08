@@ -107,9 +107,10 @@ it("정확한 법률을 우선하고 항·호·목의 조건을 누락하지 않
     { 법령명한글: "금융소비자 보호에 관한 법률", 법령ID: "123", 시행일자: "20260101" },
   ] } });
   lawService.mockResolvedValue({ 법령: { 조문: { 조문단위: [{ 조문번호: "19", 조문내용: "제19조 설명의무", 항: [
-    { 항내용: "① 다음 사항을 설명한다", 호: [{ 호내용: "1. 비용", 목: [{ 목내용: "가. 중도상환" }] }] },
+    { 항내용: "① 다음 사항을 설명한다", 호: [{ 호내용: "1. 비용", 목: [{ 목내용: [["가. 중도상환", "1) 금리 및 변동 여부"]] }] }] },
   ] }] } } });
   const result = await lookupStatute({ query: "금융소비자 보호에 관한 법률 제19조" });
   expect(result.items).toHaveLength(1); expect(result.items[0].excerptMasked).toContain("가. 중도상환");
+  expect(result.items[0].excerptMasked).toContain("1) 금리 및 변동 여부");
   expect(result.items[0].officialId).toBe("law.go.kr:123:제19조");
 });
