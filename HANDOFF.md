@@ -1,3 +1,10 @@
+## 2026-09-08 최신 main DB 경계 증거 재채택
+
+- main `fb360014e54647dd99d37970a1ed733ddb80fd5f`에서 Rate·Consent·Storage·Delete·Health를 다시 측정했다. run `34195224699`·`34195228845`·`34195233135`·`34195237392`·`34195239872`가 각 strict policy를 통과해 PR #271에서 채택한다.
+- 삭제 대상 35건의 원본·OCR·Vector·기발급 URL 잔존과 teardown 객체 잔존은 0건이다. Health 100회는 외부 Provider 전송 0건이며 DB 장애를 503으로 종결했다. 이 결과는 전체 Live Vertical Slice나 Workflow 장애 시험을 대신하지 않는다.
+- 같은 main의 Supabase run `34195221430`은 원격에 Migration 0045의 `private.prepare_initial_verification_retry` 함수 하나가 없어 실패했다. 다른 schema digest와 RLS 시험은 일치했으나 실패를 채택하지 않는다. 함수 복구 뒤 재측정한다.
+- 현재 부분 PASS는 12/20이다. OCR·Retrieval·Supabase·Processor Privacy·Vercel Privacy·Job·Deadline·Component Spike가 남아 있어 Implementation `NO-GO`, Release `NOT-EVALUATED`를 유지한다.
+
 ## 2026-09-08 회원 복수 Claim 심사 위험 보완
 
 - Production 가입 오류는 직접 가입 설정 복원 뒤 합성 회원가입 200·프로필 조회 200·탈퇴 완료·재로그인 401로 확인했다. 운영 Anthropic 상한은 전체 일 USD 20, 사용자·Case USD 3, Run USD 0.80이며 Cohere는 전체 일 USD 1, 사용자·Case USD 0.25, Run USD 0.10이다. Cohere 학습 사용은 Off다. `rerank-v4.0-fast`는 Production에서 차단하고 승인된 합성 개발 시험만 최대 USD 0.05로 유지한다.
