@@ -1,3 +1,7 @@
+## 2026-09-09 13시 40분 GitHub 과금 예외 승인과 main 통합
+
+사용자가 과금 장애 때 로컬 검사 후 PR을 계속 통합하도록 승인했다. 소유자 계정의 PR 전용 Ruleset 예외만 추가했고 기존 규칙은 유지했다. PR #301은 검증한 head af8171f와 main8f9b40a의 병합 후보b1905bf 기준으로 squash merge돼 main은6bfdff2다. merge tree는 기존 기능 branch HEAD와 일치한다. 아래의 PR301 미병합·main8f9b40a 문장은 과거 기록이다. 후속 에이전트는 AGENTS와 규칙집의 로컬 검증 병합 절차를 적용하고 같은 승인을 다시 요청하지 않는다. 정식 품질 Gate는 여전히 별도다.
+
 ## 2026-09-09 05시 OCR·인용·복구 통합 운영 반영
 
 - 최신 공개 운영은 `547af19b5833e1d63c70a25b31b156059b0cdd7d`, 배포 `dpl_6G8wpYeQwGJyrosDbBX34hV2QQMJ`, Manifest v20·Agent v12·Tool v5다. 원격은 0069까지 적용했다. 이전 아래 기록은 시간별 과거 상태다.

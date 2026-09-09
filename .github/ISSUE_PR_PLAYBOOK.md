@@ -332,9 +332,24 @@ FinShield 규칙: **계획의 정본은 `HANDOFF.md` 하나**, 이슈는 끝난 
 ### 머지 규칙
 
 - `main` = 배포 브랜치 (자동 배포가 물려 있으면 명시)
-- 머지 전 CI 통과 필수 — 사람 기억이 아니라 기계가 지키게
+- 머지 전 필수 검사 통과. 원격 CI가 과금으로 시작되지 않을 때는 아래 사용자 승인 로컬 검증 병합 절차를 따른다.
 - squash merge (커밋 1개 = 작업 단위 1개)
 - **머지 후 브랜치를 지우지 않는다** — 작업 이력이 남는다
+
+### GitHub 과금 장애의 로컬 검증 병합
+
+2026-09-09 사용자가 GitHub 과금 때문에 개발·PR 통합을 중단하지 말고 직접 검사한 뒤 계속 병합하도록 승인했다. 이 승인은 후속 작업에도 적용하며 매번 다시 묻지 않는다.
+
+1. 원격 check의 annotation을 읽어 과금·지출 한도로 시작하지 못한 것인지 확인한다. 실제 코드·검사 실패는 먼저 해결한다.
+2. 현재 origin/main과 PR HEAD의 SHA를 고정하고 별도 clean 작업 폴더에서 실제 병합 후보를 만든다. 사용자 작업 폴더나 진행 중 브랜치를 덮지 않는다.
+3. `.github/workflows/pr-check.yml`의 필수 run 단계를 로컬에서 모두 실행한다. 기존 `evidence/development/citation-contract/run-local-required.mjs <PR번호>`를 사용할 수 있다. 합성 CI 환경을 쓰고 실제 Provider 시험과 구분한다. 필요한 DB·보안·실제 배포 검증도 변경 범위에 맞게 완료한다.
+4. base SHA·head SHA·병합 후보 SHA·명령·성공/실패 로그·skip·검토 및 배포 결과를 PR에 기록한다. base나 head가 바뀌면 새 병합 후보로 필요한 검사를 다시 수행한다.
+5. 검사가 통과하면 소유자 `yongzooda`의 PR 전용 예외와 exact head 조건으로 한국어 squash merge한다. 커밋 훅·한국어 검사·실패한 테스트를 우회하거나 원격 check 성공 상태를 만들어 넣지 않는다. main 직접 push와 강제 push, 브랜치 삭제를 하지 않는다.
+6. 실제 merge commit의 코드가 검증 후보와 일치하는지 확인하고 main 배포·Runtime·필요한 DB 정합성을 검증한다. clean 기준 폴더를 최신 origin/main으로 fast-forward하며 작업 브랜치를 보존한다.
+
+Ruleset `Protect main`(22094722)은 active와 기존 required check·최신 base·PR 요구·삭제/강제 push 금지를 유지한다. 추가한 예외는 소유자 User의 `pull_request` 모드 한 개다. 이 설정은 과금 원인을 자동 판단하지 않으므로 위 검사·기록 절차를 지켜 사용한다. 원격 CI가 정상 실행될 때는 정상 CI 절차를 따른다.
+
+이 절차는 PR 통합 승인이며 정식 Evidence의 main A=W·원본 artifact·별도 Adoption·TTL이나 Implementation/Release Gate 합격식을 바꾸지 않는다. 미완료 품질을 PASS로 표시하지 않는다. [GitHub Ruleset API 계약](https://docs.github.com/en/rest/repos/rules)을 따른다.
 
 ### PR ↔ 이슈 연결
 
