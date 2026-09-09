@@ -1,0 +1,179 @@
+- link "본문 바로가기" [ref=e1]
+- banner
+  - link "FinShield 홈" [ref=e2]
+    - StaticText "FinShield"
+  - navigation "주 메뉴" [ref=e3]
+    - link "홈" [ref=e7]
+      - StaticText "홈"
+    - link "새 검증" [ref=e8]
+      - StaticText "새 검증"
+    - link "내 기록" [ref=e9]
+      - StaticText "내 기록"
+    - link "가입 후 보호" [ref=e10]
+      - StaticText "가입 후 보호"
+  - link "알림" [ref=e4]
+  - link "금융 프로필" [ref=e5]
+- main
+  - sectionheader
+    - paragraph
+      - StaticText "검증 기록"
+    - heading "파일 권유 검증" [level=1, ref=e11]
+    - paragraph
+      - StaticText "2026. 9. 8. 오후 10:20:00"
+    - link "목록으로" [ref=e12]
+    - link "검증 근거 기록" [ref=e13]
+    - link "다시 확인하기" [ref=e14]
+  - generic
+    - heading "지금 하실 일" [level=2, ref=e15]
+    - list
+      - listitem [level=1]
+        - paragraph
+          - StaticText "송금·원격제어 앱 설치를 멈추고 공식 창구로 확인하세요"
+        - paragraph
+          - StaticText "권유문에 위험한 행동 요구가 있습니다. 권유자가 준 연락처를 사용하지 말고 아래 공식 창구에서 확인하세요. 개별 사실 판정이 보류돼도 이 예방 안내를 먼저 따라 주세요."
+        - paragraph
+          - StaticText "서민금융콜센터 1397 (국번 없이)"
+  - generic
+    - StaticText "일부 검토 미완료"
+    - paragraph
+      - StaticText "일부 검토를 끝내지 못했습니다. 아래에서 완료된 검토 결과와 확인하지 못한 항목을 구분해 보실 수 있습니다."
+    - list
+      - listitem [level=1]
+        - ListMarker "• "
+        - StaticText "일부 근거가 해당 판단을 뒷받침하는지 확인하지 못했습니다."
+    - paragraph
+      - StaticText "검토가 제한된 범위: 사칭·접근 경로 확인 · 상품·기관 확인 · 반대 근거 찾기 · 설명·권유 방식 확인"
+  - generic
+    - heading "세 가지 확인 결과" [level=2, ref=e16]
+    - paragraph
+      - StaticText "진위성, 거래 위험, 개인 적합성의 확인 결과입니다."
+    - list
+      - listitem [level=1]
+        - StaticText "상품·기관 정보"
+        - StaticText "불일치 항목 있음"
+        - paragraph
+          - StaticText "상품과 기관과 접근 경로가 공식 자료와 맞는지 본 결과입니다."
+      - listitem [level=1]
+        - StaticText "거래·권유 위험"
+        - StaticText "위험한 행동 요구"
+        - paragraph
+          - StaticText "선입금 또는 원격제어 앱 설치 요구가 포함되어 있습니다. 송금·설치를 멈추고 공식 창구로 확인하세요. 범죄 사실을 확정한 판단은 아닙니다."
+        - paragraph
+          - StaticText "판단의 한계"
+        - list
+          - listitem [level=2]
+            - ListMarker "• "
+            - StaticText "가입 전이라 확인할 수 없는 항목이 있음"
+      - listitem [level=1]
+        - StaticText "적합성"
+        - StaticText "적합성 판단 보류"
+        - paragraph
+          - StaticText "비상 자금이 한 달 치 미만에 대한 주의사항이 있습니다. 상환 가능 여부나 가입 승인을 판정한 결과는 아닙니다."
+        - paragraph
+          - StaticText "판단의 한계"
+        - list
+          - listitem [level=2]
+            - ListMarker "• "
+            - StaticText "현재 유효한 상품 조건을 확인하지 못했습니다."
+          - listitem [level=2]
+            - ListMarker "• "
+            - StaticText "대출 실행액·월 상환액·필수 지출이 없어 상환 부담을 판단하지 못했습니다."
+          - listitem [level=2]
+            - ListMarker "• "
+            - StaticText "연소득·신용평점 등 가입 요건을 확인하지 못했습니다."
+          - listitem [level=2]
+            - ListMarker "• "
+            - StaticText "조기 상환 가능 여부와 수수료를 확인하지 못했습니다."
+          - listitem [level=2]
+            - ListMarker "• "
+            - StaticText "금융회사의 대출 승인 여부를 판단한 결과는 아닙니다."
+  - generic
+    - heading "항목별 결과와 근거" [level=2, ref=e17]
+    - paragraph
+      - StaticText "입력한 권유 내용이 공식 자료와 맞는지 비교한 결과입니다. 위험한 행동 요구와 사실 확인 결과는 별도로 표시합니다."
+    - list
+      - listitem [level=1]
+        - paragraph
+          - StaticText "햇살론15 정부지원 대출 승인 대상이다."
+        - StaticText "추가 정보 필요"
+        - paragraph
+          - StaticText "상품 보증 종료 고지만 있고 개인 승인여부 심사자료 없음."
+        - group
+          - DisclosureTriangle "판단 과정과 검토 상태" [expanded=false]
+            - StaticText "판단 과정과 검토 상태"
+        - button "근거 2건 보기" [expanded=false, ref=e23]
+      - listitem [level=1]
+        - paragraph
+          - StaticText "햇살론15 대출은 오늘 안에 신청해야 한다."
+        - StaticText "확인 근거 부족"
+        - paragraph
+          - StaticText "오늘 신청 마감을 뒷받침할 공식 자료가 없음, 상품은 이미 종료."
+        - group
+          - DisclosureTriangle "판단 과정과 검토 상태" [expanded=false]
+            - StaticText "판단 과정과 검토 상태"
+        - button "근거 3건 보기" [expanded=false, ref=e24]
+      - listitem [level=1]
+        - paragraph
+          - StaticText "햇살론15 진행을 위해 보증료 30만 원을 먼저 입금해야 한다."
+        - StaticText "위험한 행동 요구"
+        - StaticText "공식 예방 지침과 불일치"
+        - paragraph
+          - StaticText "권유문에 대출 전 비용을 먼저 보내라는 요구가 있습니다. 공식 예방 지침에 따라 입금 전에 공식 창구로 확인하세요. 실제 사기 여부를 확정한 결과는 아닙니다."
+        - group
+          - DisclosureTriangle "판단 과정과 검토 상태" [expanded=false]
+            - StaticText "판단 과정과 검토 상태"
+        - button "근거 5건 보기" [expanded=false, ref=e25]
+      - listitem [level=1]
+        - paragraph
+          - StaticText "햇살론15는 최대 2천만 원까지 대출 가능하다."
+        - StaticText "확인 근거 부족"
+        - paragraph
+          - StaticText "보증 종료 고지만 있어 현재 한도 확인 불가."
+        - group
+          - DisclosureTriangle "판단 과정과 검토 상태" [expanded=false]
+            - StaticText "판단 과정과 검토 상태"
+        - button "근거 1건 보기" [expanded=false, ref=e26]
+      - listitem [level=1]
+        - paragraph
+          - StaticText "햇살론15는 연 3% 고정금리이다."
+        - StaticText "공식 자료와 불일치"
+        - paragraph
+          - StaticText "햇살론15는 보증 종료되어 현재 해당 금리로 가입할 수 없습니다."
+        - group
+          - DisclosureTriangle "판단 과정과 검토 상태" [expanded=false]
+            - StaticText "판단 과정과 검토 상태"
+        - button "근거 1건 보기" [expanded=false, ref=e27]
+      - listitem [level=1]
+        - paragraph
+          - StaticText "상담원 안내에 따라 원격제어 앱을 설치해야 한다."
+        - StaticText "위험한 행동 요구"
+        - StaticText "공식 예방 지침과 불일치"
+        - paragraph
+          - StaticText "권유문에 원격제어 앱 설치 요구가 있습니다. 설치를 멈추고 공식 창구로 확인하세요. 실제 발신자나 앱의 악성 여부를 확정한 결과는 아닙니다."
+        - group
+          - DisclosureTriangle "판단 과정과 검토 상태" [expanded=false]
+            - StaticText "판단 과정과 검토 상태"
+        - button "근거 7건 보기" [expanded=false, ref=e28]
+  - generic
+    - heading "가입 후 보호" [level=2, ref=e18]
+    - paragraph
+      - StaticText "가입 사실을 등록하면 이 기록에서 설명과 계약 조건을 이어서 점검할 수 있습니다."
+    - StaticText "가입 전"
+    - StaticText "가입 후 점검 전"
+    - link "가입·피해 사실 등록" [ref=e19]
+  - group
+    - DisclosureTriangle "진행 기록" [expanded=false]
+      - StaticText "진행 기록"
+- contentinfo
+  - StaticText "FinShield"
+  - navigation "서비스 정보" [ref=e6]
+    - link "신뢰센터" [ref=e20]
+    - link "개인정보·데이터 관리" [ref=e21]
+    - link "서비스 체험" [ref=e22]
+  - paragraph
+    - StaticText "금융 거래 판단을 돕는 참고 정보입니다. 금융·법률 자문이나 거래의 안전을 보장하지 않습니다."
+  - paragraph
+    - StaticText "각 판단에 사용한 공식 자료와 확인 범위는 결과의 근거에서 확인할 수 있습니다."
+- button "Open Next.js Dev Tools" [expanded=false, ref=e29]
+  - image
+- alert

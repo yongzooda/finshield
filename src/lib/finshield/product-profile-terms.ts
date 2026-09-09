@@ -4,11 +4,15 @@ export function extractProfileTerms(text: string) {
   const terms = [...text.matchAll(/대출기간\s+(\d{1,2})년\s*(?:또는|,)\s*(\d{1,2})년\s+우대금리/gu)];
   const term = terms.length === 1 ? terms[0] : null;
   const repayment = /상환방법\s+(원리금균등분할상환|원금균등분할상환|만기일시상환)\s+지원대상/u.exec(text);
+  const rate = /대출금리\s+연\s*(\d+(?:\.\d+)?)%\s*\(단일금리\)/u.exec(text);
+  const limit = /대출한도\s+최대\s*(\d+(?:,\d{3})*)만\s*원/u.exec(text);
   return {
     schema_version: "kinfa-hessal-profile-terms-v1",
     product_id: "kinfa:hessalLoan", product_name: "햇살론15", product_kind: "LOAN",
     term_months: term ? [...new Set([Number(term[1]) * 12, Number(term[2]) * 12])].sort((a, b) => a - b) : [],
     repayment_method: repayment?.[1] ?? null,
+    annual_rate_percent: rate ? Number(rate[1]) : null,
+    maximum_amount_krw: limit ? Number(limit[1].replaceAll(",", "")) * 10000 : null,
     // 별도 본문 확인이 필요한 조건은 '없음'으로 바꾸지 않는다.
     early_repayment_fee: "UNKNOWN",
     income_eligibility_basis: /지원대상[\s\S]*연소득/u.test(text) ? "ANNUAL_INCOME_AND_OTHER_CRITERIA" : "UNKNOWN",

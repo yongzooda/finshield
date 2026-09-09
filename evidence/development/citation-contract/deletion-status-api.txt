@@ -1,0 +1,3 @@
+{"stage":"deletion-status","path":"/api/finshield/account/delete","status":200,"elapsed_ms":3285,"types":["COMPLETED"]}
+{"deletion_status":"COMPLETED"}
+{"stage":"deletion-status","path":"/api/finshield/session","status":401,"elapsed_ms":2685,"types":["json"]}

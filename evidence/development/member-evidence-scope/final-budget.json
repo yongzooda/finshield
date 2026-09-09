@@ -1,0 +1,10 @@
+{
+  "observed_at": "2026-09-08T13:37:39.617824+00:00",
+  "source": "FinShield Supabase SQL Editor의 합성 소유자 Counter 조회",
+  "scope": "OWNER_DAY",
+  "provider": "anthropic",
+  "limit_microunits": 3000000,
+  "consumed_microunits": 2100536,
+  "reserved_microunits": 574104,
+  "old_unknown_reservations_released": false
+}

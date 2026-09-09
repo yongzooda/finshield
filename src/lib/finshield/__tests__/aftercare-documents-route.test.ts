@@ -28,6 +28,11 @@ it("확인 응답 유실은 같은 항목 재시도를 안내한다",async()=>{
  m.sql.mockRejectedValueOnce(new Error("synthetic lost response"));const response=await POST(request(),params);
  expect(response.status).toBe(503);expect(await response.text()).toContain("같은 항목");expect(m.cleanup).not.toHaveBeenCalled();
 });
+it("저신뢰 OCR 문구의 원본 대조가 없으면 구체적으로 다시 안내한다",async()=>{
+ m.sql.mockRejectedValueOnce(Object.assign(new Error("OCR_REVIEW_REQUIRED"),{code:"23514"}));
+ const response=await POST(request(),params);expect(response.status).toBe(409);
+ expect(await response.text()).toContain("원본과 대조");expect(m.cleanup).not.toHaveBeenCalled();
+});
 it("자유 문구의 연락처는 모델과 DB 경계 전에 가린다",async()=>{
  await POST(request({...body,claims:[{...body.claims[0],statement_masked:"문의는 010-1234-5678 입니다"}]}),params);
  expect(JSON.stringify(m.sql.mock.calls)).not.toContain("010-1234-5678");

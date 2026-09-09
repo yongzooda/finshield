@@ -16,7 +16,7 @@ import { filterToolText } from "@/lib/tools/filter";
 import { sha256, type SourceItem, type ToolOutcome, type ToolCallContext } from "./runtime";
 
 const MAX_BODY_FETCH = 2;
-const MAX_EXCERPT = 1200;
+const MAX_EXCERPT = 6000;
 const ARTICLE_REFERENCE = /제\s*(\d+)\s*조(?:\s*의\s*(\d+))?/;
 
 type LawRow = { 법령명한글?: string; 법령ID?: string; 시행일자?: string; 공포일자?: string; 법령상세링크?: string };
@@ -49,9 +49,15 @@ const articleNo = (unit: LawArticle): string | null => {
 };
 
 const articleText = (unit: LawArticle): string => {
-  const paragraphs = asArray(unit.항 as { 항내용?: string } | { 항내용?: string }[])
-    .map((paragraph) => String(paragraph?.항내용 ?? "").trim())
-    .filter(Boolean);
+  const content = (value: unknown): string[] => Array.isArray(value) ? value.flatMap(content)
+    : typeof value === "string" ? [value.trim()] : [];
+  const collect = (value: unknown): string[] => {
+    if (Array.isArray(value)) return value.flatMap(collect);
+    if (!value || typeof value !== "object") return [];
+    return Object.entries(value).flatMap(([key, entry]) =>
+      /^(항|호|목)내용$/u.test(key) ? content(entry) : collect(entry));
+  };
+  const paragraphs = collect(unit.항).filter(Boolean);
   return [String(unit.조문내용 ?? "").trim(), ...paragraphs].filter(Boolean).join("\n");
 };
 
@@ -72,6 +78,7 @@ const bodyEvidence = (payload: unknown, query: string): { articleNo: string; exc
   const requestedNo = requested
     ? `제${Number(requested[1])}조${requested[2] ? `의${Number(requested[2])}` : ""}`
     : null;
+  if (requestedNo && !units.some(entry => entry.articleNo === requestedNo)) return null;
   const tokens = [...new Set(query.split(/\s+/)
     .map((token) => token.replace(/[^0-9A-Za-z가-힣]/g, ""))
     .filter((token) => token.length >= 2 && !/^제\d+조/.test(token)))];
@@ -81,7 +88,9 @@ const bodyEvidence = (payload: unknown, query: string): { articleNo: string; exc
       return score(b) - score(a) || a.index - b.index;
     })[0];
   // 외부 문자열의 명령문 패턴을 무해화하고 한 조문 범위만 전달한다.
-  return { articleNo: selected.articleNo, excerpt: filterToolText(selected.text.slice(0, MAX_EXCERPT)).text };
+  // 잘린 조문을 완전한 본문으로 표시하지 않는다. 긴 조문은 별도 구간 조회가 필요하다.
+  if (selected.text.length > MAX_EXCERPT) return null;
+  return { articleNo: selected.articleNo, excerpt: filterToolText(selected.text).text };
 };
 
 export const lookupStatute = async (input: unknown, ctx?: ToolCallContext): Promise<ToolOutcome> => {
@@ -98,7 +107,10 @@ export const lookupStatute = async (input: unknown, ctx?: ToolCallContext): Prom
   }
 
   const listed = await lawSearch("law", { query: lawQuery, display: 5, type: "JSON" }, { signal: ctx?.signal, maxRetries: 0 });
-  const rows = asArray(((listed as { LawSearch?: { law?: LawRow | LawRow[] } })?.LawSearch?.law));
+  const candidates = asArray(((listed as { LawSearch?: { law?: LawRow | LawRow[] } })?.LawSearch?.law));
+  const normalizeName = (name: string) => name.replace(/\s+/g, "");
+  const exact = candidates.filter(row => normalizeName(String(row.법령명한글 ?? "")) === normalizeName(lawQuery));
+  const rows = exact.length ? exact : candidates;
   const items: SourceItem[] = [];
 
   for (const [index, row] of rows.entries()) {

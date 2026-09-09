@@ -6,7 +6,7 @@ vi.mock("../rest", () => ({ restSelect: m.rest }));
 vi.mock("../registry", () => ({ loadManifest: async () => ({ manifestId: "00000000-0000-4000-8000-000000000005" }) }));
 vi.mock("workflow/api", () => ({ start: m.start }));
 vi.mock("../workflows/aftercare", () => ({ aftercareWorkflow: vi.fn() }));
-import { POST } from "@/app/api/finshield/cases/[id]/aftercare/route";
+import { POST, GET } from "@/app/api/finshield/cases/[id]/aftercare/route";
 const id = "00000000-0000-4000-8000-000000000003";
 const jobId = "00000000-0000-4000-8000-000000000004";
 const params = { params: Promise.resolve({ id }) };
@@ -42,4 +42,12 @@ it("문서 출처는 브라우저 본문 대신 소유자 조회 결과로 고�
  m.sql.mockResolvedValueOnce([{id:jobId}]).mockResolvedValueOnce([{ok:false}]);
  const response=await POST(request({...body,contract_terms:{[id]:"계약 문구"},document_links:{[id]:jobId},document_sources:[{original_statement_masked:"위조"}]}),params);
  expect(response.status).toBe(202);expect(JSON.stringify(m.sql.mock.calls)).toContain("인식 문구");expect(JSON.stringify(m.sql.mock.calls)).not.toContain("위조");
+});
+
+it.each(["RUNNING", "FAILED"])("명시한 %s 점검에 과거 성공 결과를 붙이지 않는다",async status=>{
+ m.rest.mockReset();m.sql.mockResolvedValue([]);
+ m.rest.mockResolvedValueOnce([{id}]).mockResolvedValueOnce([{id:jobId,status,assessment_id:null}]);
+ const response=await GET(new Request(`https://finshield.example/api/finshield/cases/${id}/aftercare?job_id=${jobId}`),params);
+ expect(response.status).toBe(200);expect(await response.json()).toMatchObject({review_job:{id:jobId,status},assessment:null});
+ expect(m.rest).toHaveBeenCalledTimes(2);
 });

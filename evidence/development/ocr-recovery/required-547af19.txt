@@ -1,0 +1,103 @@
+검사 시작: npm ci --ignore-scripts
+
+added 1023 packages, and audited 1030 packages in 9s
+
+391 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+검사 시작: DB 명세 검증
+Database spec validation passed: 101,234 chars, 29 datasets, D-001~D-032.
+검사 시작: Provider Stack ADR 검증
+Provider stack ADR validation passed: requirements 27ce706010344fbcedebe3abd707febff0f1dc26, 20 implementation blockers, Implementation NO-GO, Release NOT-EVALUATED.
+검사 시작: Provider ADR Validator Mutation Test
+Provider ADR validator mutation tests passed.
+검사 시작: OCR 품질 표본과 원장 계약 검증
+OCR 합성 32문서·112쪽 계약과 25개 원장 변조 거부를 확인했다.
+검사 시작: 격리 Preview 설정 계약 검증
+격리 Preview 설정 계약 10건을 통과했습니다.
+검사 시작: 저비용 Health 계약 시험
+Health 계약 통과: 요청 100회·외부 전송 0회·DB 오류와 시간 초과·Cache 만료·엄격 모드
+Health 증거 정책 통과: 합격 원장 1건·변조 거부 25건
+검사 시작: CI Integrity Preflight Contract Test
+CI integrity preflight contract test passed
+검사 시작: Provider Model Spike Contract Test
+Provider model spike contract tests passed: 50 synthetic cases, 20 deterministic fault cases.
+검사 시작: Provider Embedding Spike Contract Test
+Embedding v2 계약 시험 통과: gate 100 / development 20 질의, 지표 oracle 200회, qrel·순위·분할·과금 변형. Live 호출 없음.
+검사 시작: Provider Embedding Development Probe Contract Test
+Development probe contract tests passed: 37 assertions, 20 development queries, 168 unit corpus. No Live calls.
+검사 시작: Provider Embedding Candidate Contract Test
+B-EMBED-01 재정의 평가 계약 시험을 통과했습니다.
+B-EMBED-01 재정의 harness·정책 시험을 통과했습니다.
+검사 시작: Supabase Evidence Policy Contract Test
+B-SUPABASE-01 결과 정책 mutation test 통과: 합격 1건, 거부 44건.
+검사 시작: Source Snapshot Contract Test
+B-SOURCE-02·B-SOURCE-03 Snapshot spike 시험 통과: 합격 4건, 결과 거부 34건, 실행 거부 4건, 연결 재시도 4건.
+검사 시작: File Safety Contract Test
+B-FILE-SAFETY 계약 시험 통과: 합격 355건, 정책 거부 39건, Fixture 103건(위험 82건).
+검사 시작: OCR 개발 진단 계약 시험
+OCR 개발 진단 계약 시험 51건 통과. 합성 3문서·12쪽, 실제 외부 호출 없음.
+OCR URL 실패 진단 계약 시험 18건 통과. 실제 외부 호출 없음.
+검사 시작: Retrieval Contract Test
+B-RETRIEVAL-01 계약 시험 통과: 합격 217건, 정책 거부 29건, corpus 240건, gate 20가족.
+검사 시작: Rate Budget Contract Test
+B-RATE-01 계약 시험 통과: 합격 23건, 정책 거부 25건.
+검사 시작: Consent Isolation Contract Test
+B-CONSENT-01 계약 시험 통과: 합격 71건, 정책 거부 22건.
+검사 시작: Storage Contract Test
+B-STORAGE-01 계약 시험 통과: 합격 18건, 정책 거부 17건.
+검사 시작: Delete Contract Test
+B-DELETE-01 계약 시험 통과: 합격 26건, 정책 거부 30건.
+검사 시작: Runtime Contract Test
+B-RUNTIME-01 계약 시험 통과: 합격 19건, 정책 거부 16건.
+검사 시작: Law Contract Test
+B-LAW-01 계약 시험 통과: 합격 18건, 정책 거부 19건.
+검사 시작: 한국어 기록 검사 회귀 테스트
+한국어 기록 검사: 제목·본문·커밋·연결 이슈·squash 줄바꿈·페이지 누락·권한·CI 연결 회귀 테스트 통과.
+병합 충돌 메타데이터: 부모·파일 대조 및 영어 주석 거부 검증 통과.
+검사 시작: 한국어 작업 기록 검사
+한국어 작업 기록 형식 검사를 통과했습니다.
+검사 시작: 라우트 타입 생성
+workflows build complete (78 steps, 4 workflows, time 205ms)
+Generating route types...
+✓ Types generated successfully
+검사 시작: 타입 검사
+
+> finshield@0.1.0 typecheck
+> next typegen && tsc --noEmit
+
+workflows build complete (78 steps, 4 workflows, time 200ms)
+Generating route types...
+✓ Types generated successfully
+검사 시작: 린트
+
+> finshield@0.1.0 lint
+> eslint
+
+
+/private/tmp/finshield-recovery-merge-301/.github/scripts/test-provider-embed-candidate.mjs
+  300:5  warning  'virtualClock' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/private/tmp/finshield-recovery-merge-301/.github/scripts/test-storage-evidence.mjs
+  3:18  warning  'FORMULA_VERSION' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 2 problems (0 errors, 2 warnings)
+
+검사 시작: 테스트
+
+> finshield@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 /private/tmp/finshield-recovery-merge-301
+
+
+ Test Files  89 passed | 27 skipped (116)
+      Tests  727 passed | 96 skipped (823)
+   Start at  04:55:39
+   Duration  5.26s (transform 4.51s, setup 1.27s, import 18.49s, tests 3.50s, environment 12ms)
+
+검사 시작: Vercel Preview 확인
+Vercel status: success (attempt 1/60)
+로컬에서 필수 검사 전체 통과: PR 301, merge candidate 64fe019d0dd3d596757ffa3e3704c2766adf9812

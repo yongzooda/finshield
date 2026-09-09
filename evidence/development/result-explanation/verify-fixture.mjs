@@ -1,0 +1,11 @@
+import {readFileSync} from 'node:fs';import {execFileSync} from 'node:child_process';
+const {pdf}=JSON.parse(readFileSync('evidence/development/result-explanation/ui-fixture.json','utf8'));
+const source=JSON.parse(readFileSync('evidence/development/member-evidence-scope/pdf-final-reproduction.json','utf8')).result;
+const claims=pdf.final_claims.map((c,i)=>({claim_ref:'C'+(i+1),claim_id:c.claim_id,claim_type:pdf.claims.find(x=>x.id===c.claim_id)?.claim_type??'OTHER',expected_revision_no:1,statement_masked:c.statement_masked,materiality:'MATERIAL'}));
+const started={type:'run_started',run_id:pdf.runs[0].id,claims};
+const refOf=new Map(pdf.evidences.map((e,i)=>[e.id,'E'+(i+1)]));
+const done={...source,evidence:pdf.evidences.map(e=>({ref:refOf.get(e.id),title:e.title,source:e.source_type,grade:e.authority_grade,official_id:e.official_id,url:e.url,published_at:e.published_at,fetched_at:e.fetched_at,content_hash:e.content_hash,freshness:e.freshness_at_use,directness:e.directness,reference_only:e.reference_only,excerpt:e.excerpt_masked})),axes:pdf.axes,agents:source.agents.map(a=>pdf.runs[0].partial_reason_codes.includes('AGENT_'+a.agentCode+'_PARTIAL')?{...a,status:'PARTIAL',reasonCode:'CITATION_INVALID'}:a),claim_results:claims.map((c,i)=>({claim_ref:c.claim_ref,state:pdf.final_claims[i].status,evidence_refs:[...new Set(pdf.claim_evidences.filter(l=>l.final_claim_version_id===pdf.final_claims[i].id).map(l=>refOf.get(l.evidence_id)))],withheld_reason:null,rationale_masked:pdf.final_claims[i].decision_summary_masked})),final_claims:claims.map((c,i)=>({claim_ref:c.claim_ref,state:pdf.final_claims[i].status,reason_code:pdf.final_claims[i].reason_code,cove_status:pdf.final_claims[i].cove_status,red_team_status:pdf.final_claims[i].red_team_status,summary_masked:pdf.final_claims[i].decision_summary_masked}))};
+const cli=(...args)=>execFileSync('npx',['--yes','agent-browser','--session','finshield-result-labels-30ea',...args],{timeout:30000,stdio:'pipe'});
+cli('network','route','**/api/finshield/intake','--body',JSON.stringify({type:'done',case_id:pdf.case.id,input_id:'ui-fixture-only',claims}));
+cli('network','route','**/api/finshield/verify','--body',[started,done].map(JSON.stringify).join('\n')+'\n');
+console.log('새 검증 결과의 로컬 합성 응답 연결 완료');

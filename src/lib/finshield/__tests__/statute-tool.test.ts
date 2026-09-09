@@ -96,3 +96,21 @@ it("한국 시행일 자정 전후 Snapshot을 구분하고 원문 지문은 보
   expect(after.fingerprint).toBe(before.fingerprint);
   expect(after.locator).toMatchObject({ official_source_version: "2026-09-08", assessment_timezone: "Asia/Seoul" });
 });
+
+it("요청한 조문이 없으면 목적 조문으로 대체하지 않는다", async () => {
+  lawService.mockResolvedValue({ 법령: { 조문: { 조문단위: [{ 조문번호: "1", 조문내용: "제1조 목적" }] } } });
+  expect((await lookupStatute({ query: "금융소비자 보호에 관한 법률 제19조" })).items).toEqual([]);
+});
+it("정확한 법률을 우선하고 항·호·목의 조건을 누락하지 않는다", async () => {
+  lawSearch.mockResolvedValue({ LawSearch: { law: [
+    { 법령명한글: "금융소비자 보호에 관한 법률 시행령", 법령ID: "456", 시행일자: "20260101" },
+    { 법령명한글: "금융소비자 보호에 관한 법률", 법령ID: "123", 시행일자: "20260101" },
+  ] } });
+  lawService.mockResolvedValue({ 법령: { 조문: { 조문단위: [{ 조문번호: "19", 조문내용: "제19조 설명의무", 항: [
+    { 항내용: "① 다음 사항을 설명한다", 호: [{ 호내용: "1. 비용", 목: [{ 목내용: [["가. 중도상환", "1) 금리 및 변동 여부"]] }] }] },
+  ] }] } } });
+  const result = await lookupStatute({ query: "금융소비자 보호에 관한 법률 제19조" });
+  expect(result.items).toHaveLength(1); expect(result.items[0].excerptMasked).toContain("가. 중도상환");
+  expect(result.items[0].excerptMasked).toContain("1) 금리 및 변동 여부");
+  expect(result.items[0].officialId).toBe("law.go.kr:123:제19조");
+});

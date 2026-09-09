@@ -9,7 +9,7 @@ import { cleanupCaseFiles } from "@/lib/finshield/files/cleanup";
 export const runtime="nodejs";
 type Context={params:Promise<{id:string}>};
 const selection=z.object({input_id:z.uuid(),base_passport_id:z.uuid(),claims:z.array(z.object({
-  id:z.uuid(),target_claim_id:z.uuid(),statement_masked:z.string().trim().min(1).max(400),
+  id:z.uuid(),target_claim_id:z.uuid(),statement_masked:z.string().trim().min(1).max(400),ocr_reviewed:z.boolean().optional(),
 })).min(1).max(8)});
 
 /** PC-008: 다시 열면 저장된 문서 항목을 읽으며 원본·모델을 다시 호출하지 않는다. */
@@ -50,6 +50,7 @@ export async function POST(request:Request,context:Context) {
   } catch(error) {
     if(error instanceof UnauthenticatedError)return jsonNoStore({error:error.message},401);
     const code=String((error as {code?:string}).code??"");
+    if((error as Error).message.includes("OCR_REVIEW_REQUIRED"))return jsonNoStore({error:"낮은 신뢰도 문구를 원본과 대조해 주세요."},409);
     if(code==="42501")return jsonNoStore({error:"이 Case의 문서와 기준 Passport를 확인해 주세요."},404);
     if(["23514","55000","40001"].includes(code))return jsonNoStore({error:"이미 확인했거나 처리 중단된 문서입니다. 저장된 상태를 다시 열어 주세요."},409);
     return jsonNoStore({error:"문서 확인 응답을 받지 못했습니다. 같은 항목으로 다시 확인할 수 있습니다."},503);

@@ -20,11 +20,26 @@ begin
  exception when insufficient_privilege then null;end;
  perform private.register_input_pages(owner,kase,inp,1);
  select id into page from private.input_page_ids(owner,kase,inp);
+ perform private.record_input_page_review(owner,kase,inp,'[{"page_no":1,"text":"연 3% 금리","low_confidence_count":1,
+  "low_confidence_fields":[{"field_kind":"NUMBER","confidence_milli":591,"bbox":[0,0,20,10],"start":2,"end":4}]}]');
+ if (select low_confidence_count from public.case_input_pages where id=page)<>1
+  or (select masked_text from public.case_input_pages where id=page)<>'연 3% 금리'
+  or not exists(select 1 from public.case_input_findings where page_id=page and finding_code='OCR_NUMBER')
+  or exists(select 1 from public.case_input_findings where page_id=page and locator::text like '%연 3% 금리%') then
+  raise exception '저신뢰 위치 또는 비원문 저장 계약 위반';
+ end if;
  perform private.advance_input_stage(owner,kase,inp,'EXTRACTED','{}');
  perform private.advance_input_stage(owner,kase,inp,'MASKED','{"masked_text":"연 3% 금리","masked_text_hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","pii_policy_version":"pii-policy-v1"}');
  claim:=private.record_file_claim(owner,kase,inp,page,'PRODUCT_TERM','연 3% 금리','MATERIAL',
- '{"schema_version":"v1","kind":"masked_text_span","page_no":1,"start":0,"end":8}');
+ '{"schema_version":"v1","kind":"masked_text_span","page_no":1,"start":0,"end":8,"review_required":true,
+   "review_fields":[{"field_kind":"NUMBER","confidence_milli":591,"bbox":[0,0,20,10],"start":2,"end":4}]}');
  if (select source_page_id from public.claims where id=claim)<>page then raise exception '페이지 연결 유실';end if;
+ begin
+  perform private.confirm_case_claims(owner,kase,jsonb_build_array(jsonb_build_object('claim_id',claim)));
+  raise exception '저신뢰 원본 미확인 Claim 확정 허용';
+ exception when check_violation then
+  if sqlerrm<>'OCR_REVIEW_REQUIRED' then raise;end if;
+ end;
  begin perform private.record_file_claim(owner,kase,inp,page,'PRODUCT_TERM','연 3% 금리','MATERIAL',
  '{"schema_version":"v1","kind":"masked_text_span","page_no":2,"start":0,"end":8}');raise exception '잘못된 페이지 위치 허용';
  exception when check_violation then null;end;

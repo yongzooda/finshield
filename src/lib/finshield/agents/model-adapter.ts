@@ -14,14 +14,15 @@ import { z } from "zod";
 import { FINSHIELD_MODEL, MODEL_TIMEOUTS } from "../manifest";
 import { callFinshieldModel, emptyModelUsage, type ModelBudgetContext, type ModelUsage } from "../model-budget";
 import type { AgentModel } from "./runner";
+import { domainClaims, loanToolPlan } from "./loan-tool-plan";
 import type { JudgeModel } from "../orchestrator";
 import { JUDGE_SYSTEM } from "./prompts";
-import { coveOutput, redTeamOutput, domainAgentOutput, judgeEnvelopeOutput, requiresPersonalApprovalProof, type ToolEvidence, type ConfirmedClaim } from "../schemas";
+import { coveOutput, redTeamOutput, domainAgentOutput, judgeEnvelopeOutput, citationProblems, requiresPersonalApprovalProof, type ToolEvidence, type ConfirmedClaim } from "../schemas";
 import type { ClaimExtractor } from "../intake";
 
 const MAX_EXCERPT = 1200;
 // AI-015: 같은 Agent의 판단 본문만 나눈다. 도구 선택·독립 검색·Agent 순서는 유지한다.
-export const AGENT_CLAIM_BATCH_SIZE = 3;
+export const AGENT_CLAIM_BATCH_SIZE = 1;
 export const agentClaimBatches = (claims: ConfirmedClaim[]) =>
   Array.from({ length: Math.ceil(claims.length / AGENT_CLAIM_BATCH_SIZE) }, (_, index) =>
     claims.slice(index * AGENT_CLAIM_BATCH_SIZE, (index + 1) * AGENT_CLAIM_BATCH_SIZE));
@@ -32,14 +33,35 @@ export function assertBatchCoverage(claims: ConfirmedClaim[], refs: string[]) {
     throw new Error("MODEL_OUTPUT_CLAIM_COVERAGE_INVALID");
   }
 }
-const AFTERCARE_CONTEXT_INSTRUCTION = "가입 후 점검의 답변과 계약 문구는 사용자 진술이며 공식 근거가 아니다. 기존 Claim과 계약 문구의 차이, 추가 설명과 공식 자료 확인 필요성을 자기 Agent 범위에서 검토한다. 문구 차이 또는 유사 사례만으로 위법·사기를 확정하지 않는다.";
-const DECISIVE_CITATION_INSTRUCTION = "VERIFIED·CONTRADICTED·CONFIRMED·REFUTED·COUNTER_EVIDENCE 상태에는 citable=true, incomplete=false, reference_only=false, freshness=FRESH, directness=DIRECT인 ref만 쓴다. 그런 ref가 없으면 불확실·보류 상태를 쓴다. PERSONAL_APPROVAL_REQUIRES_CASE_DOCUMENT 항목은 개인 심사 자료가 없으면 NEED_MORE_INFORMATION(독립 재확인은 INCONCLUSIVE)이다. 상품 종료 사실과 개인 승인 여부를 섞지 않는다.";
+const AFTERCARE_CONTEXT_INSTRUCTION = "가입 후 점검의 답변과 계약 문구는 사용자 진술이며 공식 근거가 아니다. 거래 전 상품 진위 판단을 반복하지 말고 기존 Claim과 계약 문구의 차이, 설명 여부·이해도 답변, 추가 설명과 공식 자료 확인 필요성을 자기 Agent 범위에서 검토한다. 계약 비교가 주어진 Claim의 summary에는 양쪽 문구의 구체적 차이와 확인할 사항을 먼저 적는다. 실제 설명 이행을 입증할 수 없으면 UNKNOWN으로 두되 조회한 공식 의무와 요청할 자료는 설명할 수 있다. 문구 차이 또는 유사 사례만으로 위법·사기를 확정하지 않는다. 출력 참조는 현재 claims 목록 안에서만 쓰고 각 Claim을 findings 또는 out_of_scope_claim_refs 중 한 곳에 정확히 한 번 기록한다.";
+export const aftercareBatchContext = (context: import("../schemas").DomainAgentInput["aftercare_context"], claims: ConfirmedClaim[]) => context
+  ? { ...context, comparison: context.comparison.filter(row => claims.some(claim => claim.claim_ref === row.claim_ref)) } : undefined;
+const DECISIVE_CITATION_INSTRUCTION = "citation_contract는 Claim별 인용 자격 목록이다. VERIFIED/CONFIRMED는 verified_refs, CONTRADICTED/REFUTED/COUNTER_EVIDENCE는 contradicted_refs 안에서만 인용한다. 목록은 형식·출처 자격이며 해당 Claim을 실제로 지지·반박하는지는 원문과 별도로 대조한다. 자격 없는 참고 자료를 확정 인용에 함께 섞지 않는다. 해당 목록이 비어 있으면 Domain은 UNKNOWN 또는 NEED_MORE_INFORMATION, CoVe는 INCONCLUSIVE, Red Team은 NONE_FOUND를 선택한다. VERIFIED·CONTRADICTED·CONFIRMED·REFUTED·COUNTER_EVIDENCE 상태에는 citable=true, incomplete=false, reference_only=false, freshness=FRESH, directness=DIRECT인 ref만 쓴다. 그런 ref가 없으면 불확실·보류 상태를 쓴다. PERSONAL_APPROVAL_REQUIRES_CASE_DOCUMENT 항목은 개인 심사 자료가 없으면 NEED_MORE_INFORMATION(독립 재확인은 INCONCLUSIVE)이다. 상품 종료 사실과 개인 승인 여부를 섞지 않는다.";
 
 /** 모델 입력에는 표시용 참조만 쓴다. DB 행 ID·부가 속성을 직렬화하지 않는다. */
 export const claimBrief = (claims: ConfirmedClaim[]) => claims.map(({claim_ref,claim_type,statement_masked,materiality}) =>
   ({claim_ref,claim_type,statement_masked,materiality,
     ...(requiresPersonalApprovalProof(statement_masked) ? { verification_scope: "PERSONAL_APPROVAL_REQUIRES_CASE_DOCUMENT" } : {}),
   }));
+
+/** AI-012·EV-007: 사후 validator의 Claim별 제약을 판단 입력에도 전달한다.
+ * 인용 자격은 사실 판정이 아니다. 모델 출력과 복원된 원본 ref는 다시 검증한다. */
+export const citationContract = (claims: ConfirmedClaim[], evidence: ToolEvidence[]) => {
+  const pool = new Map(evidence.map(item => [item.evidence_ref, item]));
+  return claims.map(claim => ({
+    claim_ref: claim.claim_ref,
+    verified_refs: evidence.filter(item => citationProblems([item.evidence_ref], "VERIFIED", pool, claim.statement_masked).length === 0).map(item => item.evidence_ref),
+    contradicted_refs: evidence.filter(item => citationProblems([item.evidence_ref], "CONTRADICTED", pool, claim.statement_masked).length === 0).map(item => item.evidence_ref),
+    context_refs: evidence.map(item => item.evidence_ref),
+  }));
+};
+
+/** Red Team의 반박에는 Claim별로 반박에 쓸 수 있는 근거만 전달한다.
+ * 참고 근거를 섞은 뒤 사후에 성공으로 고치지 않고, 선택 전에 용도 경계를 고정한다. */
+export const redTeamDecisionEvidence = (claim: ConfirmedClaim, evidence: ToolEvidence[]) => {
+  const pool = new Map(evidence.map(item=>[item.evidence_ref,item]));
+  return evidence.filter(item=>citationProblems([item.evidence_ref],"CONTRADICTED",pool,claim.statement_masked).length===0);
+};
 
 /** 모델이 보는 근거 요약. 원문 전체가 아니라 인용에 필요한 만큼만 준다. */
 export const evidenceBrief = (evidence: ToolEvidence[]) => evidence.map((item) => ({
@@ -92,24 +114,39 @@ export const decisiveEvidence = (evidence: ToolEvidence[]) => evidence.filter((i
  * 실행 전역 E번호가 바뀔 때마다 다른 JSON grammar가 생기는 것을 막는다.
  * 출력은 원래 ref로 복원한 뒤 기존 인용·독립성 validator를 다시 거친다. */
 export function modelEvidenceScope(evidence: ToolEvidence[]) {
-  const sorted = [...evidence].sort((a, b) => Number(decisiveEvidence([b]).length > 0) - Number(decisiveEvidence([a]).length > 0));
+  // 같은 출처·본문·위치·인용 자격을 여러 Agent가 재조회해도 판단 입력에는
+  // 한 번만 제시한다. 조회 원장과 원본 Evidence는 그대로 두고 참조만 합친다.
+  const aliases = new Map<string, string>();
+  const seen = new Map<string, string>();
+  const unique = evidence.filter(item => {
+    const { evidence_ref, tool_code, fetched_at, ...content } = item;
+    void tool_code; void fetched_at;
+    const key = item.content_hash && item.independence_key ? JSON.stringify(content) : evidence_ref;
+    const canonical = seen.get(key) ?? evidence_ref;
+    aliases.set(evidence_ref, canonical);
+    if (seen.has(key)) return false;
+    seen.set(key, canonical); return true;
+  });
+  const sorted = unique.sort((a, b) => Number(decisiveEvidence([b]).length > 0) - Number(decisiveEvidence([a]).length > 0));
   const original = new Map(sorted.map((item, index) => [`E${index + 1}`, item.evidence_ref]));
+  const local = new Map([...original].map(([ref, canonical]) => [canonical, ref]));
+  const localAliases = new Map([...aliases].map(([ref, canonical]) => [ref, local.get(canonical)!]));
   const remap = <T>(output: T, mapping: Map<string, string>): T => {
     const walk = (value: unknown): unknown => {
       if (Array.isArray(value)) return value.map(walk);
       if (!value || typeof value !== "object") return value;
       return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key,
-        key === "evidence_refs" && Array.isArray(entry) ? entry.map(ref => {
+        key === "evidence_refs" && Array.isArray(entry) ? [...new Set(entry.map(ref => {
           if (typeof ref !== "string" || !mapping.has(ref)) throw new Error("MODEL_CITATION_REFERENCE_INVALID");
           return mapping.get(ref)!;
-        }) : walk(entry),
+        }))] : walk(entry),
       ]));
     };
     return walk(output) as T;
   };
   return {
     evidence: sorted.map((item, index) => ({ ...item, evidence_ref: `E${index + 1}` })),
-    localize: <T>(input: T): T => remap(input, new Map([...original].map(([local, ref]) => [ref, local]))),
+    localize: <T>(input: T): T => remap(input, localAliases),
     restore: <T>(output: T): T => remap(output, original),
   };
 }
@@ -208,7 +245,7 @@ export async function settleModelBatches<T>(promises: Promise<T>[]): Promise<T[]
   return settled.map(result => (result as PromiseFulfilledResult<T>).value);
 }
 
-export const JUDGE_CLAIM_BATCH_SIZE = 3;
+export const JUDGE_CLAIM_BATCH_SIZE = 1;
 
 export const buildJudgeBatches = (args: {
   claims: ConfirmedClaim[];
@@ -256,6 +293,9 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
   return ({
   usage: usageFor,
   async chooseTools({ system, signal, input, evidence, observations, availableTools }) {
+    signal?.throwIfAborted();
+    const plan = loanToolPlan(input);
+    if (plan && plan.every(call => availableTools.some(tool => tool.toolCode === call.toolCode))) return plan;
     const result = await callFinshieldModel({
       model: FINSHIELD_MODEL,
       system: `${system}${input.aftercare_context ? `\n${AFTERCARE_CONTEXT_INSTRUCTION}` : ""}\n\n지금은 도구를 고르는 단계다. 확인이 더 필요하면 부를 도구를 고르고,\n충분하거나 필요한 자료가 미연결·조회 실패 상태면 calls 를 빈 배열로 둔다. 같은 도구에 같은 입력을 반복하지 않는다. 목록에 없는 도구 이름을 쓰지 않는다. query에는 도구에 맞는 짧은 핵심어를 넣는다. 상품 조회는 상품명, 법령 조회는 정확한 법령명과 필요한 조문 번호 하나, 소비자 안내는 권유의 행동 요구를 쓴다. 법령명 뒤에는 조문 번호 외 검색어를 붙이지 않는다. 이유는 20자 이내다.`,
@@ -284,18 +324,26 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
   },
 
   async decide({ system, signal, input, evidence: originalEvidence, observations }) {
-    const scope = modelEvidenceScope(originalEvidence);
-    const evidence = scope.evidence;
-    const outputs = await settleModelBatches(agentClaimBatches(input.claims).map(async claims => {
+    const assignedClaims = domainClaims(input);
+    const outputs = await settleModelBatches(agentClaimBatches(assignedClaims).map(async claims => {
+      const decisionEvidence = input.agent_code === "RED_TEAM"
+        ? redTeamDecisionEvidence(claims[0],originalEvidence) : originalEvidence;
+      if(input.agent_code === "RED_TEAM" && decisionEvidence.length===0) {
+        return {schema_version:"out-v1" as const,results:claims.map(claim=>({claim_ref:claim.claim_ref,
+          status:"NONE_FOUND" as const,evidence_refs:[],note_masked:"조회한 공식 자료에서 이 항목을 반박할 수 있는 근거를 확보하지 못했습니다."}))};
+      }
+      const scope = modelEvidenceScope(decisionEvidence);
+      const evidence = scope.evidence;
       const output = await callFinshieldModel({
       model: FINSHIELD_MODEL,
-      system: `${system}${input.aftercare_context ? `\n${AFTERCARE_CONTEXT_INSTRUCTION}` : ""}\n\n지금은 판단하는 단계다. 아래 근거 목록의 ref 만 인용한다. ${DECISIVE_CITATION_INSTRUCTION} summary_masked와 note_masked는 각각 40자 이내 한 문장으로 답한다. limits는 꼭 필요한 항목만 한 개 이하로 답한다.`,
+      system: `${system}${input.aftercare_context ? `\n${AFTERCARE_CONTEXT_INSTRUCTION}` : ""}\n\n지금은 판단하는 단계다. 아래 근거 목록의 ref 만 인용한다. ${DECISIVE_CITATION_INSTRUCTION} summary_masked와 note_masked는 각각 80자 이내로 답한다. 상품 종료 고지가 있으면 현재 권유와 종료 전 조건을 구분해 설명한다. limits는 꼭 필요한 항목만 한 개 이하로 답한다.`,
       user: JSON.stringify({
         assessed_on: new Date().toISOString().slice(0, 10),
         claims: claimBrief(claims),
         journey_stage: input.journey_stage,
-        ...(input.aftercare_context ? { aftercare_context: input.aftercare_context } : {}),
+        ...(input.aftercare_context ? { aftercare_context: aftercareBatchContext(input.aftercare_context, claims) } : {}),
         evidence: evidenceBrief(evidence),
+        citation_contract: citationContract(claims, evidence),
         observations,
       }),
       schema: providerAgentSchemaFor(input.agent_code),
@@ -314,7 +362,8 @@ export const createAgentModel = (context?: ModelBudgetContext): AgentModel => {
     }
     return { schema_version: "out-v1",
       findings: outputs.flatMap(output => "findings" in output ? output.findings : []),
-      out_of_scope_claim_refs: outputs.flatMap(output => "out_of_scope_claim_refs" in output ? output.out_of_scope_claim_refs : []),
+      out_of_scope_claim_refs: [...input.claims.filter(c => !assignedClaims.includes(c)).map(c => c.claim_ref),
+        ...outputs.flatMap(output => "out_of_scope_claim_refs" in output ? output.out_of_scope_claim_refs : [])],
     };
   },
 });
@@ -332,7 +381,7 @@ export const createJudgeModel = (context?: ModelBudgetContext): JudgeModel => {
       return scope.restore(await callFinshieldModel({
         model: FINSHIELD_MODEL,
         system: `${JUDGE_SYSTEM}\n${DECISIVE_CITATION_INSTRUCTION} 각 rationale_masked는 핵심 근거를 담은 40자 이내 한 문장이다. withheld_reason은 20자 이내다. 입력 Claim마다 정확히 한 결과를 낸다.`,
-        user: JSON.stringify({ assessed_on: new Date().toISOString().slice(0, 10), claims: claimBrief(batch.claims), findings: scope.localize(batch.findings), evidence: evidenceBrief(scope.evidence) }),
+        user: JSON.stringify({ assessed_on: new Date().toISOString().slice(0, 10), claims: claimBrief(batch.claims), findings: scope.localize(batch.findings), evidence: evidenceBrief(scope.evidence), citation_contract: citationContract(batch.claims, scope.evidence) }),
         schema: providerJudgeSchemaFor(),
         maxTokens: 1600, effort: "low", signal, maxRetries: 0, timeoutMs: MODEL_TIMEOUTS.judgeMs,
       }, context, usage));

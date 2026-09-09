@@ -1,0 +1,14 @@
+{
+  "observed_at": "2026-09-08T15:13:05.597Z",
+  "scope": "이번 두 합성 Case와 Intake 사용량",
+  "rows": [
+    {
+      "scope_type": "OWNER_DAY",
+      "provider": "anthropic",
+      "model": "claude-sonnet-5",
+      "limit_microunits": "3000000",
+      "consumed_microunits": "468376",
+      "reserved_microunits": "0"
+    }
+  ]
+}

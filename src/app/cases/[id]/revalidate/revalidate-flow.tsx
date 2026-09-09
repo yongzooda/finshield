@@ -42,6 +42,7 @@ export function RevalidateFlow({ caseId, requestedJob = null }: { caseId: string
   const [viewJobId, setViewJobId] = useState<string | null>(requestedJob);
   const [loadedSession, setLoadedSession] = useState<string | null>(null);
   const [queued, setQueued] = useState(false);
+  const [recoveryRequired,setRecoveryRequired] = useState(false);
   const [refresh, setRefresh] = useState(0);
   const [requestKey, setRequestKey] = useState<string | null>(null);
 
@@ -77,6 +78,7 @@ export function RevalidateFlow({ caseId, requestedJob = null }: { caseId: string
         }
         setAgents(lines);
         setQueued(job.job_status === "QUEUED");
+        setRecoveryRequired(job.recovery_required===true);
         if (["QUEUED", "RUNNING"].includes(job.job_status)) {
           setStep("running"); timer = setTimeout(() => void poll(), 2000);
         } else if (["CHANGED", "NO_CHANGE"].includes(job.job_status)) {
@@ -166,10 +168,10 @@ export function RevalidateFlow({ caseId, requestedJob = null }: { caseId: string
       {step === "running" ? (
         <FsCard className="mt-8">
           <h2 className="fs-h2">다시 확인하는 중</h2>
-          <p className="fs-body mt-2">이 화면을 닫아도 처리는 계속됩니다.</p>
+          <p className="fs-body mt-2">{recoveryRequired?"진행 신호가 끊겼습니다. 저장된 작업의 처리 연결을 재시도해 주세요. 이전 결과는 보관됩니다.":"이 화면을 닫아도 처리는 계속됩니다."}</p>
           <div className="mt-4 flex gap-3">
             <button type="button" className="fs-btn fs-btn--quiet" onClick={() => void cancel()}>재검증 중단</button>
-            {queued ? <button type="button" className="fs-btn fs-btn--quiet" onClick={() => void start()}>처리 연결 재시도</button> : null}
+            {queued || recoveryRequired ? <button type="button" className="fs-btn fs-btn--quiet" onClick={() => void start()}>처리 연결 재시도</button> : null}
           </div>
           <ul className="fs-steps mt-5" aria-live="polite">
             {agents.map((agent) => (

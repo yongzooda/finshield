@@ -16,6 +16,7 @@ import type { ClaimState, ConfirmedClaim, CoveOutput, RedTeamOutput } from "./sc
 import { buildActionGuide } from "./action-guide";
 import type { OrchestratedRun } from "./orchestrator";
 import { highRiskAction, hasHighRiskAction } from "./high-risk-actions";
+import { productDisclosure } from "./product-disclosure";
 
 type Sql = ReturnType<typeof postgres>;
 
@@ -104,7 +105,9 @@ export const buildFinalClaims = (args: {
         : coveResult?.status === "REFUTED" || redResult?.status === "COUNTER_EVIDENCE" ? "CONTRADICT" : "CONTEXT");
     }
     const action = highRiskAction(claim.statement_masked, run.evidence);
-    const refs = [...new Set([...(judged?.evidence_refs ?? []), ...reviewRefs, ...(action ? [action.ref] : [])])];
+    const product = productDisclosure(claim.statement_masked, run.evidence);
+    if (product) relationOf.set(`${claim.claim_ref}:${product.ref}`, "CONTEXT");
+    const refs = [...new Set([...(judged?.evidence_refs ?? []), ...reviewRefs, ...(action ? [action.ref] : []), ...(product ? [product.ref] : [])])];
     const seenSources = new Set<string>();
     const evidences = refs
       .map((ref) => ({ evidence_id: run.evidenceIds.get(ref), relation: relationOf.get(`${claim.claim_ref}:${ref}`) ?? "CONTEXT" }))
@@ -120,6 +123,14 @@ export const buildFinalClaims = (args: {
           policy_reason_code: independent ? "FIRST_CANONICAL_SOURCE" : eligible ? "DUPLICATE_CANONICAL_SOURCE" : "CONTEXT_ONLY_SOURCE" };
       });
 
+    // EV-005·DB 7.3: 판단 불가와 자료 충돌을 구분한다. 한쪽 관계만 있는
+    // 모델 CONFLICT를 DB에 보내 전체 Run 저장을 실패시키지 않는다.
+    if (decided.state === "CONFLICT" && !(evidences.some(e => e.relation === "SUPPORT")
+      && evidences.some(e => e.relation === "CONTRADICT"))) {
+      decided.state = "UNKNOWN";
+      decided.reasonCode = "CONFLICT_EVIDENCE_INCOMPLETE";
+    }
+
     return {
       claim_id: claim.claimId,
       claim_type: claim.claim_type,
@@ -130,7 +141,7 @@ export const buildFinalClaims = (args: {
         : decided.reasonCode === "COVE_CONFIRMED" ? "CONFIRMED" : "CHALLENGED",
       // NONE_FOUND 는 초기 결론 지지가 아니라 이번 검색에서 반증을 못 찾았다는 뜻이다.
       red_team_status: redTeam === "NONE_FOUND" ? "UNRESOLVED" : redTeam,
-      decision_summary_masked: action?.summary ?? (decided.state !== base
+      decision_summary_masked: action?.summary ?? product?.summary ?? (decided.state !== base
         ? "독립 자료 확인이 충분하지 않아 이 항목을 확정하지 않았습니다."
         : judged?.rationale_masked ?? "확인하지 못했습니다."),
       evidences,

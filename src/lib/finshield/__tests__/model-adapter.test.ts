@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import {
   buildJudgeBatches, citationReferenceSchema, claimBrief, coveOutputSchemaFor, decisiveEvidence,
-  domainOutputSchemaFor, evidenceBrief, judgeOutputSchemaFor, mergeJudgeBatchOutputs, redTeamOutputSchemaFor,
+  domainOutputSchemaFor, evidenceBrief, judgeOutputSchemaFor, mergeJudgeBatchOutputs, redTeamOutputSchemaFor, redTeamDecisionEvidence,
 } from "../agents/model-adapter";
 import type { ToolEvidence } from "../schemas";
 
@@ -157,7 +157,7 @@ describe("AI-017 모델 출력 Citation 목록", () => {
 });
 
 describe("N-PERF-009 Evidence Judge Claim 배치", () => {
-  it("최대 여덟 Claim을 세 개 이하 묶음으로 제한한다", () => {
+  it("최대 여덟 Claim을 한 개 묶음으로 제한한다", () => {
     const inputClaims = Array.from({ length: 8 }, (_, index) => ({
       claim_ref: `C${index + 1}`,
       claim_type: "PRODUCT_TERM",
@@ -165,7 +165,7 @@ describe("N-PERF-009 Evidence Judge Claim 배치", () => {
       materiality: "MATERIAL" as const,
     }));
     const batches = buildJudgeBatches({ claims: inputClaims, findings: [], evidence: [] });
-    expect(batches.map((batch) => batch.claims.length)).toEqual([3, 3, 2]);
+    expect(batches.map((batch) => batch.claims.length)).toEqual([1, 1, 1, 1, 1, 1, 1, 1]);
     expect(batches.flatMap((batch) => batch.claims).map((claim) => claim.claim_ref))
       .toEqual(inputClaims.map((claim) => claim.claim_ref));
   });
@@ -183,9 +183,10 @@ describe("N-PERF-009 Evidence Judge Claim 배치", () => {
     }));
     const evidences = inputClaims.map((_, index) => evidence({ evidence_ref: `E${index + 1}` }));
     const batches = buildJudgeBatches({ claims: inputClaims, findings, evidence: evidences });
-    expect(batches.map((batch) => batch.claims.length)).toEqual([3, 3]);
-    expect(batches[0].evidence.map((item) => item.evidence_ref)).toEqual(["E1", "E2", "E3"]);
-    expect(batches[1].evidence.map((item) => item.evidence_ref)).toEqual(["E4", "E5", "E6"]);
+    expect(batches.map((batch) => batch.claims.length)).toEqual([1, 1, 1, 1, 1, 1]);
+    expect(batches[0].evidence.map((item) => item.evidence_ref)).toEqual(["E1"]);
+    expect(batches[1].evidence.map((item) => item.evidence_ref)).toEqual(["E2"]);
+    expect(batches[2].evidence.map((item) => item.evidence_ref)).toEqual(["E3"]);
   });
 
   it("동시에 끝난 묶음의 결과를 원래 Claim 순서로 합친다", () => {
@@ -199,4 +200,16 @@ describe("N-PERF-009 Evidence Judge Claim 배치", () => {
     expect(merged.claimResults.map((result) => result.claim_ref)).toEqual(["C1", "C2", "C3"]);
     expect(merged.conflicts).toEqual([{ claim_ref: "C2" }]);
   });
+});
+
+
+it("Red Team에 현재 Claim의 반박 자격이 없는 참고·만료·다른 용도 자료를 섞지 않는다",()=>{
+ const claim={claim_ref:"C1",claim_type:"PRODUCT_TERM",statement_masked:"햇살론15는 연 3%로 가입 가능하다",materiality:"MATERIAL" as const};
+ const closure=evidence({evidence_ref:"E1",locator:{permitted_use:"REFUTE_CURRENT_OFFER",current_transaction_proof:false}});
+ const reference=evidence({evidence_ref:"E2",reference_only:true});
+ const stale=evidence({evidence_ref:"E3",freshness_at_use:"STALE"});
+ expect(redTeamDecisionEvidence(claim,[closure,reference,stale])).toEqual([closure]);
+ expect(redTeamDecisionEvidence({...claim,statement_masked:"햇살론15 승인 대상으로 선정됐다"},[closure])).toEqual([]);
+ expect(redTeamDecisionEvidence({...claim,statement_masked:"과거 햇살론15 계약의 금리는 3%였다"},[closure])).toEqual([]);
+ expect(reference.reference_only).toBe(true);
 });

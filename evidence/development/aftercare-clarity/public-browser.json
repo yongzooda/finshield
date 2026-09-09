@@ -1,0 +1,9 @@
+{
+  "mode": "운영 배포 JS와 실제 저장된 합성 응답 기반 API Fixture의 표시 검증. 새 모델 실행 아님.",
+  "url": "https://finshield-gamma.vercel.app",
+  "checks": {
+    "difference": true,
+    "request": true,
+    "copy": true
+  }
+}

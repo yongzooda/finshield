@@ -1,0 +1,15 @@
+검사 시작: npm ci --ignore-scripts
+
+added 1023 packages, and audited 1030 packages in 11s
+
+391 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+검사 시작: DB 명세 검증
+Database spec validation passed: 101,234 chars, 29 datasets, D-001~D-032.
+검사 시작: Provider Stack ADR 검증
+Provider stack ADR validation failed:
+
+- B-CONSENT-01 trusted policy 파일 'src/lib/agents/pii.ts'의 현재 Git Blob SHA가 등록 pin과 다릅니다.
+검사 실패: Provider Stack ADR 검증

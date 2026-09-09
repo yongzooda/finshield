@@ -1,0 +1,13 @@
+
+> finshield@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 /Users/yongju/.codex/worktrees/30ea/finshield
+
+
+ Test Files  89 passed | 27 skipped (116)
+      Tests  726 passed | 96 skipped (822)
+   Start at  04:39:34
+   Duration  4.17s (transform 5.24s, setup 1.01s, import 15.80s, tests 3.21s, environment 10ms)
+

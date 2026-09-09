@@ -59,3 +59,17 @@ describe("REV-001·N-AVL-005 Lease·Outbox 계약", () => {
     expect(sql.mock.calls[0]).toContain("owner");
   });
 });
+
+it("한쪽 근거뿐인 모델 충돌은 보류해 다른 항목의 저장을 막지 않고 양쪽 근거 충돌은 보존한다", () => {
+  const checked = run();
+  checked.cove = null;
+  checked.judgeOutput!.claim_results[0].state = "CONFLICT";
+  const [oneSided] = buildFinalClaims({ claims, run: checked });
+  expect(oneSided).toMatchObject({ status: "UNKNOWN", reason_code: "CONFLICT_EVIDENCE_INCOMPLETE", cove_status: "FAILED" });
+  expect(oneSided.evidences).toHaveLength(1);
+  checked.redTeam!.results[0] = { claim_ref: "C1", status: "COUNTER_EVIDENCE", evidence_refs: ["E2"], note_masked: "별도 반대 자료" };
+  checked.evidenceIds.set("E2", "evidence-2");
+  const [twoSided] = buildFinalClaims({ claims, run: checked });
+  expect(twoSided.status).toBe("CONFLICT");
+  expect(twoSided.evidences.map(e => e.relation)).toEqual(["SUPPORT", "CONTRADICT"]);
+});

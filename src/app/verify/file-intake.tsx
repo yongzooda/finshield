@@ -3,8 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import { freshSessionToken, sessionFetch, sessionIdentity, readSessionToken } from "../session-client";
 import { uploadFile } from "./upload-file";
 
-export type FileClaim={claim_id:string;claim_ref:string;claim_type:string;statement_masked:string;materiality:string;expected_revision_no:number;source_page_no:number};
-export type PreparedFile={input_purpose?:string;case_id:string;input_id:string;claims:FileClaim[];masked_text:string;masked_pages:{page_no:number;text:string}[]};
+export type OcrReviewField={field_kind:"URL"|"INSTITUTION"|"PRODUCT"|"NUMBER"|"NEGATION"|"TEXT";confidence_milli:number;bbox:[number,number,number,number];start:number;end:number};
+export type FileClaim={claim_id:string;claim_ref:string;claim_type:string;statement_masked:string;materiality:string;expected_revision_no:number;source_page_no:number;requires_review?:boolean;review_fields?:OcrReviewField[]};
+export type PreparedFile={input_purpose?:string;case_id:string;input_id:string;claims:FileClaim[];masked_text:string;masked_pages:{page_no:number;text:string;low_confidence_count?:number;low_confidence_fields?:OcrReviewField[]}[]};
 
 export function FileIntake({token,caseId,onPrepared,onBusyChange}:{token:string;caseId?:string;onPrepared:(value:PreparedFile)=>void;onBusyChange:(busy:boolean)=>void}) {
   const [file,setFile]=useState<File|null>(null), [consent,setConsent]=useState(false);

@@ -141,6 +141,21 @@ export const selectJudgeEvidence = (
   return evidence.filter((item) => domainRefs.has(item.evidence_ref));
 };
 
+/** AI-010: 독립 검토가 새로 찾은 반대 근거도 Judge의 재계산에 포함한다.
+ * INCONCLUSIVE/NONE_FOUND는 지지 판단으로 바꾸지 않는다. */
+export const reviewFindings = (cove: CoveOutput | null, redTeam: RedTeamOutput | null): (DomainFinding & { agent_code: string })[] => [
+  ...(cove?.results ?? []).map(entry => ({ claim_ref: entry.claim_ref, agent_code: "COVE",
+    state: entry.status === "CONFIRMED" ? "VERIFIED" as const : entry.status === "REFUTED" ? "CONTRADICTED" as const : "UNKNOWN" as const,
+    relation: entry.status === "CONFIRMED" ? "SUPPORT" as const : entry.status === "REFUTED" ? "CONTRADICT" as const : "CONTEXT" as const,
+    evidence_refs: entry.evidence_refs, summary_masked: entry.note_masked, limits: [],
+  })),
+  ...(redTeam?.results ?? []).map(entry => ({ claim_ref: entry.claim_ref, agent_code: "RED_TEAM",
+    state: entry.status === "COUNTER_EVIDENCE" ? "CONTRADICTED" as const : "UNKNOWN" as const,
+    relation: entry.status === "COUNTER_EVIDENCE" ? "CONTRADICT" as const : "CONTEXT" as const,
+    evidence_refs: entry.evidence_refs, summary_masked: entry.note_masked, limits: [],
+  })),
+];
+
 export const runVerification = async (args: {
   ctx: ToolCallContext;
   claims: ConfirmedClaim[];
@@ -263,10 +278,9 @@ export const runVerification = async (args: {
     const signal = judgeSignal;
     signal.throwIfAborted();
     if (budgetExhausted) throw Object.assign(new Error("MODEL_BUDGET_BLOCKED"), {code:"MODEL_BUDGET_BLOCKED"});
-    // 독립 검토 근거는 CoVe·Red Team 정책 단계에서 사용한다. Judge에는 Domain
-    // 판단이 실제 인용한 근거만 보내 입력 크기와 잘못된 ref 선택 가능성을 줄인다.
-    const judgeEvidence = selectJudgeEvidence(findings, evidence);
-    const raw = await args.judgeModel.judge({ claims: args.claims, findings, evidence: judgeEvidence, signal });
+    const judgeFindings = [...findings, ...reviewFindings(cove, redTeam)];
+    const judgeEvidence = selectJudgeEvidence(judgeFindings, evidence);
+    const raw = await args.judgeModel.judge({ claims: args.claims, findings: judgeFindings, evidence: judgeEvidence, signal });
     const parsed = judgeEnvelopeOutput.safeParse(raw);
     if (!parsed.success) {
       judgeReasonCode = "JUDGE_SCHEMA_INVALID";

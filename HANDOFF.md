@@ -1,3 +1,52 @@
+## 2026-09-09 05시 OCR·인용·복구 통합 운영 반영
+
+- 최신 공개 운영은 `547af19b5833e1d63c70a25b31b156059b0cdd7d`, 배포 `dpl_6G8wpYeQwGJyrosDbBX34hV2QQMJ`, Manifest v20·Agent v12·Tool v5다. 원격은 0069까지 적용했다. 이전 아래 기록은 시간별 과거 상태다.
+- 저신뢰 원본 대조 강제·페이지 강조·편집 후 재확인, 금융 문구 PII 오탐, Red Team 반박 인용 자격, 실제 시각 Lease·진행 기록 fencing·만료 작업 재연결을 통합했다. 스캔 PDF 6항목 59.439초·최종 PNG 6항목 50.806초 검증/저장·PARTIAL=false다. 전처리는 각각 18.219초·17.448초다. 첫 PNG 인용 실패와 중간 검사 실패를 보존했다.
+- 실제 Vercel Workflow의 두 동시 POST는 같은 Job으로 복구됐다. 미확정 기존 Run은 모델 재호출 없이 Job과 FAILED, 새 비용 예약 0, 실패 이벤트 1, 이전 Passport 보존, stale Worker 거부, 다른 세션 동일 상태를 확인했다. 전체 장애 20종 평가와 구분한다.
+- 공개 사이트의 실제 합성 회원 결과를 브라우저로 확인했다. 운영 Runtime·DB 구조/설정/권한 대조 통과. 시험 계정 탈퇴 COMPLETED, Auth·Profile·Case·임시 객체·Embedding·Storage 모두 0, 재로그인 401이다.
+- 727 기본 테스트·선택적 skip 96, 실제 Worker DB 통합 3건·66 Migration·52 SQL 파일 통과. 실제 병합 후보 `64fe019d`에서 필수 검사 전체 로컬 통과. PR #301에 통합하며 main은 GitHub 과금 차단으로 여전히 `8f9b40a`다. 운영 변경을 main에 병합하기 전 옛 main을 재배포하지 않는다.
+- 정식 OCR F1·검색·개인정보·Workflow/기한·전체 E2E/Claim 품질은 완료되지 않았다. Implementation NO-GO·Release NOT-EVALUATED 유지. [현재 요청별 상태](docs/ops/2026-09-09-current-service-status.md), [원본 검증 자료](evidence/development/ocr-recovery/)를 따른다.
+
+## 2026-09-09 심사 체험 세 결함 운영 반영
+
+- 운영은 f9031ca, 배포 dpl_418rnextgdm4KLckt6XbfpM1f9rT, Manifest v19·Agent v11·Tool v5다. 원격 Migration 0065까지 추가 적용했고 운영 Runtime·구조 6종·설정 10항목의 정합성이 통과했다.
+- 거래 전 v18 첫 표본 PDF 6항목 57.733초·정상 Text 4항목 53.814초에 검증·저장 완료, 두 Run·14 Agent/Judge 성공이다. PDF 전처리 24.832초·Text 추출 9.150초는 별도다. v19는 가입 후 전용 변경이며 속도 실측 SHA와 구분한다. 개인 승인·개별 기한 정보 부족을 확정으로 바꾸지 않았다.
+- 가입 후 최종 v19는 두 Agent 성공·실제 공식 조회 3건·동일 요청 키·새 로그인 복원·네 답변·금리 비교·기존 Passport 불변을 확인했다. 실패 Job에 과거 성공 assessment가 섞이던 GET도 실제로 수정 확인했다. 실패 표본을 모두 보존했다.
+- 기본 702건 통과·선택적 96건 생략, 빌드·타입·lint 오류 0, 새 DB의 62 Migration·실제 SQL 50파일 통과다. 실제 병합 후보 2a266ae의 필수 검사 전체를 로컬 통과했다. 운영 브라우저의 결과·Passport·가입 후 복원·모바일 가로 넘침 0·오류 0도 확인했다.
+- GitHub check는 결제·한도 장애로 차단돼 main은 8f9b40a에 머문다. 사용자 승인으로 검증 후보만 직접 운영 승격했다. PR #293·#295·#297을 통합하기 전 옛 main을 재배포하지 않는다. 검사 상태·보호 규칙을 조작하지 않았다.
+- 시험 계정 탈퇴 COMPLETED·재로그인 401·Auth/DB/Storage 잔여물 0을 확인했다. 총 모델 소비 USD 2.315500·미정산 예약 0이다.
+- [실측·실패·제한](evidence/development/review-evidence-latency/README.md)을 따른다. Implementation NO-GO·Release NOT-EVALUATED·부분 8/20은 유지한다. 이 변경이 전체 P0·정식 품질 Gate 완료는 아니다.
+
+## 2026-09-09 상품 조건·지연·가입 후 점검 수정 진행
+
+사용자가 심사 체험의 금리·한도 설명, 긴 검증 시간, 가입 후 Agent 품질 세 항목 수정을 요청했다. 독립 검토 근거의 Judge 전달, 고정 Domain 읽기 계획, 종료 전 공식 조건의 출처 연결, 가입 후 설명의무 조회와 정확한 조문 선택을 보완했다. [사전 검증 기준](docs/ops/review-evidence-latency.md)에 첫 실행·60초 목표·실패 보존 범위를 등록했다. 기본 693건 통과·선택적 96건 skip·타입·빌드·lint 오류 0, 격리 새 정의 SQL 시험까지 통과했다. 실제 배포 표본과 원격 정합성은 후속 기록에서 확인한다. 기존 운영 버전과 과거 Passport를 유지하며 Gate는 변경하지 않는다.
+
+## 2026-09-09 인용 실패 수정과 운영 반영 완료
+
+- 운영 주소는 e9d6e9d, 배포 dpl_EVipHpt7HpeJAtzTpjkFo2obb8zD, Manifest v12·Agent 프롬프트 v4·원격 Migration 0058이다. 기존 라벨 수정도 운영에 포함됐다. DB 구조 6종·설정 10항목과 운영 Runtime이 일치했다.
+- 같은 합성 PDF 6 Claim은 92.981초, 정상 예방 Text 4 Claim은 67.668초에 저장됐다. 두 Run COMPLETED·총 14 Agent/Judge SUCCEEDED·인용 오류 0이다. 개인 승인 정보 부족, 금리/한도 독립 근거 부족은 여전히 남는다. 전체 판단 품질 Gate 통과가 아니다.
+- 기본 687건·선택적 96건 skip·타입·빌드·격리 SQL 45까지 통과했다. PR #295 실제 병합 후보의 필수 검사 전체도 로컬에서 통과했으며 배포 코드 트리와 일치했다. 운영 브라우저·Passport·모바일·원본 삭제와 시험 계정 삭제를 확인했다. 비용 USD 0.468376·미정산 예약 0이다.
+- 중요: 사용자 승인으로 Actions 한도 장애에서 로컬 검사를 거쳐 직접 운영 승격했다. main은 아직 8f9b40a이고 PR #293·#295는 관리자 병합도 차단돼 열려 있다. 두 변경을 main에 통합하기 전 옛 main을 운영 재배포하지 않는다. 저장소 보호 규칙이나 원격 검사 상태를 조작하지 않았다.
+- [실제 검증과 제한](evidence/development/citation-contract/README.md)을 따른다. Implementation NO-GO·Release NOT-EVALUATED를 유지한다.
+
+## 2026-09-09 Agent 인용 계약과 Actions 장애 우회 운영 절차
+
+- 사용자가 GitHub 한도 장애에서 로컬 검사 후 배포를 승인했다. PR #293의 실제 병합 후보에서 필수 검사 전체를 로컬 실행해 통과했지만 GitHub가 관리자 병합도 거부했다. 검사 성공 상태를 위조하거나 저장소 보호를 변경하지 않는다.
+- Agent/Judge에 Claim별 인용 자격을 판단 전에 전달한다. 사후 인용·정책 검사는 그대로 유지한다. Migration 0058·Manifest v12·Agent 프롬프트 v4는 과거 정의를 보존하고 새 Run에 적용한다.
+- 기본 687건·선택적 96건 skip, 타입·빌드·격리 SQL 45까지 통과했다. 실제 Provider 시험과 운영 후보 승격·정합성 확인을 진행 중이다. [상세 기록](docs/ops/agent-citation-contract.md)을 따른다.
+
+## 2026-09-08 결과 라벨·검토 실패 안내 수정 — 배포 전
+
+- 새 검증·기록·Passport에서 선입금/원격제어 위험 행동과 사실 비교 라벨을 구분했다. 중복 인용 오류는 한 번 설명하고 Agent 실패 범위·적합성 제한은 한국어로 표시한다. 원본 판정과 Passport는 바꾸지 않는다.
+- 기본 683건 통과·선택적 96건 skip, 타입·빌드 통과·lint 오류 0이다. 합성 API 응답을 연결한 로컬 브라우저에서 세 결과 화면과 정상 결과·390px 너비·접근성을 확인했다. 실제 Provider 품질 재측정이 아니다.
+- 현재 운영 반영 전이며 필수 원격 검사와 Preview 확인이 필요하다. 실제 인용 검토 실패와 NO-GO는 남아 있다. [수정·검증 범위](docs/ops/result-explanation.md)를 따른다.
+
+## 2026-09-08 회원 근거 수정 운영 반영·시험 데이터 정리
+
+- PR #289를 필수 검사 통과 뒤 squash merge하고 main 8f9b40ad5c8f577280f66d626888b3ddba75bed0의 검증된 Git 배포를 Production에 승격했다. DB 구조·구성·실행 SHA가 일치하며 공개 주소에서 PDF·정상 Text 결과 복원을 API와 브라우저로 확인했다. 신규 모델 실행은 앞서 기록한 보호 후보의 실측이며 운영 재호출로 표현하지 않는다.
+- 합성 Case 11건·Auth·Profile·원본·OCR·Embedding·Storage는 모두 0건, 탈퇴 완료 원장 1건·재로그인 401을 확인했다. 확정 비용 USD 2.100536·미확정 예약 USD 0.574104는 기존 상한 안에서 보존했다.
+- 병합 전 PR CI는 통과했지만 병합 후 main run 34232997678은 GitHub 결제 실패 또는 지출 한도 안내로 시작되지 않았다. 후속 기록 PR도 필수 검사 전에는 병합하지 않는다. [운영·정리·CI 차단 원본](docs/ops/member-evidence-scope.md)을 따른다. Gate는 NO-GO·NOT-EVALUATED·8/20 그대로다.
+
 ## 2026-09-08 회원 PDF의 위험 경고·근거 비교 복구
 
 - PR #289는 사용자가 제공한 합성 PDF의 선입금·원격제어 요구에 공식 예방 지침과 중단 행동을 연결한다. 일반 지침으로 개인 승인·신청 기한·범죄 사실을 단정하지 않는다. 법령 시행일 Snapshot 충돌, Judge 묶음 실패 전파, 실제 수신 사용량 정산도 보완했다.

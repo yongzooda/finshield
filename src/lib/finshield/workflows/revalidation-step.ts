@@ -51,7 +51,7 @@ export async function executeRevalidationStep(jobId:string) {
       signal:AbortSignal.any([abort.signal,AbortSignal.timeout(Math.max(1,Date.parse(input.deadline_at)-Date.now()-6000))])},
       claims:input.claims,maskedIntake:"",journeyStage:input.journey_stage,agentModel:createAgentModel({sql,ownerId:context.owner_id,caseId:context.case_id,runId}),judgeModel:createJudgeModel({sql,ownerId:context.owner_id,caseId:context.case_id,runId}),
       progress:event=>{progressWrites=progressWrites.then(async()=>{
-        await recordRevalidationProgress(sql,jobId,event);
+        await recordRevalidationProgress(sql,jobId,lease,event);
       }).catch(()=>{abort.abort();});}});
     await progressWrites;abort.signal.throwIfAborted();
     const [beat]=await sql`select private.heartbeat_revalidation_job(${jobId}::uuid,${lease}::uuid,180) as ok`;

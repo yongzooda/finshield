@@ -1,0 +1,25 @@
+{
+  "mode": "DEVELOPMENT_DIAGNOSTIC",
+  "gate_evidence": false,
+  "registered_at": "2026-09-08T18:51:58.738Z",
+  "revision": "9513c11ed6a6c5ae80fedb1bc49c08d6e2b4edcf",
+  "scope": [
+    {
+      "path": ".github/scripts/ocr-url-diagnostic.mjs",
+      "sha256": "614ae3dfb8d85b0523a91e27e84c98962cb03ffa20ec8c1dd39113060e9bb04c"
+    },
+    {
+      "path": ".github/scripts/ocr-quality-text.mjs",
+      "sha256": "e051e8d8289e07ea4763a87274273f137a67c14f878b77080da3a367a92241e5"
+    },
+    {
+      "path": "docs/ops/ocr-recovery-followup.md",
+      "sha256": "d0867cd28dcb33ff8ff3f0944d5c13031357099ec2e7814162955e151bba394b"
+    }
+  ],
+  "requests": 1,
+  "measured_at": "2026-09-08T18:51:58.820Z",
+  "status": "FAILED",
+  "error_code": "OCR_CONFIG_INVALID",
+  "elapsed_ms": 3
+}

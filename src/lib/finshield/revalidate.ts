@@ -18,8 +18,8 @@ import { buildAxisResults, buildFinalClaims } from "./finalize";
 type Sql = ReturnType<typeof postgres>;
 
 /** REV-001: 진행 정보는 기존 HEARTBEAT 이벤트 계약의 하위 유형으로 저장한다. */
-export async function recordRevalidationProgress(sql: Sql, jobId: string, event: Parameters<RunProgress>[0]) {
-  await sql`select private.append_revalidation_event(${jobId}::uuid,'HEARTBEAT_PROGRESS',${JSON.stringify(event)}::text::jsonb)`;
+export async function recordRevalidationProgress(sql: Sql, jobId: string, leaseToken: string, event: Parameters<RunProgress>[0]) {
+  await sql`select private.record_revalidation_progress(${jobId}::uuid,${leaseToken}::uuid,${JSON.stringify(event)}::text::jsonb)`;
 }
 
 export type RevalidationClaim = ConfirmedClaim & { claimId: string };

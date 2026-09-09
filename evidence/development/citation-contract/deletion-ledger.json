@@ -1,0 +1,13 @@
+{
+  "source": "FinShield SQL Editor에서 이번 합성 owner만 조회",
+  "owner": "943d1a00-b838-43f0-8959-0cb05273df3c",
+  "auth_users": 0,
+  "profiles": 0,
+  "cases": 0,
+  "inputs": 0,
+  "ocr_artifacts": 0,
+  "embeddings": 0,
+  "storage_objects": 0,
+  "account_workflow_status": "COMPLETED",
+  "subsequent_password_login_http": 401
+}

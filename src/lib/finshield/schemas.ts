@@ -152,6 +152,10 @@ export const citationProblems = (
   if (state === "VERIFIED" && refs.some(ref => pool.get(ref)?.locator?.permitted_use === "REFUTE_CURRENT_OFFER")) {
     problems.push("종료 고지를 현재 가입 가능성의 지지 근거로 썼습니다.");
   }
+  if (state === "CONTRADICTED" && statement && refs.some(ref => pool.get(ref)?.locator?.permitted_use === "REFUTE_CURRENT_OFFER")
+    && (!/햇살론\s*15(?!\d)/u.test(statement) || /과거|당시|기존\s*계약|종료\s*전|20\d{2}년/u.test(statement))) {
+    problems.push("상품 종료 고지는 해당 상품의 현재 권유만 반박할 수 있습니다.");
+  }
   const known = refs.filter((ref) => pool.has(ref)).map((ref) => pool.get(ref) as ToolEvidence);
   if ((state === "VERIFIED" || state === "CONTRADICTED") && statement
     && /오늘|당일|마감|기한|긴급/u.test(statement)

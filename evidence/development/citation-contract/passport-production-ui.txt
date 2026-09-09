@@ -1,0 +1,499 @@
+- link "본문 바로가기" [ref=e1]
+- banner
+  - link "FinShield 홈" [ref=e3]
+    - StaticText "FinShield"
+  - link "알림" [ref=e4]
+  - link "금융 프로필" [ref=e5]
+- navigation "모바일 주 메뉴" [ref=e2]
+  - link "홈" [ref=e6]
+    - StaticText "홈"
+  - link "새 검증" [ref=e7]
+    - StaticText "새 검증"
+  - link "내 기록" [ref=e8]
+    - StaticText "내 기록"
+  - link "가입 후 보호" [ref=e9]
+    - StaticText "가입 후 보호"
+- main
+  - sectionheader
+    - paragraph
+      - StaticText "검증 근거 기록 · Evidence Passport"
+    - heading "파일 권유 검증" [level=1, ref=e11]
+    - StaticText "중대한 위험 신호"
+    - StaticText "범위 미충족"
+    - StaticText "버전 "
+    - StaticText "1"
+    - StaticText " · "
+    - StaticText "2026. 9. 9. 오전 12:07:39"
+    - link "기록으로 돌아가기" [ref=e12]
+  - generic
+    - heading "지금 하실 일" [level=2, ref=e13]
+    - list
+      - listitem [level=1]
+        - paragraph
+          - StaticText "송금·원격제어 앱 설치를 멈추고 공식 창구로 확인하세요"
+        - paragraph
+          - StaticText "권유문에 위험한 행동 요구가 있습니다. 권유자가 준 연락처를 사용하지 말고 아래 공식 창구에서 확인하세요. 개별 사실 판정이 보류돼도 이 예방 안내를 먼저 따라 주세요."
+        - paragraph
+          - StaticText "서민금융콜센터 1397 (국번 없이)"
+  - generic
+    - heading "세 가지 확인 결과" [level=2, ref=e14]
+    - list
+      - listitem [level=1]
+        - StaticText "상품·기관 정보"
+        - StaticText "확정 못 함"
+        - paragraph
+          - StaticText "상품과 기관과 접근 경로가 공식 자료와 맞는지 본 결과입니다."
+      - listitem [level=1]
+        - StaticText "거래·권유 위험"
+        - StaticText "위험한 행동 요구"
+        - paragraph
+          - StaticText "선입금 또는 원격제어 앱 설치 요구가 포함되어 있습니다. 송금·설치를 멈추고 공식 창구로 확인하세요. 범죄 사실을 확정한 판단은 아닙니다."
+        - paragraph
+          - StaticText "판단의 한계"
+        - list
+          - listitem [level=2]
+            - ListMarker "• "
+            - StaticText "가입 전이라 확인할 수 없는 항목이 있음"
+      - listitem [level=1]
+        - StaticText "적합성"
+        - StaticText "정보 부족"
+        - paragraph
+          - StaticText "금융 프로필을 건너뛰어 적합성을 판단하지 않았습니다. 안전하다는 뜻이 아닙니다."
+        - paragraph
+          - StaticText "판단의 한계"
+        - list
+          - listitem [level=2]
+            - ListMarker "• "
+            - StaticText "금융 프로필을 남기지 않음"
+        - group
+          - DisclosureTriangle "프로필 비교 이유와 확인하지 못한 조건" [expanded=false]
+            - StaticText "프로필 비교 이유와 확인하지 못한 조건"
+  - generic
+    - heading "항목별 확인 결과" [level=2, ref=e15]
+    - paragraph
+      - StaticText "입력한 권유 내용이 공식 자료와 맞는지 비교한 결과입니다. 위험한 행동 요구와 사실 확인 결과는 별도로 표시합니다."
+    - list
+      - listitem [level=1]
+        - paragraph
+          - StaticText "햇살론15는 최대 2천만 원까지 대출 가능하다."
+        - StaticText "확인 근거 부족"
+        - paragraph
+          - StaticText "독립 자료 확인이 충분하지 않아 이 항목을 확정하지 않았습니다."
+        - group
+          - DisclosureTriangle "판단 과정과 검토 상태" [expanded=false]
+            - StaticText "판단 과정과 검토 상태"
+        - paragraph
+          - StaticText "근거 3건 · 독립성 확인 근거 1건"
+        - list
+          - listitem [level=2]
+            - paragraph
+              - StaticText "햇살론15 공식 보증 종료 고지"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "햇살론15 [2025년 12월 31일 보증 종료]"
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 미상 · 조회 2026. 9. 8. 오후 8:42:39"
+            - link "공식 원문 열기" [ref=e19]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "햇살론15 공식 보증 종료 고지"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "햇살론15 [2025년 12월 31일 보증 종료]"
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 미상 · 조회 2026. 9. 8. 오후 8:42:39"
+            - link "공식 원문 열기" [ref=e20]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "햇살론15 공식 보증 종료 고지"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "햇살론15 [2025년 12월 31일 보증 종료]"
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 미상 · 조회 2026. 9. 8. 오후 8:42:39"
+            - link "공식 원문 열기" [ref=e21]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+      - listitem [level=1]
+        - paragraph
+          - StaticText "햇살론15 승인 대상이다."
+        - StaticText "추가 정보 필요"
+        - paragraph
+          - StaticText "개인 승인 여부는 심사자료 부재로 판단 불가하며 상품도 종료됨."
+        - group
+          - DisclosureTriangle "판단 과정과 검토 상태" [expanded=false]
+            - StaticText "판단 과정과 검토 상태"
+        - paragraph
+          - StaticText "근거 2건 · 독립성 확인 근거 0건"
+        - list
+          - listitem [level=2]
+            - paragraph
+              - StaticText "햇살론15 공식 보증 종료 고지"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "햇살론15 [2025년 12월 31일 보증 종료]"
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 미상 · 조회 2026. 9. 8. 오후 8:42:39"
+            - link "공식 원문 열기" [ref=e22]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "햇살론15 공식 보증 종료 고지"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "햇살론15 [2025년 12월 31일 보증 종료]"
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 미상 · 조회 2026. 9. 8. 오후 8:42:39"
+            - link "공식 원문 열기" [ref=e23]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+      - listitem [level=1]
+        - paragraph
+          - StaticText "햇살론15는 연 3% 고정금리이다."
+        - StaticText "확인 근거 부족"
+        - paragraph
+          - StaticText "독립 자료 확인이 충분하지 않아 이 항목을 확정하지 않았습니다."
+        - group
+          - DisclosureTriangle "판단 과정과 검토 상태" [expanded=false]
+            - StaticText "판단 과정과 검토 상태"
+        - paragraph
+          - StaticText "근거 3건 · 독립성 확인 근거 1건"
+        - list
+          - listitem [level=2]
+            - paragraph
+              - StaticText "햇살론15 공식 보증 종료 고지"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "햇살론15 [2025년 12월 31일 보증 종료]"
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 미상 · 조회 2026. 9. 8. 오후 8:42:39"
+            - link "공식 원문 열기" [ref=e24]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "햇살론15 공식 보증 종료 고지"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "햇살론15 [2025년 12월 31일 보증 종료]"
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 미상 · 조회 2026. 9. 8. 오후 8:42:39"
+            - link "공식 원문 열기" [ref=e25]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "햇살론15 공식 보증 종료 고지"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "햇살론15 [2025년 12월 31일 보증 종료]"
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 미상 · 조회 2026. 9. 8. 오후 8:42:39"
+            - link "공식 원문 열기" [ref=e26]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+      - listitem [level=1]
+        - paragraph
+          - StaticText "오늘 안에 신청해야 한다."
+        - StaticText "공식 자료와 불일치"
+        - paragraph
+          - StaticText "햇살론15는 2025.12.31 보증 종료되어 현재 신청 불가."
+        - group
+          - DisclosureTriangle "판단 과정과 검토 상태" [expanded=false]
+            - StaticText "판단 과정과 검토 상태"
+        - paragraph
+          - StaticText "근거 4건 · 독립성 확인 근거 1건"
+        - list
+          - listitem [level=2]
+            - paragraph
+              - StaticText "햇살론15 공식 보증 종료 고지"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "햇살론15 [2025년 12월 31일 보증 종료]"
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 미상 · 조회 2026. 9. 8. 오후 8:42:39"
+            - link "공식 원문 열기" [ref=e27]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "햇살론15 공식 보증 종료 고지"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "햇살론15 [2025년 12월 31일 보증 종료]"
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 미상 · 조회 2026. 9. 8. 오후 8:42:39"
+            - link "공식 원문 열기" [ref=e28]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "햇살론15 공식 보증 종료 고지"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "햇살론15 [2025년 12월 31일 보증 종료]"
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 미상 · 조회 2026. 9. 8. 오후 8:42:39"
+            - link "공식 원문 열기" [ref=e29]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "햇살론15 공식 보증 종료 고지"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "햇살론15 [2025년 12월 31일 보증 종료]"
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 미상 · 조회 2026. 9. 8. 오후 8:42:39"
+            - link "공식 원문 열기" [ref=e30]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+      - listitem [level=1]
+        - paragraph
+          - StaticText "상담원이 원격제어 앱을 설치해 달라고 요청했다."
+        - StaticText "위험한 행동 요구"
+        - StaticText "공식 예방 지침과 불일치"
+        - paragraph
+          - StaticText "권유문에 원격제어 앱 설치 요구가 있습니다. 설치를 멈추고 공식 창구로 확인하세요. 실제 발신자나 앱의 악성 여부를 확정한 결과는 아닙니다."
+        - group
+          - DisclosureTriangle "판단 과정과 검토 상태" [expanded=false]
+            - StaticText "판단 과정과 검토 상태"
+        - paragraph
+          - StaticText "근거 8건 · 독립성 확인 근거 2건"
+        - list
+          - listitem [level=2]
+            - paragraph
+              - StaticText "햇살론15 공식 보증 종료 고지"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "햇살론15 [2025년 12월 31일 보증 종료]"
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 미상 · 조회 2026. 9. 8. 오후 8:42:39"
+            - link "공식 원문 열기" [ref=e31]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "햇살론15 공식 보증 종료 고지"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "햇살론15 [2025년 12월 31일 보증 종료]"
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 미상 · 조회 2026. 9. 8. 오후 8:42:39"
+            - link "공식 원문 열기" [ref=e32]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다. 정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다. ‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다. 출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 2021. 5. 27. · 조회 2026. 9. 8. 오후 8:42:54"
+            - link "공식 원문 열기" [ref=e33]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다. 정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다. ‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다. 출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 2021. 5. 27. · 조회 2026. 9. 8. 오후 8:42:54"
+            - link "공식 원문 열기" [ref=e34]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다. 정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다. ‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다. 출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 2021. 5. 27. · 조회 2026. 9. 8. 오후 8:42:54"
+            - link "공식 원문 열기" [ref=e35]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다. 정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다. ‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다. 출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 2021. 5. 27. · 조회 2026. 9. 8. 오후 8:42:54"
+            - link "공식 원문 열기" [ref=e36]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다. 정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다. ‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다. 출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 2021. 5. 27. · 조회 2026. 9. 8. 오후 8:42:54"
+            - link "공식 원문 열기" [ref=e37]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다. 정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다. ‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다. 출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 2021. 5. 27. · 조회 2026. 9. 8. 오후 8:42:54"
+            - link "공식 원문 열기" [ref=e38]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+      - listitem [level=1]
+        - paragraph
+          - StaticText "진행하려면 보증료 30만 원을 먼저 입금해야 한다."
+        - StaticText "위험한 행동 요구"
+        - StaticText "공식 예방 지침과 불일치"
+        - paragraph
+          - StaticText "권유문에 대출 전 비용을 먼저 보내라는 요구가 있습니다. 공식 예방 지침에 따라 입금 전에 공식 창구로 확인하세요. 실제 사기 여부를 확정한 결과는 아닙니다."
+        - group
+          - DisclosureTriangle "판단 과정과 검토 상태" [expanded=false]
+            - StaticText "판단 과정과 검토 상태"
+        - paragraph
+          - StaticText "근거 8건 · 독립성 확인 근거 2건"
+        - list
+          - listitem [level=2]
+            - paragraph
+              - StaticText "햇살론15 공식 보증 종료 고지"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "햇살론15 [2025년 12월 31일 보증 종료]"
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 미상 · 조회 2026. 9. 8. 오후 8:42:39"
+            - link "공식 원문 열기" [ref=e39]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "햇살론15 공식 보증 종료 고지"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "햇살론15 [2025년 12월 31일 보증 종료]"
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 미상 · 조회 2026. 9. 8. 오후 8:42:39"
+            - link "공식 원문 열기" [ref=e40]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다. 정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다. ‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다. 출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 2021. 5. 27. · 조회 2026. 9. 8. 오후 8:42:54"
+            - link "공식 원문 열기" [ref=e41]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다. 정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다. ‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다. 출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 2021. 5. 27. · 조회 2026. 9. 8. 오후 8:42:54"
+            - link "공식 원문 열기" [ref=e42]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다. 정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다. ‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다. 출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 2021. 5. 27. · 조회 2026. 9. 8. 오후 8:42:54"
+            - link "공식 원문 열기" [ref=e43]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다. 정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다. ‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다. 출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 2021. 5. 27. · 조회 2026. 9. 8. 오후 8:42:54"
+            - link "공식 원문 열기" [ref=e44]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다. 정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다. ‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다. 출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 2021. 5. 27. · 조회 2026. 9. 8. 오후 8:42:54"
+            - link "공식 원문 열기" [ref=e45]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+          - listitem [level=2]
+            - paragraph
+              - StaticText "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요"
+            - StaticText "최근 수집"
+            - paragraph
+              - StaticText "서민금융진흥원은 문자메시지나 전화를 통한 금융상품광고를 하지 않습니다. 불법대출광고에 현혹되지 않도록 주의하시기 바랍니다. 정상적인 금융기관은 정책서민금융 대출을 받기 위한 공탁금, 기존 대출 상환, 신용등급 상향 수수료 등의 명목으로 금전요구를 하지 않습니다. ‘신용도에 관계없이 누구나 가능한 대출’상품은 없습니다. 적법한 대출은 신용등급과 상환능력 등에 따라 승인여부가 결정됩니다. 출처가 불분명한 앱(App), URL 주소는 클릭하지 마세요. 앱을 설치하거나 URL을 클릭한 것만으로도 본인의 스마트폰 해킹이 가능해져 사기대출의 피해를 입을 수 있습니다."
+            - paragraph
+              - StaticText "서민금융진흥원 · 발행 2021. 5. 27. · 조회 2026. 9. 8. 오후 8:42:54"
+            - link "공식 원문 열기" [ref=e46]
+            - group
+              - DisclosureTriangle "출처 버전과 검증 기록" [expanded=false]
+                - StaticText "출처 버전과 검증 기록"
+  - group
+    - DisclosureTriangle "검증 기록 상세 정보" [expanded=false]
+      - StaticText "검증 기록 상세 정보"
+- contentinfo
+  - StaticText "FinShield"
+  - navigation "서비스 정보" [ref=e10]
+    - link "신뢰센터" [ref=e16]
+    - link "개인정보·데이터 관리" [ref=e17]
+    - link "서비스 체험" [ref=e18]
+  - paragraph
+    - StaticText "금융 거래 판단을 돕는 참고 정보입니다. 금융·법률 자문이나 거래의 안전을 보장하지 않습니다."
+  - paragraph
+    - StaticText "각 판단에 사용한 공식 자료와 확인 범위는 결과의 근거에서 확인할 수 있습니다."
+- alert

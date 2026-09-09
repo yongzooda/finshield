@@ -1,0 +1,179 @@
+{
+  "observed_at": "2026-09-08T16:46:46.429Z",
+  "runs": [
+    {
+      "id": "53a61305-6aea-4774-b0d5-55a0d7d6e0ae",
+      "status": "COMPLETED",
+      "reason_code": null,
+      "partial_reason_codes": [],
+      "manifest_version": "finshield-p0-loan-v18"
+    },
+    {
+      "id": "e1bb0271-2f65-4876-9281-bad07e90a96b",
+      "status": "COMPLETED",
+      "reason_code": null,
+      "partial_reason_codes": [],
+      "manifest_version": "finshield-p0-loan-v18"
+    }
+  ],
+  "agents": [
+    {
+      "verification_run_id": "53a61305-6aea-4774-b0d5-55a0d7d6e0ae",
+      "agent_code": "PRODUCT_INSTITUTION",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 7262,
+      "input_tokens": "5847",
+      "output_tokens": "225",
+      "cost_microunits": "13944"
+    },
+    {
+      "verification_run_id": "53a61305-6aea-4774-b0d5-55a0d7d6e0ae",
+      "agent_code": "FRAUD_CHANNEL",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 5004,
+      "input_tokens": "11639",
+      "output_tokens": "571",
+      "cost_microunits": "28988"
+    },
+    {
+      "verification_run_id": "53a61305-6aea-4774-b0d5-55a0d7d6e0ae",
+      "agent_code": "SALES_CONDUCT",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 8387,
+      "input_tokens": "7854",
+      "output_tokens": "692",
+      "cost_microunits": "22628"
+    },
+    {
+      "verification_run_id": "53a61305-6aea-4774-b0d5-55a0d7d6e0ae",
+      "agent_code": "REGULATION_DISPUTE",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 7026,
+      "input_tokens": "9474",
+      "output_tokens": "658",
+      "cost_microunits": "25528"
+    },
+    {
+      "verification_run_id": "53a61305-6aea-4774-b0d5-55a0d7d6e0ae",
+      "agent_code": "COVE",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 9844,
+      "input_tokens": "18828",
+      "output_tokens": "743",
+      "cost_microunits": "45086"
+    },
+    {
+      "verification_run_id": "53a61305-6aea-4774-b0d5-55a0d7d6e0ae",
+      "agent_code": "RED_TEAM",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 8013,
+      "input_tokens": "18082",
+      "output_tokens": "591",
+      "cost_microunits": "42074"
+    },
+    {
+      "verification_run_id": "53a61305-6aea-4774-b0d5-55a0d7d6e0ae",
+      "agent_code": "EVIDENCE_JUDGE",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 4375,
+      "input_tokens": "20079",
+      "output_tokens": "552",
+      "cost_microunits": "45678"
+    },
+    {
+      "verification_run_id": "e1bb0271-2f65-4876-9281-bad07e90a96b",
+      "agent_code": "PRODUCT_INSTITUTION",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 6921,
+      "input_tokens": "11754",
+      "output_tokens": "766",
+      "cost_microunits": "31168"
+    },
+    {
+      "verification_run_id": "e1bb0271-2f65-4876-9281-bad07e90a96b",
+      "agent_code": "FRAUD_CHANNEL",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 5399,
+      "input_tokens": "11620",
+      "output_tokens": "567",
+      "cost_microunits": "28910"
+    },
+    {
+      "verification_run_id": "e1bb0271-2f65-4876-9281-bad07e90a96b",
+      "agent_code": "SALES_CONDUCT",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 9447,
+      "input_tokens": "11767",
+      "output_tokens": "932",
+      "cost_microunits": "32854"
+    },
+    {
+      "verification_run_id": "e1bb0271-2f65-4876-9281-bad07e90a96b",
+      "agent_code": "REGULATION_DISPUTE",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 7259,
+      "input_tokens": "14203",
+      "output_tokens": "862",
+      "cost_microunits": "37026"
+    },
+    {
+      "verification_run_id": "e1bb0271-2f65-4876-9281-bad07e90a96b",
+      "agent_code": "COVE",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 7917,
+      "input_tokens": "30830",
+      "output_tokens": "1093",
+      "cost_microunits": "72590"
+    },
+    {
+      "verification_run_id": "e1bb0271-2f65-4876-9281-bad07e90a96b",
+      "agent_code": "RED_TEAM",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 6862,
+      "input_tokens": "30688",
+      "output_tokens": "891",
+      "cost_microunits": "70286"
+    },
+    {
+      "verification_run_id": "e1bb0271-2f65-4876-9281-bad07e90a96b",
+      "agent_code": "EVIDENCE_JUDGE",
+      "status": "SUCCEEDED",
+      "reason_code": null,
+      "latency_ms": 9874,
+      "input_tokens": "29159",
+      "output_tokens": "1217",
+      "cost_microunits": "70488"
+    }
+  ],
+  "passports": [
+    {
+      "verification_run_id": "53a61305-6aea-4774-b0d5-55a0d7d6e0ae",
+      "count": 1
+    },
+    {
+      "verification_run_id": "e1bb0271-2f65-4876-9281-bad07e90a96b",
+      "count": 1
+    }
+  ],
+  "files": null,
+  "reservations": [
+    {
+      "status": "SETTLED",
+      "count": 55,
+      "actual_microunits": "567248"
+    }
+  ]
+}

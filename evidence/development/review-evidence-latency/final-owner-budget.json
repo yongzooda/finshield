@@ -1,0 +1,16 @@
+[
+  {
+    "scope_type": "OWNER_DAY",
+    "provider": "all",
+    "reserved_microunits": "0",
+    "consumed_microunits": "2315500",
+    "limit_microunits": "3000000"
+  },
+  {
+    "scope_type": "OWNER_DAY",
+    "provider": "anthropic",
+    "reserved_microunits": "0",
+    "consumed_microunits": "2315500",
+    "limit_microunits": "3000000"
+  }
+]

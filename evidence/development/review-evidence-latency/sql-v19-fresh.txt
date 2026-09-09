@@ -1,0 +1,753 @@
+== Migration 적용 ==
+  ✓ 00_supabase_stub.sql
+  ✓ 0001_finshield_baseline.sql
+  ✓ 0002_revoke_default_function_grants.sql
+  ✓ 0003_profiles.sql
+  ✓ 0004_financial_cases.sql
+  ✓ 0005_claims_and_consents.sql
+  ✓ 0006_execution_registry.sql
+  ✓ 0007_source_knowledge_base.sql
+  ✓ 0008_worker_extensions_usage.sql
+  ✓ 0009_runs_and_manifests.sql
+  ✓ 0010_agent_tool_evidence.sql
+  ✓ 0011_results_and_passports.sql
+  ✓ 0012_jobs_notifications_aftercare.sql
+  ✓ 0013_storage_cleanup_outbox.sql
+  ✓ 0014_budget_rate_audit.sql
+  ✓ 0015_case_run_functions.sql
+  ✓ 0016_finalization.sql
+  ✓ 0017_demo_evaluation_views.sql
+  ✓ 0018_keyword_search_or_terms.sql
+  ✓ 0019_upload_slot_functions.sql
+  ✓ 0020_input_artifact_functions.sql
+  ✓ 0021_p0_execution_manifest.sql
+  ✓ 0022_text_input_function.sql
+  ✓ 0023_source_snapshot_immutability.sql
+  ✓ 0024_cove_red_team_agents.sql
+  ✓ 0025_journey_and_aftercare.sql
+  ✓ 0026_submission_result_contracts.sql
+  ✓ 0027_confirmed_run_input.sql
+  ✓ 0028_scoped_revalidation_claim.sql
+  ✓ 0029_file_intake_access.sql
+  ✓ 0030_review_manifest_v2.sql
+  ✓ 0031_file_processing_contract.sql
+  ✓ 0032_revalidation_dispatch.sql
+  ✓ 0033_file_expiry_dispatch.sql
+  ✓ 0034_model_usage_context.sql
+  ✓ 0035_intake_stop_guard.sql
+  ✓ 0036_profile_deletion_guard.sql
+  ✓ 0037_member_session_rls.sql
+  ✓ 0038_account_deletion.sql
+  ✓ 0039_shared_provider_budget.sql
+  ✓ 0040_notification_delivery.sql
+  ✓ 0041_profile_policy.sql
+  ✓ 0042_aftercare_review_jobs.sql
+  ✓ 0043_aftercare_document_inputs.sql
+  ✓ 0044_aftercare_input_budget.sql
+  ✓ 0045_initial_verification_retry.sql
+  ✓ 0046_judge_budget_policy.sql
+  ✓ 0047_demo_evidence_connection.sql
+  ✓ 0048_demo_runtime_reliability.sql
+  ✓ 0049_demo_regulation_timeout.sql
+  ✓ 0050_member_claim_runtime_budget.sql
+  ✓ 0054_member_evidence_scope.sql
+  ✓ 0055_member_review_runtime.sql
+  ✓ 0056_member_shared_deadline.sql
+  ✓ 0057_high_risk_action_priority.sql
+  ✓ 0058_agent_citation_contract.sql
+  ✓ 0059_review_evidence_latency.sql
+  ✓ 0060_domain_scope_aftercare_batches.sql
+  ✓ 0061_bounded_decision_output.sql
+  ✓ 0062_nested_statute_content.sql
+  ✓ 0063_canonical_model_evidence.sql
+  ✓ 0064_single_claim_decisions.sql
+  ✓ 0065_aftercare_comparison_scope.sql
+== 불변식 시험 ==
+   허용 확인: auth.users insert 가 profiles 를 생성
+1. financial_cases
+   거부 확인: title_masked 161자  (23514)
+   거부 확인: deletion_status ACTIVE 인데 deleted_at 설정  (23514)
+   거부 확인: ENROLLED 인데 가입 확인 시각 없음  (23514)
+   거부 확인: PRE_TRANSACTION 인데 가입 확인 시각 있음  (23514)
+   허용 확인: 가입 확인 없이 피해 의심 단계로 전진 (명세 6.7)
+   허용 확인: 피해 의심 단계 원복
+   거부 확인: P0 에서 URL 입력 유형  (23514)
+   거부 확인: DRAFT lifecycle 에 resume_state 설정  (23514)
+   거부 확인: 다른 소유자의 프로필 Snapshot 참조  (23503)
+   거부 확인: 참조 Case 가 있는 Snapshot 직접 삭제  (23503)
+   허용 확인: updated_at trigger 갱신
+2. case_inputs
+   거부 확인: 다른 소유자의 Case 에 입력 추가  (23503)
+   거부 확인: PDF 11쪽  (23514)
+   거부 확인: Image 2쪽  (23514)
+   거부 확인: P0 에서 URL 입력 행  (23514)
+   거부 확인: MASKED 이전 단계에서 masked_text 영속  (23514)
+   거부 확인: PII Gate 미통과 상태의 masked_text 영속  (23514)
+   허용 확인: MASKED + PII PASSED 뒤 masked_text 영속
+   거부 확인: masked_text_hash 형식 위반  (23514)
+   거부 확인: 원본 보관 24시간 초과  (23514)
+   거부 확인: 삭제 성공 없이 RAW_DELETED 단계  (23514)
+   거부 확인: SUCCEEDED 인데 raw_deleted_at 없음  (23514)
+   허용 확인: 중단 경로에서 단계 보존한 채 삭제 축만 종결 (명세 4.3)
+   거부 확인: 정상 경로 + 삭제 성공인데 RAW_DELETED 아님  (23514)
+   허용 확인: 정상 경로 종결
+3. case_input_pages, case_input_findings
+   거부 확인: page_no 11  (23514)
+   거부 확인: 같은 입력에 중복 page_no  (23505)
+   거부 확인: locator 에 schema_version 없음  (23514)
+   거부 확인: 열거하지 않은 finding_type  (23514)
+   허용 확인: 정상 Finding
+4. private.input_objects, private.ocr_artifacts
+   거부 확인: Text 입력에 Storage 객체 연결  (23514)
+   거부 확인: 격리 Bucket 이 아닌 Bucket  (23514)
+   거부 확인: object_path 경로 조작  (23514)
+   거부 확인: 허용하지 않은 확장자  (23514)
+   거부 확인: 임시 객체 24시간 초과  (23514)
+   허용 확인: 정상 격리 객체
+   거부 확인: DELETED 가 아닌데 deleted_at 있음  (23514)
+   허용 확인: 정상 OCR 중간물 메타데이터
+5. case_events
+   거부 확인: Append-only Event UPDATE  (23001)
+   거부 확인: 같은 Case 에 중복 event_no  (23505)
+   거부 확인: 같은 Owner·Case 에 중복 idempotency_key  (23505)
+   거부 확인: 허용하지 않은 event_type Namespace  (23514)
+   거부 확인: payload 에 schema_version 없음  (23514)
+   거부 확인: 다른 Case 의 Event 를 정정 대상으로 지정  (23503)
+6. RLS 교차 소유
+   허용 확인: 본인 Case·입력·Event 만 조회
+   거부 확인: 회원이 Case 를 직접 UPDATE  (42501)
+   거부 확인: 회원이 Event 를 직접 INSERT  (42501)
+   거부 확인: 회원이 private.input_objects 조회  (42501)
+   거부 확인: 회원이 private.ocr_artifacts 조회  (42501)
+   허용 확인: 삭제 표시 즉시 Case 와 자식 조회 차단
+   거부 확인: 익명이 financial_cases 조회  (42501)
+   거부 확인: 익명이 case_inputs 조회  (42501)
+   거부 확인: 익명이 case_events 조회  (42501)
+모든 불변식 시험을 통과했습니다.
+7. claims
+   거부 확인: 부모 없는 DERIVED Claim  (23514)
+   거부 확인: 원문 입력 없는 EXTRACTED Claim  (23514)
+   거부 확인: 입력 없이 페이지만 지정한 Claim  (23514)
+   거부 확인: source_locator 에 schema_version 없음  (23514)
+   거부 확인: 다른 Case 의 Claim 을 부모로 지정  (23503)
+   허용 확인: 같은 Case 부모를 가진 파생 Claim
+8. claim_revisions
+   거부 확인: Append-only revision UPDATE  (23001)
+   거부 확인: 같은 Claim 에 중복 revision_no  (23505)
+   거부 확인: 규칙 버전 없는 SYSTEM_DERIVATION revision  (23514)
+   거부 확인: USER_REMOVE 인데 is_removed 가 false  (23514)
+   거부 확인: 삭제 revision 을 사용자 확정으로 표시  (23514)
+   거부 확인: statement_masked 4KiB 초과  (23514)
+   거부 확인: structured_value 에 schema_version 없음  (23514)
+   허용 확인: 사용자 확정 revision 추가
+9. processing_consents
+   거부 확인: 동의 증적 UPDATE  (23001)
+   거부 확인: 거절 증적 삭제  (23001)
+   거부 확인: 일반 약관 동의를 처리 동의로 대체  (23514)
+   거부 확인: 전송 범주가 빈 배열인 동의  (23514)
+   거부 확인: 대상 없는 철회  (23514)
+   허용 확인: 앞선 결정을 대체하는 새 동의
+   거부 확인: 다른 입력의 동의를 참조 (0004 FK 보강 확인)  (23503)
+   허용 확인: 같은 입력에 대해 기록된 동의 참조
+10. RLS 교차 소유
+   허용 확인: 본인 Claim·revision·동의 조회
+   허용 확인: 타인 Claim 차단
+   거부 확인: 회원이 Claim 을 직접 INSERT  (42501)
+   거부 확인: 회원이 동의를 직접 INSERT  (42501)
+   거부 확인: 익명이 claims 조회  (42501)
+   거부 확인: 익명이 claim_revisions 조회  (42501)
+   거부 확인: 익명이 processing_consents 조회  (42501)
+11. Cascade 삭제
+   거부 확인: Case 가 살아 있는데 Event 직접 삭제  (23001)
+   거부 확인: Claim 이 살아 있는데 revision 직접 삭제  (23001)
+   허용 확인: Case 삭제 Cascade 로 모든 자식 제거
+0005 불변식 시험을 통과했습니다.
+12. policy_versions
+   거부 확인: 같은 유형·버전 중복  (23505)
+   거부 확인: 열거하지 않은 policy_type  (23514)
+   거부 확인: rules 가 object 가 아님  (23514)
+   거부 확인: content_hash 형식 위반  (23514)
+   거부 확인: 정책 버전 UPDATE  (23001)
+   거부 확인: 정책 버전 DELETE  (23001)
+13. agent_definitions, tool_definitions
+   거부 확인: 같은 agent_code·version 중복  (23505)
+   거부 확인: 열거하지 않은 role  (23514)
+   거부 확인: agent_code 형식 위반  (23514)
+   거부 확인: Agent 정의 UPDATE  (23001)
+   거부 확인: Run deadline 180초를 넘는 timeout  (23514)
+   거부 확인: retry_limit 상한 초과  (23514)
+   거부 확인: 입력 상한 10 MiB 초과  (23514)
+   거부 확인: 열거하지 않은 transport  (22P02)
+   거부 확인: Tool 정의 DELETE  (23001)
+14. agent_tool_allowlists
+   허용 확인: 등록된 Agent·Tool 허용 목록
+   거부 확인: 같은 Agent·Tool·목적 중복  (23505)
+   거부 확인: 미등록 Tool 을 허용 목록에 추가  (23503)
+   거부 확인: 허용 목록 DELETE  (23001)
+   거부 확인: 허용 목록이 참조하는 Agent 정의 DELETE  (23001)
+15. Registry 권한
+   허용 확인: Worker 가 Registry 를 읽는다
+   거부 확인: Worker 가 Tool 정의 INSERT  (42501)
+   거부 확인: 회원이 Agent 정의 조회  (42501)
+   거부 확인: 회원이 정책 버전 조회  (42501)
+   거부 확인: 익명이 Tool 정의 조회  (42501)
+0006 불변식 시험을 통과했습니다.
+16. source_snapshots, source_fetch_events
+   거부 확인: 같은 유형·식별자·버전·내용의 Snapshot 중복  (23505)
+   거부 확인: 법령 Snapshot 에 법령명·조문 없음  (23514)
+   거부 확인: 본문 불완전한데 인용 가능 표시  (23514)
+   거부 확인: 열거하지 않은 source_type  (23514)
+   거부 확인: official_id·version 이 null 인 동일 내용 중복  (23505)
+   거부 확인: Snapshot UPDATE  (23001)
+   허용 확인: 같은 내용 재조회 사건
+   거부 확인: 같은 adapter·request_key 중복  (23505)
+   거부 확인: CHANGED 인데 Snapshot 없음  (23514)
+   거부 확인: FAILED 인데 error_code 없음  (23514)
+   허용 확인: 과거 Snapshot 없는 실패 사건
+17. kb_releases, documents, chunks
+   거부 확인: Embedding 설정이 일부만 있음  (23514)
+   거부 확인: 같은 Release 버전 중복  (23505)
+   허용 확인: Release 에 Snapshot 포함
+   허용 확인: Release Publish Event
+   거부 확인: 열거하지 않은 Release event_type  (23514)
+   거부 확인: 같은 Release 안 문서 key·version 중복  (23505)
+   거부 확인: 코드 배열에 null 원소  (23514)
+   허용 확인: search_vector 생성과 GIN FTS 조회
+   거부 확인: 다른 Release 의 문서에 Chunk 연결  (23503)
+   거부 확인: 같은 문서에 중복 chunk_no  (23505)
+   거부 확인: Chunk UPDATE  (23001)
+18. knowledge_embeddings
+   허용 확인: 1024차원 Embedding 적재
+   거부 확인: 1023차원 Vector  (22000)
+   거부 확인: Release 가 선언하지 않은 모델의 Embedding  (23503)
+   거부 확인: 다른 Release 의 Chunk 에 Embedding 연결  (23503)
+19. official_channel_registry
+   허용 확인: pgvector cosine Exact KNN 연산
+   허용 확인: 공식 Snapshot 근거의 채널 등록
+   거부 확인: 열거하지 않은 channel_type  (23514)
+   거부 확인: 근거 Snapshot 없는 채널 등록  (23503)
+   거부 확인: 채널 Registry DELETE  (23001)
+20. KB 권한
+   허용 확인: Worker 가 KB 를 검색한다
+   허용 확인: Worker 가 pgvector Exact KNN 을 실행한다
+   허용 확인: Worker 가 조회 사건을 적재한다
+   거부 확인: Worker 가 Release UPDATE  (42501)
+   거부 확인: Worker 가 조회 사건 DELETE  (42501)
+   거부 확인: 회원이 KB Chunk 직접 조회  (42501)
+   거부 확인: 회원이 채널 Registry 직접 조회  (42501)
+   거부 확인: 익명이 Source Snapshot 조회  (42501)
+0007 불변식 시험을 통과했습니다.
+21. execution_manifests
+   거부 확인: 등록되지 않은 Evidence 정책 버전  (23503)
+   거부 확인: Release 선언과 다른 Embedding 차원  (23503)
+   거부 확인: 없는 KB Release 참조  (23503)
+   허용 확인: Manifest 에 Agent 구성 고정
+   거부 확인: 같은 Manifest 에 같은 Agent 정의 중복  (23505)
+   허용 확인: Manifest 에 Tool 버전 고정
+   허용 확인: Manifest 활성화 Event
+   거부 확인: Manifest UPDATE  (23001)
+   거부 확인: Manifest Event DELETE  (23001)
+22. verification_runs
+   거부 확인: 다른 소유자의 Profile Snapshot 을 고정  (23503)
+   거부 확인: Deadline 180초 초과  (23514)
+   거부 확인: 직전 Run 없는 재검증  (23514)
+   거부 확인: 종결 전 종합 결과 기록  (23514)
+   거부 확인: Case 당 활성 초기 Run 둘  (23505)
+   거부 확인: 같은 idempotency_key 에 다른 request_hash  (23514)
+   거부 확인: 종합 결과 없이 COMPLETED  (23514)
+   거부 확인: 이유 없이 FAILED  (23514)
+   허용 확인: 결과·Coverage 와 함께 종결
+   허용 확인: Case 최신 Run 포인터 (교차 소유 FK)
+   거부 확인: 다른 Case 의 Run 을 최신 Run 으로 지정  (23503)
+   허용 확인: 직전 Run 을 가리키는 재검증 Run
+   거부 확인: Case 가 살아 있는데 Run 직접 삭제  (23001)
+23. verification_run_claims
+   거부 확인: 사용자 미확정 Material Claim 을 CONFIRMED 로 고정  (23514)
+   거부 확인: 검증 대상인데 CONFIRMED 가 아님  (23514)
+   거부 확인: 누락인데 이유 Code 없음  (23514)
+   거부 확인: Claim identity 와 revision 을 바꿔 끼움  (23503)
+   허용 확인: 사용자 확정 revision 을 Run 에 고정
+   거부 확인: Run 입력 고정 뒤 UPDATE  (23001)
+   거부 확인: Run 이 살아 있는데 Run Claim 직접 삭제  (23001)
+24. Run 권한
+   허용 확인: Worker 가 Manifest·Run 을 읽는다
+   거부 확인: Worker 가 Run 상태를 직접 UPDATE  (42501)
+   거부 확인: Worker 가 Manifest Event INSERT  (42501)
+   거부 확인: 회원이 Run 표를 직접 조회 (View 전용)  (42501)
+   거부 확인: 회원이 Manifest 조회  (42501)
+   허용 확인: Case 삭제 Cascade 로 Run·Run Claim 제거
+0009 불변식 시험을 통과했습니다.
+25. 준비: Case·Run·Claim
+26. agent_runs: Manifest 고정 강제
+   거부 확인: Registry 에 없는 Agent 실행  (23514)
+   거부 확인: Manifest 의 논리 키와 다른 Agent 정의  (23514)
+   허용 확인: Manifest 에 고정된 Agent 실행
+   거부 확인: Provider 만 있고 모델 ID 없음  (23514)
+   허용 확인: Agent 입력 Claim 연결
+   거부 확인: 열거하지 않은 relation  (23514)
+27. tool_runs: Manifest·Allowlist 강제
+   거부 확인: Manifest 에 없는 Tool 호출  (23514)
+   허용 확인: Judge Agent 실행
+   거부 확인: Agent Allowlist 에 없는 Tool 호출  (23514)
+   거부 확인: 실행 중인데 Provenance 완전 표시  (23514)
+   허용 확인: 허용된 Tool 호출 성공 (Provenance 완전)
+   허용 확인: 재시도 실패 (Provenance 불완전)
+   거부 확인: 종결된 Tool 행 수정  (23514)
+28. retrieval_steps
+   허용 확인: AI-007 순서대로 단계 기록
+   거부 확인: 순번과 단계 이름이 어긋남 (2번에 VECTOR)  (23514)
+29. evidences: Provenance·인용 가능성
+   거부 확인: Source 가 하나도 없는 Evidence  (23514)
+   거부 확인: Provenance 불완전한 Tool 결과를 Evidence 로 승격  (23514)
+   거부 확인: 참고용(reference_only) 인데 인용 가능 표시  (23514)
+   거부 확인: 인용 불가 Snapshot 을 인용 가능 Evidence 로 표시  (23514)
+   허용 확인: 직접 근거 2건(같은 복제군)과 참고용 근거 1건
+30. final_claim_versions: Evidence Policy Validator
+   거부 확인: 근거 관계 없는 VERIFIED Commit  (23514)
+   거부 확인: 참고용·간접 근거만으로 VERIFIED  (23514)
+   허용 확인: 직접·인용 가능 SUPPORT 근거로 VERIFIED Commit
+   거부 확인: 같은 복제군의 두 번째 독립 대표 (규칙 3)  (23505)
+   허용 확인: 같은 복제군의 비독립 연결
+   거부 확인: Evidence 와 다른 independence_key 를 적음  (23503)
+   거부 확인: 같은 Run 의 같은 Claim 에 두 번째 최종 상태  (23514)
+   거부 확인: Claim identity 와 revision 바꿔치기  (23514)
+   거부 확인: 최종 Claim 상태 UPDATE  (23001)
+31. 권한과 Cascade
+   허용 확인: Worker 가 Evidence 를 읽는다
+   거부 확인: Worker 가 Agent 상태를 직접 UPDATE  (42501)
+   거부 확인: 회원이 Evidence 표를 직접 조회 (View 전용)  (42501)
+   허용 확인: Case 삭제 Cascade 로 실행 Trace·Evidence 전부 제거
+0010 불변식 시험을 통과했습니다.
+32. 준비: Case·Run
+33. verification_axis_results
+   허용 확인: 축별 결과 기록
+   거부 확인: 같은 Run 에 같은 축 두 번  (23505)
+   거부 확인: 축 결과 UPDATE  (23001)
+34. action_guides: 원시 채널 금지
+   거부 확인: actions 에 URL 원문  (23514)
+   거부 확인: actions 에 전화번호 원문  (23514)
+   거부 확인: COMPLETED 인데 행동이 없음  (23514)
+   허용 확인: 채널 ID 참조형 Guide
+   허용 확인: 승인 채널을 행동 1에 연결
+   거부 확인: Guide 에 없는 action_no 2 에 채널 연결  (23514)
+   거부 확인: 유효기간 밖 채널 연결  (23514)
+35. evidence_passports
+   거부 확인: Coverage 미충족인데 특별한 위험 신호 없음  (23514)
+   거부 확인: Run 이 고정한 Profile Snapshot 과 다른 Passport  (23514)
+   허용 확인: Run 이 고정한 값과 일치하는 Passport
+   거부 확인: Case 안 Passport 번호 중복  (23505)
+   허용 확인: Case 최신 Passport 포인터 (교차 소유 FK)
+   거부 확인: 다른 Case 의 Passport 를 최신으로 지정  (23503)
+   거부 확인: Passport UPDATE  (23001)
+   거부 확인: Case 가 살아 있는데 Passport 직접 삭제  (23001)
+36. 권한과 Cascade
+   허용 확인: 회원이 본인 Passport·축 결과·Guide 를 읽는다
+   허용 확인: 타인 Passport 차단
+   거부 확인: 회원이 Passport 를 직접 INSERT  (42501)
+   허용 확인: Case 삭제 Cascade 로 Passport·Guide·축 결과 제거
+0011 불변식 시험을 통과했습니다.
+37. 준비: Case·Run·Passport 두 벌
+38. revalidation_jobs
+   거부 확인: Case 당 활성 재검증 Job 둘  (23505)
+   거부 확인: 이유 없이 FAILED  (23514)
+   거부 확인: FAILED 인데 성공 결과 포인터  (23514)
+   허용 확인: Job Runtime 생성
+   거부 확인: Token·만료 없는 반쪽 Lease  (23514)
+   허용 확인: 완전한 Lease 부여
+   거부 확인: max_attempts 초과 시도  (23514)
+39. 종결 정합성 (Deferred Trigger)
+   거부 확인: Diff 없는 NO_CHANGE 종결 Commit  (23514)
+   거부 확인: NO_CHANGE 인데 material_change=true  (23514)
+   허용 확인: 빈 Diff 와 함께 NO_CHANGE 종결 Commit
+   거부 확인: Job 당 두 번째 Diff  (23505)
+   거부 확인: Diff UPDATE  (23001)
+40. revalidation_events, notifications
+   거부 확인: 실제 Fetch Event 없는 Source 재조회 Event  (23514)
+   허용 확인: Fetch Event 를 가리키는 재조회 Event
+   거부 확인: NO_CHANGE Job 에 위험 알림  (23514)
+   허용 확인: NO_CHANGE 조용한 완료 알림
+   거부 확인: 같은 deduplication_key 중복 알림  (23505)
+   거부 확인: P0 에서 EMAIL 채널  (23514)
+   허용 확인: 계정 기본 알림 설정
+   거부 확인: 계정 기본 설정 둘  (23505)
+   거부 확인: P1 Feature Gate 전 Email 켜기  (23514)
+   거부 확인: ACCOUNT scope 인데 case_id 있음  (23514)
+41. precase_assessments: 가입 확인 없이 시작 불가
+   거부 확인: 가입 확인 없는 Case 의 가입 후 점검  (23514)
+   허용 확인: 가입 확인 뒤 가입 후 점검 시작
+   거부 확인: 결과 없이 COMPLETED  (23514)
+   허용 확인: 첫 답변
+   거부 확인: 직전 답변 없이 정정 버전  (23514)
+   허용 확인: 직전 답변을 가리키는 정정
+   거부 확인: 답변 UPDATE  (23001)
+   허용 확인: Checklist 항목
+   거부 확인: completed_at 없이 DONE  (23514)
+42. 권한과 Cascade
+   허용 확인: 회원이 본인 알림·Diff·점검을 읽는다
+   거부 확인: 회원이 알림을 직접 UPDATE (RPC 전용)  (42501)
+   거부 확인: 회원이 Job Runtime 조회  (42501)
+   허용 확인: Worker 가 Job Runtime 을 읽고 Lease 한다
+   거부 확인: Worker 가 Job 상태를 직접 UPDATE  (42501)
+   허용 확인: Case 삭제 Cascade 로 Job·Runtime·Diff·알림·점검 제거
+0012 불변식 시험을 통과했습니다.
+ 통과: 심사 상한·기존 원장 보존·Fast 격리·DB 소유자 전용 적용
+ 10_judge_budget_policy 시험을 모두 통과했습니다
+43. 준비: Case·입력·페이지
+44. Bucket 과 upload slot
+   허용 확인: Private Bucket 두 개, exports 없음
+   거부 확인: owner/case/input 구성이 아닌 object_path  (23514)
+   거부 확인: uploaded_at 없는 UPLOADED slot  (23514)
+45. storage.objects 정책: 본인의 열린 slot 에만 INSERT
+   거부 확인: slot 이 없는 경로에 업로드  (42501)
+   거부 확인: 격리 Bucket 이 아닌 곳에 업로드  (42501)
+   허용 확인: 본인의 열린 slot 경로에 업로드
+   허용 확인: 회원의 storage.objects SELECT·UPDATE·DELETE 는 0건
+   거부 확인: 타인의 slot 경로에 업로드  (42501)
+   거부 확인: 익명이 slot 판정 함수 호출  (42501)
+   거부 확인: 닫힌 slot 경로에 재업로드  (42501)
+46. Signed URL 발급 전 확인
+   허용 확인: 본인·미차단·미만료·업로드 확인 객체에 60초 Signed URL 허가
+   거부 확인: 타인 객체 Signed URL  (42501)
+47. Cleanup enqueue → claim → 부재 확인 → finish
+   허용 확인: enqueue 는 접근 차단·Job·Outbox 를 한 Transaction 에 남긴다
+   거부 확인: 접근 차단 뒤 Signed URL  (42501)
+   허용 확인: Worker Claim 은 Lease·Attempt 를 부여하고 중복 Claim 을 막는다
+   거부 확인: 다른 Lease token 으로 finish  (55P03)
+   거부 확인: Storage 객체가 남아 있는데 삭제 성공 기록  (23514)
+   허용 확인: 부재 확인 뒤 Job·객체·입력 삭제 축 종결
+48. Cleanup 실패·재시도·소진 경보
+   허용 확인: 제한 Retry 뒤 소진 경보, 접근 차단 유지
+49. TTL·고아 Sweeper
+   허용 확인: Sweeper 가 만료·고아·객체 없음 을 모두 찾는다
+50. case_embeddings
+   거부 확인: Embedding 24시간 초과  (23514)
+   거부 확인: 1024 차원이 아닌 Embedding  (22000)
+51. Case 삭제 요청 → Cleanup 완료 → Purge
+   허용 확인: 삭제 요청은 접근 차단·Event·Ledger·Cleanup 을 남기고 Purge 는 부재 확인 전 보류
+   거부 확인: 같은 Key 다른 Payload 삭제 요청  (23505)
+   거부 확인: 타인이 Case 삭제 요청  (42501)
+   거부 확인: Ledger UPDATE  (23001)
+   거부 확인: Ledger DELETE  (23001)
+   거부 확인: 회원이 Cleanup 함수 호출  (42501)
+   허용 확인: 회원은 본인 삭제 요청만 읽고 Cleanup 함수는 못 부른다
+   허용 확인: 부재 확인 뒤 Purge, 요청 COMPLETED, 비식별 Ledger 두 사건
+52. Idempotency·Outbox·Retention
+   거부 확인: 같은 Key 다른 Hash  (23505)
+   허용 확인: Idempotency claim·중복·충돌·종결
+   거부 확인: DELIVERED 를 다시 finish  (55P03)
+   허용 확인: Outbox claim·전달·실패 Backoff·30일 Retention
+   거부 확인: Worker 가 input_objects 직접 조회  (42501)
+   거부 확인: Worker 가 Outbox 직접 INSERT  (42501)
+   허용 확인: Worker 는 함수로만 쓰고 표 직접 쓰기는 거부된다
+0013 불변식 시험을 통과했습니다.
+53. 준비: Case·Run·예산 상한
+   거부 확인: 상한 설정 없는 범위의 예약  (42501)
+   거부 확인: 열거하지 않은 예산 범위  (23514)
+54. 원자 예약·상한·정산·해제·대조
+   허용 확인: 예약이 day·owner·case·run 네 범위를 원자적으로 잡는다
+   거부 확인: RUN 상한 2500 을 넘는 세 번째 예약 (2000 + 600)  (23514)
+   거부 확인: 중복 정산  (23514)
+   거부 확인: 정산된 예약 해제  (23514)
+   허용 확인: 정산은 reserved 를 돌려주고 consumed 에 실제 비용을 더한다
+   허용 확인: 예상 초과 정산 경보
+   허용 확인: 사용량 불명확 예약은 유지한 채 대조 대상으로 남는다
+   거부 확인: 0 비용 예약  (23514)
+   거부 확인: Counter 음수  (23514)
+55. Rate 소비·Provider 직렬화·Circuit
+   허용 확인: 창 안 3회 허용, 4회째 거부와 retry_after, 사용자 분리
+   허용 확인: Provider 1 TPS 직렬화 시각 배정
+   거부 확인: OPEN Circuit 에서 슬롯 요청  (23514)
+   허용 확인: Circuit CLOSED → OPEN → HALF_OPEN → 성공 시 CLOSED
+56. Source Cache 와 감사
+   허용 확인: Cache FRESH → 오류 뒤 STALE, 0건은 EMPTY
+   거부 확인: Snapshot 없는 FRESH  (23514)
+   거부 확인: Code 없는 ERROR  (23514)
+   허용 확인: Code 와 ID 만 있는 감사 기록
+   거부 확인: 자유 문자열이 섞인 error_code  (23514)
+   거부 확인: 자유 문자열 event_code  (23514)
+   거부 확인: 감사 기록 UPDATE  (23001)
+57. Retention 과 권한
+   허용 확인: 감사 90일·Rate 24시간 Retention
+   거부 확인: Worker 가 Counter 를 직접 감소  (42501)
+   거부 확인: Worker 가 감사 기록 DELETE  (42501)
+   거부 확인: Worker 가 예산 상한 INSERT  (42501)
+   허용 확인: Worker 는 읽기와 함수만, 감소·삭제·상한 변경은 거부
+   거부 확인: 회원이 예산 Counter 조회  (42501)
+   거부 확인: 회원이 Rate 함수 호출  (42501)
+   허용 확인: Case Cascade 로 예약 제거, 집계 Counter 보존
+0014 불변식 시험을 통과했습니다.
+58. create_case: Idempotency 와 프로필 Snapshot
+   허용 확인: create_case 는 Snapshot·첫 Event 를 남기고 같은 요청은 같은 Case 를 돌려준다
+   거부 확인: 같은 Key 다른 Hash  (23505)
+   거부 확인: 프로필 없는 소유자  (42501)
+   허용 확인: 프로필 없는 사용자는 SKIPPED Snapshot
+59. transition_financial_case
+   거부 확인: 회원이 DRAFT → VERIFYING  (23514)
+   거부 확인: DRAFT → VERIFIED 건너뛰기  (23514)
+   거부 확인: 타인이 Case 전이  (42501)
+   거부 확인: 저장된 재개 상태와 다른 재개  (23514)
+   거부 확인: 입력 없는 CLOSED → INPUT_REVIEW  (23514)
+   허용 확인: 허용 전이·재개·종료·재개 Event 5건
+60. advance_input_stage
+   거부 확인: 단계 건너뛰기 QUARANTINED → EXTRACTED  (23514)
+   거부 확인: 업로드 확인 객체 없는 VALIDATED  (23514)
+   거부 확인: MIME·Magic 결과 없는 VALIDATED  (23514)
+   거부 확인: 성공한 페이지 없는 EXTRACTED  (23514)
+   거부 확인: 마스킹 결과 없는 MASKED  (23514)
+   거부 확인: 열린 BLOCKING PII 발견이 있는 MASKED  (23514)
+   허용 확인: 한 단계씩 전진, 업로드·페이지·PII 선행조건
+   거부 확인: 확정 Claim 없는 CLAIM_CONFIRMED  (23514)
+   거부 확인: 미확정 Claim 이 남은 CLAIM_CONFIRMED  (23514)
+   거부 확인: 원본 삭제 확인 전 RAW_DELETED  (23514)
+   허용 확인: Claim 확인은 원본 Cleanup 을 같은 Transaction 에 만든다
+61. create_verification_run·start·fail
+   허용 확인: Run 은 Claim revision·Snapshot·Manifest 를 고정하고 Case 를 VERIFYING 으로 바꾼다
+   거부 확인: 같은 Key 다른 Hash  (23505)
+   거부 확인: VERIFYING 중 두 번째 초기 Run  (23514)
+   거부 확인: RUNNING Run 재시작  (23514)
+   허용 확인: 전면 실패는 Passport 없이 종결하고 Case 를 INPUT_REVIEW 로 되돌린다
+   허용 확인: 사용자 중단은 활성 Run 취소와 원본 Cleanup 을 만든다
+62. 재검증 Job: enqueue·claim·heartbeat·fail·cancel 과 REVALIDATION Run
+   거부 확인: 없는 Case 의 Run  (42501)
+   거부 확인: 활성 Job 이 있는데 새 재검증  (23505)
+   허용 확인: enqueue → claim(Lease·Attempt) → heartbeat(token 검증)
+   허용 확인: 재검증 Run 은 직전 Run 을 가리키고 Case VERIFIED 를 유지한다
+   거부 확인: 다른 Lease token 으로 Job 실패 종결  (55P03)
+   거부 확인: 타인이 Job 취소  (42501)
+   허용 확인: 취소는 cancel_requested_at 뒤 FAILED·USER_CANCELLED 로 종결
+   거부 확인: VERIFIED 가 아닌 Case 의 재검증  (23514)
+63. 검색 함수
+   허용 확인: Manifest Release 안 Metadata Filter → Keyword·Vector 후보와 Provenance, 0건은 0건
+   거부 확인: 후보 상한 50 초과  (23514)
+   거부 확인: 범위 없는 사용자 Vector Query  (23514)
+   거부 확인: 타인 Case 의 Vector 검색  (42501)
+   허용 확인: 사용자 Vector 검색은 Owner·Case 고정
+64. 권한
+   거부 확인: 회원이 create_case 직접 호출  (42501)
+   거부 확인: 회원이 lifecycle 직접 UPDATE  (42501)
+   허용 확인: Worker 는 함수로 Case 를 만들고 회원은 직접 못 바꾼다
+0015 불변식 시험을 통과했습니다.
+65. 준비: 함수 경로로 Case·입력·Claim·Run
+   준비: Case 5258e52f-da47-490d-993a-043f7cad11cb Run 1519d08d-d2c7-4f5f-a9f6-52b7d401d9ad
+66. 최종화 거부: RUNNING 아님·근거 없는 VERIFIED·빠진 Claim·축 부족
+   거부 확인: QUEUED Run 최종화  (23514)
+   거부 확인: 근거 없는 VERIFIED  (23514)
+   거부 확인: 검증 대상 Claim 이 빠진 최종화  (23514)
+   거부 확인: 축 결과 한 개  (23514)
+   거부 확인: 한쪽 근거만 있는 CONFLICT  (23514)
+   거부 확인: CoVe 없는 Material Claim  (23514)
+   거부 확인: Red Team 반대 근거가 있는데 VERIFIED  (23514)
+   거부 확인: 최종화 전제·근거 정책·Claim 누락·축 수·CONFLICT 양측 근거·CoVe·Red Team
+67. 최종화 성공: 특별한 위험 신호 없음, Passport v1, Case VERIFIED
+   허용 확인: 최종화는 Claim·근거·축·Guide·Passport·Run·Case·Outbox 를 한 Transaction 에 쓴다
+   거부 확인: 종결된 Run 재최종화  (23514)
+68. 재검증 최종화: CHANGED (중대 모순) → NO_CHANGE
+   거부 확인: 다른 Lease token 으로 재검증 최종화  (55P03)
+   허용 확인: 재검증 CHANGED 는 Diff·새 Passport v2·중대 변경 알림을 남긴다
+   허용 확인: 같은 결과의 재검증은 NO_CHANGE 와 빈 Diff, 조용한 알림
+69. Guide 실패는 PARTIAL, Deadline 초과는 거부, Matrix 순수 함수
+   거부 확인: Deadline 을 넘긴 Run 최종화  (23514)
+   허용 확인: Guide 실패는 Claim·근거·축을 보존한 PARTIAL, Material UNKNOWN 은 정보 부족
+   허용 확인: 종합 결과 Matrix 다섯 행의 우선순위
+   거부 확인: 회원이 최종화 함수 호출  (42501)
+0016 불변식 시험을 통과했습니다.
+70. Demo Seed·Session·결과 모드
+   허용 확인: Seed 근거를 공용 Snapshot 으로 고정
+   거부 확인: Seed UPDATE  (23001)
+   거부 확인: URL Seed  (23514)
+   거부 확인: 24시간 넘는 Demo Session  (23514)
+   거부 확인: 승인되지 않은 Seed  (P0002)
+   허용 확인: Session 은 Hash 만 저장하고 Capability 로만 읽힌다
+   거부 확인: LIVE Session 에 사전계산 결과  (23514)
+   거부 확인: Run 당 결과 둘  (23505)
+   허용 확인: Live 결과는 사전계산일 수 없다
+   거부 확인: STATIC_FALLBACK Session 에 Live 결과  (23514)
+   허용 확인: 정적 Fallback 은 사전계산·기준일을 가진다
+   허용 확인: 만료 Session 과 실행이 Demo 스키마 안에서만 정리된다
+71. 평가·신뢰센터
+   거부 확인: 분자·분모와 다른 비율 값  (23514)
+   거부 확인: 분모 0 인데 값 있음 (N/A 여야 함)  (23514)
+   거부 확인: 완료되지 않은 평가 Run 공개  (23514)
+   거부 확인: 원문 오류 문자열이 든 Tool 상태  (23514)
+72. 회원 안전 View
+   거부 확인: 익명이 평가 표 직접 조회  (42501)
+   거부 확인: 익명이 Demo Session 직접 조회  (42501)
+   허용 확인: 익명은 공개 FinShield 지표와 최신 Tool 상태만, 산식·표본·분모 보존
+   허용 확인: 회원 View 는 본인 Case 의 요약·Passport·채널 표시값만 준다
+   허용 확인: 타인에게는 View·채널 Helper 가 비어 있다
+0017 불변식 시험을 통과했습니다.
+   거부 확인: 익명이 회원 View 조회  (42501)
+73. 교차 소유·익명·Worker 거부 행렬
+   허용 확인: 교차 소유 거부 247건, 익명 거부 83건, Worker 거부 15건·허용 68건, 판정 불가 0건
+ MATRIX {"anon_denials": 83, "inconclusive": 0, "worker_allowed": 68, "worker_denials": 15, "unexpected_allows": 0, "cross_owner_denials": 247, "worker_denied_tables": ["private.input_objects", "private.ocr_artifacts", "public.case_events", "public.case_input_findings", "public.case_input_pages", "public.case_inputs", "public.claim_revisions", "public.claims", "public.financial_cases", "public.financial_profile_versions", "public.financial_profiles", "public.precase_document_terms", "public.precase_review_jobs", "public.processing_consents", "public.profiles"]}
+74. 닫힌 slot 재업로드·차단 객체 열람 반복 거부
+75. 삭제 요청 즉시 접근 차단
+   허용 확인: 닫힌 slot 재업로드 20회·차단 객체 열람 20회 모두 거부
+ MATRIX {"closed_slot_rejections": 20, "blocked_read_rejections": 20}
+   허용 확인: 삭제 요청 뒤 소유자 조회 0건 (1.6 ms)
+ MATRIX {"access_block_ms": 1.6}
+교차 소유·Worker 거부 행렬 시험을 통과했습니다.
+1. 조사가 붙은 문장 질의
+   허용 확인: 조사가 붙은 문장 질의가 Keyword 후보를 만든다
+2. 겹치는 낱말이 없으면 0건
+   거부 확인: 겹치는 낱말이 없으면 0건
+3. 낱말이 없는 질의는 Keyword 를 건너뛴다
+   경계 확인: 낱말 없는 질의는 Keyword 를 건너뛴다
+4. Metadata Filter 는 그대로다
+   거부 확인: 다른 기관은 Keyword 가 맞아도 통과하지 못한다
+15. Keyword 검색 불변식 4건을 통과했습니다.
+1. 서버가 경로를 정하고 한 번만 확인된다
+2. 선언 MIME·크기·입력 유형을 거부한다
+   거부 확인: 이미 확인된 slot 의 재확인  (23514)
+   허용 확인: 서버가 경로를 정하고 확인은 한 번만 성공한다
+   거부 확인: 허용하지 않는 선언 MIME  (23514)
+   거부 확인: 10 MiB 초과  (23514)
+   거부 확인: Text 입력의 slot  (23514)
+   거부 확인: 24시간을 넘는 수명  (23514)
+   거부 확인: 다른 소유자의 Case  (42501)
+   거부 확인: MIME·크기·유형·수명·소유자를 모두 막는다
+3. 닫힌 slot 은 더 이상 열린 경로가 아니다
+4. 확인된 slot 은 닫기가 아니라 Cleanup 으로 처리한다
+   거부 확인: 닫힌 slot 의 업로드 확인  (23514)
+   거부 확인: 닫힌 slot 은 확인도 안 되고 입력도 종결된다
+   거부 확인: 확인된 slot 의 닫기  (23514)
+   거부 확인: 확인된 slot 은 닫기로 되돌리지 못한다
+5. 회원·익명은 이 함수를 부를 수 없다
+   거부 확인: 회원의 직접 slot 생성  (42501)
+   거부 확인: slot 생성은 서버 역할만 부른다
+16. Upload slot 불변식 5건을 통과했습니다.
+1. 페이지는 함수로만 만들고 두 번 등록하지 못한다
+   허용 확인: 페이지는 함수로만 만들어지고 재등록·상한 초과는 막힌다
+2. 소유자·Case 가 다르면 산출물을 등록하지 못한다
+   거부 확인: 남의 소유자·긴 수명·없는 입력의 산출물 등록
+3. Claim 확인은 원본·임시물·vector 를 모두 청소에 넣는다
+4. 사용자 중단은 결과 축만 바꾸고 세 대상을 청소에 넣는다
+   허용 확인: Claim 확인이 원본·OCR 임시물·Case vector 를 모두 청소에 넣는다
+5. 산출물 등록 함수는 worker 만 실행한다
+   허용 확인: 중단은 결과 축만 바꾸고 세 대상을 청소에 넣으며 멱등하다
+   거부 확인: 회원·익명은 산출물 등록 함수를 부르지 못한다
+17. 입력 산출물·중단 불변식 5건을 통과했습니다.
+1. 피해 의심만으로는 가입으로 보지 않는다
+2. 가입 확인이 없으면 가입 후 점검을 시작할 수 없다
+   허용 확인: 피해 의심은 가입 확인 없이 성립하고 가입으로 세지 않는다
+   거부 확인: 가입 확인 없는 점검  (23514)
+3. 가입 등록은 확인 시각과 Event 를 남기고 같은 내용은 한 번만 쌓는다
+   허용 확인: 가입 등록은 멱등하고 내용을 고치면 정정 기록이 쌓인다
+4. 미래 날짜와 잘못된 Code 는 받지 않는다
+5. 점검은 Passport 의 프로필 판을 물려받고 답변·행동을 함께 남긴다
+   거부 확인: 미래 가입일  (23514)
+   거부 확인: 정해진 형식이 아닌 채널 Code  (23514)
+   허용 확인: 점검은 Passport 의 프로필 판을 쓰고 답변·행동·Event 를 함께 남긴다
+   허용 확인: 점검은 덮어쓰지 않고 판을 쌓는다
+6. 남의 Case·다른 Case 의 Passport 는 쓰지 못한다
+   거부 확인: 남의 Case 가입 등록  (42501)
+   거부 확인: 다른 Case 의 Passport  (42501)
+7. 회원·익명은 이 함수들을 부를 수 없다
+   거부 확인: 회원의 가입 등록 함수 호출  (42501)
+   거부 확인: 회원의 점검 기록 함수 호출  (42501)
+18. 가입·가입 후 점검 불변식 7건을 통과했습니다.
+ 제출 흐름 원장: 교차 소유·중복·오래된 판·실행 중 수정 거부, 이전 판 보존·고정 입력 통과
+ 19_submission_contract_invariants 시험을 모두 통과했습니다
+ 파일 입력: 교차 소유·중복·검사 전/중단 후 OCR 거부, 페이지 위치·삭제 임대 검증 통과
+ 20_file_processing 시험을 모두 통과했습니다
+   거부 확인: 다른 소유자 상태 조회  (42501)
+   통과: 상태 복원·교차 소유자 차단·취소 종결·Lease 회전·불명확한 Provider 재호출 방지
+ 21_revalidation_dispatch 시험을 모두 통과했습니다
+   거부 확인: 만료 전 삭제 방지  (23514)
+   통과: 만료 전 보호·만료 접근 차단·한 입력만 중복 없이 정리·부재 확인
+ 22_file_expiry 시험을 모두 통과했습니다
+   거부 확인: 마스킹 전 비용 예약 거부  (42501)
+   거부 확인: 다른 소유자의 입력 예산 거부  (42501)
+   거부 확인: 예약액을 포함한 상한 초과 거부  (23514)
+   거부 확인: 동일 응답 중복 정산 거부  (23514)
+   통과: 마스킹 전·타인 입력 차단·예약 합산 상한·4범위 정산·중복 정산 거부·Demo 분리
+ 23_model_budget_context 시험을 모두 통과했습니다
+   거부 확인: 마스킹 전 Claim 기록 차단  (42501)
+   거부 확인: 중단 뒤 Claim 기록 차단  (42501)
+   거부 확인: 중단 뒤 모델 비용 예약 차단  (42501)
+   통과: 마스킹 전·중단 뒤 Claim 기록과 후속 모델 예약 차단
+ 24_intake_stop 시험을 모두 통과했습니다
+   거부 확인: 미완료 REQUESTED Profile 직접 삭제  (55000)
+   거부 확인: 미완료 REQUESTED Auth Cascade  (55000)
+   거부 확인: 미완료 ACCESS_BLOCKED Profile 직접 삭제  (55000)
+   거부 확인: 미완료 ACCESS_BLOCKED Auth Cascade  (55000)
+   거부 확인: 미완료 CLEANING Profile 직접 삭제  (55000)
+   거부 확인: 미완료 CLEANING Auth Cascade  (55000)
+   거부 확인: 미완료 FAILED Profile 직접 삭제  (55000)
+   거부 확인: 미완료 FAILED Auth Cascade  (55000)
+   거부 확인: 미완료 Case 삭제 요청  (55000)
+   거부 확인: 활성 Case의 Profile 직접 삭제  (55000)
+   거부 확인: 활성 Case의 Auth Cascade  (55000)
+   허용 확인: 완료 원장 보존 뒤 Auth 마지막 삭제
+   허용 확인: 소유 자산 없는 계정 삭제
+   통과: 거부 뒤 계정 보존·정상 최종 삭제·함수 권한
+ 25_profile_deletion_guard 시험을 모두 통과했습니다
+   허용 확인: 정상 세션의 본인 조회·RPC 세 곳·Storage slot
+   거부 확인: 무효 세션의 표·UPDATE·RPC 세 곳·slot·Storage 쓰기
+   거부 확인: 무효 세션의 표·UPDATE·RPC 세 곳·slot·Storage 쓰기
+   거부 확인: 무효 세션의 표·UPDATE·RPC 세 곳·slot·Storage 쓰기
+   거부 확인: 무효 세션의 표·UPDATE·RPC 세 곳·slot·Storage 쓰기
+   거부 확인: 무효 세션의 표·UPDATE·RPC 세 곳·slot·Storage 쓰기
+   거부 확인: 무효 세션의 표·UPDATE·RPC 세 곳·slot·Storage 쓰기
+   거부 확인: 무효 세션의 표·UPDATE·RPC 세 곳·slot·Storage 쓰기
+   허용 확인: 다른 세션의 회원 조회와 같은 정상 경로 Storage 쓰기
+   거부 확인: Auth not_after 만료
+   통과: 전체 public 표의 Restrictive 정책·실행 권한·내부 표 비노출
+26_member_session_rls 시험을 모두 통과했습니다
+ 통과: 새 작업 차단·다른 회원 정상·Case/Storage 잔존 거부·Auth 실패 rollback·반복 완료·비식별 원장·교차 회원 거부
+ 27_account_deletion 시험을 모두 통과했습니다
+   거부 확인: 다른 소유자 검색 비용 예약  (42501)
+ 통과: Provider 합산 상한·예약 rollback·양쪽 정산·미확정 유지·소유권
+ 28_shared_provider_budget 시험을 모두 통과했습니다
+ 통과: 알림·Outbox 원자성·Orphan·동일 요청·소유자·삭제 작업 분리·실패 재시도
+ 29_notification_delivery 시험을 모두 통과했습니다
+ 통과: 실제 최종화·자기신고 확정 거부·부담/기간/가입 분리·종료/다른 상품 제외·현재 프로필 변경 후 불변·교차 회원 거부·이전 Manifest 보존
+ 30_profile_policy 시험을 모두 통과했습니다
+   거부 확인: 동일 key 본문 변경  (23514)
+   거부 확인: 다른 회원 접수  (42501)
+   거부 확인: 점검 Provider 합산 초과  (23514)
+   거부 확인: 가입 후 Allowlist 밖 Agent  (23514)
+   거부 확인: Allowlist 밖 Tool  (23514)
+   거부 확인: 점검 결과 쓰기 실패  (P0001)
+   거부 확인: 취소 후 모델 비용 예약  (42501)
+   거부 확인: Worker 직접 본문 읽기  (42501)
+ 31_aftercare_review 시험을 모두 통과했습니다
+   거부 확인: 가입 등록 없는 문서 거부  (23514)
+   거부 확인: 타인 Case 업로드 거부  (42501)
+   거부 확인: 문서 목적 변경 거부  (23514)
+   거부 확인: 기존 미완료 문서 중복 거부  (55000)
+   거부 확인: 타인 계약 문서 예약 거부  (42501)
+   거부 확인: 가입 후 상한 초과 거부  (23514)
+   거부 확인: 타인 문서 확인 거부  (42501)
+   거부 확인: 확인 완료 문서 재호출 예약 거부  (42501)
+   거부 확인: 확정 후 문구 변경 거부  (55000)
+   거부 확인: 점검 문서 출처 위조 거부  (42501)
+   거부 확인: Worker 계약 본문 접근 거부  (42501)
+ 32_aftercare_documents 시험을 모두 통과했습니다
+   거부 확인: 살아 있는 Run 자동 종결 거부  (23505)
+   거부 확인: 다른 Run ID로 중단 거부  (23505)
+   통과: 실행 중 보호·명시 재시도·기한 초과·중복 종결 방지
+ 33_initial_verification_retry 시험을 모두 통과했습니다
+ 통과: 공식 상품·사칭 안내 본문 2건, 재조회 사건, v4 Manifest 연결
+ 34_demo_evidence_connection 시험을 모두 통과했습니다
+ 통과: Seed 사칭 안내 최신성, v5 시간 제한, Agent·Tool 연결
+ 35_demo_runtime_reliability 시험을 모두 통과했습니다
+ 통과: v6 Domain 선택 6초·단계 16초, Agent 7개·Tool 19개
+ 36_demo_regulation_timeout 시험을 모두 통과했습니다
+ 40_member_evidence_scope: 새 구성·CoVe·과거 구성·예산 보존 통과
+ 41_member_review_runtime: 현재 기한·과거 구성 보존 통과
+ 42_member_shared_deadline: 연결·전체 Demo 기한·과거 설정 보존 통과
+ 43_statute_effective_snapshot: 시행 전후 조회·과거 불변성·원문 지문 보존 통과
+ 44_high_risk_action_priority: 행동 요구 우선·정보 부족 보존·과거 정책 불변 통과
+ 45_agent_citation_contract: 새 버전·일곱 Agent·허용 도구·과거 정책 보존 통과
+ 46_review_evidence_latency: 새 정의와 기존 정책 보존 통과
+ 47_domain_scope_aftercare_batches: 새 버전·일곱 Agent·허용 도구·과거 정책 보존 통과
+ 48_bounded_decision_output: 새 버전·일곱 Agent·허용 도구·과거 정책 보존 통과
+ 49_nested_statute_content: Agent·Tool 버전과 기존 범위 보존 통과
+ 50_canonical_model_evidence: 새 버전·일곱 Agent·허용 도구·과거 정책 보존 통과
+ 51_single_claim_decisions: 새 버전·일곱 Agent·허용 도구·과거 정책 보존 통과
+ 52_aftercare_comparison_scope: 새 버전·일곱 Agent·허용 도구·과거 정책 보존 통과
+== 통계 ==
+RLS 미적용 public 테이블: 없음
+FORCE RLS 미적용 public 테이블: 없음
+anon 권한이 남은 public 테이블: 없음

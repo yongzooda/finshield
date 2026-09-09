@@ -1,6 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import { searchOfficialWarning } from "./official-warning";
+import { lookupStatute } from "./statute";
 import { queryWithSignal } from "../query-signal";
 import { embedQuery, RetrievalProviderError } from "../retrieval-provider";
 import { gateForModel } from "@/lib/agents/pii";
@@ -121,7 +122,14 @@ export async function getSourceSnapshot(input: unknown, ctx: ToolCallContext): P
 export async function checkDocuments(input: unknown, ctx: ToolCallContext): Promise<ToolOutcome> {
   const outcome = await searchPublicKnowledge(input, ctx, ["TERMS", "GUIDE", "PRECASE_GUIDE"]);
   if (outcome.errorCode) return outcome;
-  return { ...outcome, observations: { ...outcome.observations, material_basis: "CURATED_LOAN_PREPARATION_V1",
+  // PC-005: 등록된 설명·계약 자료 확인 경로에서 현행 설명의무 원문을 조회한다.
+  // 비어 있는 KB를 유사사례나 모델 상식으로 대신하지 않는다. Demo는 Seed 범위를 유지한다.
+  const statute = ctx.aftercareJobId && !ctx.allowedSourceSnapshotIds?.length
+    ? await lookupStatute({ query: "금융소비자 보호에 관한 법률 제19조" }, ctx) : null;
+  return { ...outcome, items: [...outcome.items, ...(statute?.items ?? [])],
+    candidateCount: outcome.candidateCount + (statute?.candidateCount ?? 0),
+    reasonCode: outcome.items.length || statute?.items.length ? null : outcome.reasonCode,
+    observations: { ...outcome.observations, material_basis: "CURATED_LOAN_PREPARATION_V1",
     required_materials: [
       { code: "CONTRACT_AT_SIGNUP", label: "가입 당시 계약서", reason: "약정한 조건과 가입 시점을 확인합니다" },
       { code: "TERMS_AT_SIGNUP", label: "가입 당시 적용 약관", reason: "개정된 현재 약관과 구분합니다" },

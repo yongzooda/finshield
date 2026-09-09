@@ -1,0 +1,17 @@
+{
+  "purpose": "제품 파일 흐름 개발 검증. 정식 OCR 품질 재평가가 아님.",
+  "files": {
+    "proposal-scanned.pdf": {
+      "bytes": 91480,
+      "sha256": "93a14d8fc11c2db31e5d21940b2ce19e851e9b06f02f44715b775b5dde40f6b8"
+    },
+    "proposal.png": {
+      "bytes": 106300,
+      "sha256": "ae1c8ed2c750e3660377ec29f8e9b8995a39bb2e951b701457c6a480f899ab7f"
+    },
+    "scan-check.png": {
+      "bytes": 53490,
+      "sha256": "4267ca7a040db52cf97f8209a5078a2b08f5034fea793516e4c057e2aef33e47"
+    }
+  }
+}

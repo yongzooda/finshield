@@ -1907,3 +1907,15 @@ PC-008·PC-011의 Migration 0043은 `case_inputs.input_purpose`를 `PROPOSAL|AFT
 `confirm_aftercare_document`는 한 입력의 선택 문구 1~8개를 이전 Passport Claim에 일대일 연결한다. 수정 문구의 PII 검사는 서버 API에서 수행한다. 같은 내용 재요청은 기존 확인을 반환하고 바뀐 내용은 거부한다. 확인과 원본·OCR·Embedding 삭제 Job 예약이 한 트랜잭션이며 물리 삭제 결과는 원장에서 별도로 확인한다. 점검 요청의 `document_sources`는 실제 확인된 문구·위치·Case·Passport와 대조한 Snapshot만 저장한다. 문구를 직접 바꾸면 문서 연결을 해제해야 하며 문서 출처를 위조할 수 없다. 과거 Passport와 거래 전 Claim은 갱신하지 않는다.
 
 Migration 0044는 완료 Case의 AFTERCARE Image/PDF 비용 예약을 허용하되, 동일 소유자·가입 등록·기준 Passport·활성 MASKED 입력·TTL·삭제 차단을 요구한다. PROPOSAL의 기존 lifecycle 제한과 개별/합산 예산 원장은 유지한다. 계정 삭제와 같은 소유자 잠금으로 예약 경합을 막는다 (PC-008·N-OPS-003).
+
+### OCR 원본 대조 경계 추가 — 0066
+
+INP-006·INP-007: 마스킹 페이지별 저신뢰 필드 위치를 저장하고, 확정 함수가 원본 대조를 요구한다. Finding에는 인식 원문을 복제하지 않는다. 기존 PR #281의 0051은 소급 적용하지 않고 0065 뒤의 0066으로 통합한다. 부정·예외 표현과 미분류 문구도 검토하며 계정 삭제 잠금·원본 삭제 흐름을 유지한다. 상세 검증은 `docs/ops/ocr-low-confidence-review.md`를 따른다.
+
+### 재검증 만료 임대와 Orphan — 0067
+
+REV-001·N-AVL-005: 현재 token과 만료 시각을 함께 검사한 Worker만 실패·최종화한다. 최대 시도가 소진된 만료 Job을 기존 Run과 함께 종결하며 미확정 모델 응답을 재호출하지 않는다. PR #285의 0053은 현재 0067로 옮긴다. 실제 Vercel 장애 20종 검증과 정식 Gate 채택은 별도다.
+
+### 반박 인용과 진행 기록 — 0068·0069
+
+AI-012·REV-001: Agent v12·Manifest v20을 추가해 Claim별 반박 자격이 있는 자료를 판단에 전달한다. 기존 판정 정책·정의·Passport는 유지한다. 진행 기록 함수는 현재 Lease와 실제 만료 시각을 검증하고 기존 Worker의 token 없는 직접 이벤트 추가 권한을 회수한다. 상세는 `docs/ops/red-team-citation-scope.md`와 `docs/ops/recovery-fencing-current.md`를 따른다.

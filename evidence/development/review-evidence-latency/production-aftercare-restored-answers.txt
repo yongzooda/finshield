@@ -1,0 +1,134 @@
+- link "본문 바로가기" [ref=e1]
+- banner
+  - link "FinShield 홈" [ref=e2]
+    - StaticText "FinShield"
+  - navigation "주 메뉴" [ref=e3]
+    - link "홈" [ref=e7]
+      - StaticText "홈"
+    - link "새 검증" [ref=e8]
+      - StaticText "새 검증"
+    - link "내 기록" [ref=e9]
+      - StaticText "내 기록"
+    - link "가입 후 보호" [ref=e10]
+      - StaticText "가입 후 보호"
+  - link "알림" [ref=e4]
+  - link "금융 프로필" [ref=e5]
+- main
+  - sectionheader
+    - paragraph
+      - StaticText "가입 후 점검"
+    - heading "설명과 계약 조건을 점검하세요" [level=1, ref=e11]
+    - paragraph
+      - StaticText "설명받은 내용과 이해한 정도, 실제 계약 조건의 차이를 확인합니다. 시험용 가상 상황으로 답해 주세요."
+    - link "기록으로 돌아가기" [ref=e12]
+  - generic
+    - heading "실제 계약서에 적힌 조건" [level=2, ref=e13]
+    - paragraph
+      - StaticText "이전 검증 기록의 문장과 비교할 계약 문구를 입력하세요. 시험용 합성 계약만 사용하고, 이름·계좌번호는 넣지 마세요."
+    - LabelText
+      - StaticText "이전 권유: 진행을 위해 보증료 30만 원을 먼저 입금해야 한다."
+    - textbox "이전 권유: 진행을 위해 보증료 30만 원을 먼저 입금해야 한다." [ref=e14]
+    - LabelText
+      - StaticText "이전 권유: 정부지원 상품인 햇살론15이다."
+    - textbox "이전 권유: 정부지원 상품인 햇살론15이다." [ref=e15]
+    - LabelText
+      - StaticText "이전 권유: 햇살론15는 최대 2천만 원까지 대출 가능하다."
+    - textbox "이전 권유: 햇살론15는 최대 2천만 원까지 대출 가능하다." [ref=e16]
+    - LabelText
+      - StaticText "이전 권유: 햇살론15는 연 3% 고정금리이다."
+    - textbox "이전 권유: 햇살론15는 연 3% 고정금리이다." [ref=e17]: 합성 계약의 금리는 연 8.2%입니다.
+      - StaticText "합성 계약의 금리는 연 8.2%입니다."
+    - LabelText
+      - StaticText "이전 권유: 오늘 안에 신청해야 한다."
+    - textbox "이전 권유: 오늘 안에 신청해야 한다." [ref=e18]
+    - LabelText
+      - StaticText "이전 권유: 햇살론15 승인 대상이다."
+    - textbox "이전 권유: 햇살론15 승인 대상이다." [ref=e19]
+    - LabelText
+      - StaticText "이전 권유: 원격제어 앱을 설치해야 한다."
+    - textbox "이전 권유: 원격제어 앱을 설치해야 한다." [ref=e20]
+    - region "가입 후 계약 문서" [ref=e21]
+      - heading "계약 파일의 문구 확인" [level=3, ref=e26]
+      - paragraph
+        - StaticText "인식한 숫자·단위·부정 표현을 원본과 대조하고 필요한 문구를 수정하세요. 확인한 문구는 같은 Case의 가입 후 비교에만 사용합니다."
+      - region "문서로 입력" [ref=e27]
+        - heading "캡처 이미지 또는 PDF" [level=3, ref=e28]
+        - paragraph
+          - StaticText "PDF·PNG·JPG, 최대 10 MiB·10쪽. 원본은 항목 확인이나 중단 시 삭제를 시작하며 최대 24시간 임시 처리합니다."
+        - paragraph
+          - StaticText "분쟁 준비에 필요한 원본은 본인 기기에 따로 보관해 주세요. 서버에는 원본을 보관하지 않습니다."
+        - LabelText
+          - StaticText "계약 문서 선택"
+        - button "계약 문서 선택" [ref=e29]: 선택된 파일 없음
+        - LabelText
+          - checkbox "이미지·스캔 PDF의 글자를 읽기 위해 원본을 NAVER Cloud CLOVA OCR에 보내는 데 동의합니다. 선택 사항이며, 동의하지 않으면 디지털 PDF의 텍스트 추출 또는 직접 입력을 이용할 수 있습니다. 이름·계좌번호 등 실제 개인정보가 포함된 문서는 올리지 마세요." [checked=false, ref=e31]
+          - StaticText "이미지·스캔 PDF의 글자를 읽기 위해 원본을 NAVER Cloud CLOVA OCR에 보내는 데 동의합니다. 선택 사항이며, 동의하지 않으면 디지털 PDF의 텍스트 추출 또는 직접 입력을 이용할 수 있습니다. 이름·계좌번호 등 실제 개인정보가 포함된 문서는 올리지 마세요."
+        - button "문서에서 항목 추출" [disabled, ref=e30]
+  - generic
+    - list
+      - listitem [level=1]
+        - paragraph
+          - StaticText "금리와 수수료를 계약 전에 설명받으셨습니까?"
+        - paragraph
+          - StaticText "총 얼마를 더 내게 되는지까지 들으셨는지를 기준으로 골라 주세요."
+        - group "금리와 수수료를 계약 전에 설명받으셨습니까?"
+          - button "들었습니다" [ref=e32]
+          - button "일부만 들었습니다" [ref=e33]
+          - button "듣지 못했습니다" [ref=e34]
+      - listitem [level=1]
+        - paragraph
+          - StaticText "중도 상환과 연체에 따르는 불이익을 설명받으셨습니까?"
+        - group "중도 상환과 연체에 따르는 불이익을 설명받으셨습니까?"
+          - button "들었습니다" [ref=e35]
+          - button "일부만 들었습니다" [ref=e36]
+          - button "듣지 못했습니다" [ref=e37]
+      - listitem [level=1]
+        - paragraph
+          - StaticText "설명을 듣고 계약 내용을 이해하셨습니까?"
+        - group "설명을 듣고 계약 내용을 이해하셨습니까?"
+          - button "이해했습니다" [ref=e38]
+          - button "일부만 이해했습니다" [ref=e39]
+          - button "이해하지 못했습니다" [ref=e40]
+      - listitem [level=1]
+        - paragraph
+          - StaticText "계약서 내용이 들으신 설명과 같습니까?"
+        - paragraph
+          - StaticText "금리, 한도, 기간, 수수료 가운데 하나라도 다르면 다르다고 골라 주세요."
+        - group "계약서 내용이 들으신 설명과 같습니까?"
+          - button "같습니다" [ref=e41]
+          - button "다른 부분이 있습니다" [ref=e42]
+          - button "확인하지 못했습니다" [ref=e43]
+      - listitem [level=1]
+        - paragraph
+          - StaticText "재촉을 받아 충분히 보지 못한 채 서명하셨습니까?"
+        - group "재촉을 받아 충분히 보지 못한 채 서명하셨습니까?"
+          - button "아니요" [ref=e44]
+          - button "그렇습니다" [ref=e45]
+      - listitem [level=1]
+        - paragraph
+          - StaticText "계약서 사본을 가지고 계십니까?"
+        - paragraph
+          - StaticText "사본을 여기에 올리실 필요는 없습니다. 가지고 계신지만 확인합니다."
+        - group "계약서 사본을 가지고 계십니까?"
+          - button "가지고 있습니다" [ref=e46]
+          - button "없습니다" [ref=e47]
+      - listitem [level=1]
+        - paragraph
+          - StaticText "권유받을 때의 문자나 통화 기록을 가지고 계십니까?"
+        - group "권유받을 때의 문자나 통화 기록을 가지고 계십니까?"
+          - button "가지고 있습니다" [ref=e48]
+          - button "없습니다" [ref=e49]
+    - button "점검 결과 보기" [ref=e22]
+    - paragraph
+      - StaticText "4개 항목에 답하셨습니다. 답하지 않은 항목은 확인하지 못한 것으로 남기고, 결과에도 그렇게 적습니다."
+- contentinfo
+  - StaticText "FinShield"
+  - navigation "서비스 정보" [ref=e6]
+    - link "신뢰센터" [ref=e23]
+    - link "개인정보·데이터 관리" [ref=e24]
+    - link "서비스 체험" [ref=e25]
+  - paragraph
+    - StaticText "금융 거래 판단을 돕는 참고 정보입니다. 금융·법률 자문이나 거래의 안전을 보장하지 않습니다."
+  - paragraph
+    - StaticText "각 판단에 사용한 공식 자료와 확인 범위는 결과의 근거에서 확인할 수 있습니다."
+- alert

@@ -11,15 +11,15 @@ import { readSessionToken, sessionIdentity } from "../../session-client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CLAIM_STATE_VIEW, FsCard, FsChip } from "../../fs-shell";
+import { FsCard, FsChip } from "../../fs-shell";
+import { AxisLimitations, ClaimBadges, ClaimReviewDetails, ResultScopeNote, ReviewNotice } from "../../result-explanation";
 import { FsLoginCard, useFsToken } from "../../fs-session";
 import { OfficialActions, type StoredGuide } from "../../official-actions";
 import { EvidenceCitation, type EvidenceCitationData } from "../../evidence-citation";
 import { fetchCase } from "../case-api";
 import {
   ACTION_LABEL, AFTERCARE_RESULT, AFTERCARE_STATUS, AXIS_LABEL, FRESHNESS_LABEL, JOURNEY_STAGE,
-  RELATION_LABEL, axisResultOf, actorLabel, coveLabel, eventLabel, limitationLabel, nextAction,
-  partialLabel, reasonLabel, runStatusLabel,
+  RELATION_LABEL, axisResultOf, actorLabel, eventLabel, nextAction,
 } from "../../fs-labels";
 
 type Detail = {
@@ -112,22 +112,8 @@ export function CaseDetail({ caseId }: { caseId: string }) {
         </div>
       </header>
 
-      {/* RES-008: 온전히 끝나지 않았으면 맨 위에 알린다. */}
-      {latest && (!["COMPLETED", "SUCCEEDED"].includes(latest.status) || partialReasons.length > 0) ? (
-        <FsCard className="mt-8">
-          <FsChip tone="caution">{runStatusLabel(latest.status)}</FsChip>
-          <p className="fs-body mt-2">
-            {partialReasons.length > 0
-              ? `끝까지 확인하지 못한 단계가 있습니다. ${partialReasons.map(partialLabel).join(" · ")}`
-              : ["QUEUED", "RUNNING"].includes(latest.status)
-                ? "공식 자료와 대조하고 있습니다. 완료되면 이 화면에 결과가 표시됩니다."
-                : "이번 확인은 온전히 끝나지 않았습니다."}
-          </p>
-        </FsCard>
-      ) : null}
-
       {/* RES-005: 결론보다 행동을 먼저 놓는다. */}
-      {action ? (
+      {action && !passport?.guide?.actions?.length ? (
         <FsCard className="mt-8">
           <p className="fs-eyebrow">지금 하실 일</p>
           <h2 className="fs-h2 mt-2">{action.title}</h2>
@@ -135,7 +121,8 @@ export function CaseDetail({ caseId }: { caseId: string }) {
         </FsCard>
       ) : null}
 
-      <OfficialActions guide={passport?.guide} />
+      <OfficialActions guide={passport?.guide} title="지금 하실 일" />
+      {latest ? <ReviewNotice status={latest.status} reasons={partialReasons} /> : null}
       {latest ? (
         <FsCard>
           <h2 className="fs-h2">세 가지 확인 결과</h2>
@@ -143,7 +130,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
           <ul className="mt-4 space-y-3">
             {axes.length === 0 ? <li className="fs-body">아직 확정된 축별 결과가 없습니다.</li> : null}
             {axes.map((axis) => {
-              const view = axisResultOf(axis.result_code);
+              const view = axisResultOf(axis.result_code, axis.axis);
               return (
                 <li key={axis.axis} className="border-t border-[var(--fs-line)] pt-3 first:border-0 first:pt-0">
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -151,11 +138,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
                     <FsChip tone={view.tone}>{view.label}</FsChip>
                   </div>
                   <p className="fs-meta mt-1">{axis.summary_masked}</p>
-                  {(axis.limitation_codes ?? []).length > 0 ? (
-                    <p className="fs-meta mt-1">
-                      확인하지 못한 범위: {(axis.limitation_codes ?? []).map(limitationLabel).join(" · ")}
-                    </p>
-                  ) : null}
+                  <AxisLimitations codes={axis.limitation_codes} />
                 </li>
               );
             })}
@@ -165,26 +148,22 @@ export function CaseDetail({ caseId }: { caseId: string }) {
 
       <FsCard>
         <h2 className="fs-h2">항목별 결과와 근거</h2>
+        <ResultScopeNote />
         {finals.length === 0 ? (
           <p className="fs-body mt-2">아직 확정된 결과가 없습니다.</p>
         ) : (
           <ul className="mt-4 space-y-5">
             {finals.map((row) => {
-              const view = CLAIM_STATE_VIEW[row.status] ?? { label: row.status, tone: "neutral" as const, help: "" };
               const items = evidenceOf(row.id);
               const isOpen = opened.has(row.id);
               return (
                 <li key={row.id} className="border-t border-[var(--fs-line)] pt-5 first:border-0 first:pt-0">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <p className="max-w-xl leading-relaxed">{row.statement_masked}</p>
-                    <FsChip tone={view.tone}>{view.label}</FsChip>
+                    <ClaimBadges status={row.status} reason={row.reason_code} />
                   </div>
                   <p className="fs-body mt-2">{row.decision_summary_masked}</p>
-                  <p className="fs-meta mt-1">
-                    {row.is_material ? "거래에 영향이 큰 항목" : "참고 항목"} · 이렇게 정한 이유: {reasonLabel(row.reason_code)}
-                    {row.cove_status !== "NOT_REQUIRED" ? ` · 독립 재확인 ${coveLabel(row.cove_status)}` : ""}
-                    {row.red_team_status === "COUNTER_EVIDENCE" ? " · 반대 근거 있음" : ""}
-                  </p>
+                  <ClaimReviewDetails reason={row.reason_code} cove={row.cove_status} redTeam={row.red_team_status} />
                   {items.length > 0 ? (
                     <>
                       <button type="button" aria-expanded={isOpen}
@@ -212,7 +191,6 @@ export function CaseDetail({ caseId }: { caseId: string }) {
                                 </FsChip>
                                 {evidence!.reference_only ? <FsChip tone="caution">참고용</FsChip> : null}
                               </div>
-                              <p className="fs-body mt-2">{evidence!.excerpt_masked ?? "본문 없음"}</p>
                               <EvidenceCitation evidence={evidence!} />
                               <details className="fs-details"><summary>근거 연결 정보</summary>
                               <dl className="fs-meta mt-2 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1">

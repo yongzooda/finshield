@@ -50,3 +50,11 @@ it("취소된 점검은 다음 모델과 Tool을 호출하지 않는다", async 
   await expect(runAftercareReview({ ...s, context, lease: id(8) })).rejects.toThrow();
   expect(s.model.chooseTools).not.toHaveBeenCalled(); expect(s.tool).not.toHaveBeenCalled();
 });
+
+it("모델 출력의 개인정보 의심 항목을 보류하고 두 Agent 조회와 다른 결과를 보존한다", async () => {
+  const s=setup();vi.mocked(s.model.decide).mockResolvedValue({schema_version:"out-v1",findings:[{claim_ref:"C1",state:"UNKNOWN",relation:"CONTEXT",evidence_refs:[],summary_masked:"연락처 010-1234-5678로 문의",limits:[]}],out_of_scope_claim_refs:[]});
+  const result=await runAftercareReview({...s,context,lease:id(8)});
+  expect(s.sql).toHaveBeenCalledTimes(2);
+  for(const call of s.sql.mock.calls){const trace=JSON.parse(call[3]);expect(trace.status).toBe("PARTIAL");expect(trace.reason_code).toBe("OUTPUT_PII_REJECTED");expect(JSON.stringify(trace)).not.toContain("010-1234-5678");expect(trace.output.findings[0].state).toBe("WITHHELD");}
+  expect(result.result).not.toBe("NORMAL_MANAGEMENT");
+});

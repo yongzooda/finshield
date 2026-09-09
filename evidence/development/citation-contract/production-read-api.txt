@@ -1,0 +1,1 @@
+{"stage":"read","path":"/api/finshield/cases/96a5779a-aec8-4401-a031-af5c637fc002","status":200,"elapsed_ms":3117,"types":["json"]}

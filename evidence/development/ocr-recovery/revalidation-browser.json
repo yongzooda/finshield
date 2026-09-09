@@ -1,0 +1,9 @@
+{
+  "mode": "로컬 운영 빌드, 합성 상태 API Fixture, 실제 Workflow 아님",
+  "checks": {
+    "expired_button": true,
+    "retry_post": true,
+    "reload_restores": true,
+    "terminal_preserves_previous": true
+  }
+}
