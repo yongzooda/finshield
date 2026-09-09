@@ -708,7 +708,7 @@ const ocrEvidencePolicy = {
   workflowPath: ".github/workflows/ocr-evidence.yml",
   workflowBlobSha: "865703f12a16392e819c603614541e50454ded92",
   harnessPath: ".github/scripts/run-ocr-evidence.mjs",
-  harnessBlobSha: "81a7175dadc00b681f8aac9c3a3a02652f666aaa",
+  harnessBlobSha: "1f6a9aa158745ee021dfbb38b6e4a8496297bb0f",
   trustedExecutionFiles: Object.freeze([
   {
     "path": ".github/workflows/ocr-evidence.yml",
@@ -716,7 +716,7 @@ const ocrEvidencePolicy = {
   },
   {
     "path": ".github/scripts/run-ocr-evidence.mjs",
-    "blobSha": "81a7175dadc00b681f8aac9c3a3a02652f666aaa"
+    "blobSha": "1f6a9aa158745ee021dfbb38b6e4a8496297bb0f"
   },
   {
     "path": ".github/scripts/ocr-evidence-policy.mjs",
@@ -724,7 +724,7 @@ const ocrEvidencePolicy = {
   },
   {
     "path": ".github/scripts/ocr-quality-spike.mjs",
-    "blobSha": "496bfa85b72493db163091c83cacfcdc0c9785df"
+    "blobSha": "d37c7f2f0a2b39f64d23e77be542457de946cb2c"
   },
   {
     "path": ".github/scripts/ocr-quality-text.mjs",
@@ -737,6 +737,10 @@ const ocrEvidencePolicy = {
   {
     "path": ".github/fixtures/ocr-quality-v1/manifest.json",
     "blobSha": "810ce1badf56d9e59f3aafc93309828516cd497a"
+  },
+  {
+    "path": ".github/fixtures/ocr-quality-v2/manifest.json",
+    "blobSha": "176d2bf17e01ecc549e9b448d3eff34da3a4cc0f"
   },
   {
     "path": ".github/scripts/provider-adr-digest.mjs",
@@ -761,40 +765,41 @@ const ocrEvidencePolicy = {
   ".github/fixtures/file-safety-parser/package.json",
   ".github/fixtures/file-safety-parser/package-lock.json",
   ".github/fixtures/ocr-quality-v1/manifest.json",
-  ".github/fixtures/ocr-quality-v1/generate.py",
+  ".github/fixtures/ocr-quality-v2/manifest.json",
+  ".github/fixtures/ocr-quality-v2/generate.py",
   "docs/ops/ocr-quality-spike.md",
-  ".github/fixtures/ocr-quality-v1/refinance-text.txt",
-  ".github/fixtures/ocr-quality-v1/refinance-image.png",
-  ".github/fixtures/ocr-quality-v1/refinance-digital.pdf",
-  ".github/fixtures/ocr-quality-v1/refinance-scanned.pdf",
-  ".github/fixtures/ocr-quality-v1/living-text.txt",
-  ".github/fixtures/ocr-quality-v1/living-image.png",
-  ".github/fixtures/ocr-quality-v1/living-digital.pdf",
-  ".github/fixtures/ocr-quality-v1/living-scanned.pdf",
-  ".github/fixtures/ocr-quality-v1/institution-text.txt",
-  ".github/fixtures/ocr-quality-v1/institution-image.png",
-  ".github/fixtures/ocr-quality-v1/institution-digital.pdf",
-  ".github/fixtures/ocr-quality-v1/institution-scanned.pdf",
-  ".github/fixtures/ocr-quality-v1/channel-text.txt",
-  ".github/fixtures/ocr-quality-v1/channel-image.png",
-  ".github/fixtures/ocr-quality-v1/channel-digital.pdf",
-  ".github/fixtures/ocr-quality-v1/channel-scanned.pdf",
-  ".github/fixtures/ocr-quality-v1/withdrawal-text.txt",
-  ".github/fixtures/ocr-quality-v1/withdrawal-image.png",
-  ".github/fixtures/ocr-quality-v1/withdrawal-digital.pdf",
-  ".github/fixtures/ocr-quality-v1/withdrawal-scanned.pdf",
-  ".github/fixtures/ocr-quality-v1/fee-text.txt",
-  ".github/fixtures/ocr-quality-v1/fee-image.png",
-  ".github/fixtures/ocr-quality-v1/fee-digital.pdf",
-  ".github/fixtures/ocr-quality-v1/fee-scanned.pdf",
-  ".github/fixtures/ocr-quality-v1/overdue-text.txt",
-  ".github/fixtures/ocr-quality-v1/overdue-image.png",
-  ".github/fixtures/ocr-quality-v1/overdue-digital.pdf",
-  ".github/fixtures/ocr-quality-v1/overdue-scanned.pdf",
-  ".github/fixtures/ocr-quality-v1/repayment-text.txt",
-  ".github/fixtures/ocr-quality-v1/repayment-image.png",
-  ".github/fixtures/ocr-quality-v1/repayment-digital.pdf",
-  ".github/fixtures/ocr-quality-v1/repayment-scanned.pdf"
+  ".github/fixtures/ocr-quality-v2/collateral-text.txt",
+  ".github/fixtures/ocr-quality-v2/collateral-image.png",
+  ".github/fixtures/ocr-quality-v2/collateral-digital.pdf",
+  ".github/fixtures/ocr-quality-v2/collateral-scanned.pdf",
+  ".github/fixtures/ocr-quality-v2/refund-text.txt",
+  ".github/fixtures/ocr-quality-v2/refund-image.png",
+  ".github/fixtures/ocr-quality-v2/refund-digital.pdf",
+  ".github/fixtures/ocr-quality-v2/refund-scanned.pdf",
+  ".github/fixtures/ocr-quality-v2/credit-text.txt",
+  ".github/fixtures/ocr-quality-v2/credit-image.png",
+  ".github/fixtures/ocr-quality-v2/credit-digital.pdf",
+  ".github/fixtures/ocr-quality-v2/credit-scanned.pdf",
+  ".github/fixtures/ocr-quality-v2/bridge-text.txt",
+  ".github/fixtures/ocr-quality-v2/bridge-image.png",
+  ".github/fixtures/ocr-quality-v2/bridge-digital.pdf",
+  ".github/fixtures/ocr-quality-v2/bridge-scanned.pdf",
+  ".github/fixtures/ocr-quality-v2/insurance-text.txt",
+  ".github/fixtures/ocr-quality-v2/insurance-image.png",
+  ".github/fixtures/ocr-quality-v2/insurance-digital.pdf",
+  ".github/fixtures/ocr-quality-v2/insurance-scanned.pdf",
+  ".github/fixtures/ocr-quality-v2/remote-text.txt",
+  ".github/fixtures/ocr-quality-v2/remote-image.png",
+  ".github/fixtures/ocr-quality-v2/remote-digital.pdf",
+  ".github/fixtures/ocr-quality-v2/remote-scanned.pdf",
+  ".github/fixtures/ocr-quality-v2/paperwork-text.txt",
+  ".github/fixtures/ocr-quality-v2/paperwork-image.png",
+  ".github/fixtures/ocr-quality-v2/paperwork-digital.pdf",
+  ".github/fixtures/ocr-quality-v2/paperwork-scanned.pdf",
+  ".github/fixtures/ocr-quality-v2/earlyrepay-text.txt",
+  ".github/fixtures/ocr-quality-v2/earlyrepay-image.png",
+  ".github/fixtures/ocr-quality-v2/earlyrepay-digital.pdf",
+  ".github/fixtures/ocr-quality-v2/earlyrepay-scanned.pdf"
 ]),
   validate: validateOcrEvidenceResult,
 };
