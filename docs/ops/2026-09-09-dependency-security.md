@@ -13,3 +13,5 @@ Next.js·eslint-config-next를16.3.1→16.3.4, sharp를0.35.3→0.35.4, Vitest/m
 Production build·727 기본 테스트·lint 오류0(기존 경고2)이 통과했다. 선택적96skip은 실제 시험 성공으로 쓰지 않는다. 실제 merge candidate의 필수 검사와 배포·HTTP·DB 정합성은 PR에 이어 기록한다.
 
 패키지가 scope에 포함된 B-MODEL-01·B-HEALTH-01은 기존 PASS를 재사용하지 않고 NOT-EVALUATED로 되돌렸다. 이전 채택 항목·결과는 보존했고 새 package pin을 등록했다. 나머지6개 채택 항목의 scope digest는 그대로다. Implementation NO-GO·Release NOT-EVALUATED 유지, 재채택은 main 실행·별도 Adoption 기준을 따른다.
+
+최초 필수 검사는 과거 증거 원장에 허용되지 않는 NOT-EVALUATED 상태를 넣어 실패했다. blocker는 NOT-EVALUATED, 과거 증거 원장은 기존 schema의 STALE로 구분해 수정했다. 검증기나 허용 상태를 느슨하게 바꾸지 않았다. Next16.3.4 운영 빌드의 4개 화면·390px·키보드·브라우저 오류0, 비로그인 API 거부401/잘못된 로그인 입력400도 확인했다.

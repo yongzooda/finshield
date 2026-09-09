@@ -1,0 +1,24 @@
+{
+  "mode": "Next16.3.4 로컬 운영 빌드·비로그인 화면, 실제 Provider 호출 없음",
+  "checks": [
+    {
+      "path": "/",
+      "rendered": true
+    },
+    {
+      "path": "/verify",
+      "rendered": true
+    },
+    {
+      "path": "/cases",
+      "rendered": true
+    },
+    {
+      "path": "/live-demo",
+      "rendered": true
+    }
+  ],
+  "mobile_overflow": false,
+  "keyboard_focus": "\"A\"",
+  "browser_errors": ""
+}
