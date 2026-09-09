@@ -1,3 +1,7 @@
+## 2026-09-09 의존성 보안 패치 진행
+
+npm audit에서 새로 확인된 Next/Sharp/Vitest/js-yaml 경고5건을 수정판으로 갱신했고 clean 설치 뒤 audit0·빌드·727 기본 테스트·lint 오류0이다. 새 package 범위 때문에 Model·Health를 재측정 대기로 바꿨고 기존 결과를 보존했다(현행6/20, Gate NO-GO·NOT-EVALUATED). 로컬 검사 병합 승인은 PR303을 통해 main에 기록돼 있다. 상세는 docs/ops/2026-09-09-dependency-security.md와 후속 보안 PR을 따른다.
+
 ## 2026-09-09 13시 40분 GitHub 과금 예외 승인과 main 통합
 
 사용자가 과금 장애 때 로컬 검사 후 PR을 계속 통합하도록 승인했다. 소유자 계정의 PR 전용 Ruleset 예외만 추가했고 기존 규칙은 유지했다. PR #301은 검증한 head af8171f와 main8f9b40a의 병합 후보b1905bf 기준으로 squash merge돼 main은6bfdff2다. merge tree는 기존 기능 branch HEAD와 일치한다. 아래의 PR301 미병합·main8f9b40a 문장은 과거 기록이다. 후속 에이전트는 AGENTS와 규칙집의 로컬 검증 병합 절차를 적용하고 같은 승인을 다시 요청하지 않는다. 정식 품질 Gate는 여전히 별도다.

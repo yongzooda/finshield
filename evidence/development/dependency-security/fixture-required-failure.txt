@@ -1,0 +1,24 @@
+검사 시작: npm ci --ignore-scripts
+
+added 1024 packages, and audited 1031 packages in 21s
+
+391 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+검사 시작: DB 명세 검증
+Database spec validation passed: 101,234 chars, 29 datasets, D-001~D-032.
+검사 시작: Provider Stack ADR 검증
+Provider stack ADR validation passed: requirements 27ce706010344fbcedebe3abd707febff0f1dc26, 20 implementation blockers, Implementation NO-GO, Release NOT-EVALUATED.
+검사 시작: Provider ADR Validator Mutation Test
+file:///private/tmp/finshield-recovery-merge-301/.github/scripts/test-provider-stack-adr-validator.mjs:538
+      throw new Error(`partial PASS evidence expected success\n${errors.join("\n")}`);
+            ^
+
+Error: partial PASS evidence expected success
+implementation evidence 'B-MODEL-01' 시험 commit의 trusted execution 파일 blob pin이 다릅니다.
+    at expectPartialEvidence (file:///private/tmp/finshield-recovery-merge-301/.github/scripts/test-provider-stack-adr-validator.mjs:538:13)
+    at async file:///private/tmp/finshield-recovery-merge-301/.github/scripts/test-provider-stack-adr-validator.mjs:553:1
+
+Node.js v24.4.1
+검사 실패: Provider ADR Validator Mutation Test
