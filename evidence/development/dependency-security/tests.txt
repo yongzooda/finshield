@@ -1,0 +1,13 @@
+
+> finshield@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.11 /private/tmp/finshield-security-patches
+
+
+ Test Files  89 passed | 27 skipped (116)
+      Tests  727 passed | 96 skipped (823)
+   Start at  13:49:10
+   Duration  4.17s (transform 4.31s, setup 1.06s, import 15.48s, tests 2.62s, environment 14ms)
+

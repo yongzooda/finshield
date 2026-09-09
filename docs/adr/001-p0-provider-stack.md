@@ -603,7 +603,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `EVID-DOC-01` | Provider 공개 기술 문서 | DOCUMENTED | Anthropic·Cohere·Supabase·CLOVA·Vercel 공개 문서의 명시된 모델 ID·기술 제한·API 동작을 2026-09-03 확인; DPA·보존·리전·계약 승인이 아님 |
 | `EVID-LAW-01` | Law 등록 IP 위험 | DOCUMENTED | 공식 공지에서 OC 등록 IP와 요청 IP 불일치 오류 가능성 확인 |
 | `EVID-LAW-02` | 법제처 OC·등록 도메인 Referer·응답 원장과 Snapshot 해시 | PASS | main run `34045798279`, artifact `9993055183`. Preview 와 Production 배포 안의 관측 endpoint 로 법제처를 15회 두드렸다. 등록 도메인을 Referer 로 보내면 양쪽에서 통했고, 헤더를 빼거나 배포 고유 주소나 미등록 도메인을 보내면 여섯 건 모두 막혔다. 요청이 어디서 나갔는지가 아니라 무엇을 보냈는지가 기준이므로 Preview 배포도 등록 도메인을 보내면 통한다. 고정 질의의 본문 해시는 세 번 모두 같았다. 일자별 조문 개정 조회는 어제와 사흘 전 모두 답했고 어제 자는 목록이 비어 와 D+1 반영과 어긋나지 않는다. 429 와 5xx 와 시간 초과는 0건이고 가장 느린 응답이 1,166ms 다. 결과에는 요청 주소와 OC 와 본문 원문을 담지 않았다 공식 공지가 말한 등록 IP 불일치는 실제 제약이 아니었고 등록 도메인 대조가 실제 제약이다 |
-| `EVID-MODEL-01` | Anthropic Sonnet 5 Live Spike | PASS | 실행 의존성 재등록 뒤 main run `34078050277`, artifact `10002820639`. 합성 50건·100 live request·결정적 fault 20건이 동일 schema·strict tool·P95·비용 policy를 통과했다. 이전 run `34077370635`도 통과했으나 OCR 진단 PR 병합으로 main이 바뀌어 최신 main에서 다시 측정했다. 과거 결과는 이력으로 보존한다 |
+| `EVID-MODEL-01` | Anthropic Sonnet 5 Live Spike | NOT-EVALUATED | 2026-09-09 보안 패치로 의존성 범위가 바뀌어 재측정이 필요하다. 다음은 과거 통과 이력이다.  실행 의존성 재등록 뒤 main run `34078050277`, artifact `10002820639`. 합성 50건·100 live request·결정적 fault 20건이 동일 schema·strict tool·P95·비용 policy를 통과했다. 이전 run `34077370635`도 통과했으나 OCR 진단 PR 병합으로 main이 바뀌어 최신 main에서 다시 측정했다. 과거 결과는 이력으로 보존한다 |
 | `EVID-EMBED-01` | Cohere embed-v4.0 Claim 단위 1차 후보 생성 Live Spike | PASS | 사전등록 7절 구성(Metadata Filter → Claim 단위 Exact KNN, 후보 풀 20)으로 v5 평가셋을 main run `33956964817`, artifact `9966699530`에서 측정. Claim별 Recall@20 1.00, Case 합집합 Recall 1.00, 위험 핵심 Recall 1.00, 전량 회수 100/100, 최악 minimum_k 13, Query P95 559ms. 문단 단위였던 v3 run `33954521524`(0.902)·v4 run `33955613801`(0.970)은 이력으로 보존 |
 | `EVID-SOURCE-02` | 공공데이터포털 금융위·진흥원 API key·quota·license Live Snapshot | PASS | main run `33981225371`, artifact `9973809814`. 두 API 결과 코드 `00`, serviceKey 인증 성공, 금융위 총건수 19를 1 page 로 전량 수신, 개발계정 트래픽 10,000회, 라이선스 `이용허락범위 제한 없음`(2026-09-05 확인)을 source registry 관측으로 보존. serviceKey 는 결과·로그·URL 기록에서 지움 |
 | `EVID-SOURCE-03` | Demo `햇살론15` 상품·취급기관 Snapshot | PASS | main run `33981161310`, artifact `9973794051`. 금융위 `햇살론15` 레코드 19건(기준년월 이력, 현재 기준월 `202602` 1건, 47 필드), 진흥원 취급기관 16개(상품명 join 16/16, 은행 16 대 금융위 표기 "대출협약은행 12개"), 공식 상품 페이지 200·제목·1397, 사칭 신고센터 200·1397·사칭·중개수수료 표지. 이용안내 페이지는 실행 환경에서 기본 틀만 돌려줘 수수료 미요구 문구 Snapshot 은 아직 없음 |
@@ -615,7 +615,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `EVID-STORAGE-01` | 인증 사용자 Storage 권한과 발급 token 재사용 | PASS | main run `34195233135`, artifact `10043645920`, Adoption PR #271. 실제 회원 업로드 1건과 거부 8경로가 통과했다. 부당 읽기·쓰기·덮어쓰기·닫힌 TUS 재사용 허용은 0건이며 RLS 우회 키를 쓰지 않았다 |
 | `EVID-DELETE-01` | 원본·OCR·Case vector 물리 삭제 | PASS | main run `34195237392`, artifact `10043815404`, Adoption PR #271. 합성 40 Case 중 대상 35건의 원본·OCR·Vector·기발급 URL 접근이 남지 않았다. 만료 전 5건은 보존했고 최대 삭제는 199초, teardown 객체 잔존은 0건이다. 24시간 전체 대기나 Vercel Workflow 장애 증거는 아니다 |
 | `EVID-RUNTIME-01` | Preview·Production 실제 Node·region·deployment | PASS | main run `34044111706`, artifact `9992567920`. 배포 안에 둔 관측 endpoint 를 Preview 와 Production 배포 3개씩에서 불렀다. 여섯 배포 모두 Node 판과 region 과 deployment ID 를 돌려줘 기록률이 100% 다. 배포가 스스로 적은 deployment ID 가 Vercel API 의 값과 여섯 건 모두 같아 응답의 출처가 고정된다. 실제 Node 는 v24.18.0 이고 region 은 icn1 이다. major 24 는 8.2 와 맞고 minor·patch 는 로컬과 달라 고정 Snapshot 으로 적지 않는다는 판단이 근거를 얻었다. 배포 보호는 Vercel 자동화 우회 비밀로 열었고 그 값은 결과에 남기지 않았다 |
-| `EVID-HEALTH-01` | 저비용 Health 실제 HTTP·DB 장애·외부 전송 계측 | PASS | main run `34195239872`, artifact `10043669488`, Adoption PR #271. 실제 Next HTTP 100회에서 외부 fetch·HTTP·HTTPS 시도는 모두 0회다. DB 장애의 기본·엄격 응답은 503이며 계측 제어가 세 경로를 각각 1회 검출했다. 미관측 Provider 상태는 unknown으로 유지하며 제품 전체 정상이나 Provider 품질 증거로 확대하지 않는다 |
+| `EVID-HEALTH-01` | 저비용 Health 실제 HTTP·DB 장애·외부 전송 계측 | NOT-EVALUATED | 2026-09-09 보안 패치로 의존성 범위가 바뀌어 재측정이 필요하다. 다음은 과거 통과 이력이다.  main run `34195239872`, artifact `10043669488`, Adoption PR #271. 실제 Next HTTP 100회에서 외부 fetch·HTTP·HTTPS 시도는 모두 0회다. DB 장애의 기본·엄격 응답은 503이며 계측 제어가 세 경로를 각각 1회 검출했다. 미관측 Provider 상태는 unknown으로 유지하며 제품 전체 정상이나 Provider 품질 증거로 확대하지 않는다 |
 | `EVID-OCR-01` | 합성 32문서·112쪽 Parser·OCR 정확도 | FAIL | main run `34086750192`, artifact `10005519681`. 지원 112/112쪽, 숫자 TP 560·부정 표현 TP 336의 FP/FN은 0이고 10쪽 P95는 19,743ms다. 필드는 TP 329·FP 7·FN 7로 F1 0.9791666667이며 기준 0.98에 미달했다. 스캔 한 가족의 URL 7쪽 차이를 실패 진단 원본으로 보존했다. 합격선·정답을 바꾸거나 반복 결과를 선택하지 않는다 |
 
 위 PASS는 제품 Live Vertical Slice PASS가 아니다. GitHub의 Vercel status는 build/deploy 성공을 뜻하며 Provider key·OCR·RLS·Workflow 기능 성공을 증명하지 않는다.
@@ -624,7 +624,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 
 | 차단 ID | 실제로 필요한 증거 | 현재 상태 | 해제 조건 |
 |---|---|---|---|
-| `B-MODEL-01` | Anthropic Sonnet 5 auth·quota·structured output·strict tool·P95·cost | PASS | §15.1 Model schema·policy·비용 합격 + sanitized artifact |
+| `B-MODEL-01` | Anthropic Sonnet 5 auth·quota·structured output·strict tool·P95·cost | NOT-EVALUATED | §15.1 Model schema·policy·비용 합격 + sanitized artifact |
 | `B-EMBED-01` | Cohere Claim 단위 1차 후보 생성 Recall@20·P95·cost | PASS | §15.1 후보 생성 합격 + versioned raw metric artifact |
 | `B-RETRIEVAL-01` | Metadata Filter·Keyword FTS·Vector·Rerank 종단 top 5 품질 | NOT-EVALUATED | §15.1 종단 Retrieval 합격 + query별 단계 원장; `B-SUPABASE-01` 선행 |
 | `B-OCR-01` | PDF.js·CLOVA 한국어 숫자·부정어·기관명·URL·표 Fixture | NOT-EVALUATED | §15.1 OCR·Parser 합격 + page별 diff |
@@ -641,7 +641,7 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | `B-JOB-01` | Workflow deploy·replay·retry·orphan·fencing·cancel·ambiguous Provider | NOT-EVALUATED | §15.1 Workflow 합격 + fault run/DB state |
 | `B-RATE-01` | 원자 reserve/settle·multi-instance rate·CLOVA 기본 1 TPS | NOT-EVALUATED | §15.1 Rate·Budget 합격 |
 | `B-DEADLINE-01` | Text 120초·Image/PDF 180초 abort·status 조회·partial save | NOT-EVALUATED | §4.3 예산 합·§15.1 P95/단절 복원 합격 + terminal row |
-| `B-HEALTH-01` | 저비용 health와 cached provider status | PASS | §15.1 Health 합격 + provider 호출 없는 trace |
+| `B-HEALTH-01` | 저비용 health와 cached provider status | NOT-EVALUATED | §15.1 Health 합격 + provider 호출 없는 trace |
 | `B-RUNTIME-01` | Preview/Production 실제 Node minor/patch·deployment·region | PASS | §15.1 Runtime 합격 + manifest |
 | `B-SPIKE-01` | 실제 Provider·Source·Storage·DB·Workflow component vertical | NOT-EVALUATED | §15.1 합성 Text·Image·PDF spike 합격; 제품 UI 요구 없음 |
 

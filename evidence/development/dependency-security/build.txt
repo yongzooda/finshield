@@ -1,0 +1,86 @@
+
+> finshield@0.1.0 build
+> rm -rf .next && next build
+
+▲ Next.js 16.3.4 (Turbopack)
+workflows build complete (78 steps, 4 workflows, time 192ms)
+✓ Running next.config.ts took 2.5s
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 5.9s
+  Running TypeScript ...
+  Finished TypeScript in 4.2s ...
+  Collecting page data using 9 workers ...
+  Generating static pages using 9 workers (0/20) ...
+  Generating static pages using 9 workers (5/20) 
+  Generating static pages using 9 workers (10/20) 
+  Generating static pages using 9 workers (15/20) 
+✓ Generating static pages using 9 workers (20/20) in 422ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /.well-known/workflow/v1/flow
+├ ƒ /.well-known/workflow/v1/step
+├ ƒ /.well-known/workflow/v1/webhook/[token]
+├ ƒ /api/consult
+├ ƒ /api/event
+├ ƒ /api/finshield/account/delete
+├ ƒ /api/finshield/cases
+├ ƒ /api/finshield/cases/[id]
+├ ƒ /api/finshield/cases/[id]/aftercare
+├ ƒ /api/finshield/cases/[id]/aftercare/documents
+├ ƒ /api/finshield/cases/[id]/delete
+├ ƒ /api/finshield/cases/[id]/journey
+├ ƒ /api/finshield/cases/[id]/revalidate
+├ ƒ /api/finshield/cases/[id]/stop
+├ ƒ /api/finshield/demo
+├ ƒ /api/finshield/files/process
+├ ƒ /api/finshield/files/slot
+├ ƒ /api/finshield/intake
+├ ƒ /api/finshield/notifications
+├ ƒ /api/finshield/profile
+├ ƒ /api/finshield/session
+├ ƒ /api/finshield/signup
+├ ƒ /api/finshield/verify
+├ ƒ /api/health
+├ ƒ /api/judge
+├ ƒ /api/law-probe
+├ ƒ /api/mcp
+├ ƒ /api/report
+├ ƒ /api/runtime-manifest
+├ ƒ /cases
+├ ƒ /cases/[id]
+├ ƒ /cases/[id]/aftercare
+├ ƒ /cases/[id]/journey
+├ ƒ /cases/[id]/passport
+├ ƒ /cases/[id]/revalidate
+├ ○ /consult
+├ ○ /demo
+├ ○ /demo/judgment
+├ ○ /demo/prevention
+├ ○ /demo/withheld
+├ ○ /happycall
+├ ƒ /insight
+├ ƒ /insight/channel
+├ ƒ /insight/checklist
+├ ƒ /insight/issues
+├ ƒ /insight/traits
+├ ○ /judgment
+├ ƒ /live-demo
+├ ○ /mcp
+├ ƒ /notifications
+├ ƒ /precase
+├ ƒ /precheck
+├ ○ /privacy
+├ ○ /privacy-center
+├ ƒ /profile
+├ ○ /trust
+├ ƒ /verification
+└ ƒ /verify
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
