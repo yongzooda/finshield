@@ -15,3 +15,5 @@ Production build·727 기본 테스트·lint 오류0(기존 경고2)이 통과�
 패키지가 scope에 포함된 B-MODEL-01·B-HEALTH-01은 기존 PASS를 재사용하지 않고 NOT-EVALUATED로 되돌렸다. 이전 채택 항목·결과는 보존했고 새 package pin을 등록했다. 나머지6개 채택 항목의 scope digest는 그대로다. Implementation NO-GO·Release NOT-EVALUATED 유지, 재채택은 main 실행·별도 Adoption 기준을 따른다.
 
 최초 필수 검사는 과거 증거 원장에 허용되지 않는 NOT-EVALUATED 상태를 넣어 실패했다. blocker는 NOT-EVALUATED, 과거 증거 원장은 기존 schema의 STALE로 구분해 수정했다. 검증기나 허용 상태를 느슨하게 바꾸지 않았다. Next16.3.4 운영 빌드의 4개 화면·390px·키보드·브라우저 오류0, 비로그인 API 거부401/잘못된 로그인 입력400도 확인했다.
+
+후속 필수 검사에서 GitHub 증거 조회의 일시적인 fetch 실패가 발생했다. 접속 복구 후 같은 후보로 재실행하자 검증기 mutation fixture가 이전 package blob을 고정한 오류가 드러났다. 실제 새 파일의 blob 두 개로 fixture를 갱신하고 mutation 시험 전체 통과를 확인했다. 검증기의 합격식과 불일치 거부 시험은 유지한다. 실패 원본은 network-required-failure.txt와 fixture-required-failure.txt로 보존한다.

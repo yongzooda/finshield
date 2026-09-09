@@ -1,0 +1,17 @@
+검사 시작: npm ci --ignore-scripts
+
+added 1024 packages, and audited 1031 packages in 23s
+
+391 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+검사 시작: DB 명세 검증
+Database spec validation passed: 101,234 chars, 29 datasets, D-001~D-032.
+검사 시작: Provider Stack ADR 검증
+Provider stack ADR validation failed:
+
+- implementation evidence 'B-EMBED-01' GitHub provenance를 검증할 수 없습니다: fetch failed
+- implementation evidence 'B-SOURCE-02' GitHub provenance를 검증할 수 없습니다: fetch failed
+- implementation evidence 'B-SOURCE-03' GitHub provenance를 검증할 수 없습니다: fetch failed
+검사 실패: Provider Stack ADR 검증
