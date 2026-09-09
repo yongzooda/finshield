@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "invalidated_by": "docs/adr/001-p0-provider-stack.md#5.2 Cohere Fast 제품 Retrieval 결정",
-  "reason": "Architecture Decision 본문이 바뀌어 기존 ADR decision digest를 재사용하지 않는다.",
+  "invalidated_by": "docs/adr/001-p0-provider-stack.md#8 Cohere Fast 제품 Retrieval 결정",
+  "reason": "Architecture Decision 본문이 바뀌어 기존 ADR decision digest를 재사용하지 않는다. 2026-09-10 rebase 시점 main c2bdce9의 채택 6건을 그대로 보존한다. B-MODEL-01·B-HEALTH-01은 이 변경 이전에 의존성 보안 패치로 이미 NOT-EVALUATED였고 evidence/development/runtime/pre-0050-adopted-entries.json 이력을 따른다.",
   "previous_entries": {
     "B-EMBED-01": {
       "code_under_test_sha": "76cf8734d34634dceb7f6e7a639864f06dcd98ad",
@@ -41,25 +41,6 @@
       "adoption_pr_number": 131,
       "adopted_at": "2026-09-06T10:37:43Z"
     },
-    "B-HEALTH-01": {
-      "code_under_test_sha": "fb360014e54647dd99d37970a1ed733ddb80fd5f",
-      "workflow_head_sha": "fb360014e54647dd99d37970a1ed733ddb80fd5f",
-      "run_id": 34195239872,
-      "run_attempt": 1,
-      "workflow_id": 351994574,
-      "workflow_path": ".github/workflows/health-evidence.yml",
-      "workflow_blob_sha": "f7a71271b4c291bb1ca5f1def6bb36ee20af239f",
-      "harness_blob_sha": "ba74bcd3a75dba2e7bee7ab9c3da1925a74acc8b",
-      "scope_sha256": "8650a8d3e12235a6a867e117ad119a95c4219554806ead63781584a5ea097fa0",
-      "job_name": "health-evidence / B-HEALTH-01",
-      "artifact_id": 10043669488,
-      "artifact_name": "provider-evidence-B-HEALTH-01-fb360014e54647dd99d37970a1ed733ddb80fd5f",
-      "artifact_digest": "sha256:4d2aa73ecc0d89885ee8d201f31af9dedcee92868e69567bd0de70b9c740c626",
-      "result_path": "evidence/results/B-HEALTH-01/34195239872.json",
-      "result_sha256": "2f8b6980c3eef916d01c3eb45583b773aef9142396b401c7db5b4cca0e762f35",
-      "adoption_pr_number": 271,
-      "adopted_at": "2026-09-08T06:48:47Z"
-    },
     "B-LAW-01": {
       "code_under_test_sha": "9b06d48d8d151df64b237588bb86d9098d9655b5",
       "workflow_head_sha": "9b06d48d8d151df64b237588bb86d9098d9655b5",
@@ -78,25 +59,6 @@
       "result_sha256": "c323e72d2c8d9a829894522fa508ca53ae869aaabb30de04b82d9e6402fc005c",
       "adoption_pr_number": 166,
       "adopted_at": "2026-09-06T16:34:05Z"
-    },
-    "B-MODEL-01": {
-      "code_under_test_sha": "a6c01446b7daca01dfc1f488a50908507aaacb72",
-      "workflow_head_sha": "a6c01446b7daca01dfc1f488a50908507aaacb72",
-      "run_id": 34078050277,
-      "run_attempt": 1,
-      "workflow_id": 349337303,
-      "workflow_path": ".github/workflows/provider-spike-evidence.yml",
-      "workflow_blob_sha": "49f21b3aabe11f5c53e39f2a2e30cd857a549ca6",
-      "harness_blob_sha": "109c96b06dfc1c3eaa76d16f9c7d76d7b70ca93d",
-      "scope_sha256": "99db02c026f316bcd8128c235942cd420b8482a04d500610a1db5f95b5d6d5bf",
-      "job_name": "provider-evidence / B-MODEL-01",
-      "artifact_id": 10002820639,
-      "artifact_name": "provider-evidence-B-MODEL-01-a6c01446b7daca01dfc1f488a50908507aaacb72",
-      "artifact_digest": "sha256:651b005a37d228d64d60289cf80a5acc31d12ff56271fdbda38bfa1c0eb62759",
-      "result_path": "evidence/results/B-MODEL-01/34078050277.json",
-      "result_sha256": "da34ab6abb3dccbf0ffe669ea35642d1cdf29d249dde1f2901f19f93597fa74b",
-      "adoption_pr_number": 198,
-      "adopted_at": "2026-09-07T03:05:13Z"
     },
     "B-RUNTIME-01": {
       "code_under_test_sha": "6e5641a7389d6490333876c2939044c16d7f62c0",
@@ -155,5 +117,6 @@
       "adoption_pr_number": 116,
       "adopted_at": "2026-09-05T17:34:05Z"
     }
-  }
+  },
+  "preserved_from_main_sha": "c2bdce967df3edf6ecef4f52b83e13ea78d105ae"
 }

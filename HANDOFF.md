@@ -1,3 +1,10 @@
+## 2026-09-10 Cohere Fast 제품 Retrieval을 최신 main에 정렬
+
+- `rerank-v4.0-fast`를 제품 relevance 단계에 연결한 변경을 main `c2bdce9` 위로 다시 쌓았다. Keyword 20개·Vector 20개 합집합 최대 40개, 최종 top 5, 네 범위 비용 상한은 그대로다. Manifest는 v8이 아니라 현재 v20 위의 `finshield-p0-loan-v21`이고 Migration 번호는 0052에서 0070으로 옮겼다. 원격은 0069까지 적용돼 있어 0070만 새로 적용하면 된다.
+- 이전 branch의 SQL 계약 파일 이름 `09a_retrieval_fast_runtime.sql`은 `supabase/tests/run-local.sh`의 `[0-9][0-9]_*.sql` 목록에 잡히지 않아 한 번도 실행되지 않았다. `09_retrieval_fast_runtime.sql`로 바꿔 실제 실행되게 했다. 예산 원장을 합성 Fixture로 덮어쓰고 commit하는 `10_budget_rate_invariants` 앞에서 돌아야 Migration이 남긴 실제 상한을 검사할 수 있다.
+- 이 Provider 결정으로 ADR decision digest가 바뀌어 채택 증거를 재사용하지 않는다. main `c2bdce9`의 채택 6건은 `evidence/development/runtime/pre-0070-adopted-entries.json`에 보존했고 현재 부분 PASS는 0/20이다. Implementation `NO-GO`, Release `NOT-EVALUATED`를 유지한다.
+- 새 평가셋 v6은 노출하지 않은 20가족·100 Claim이며 측정 전이다. GitHub Actions가 과금으로 막혀 있어 정식 main 단일 측정과 별도 Adoption은 아직 수행할 수 없다. 로컬 실행 결과를 Gate 증거로 채택하지 않는다.
+
 ## 2026-09-09 의존성 보안 패치 진행
 
 npm audit에서 새로 확인된 Next/Sharp/Vitest/js-yaml 경고5건을 수정판으로 갱신했고 clean 설치 뒤 audit0·빌드·727 기본 테스트·lint 오류0이다. 새 package 범위 때문에 Model·Health를 재측정 대기로 바꿨고 기존 결과를 보존했다(현행6/20, Gate NO-GO·NOT-EVALUATED). 로컬 검사 병합 승인은 PR303을 통해 main에 기록돼 있다. 상세는 docs/ops/2026-09-09-dependency-security.md와 후속 보안 PR을 따른다.

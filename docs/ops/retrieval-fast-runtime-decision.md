@@ -28,4 +28,4 @@ Fast search unit과 총 USD 0.25 비용 상한을 포함한다. 이 계약은 �
 
 ## 배포 조건
 
-실행 Manifest v8과 비용 함수는 Migration 0052에 있다. 실제 FinShield DB에 0045·0050·0051·0052를 순서대로 적용하고 `COHERE_API_KEY`를 Production에 등록하기 전에는 새 제품 경로를 Production 완료로 표시하지 않는다. `B-RETRIEVAL-01`은 새 평가와 별도 Adoption PR 전까지 `NOT-EVALUATED`다.
+실행 Manifest v21과 비용 함수는 Migration 0070에 있다. 실제 FinShield DB에 0070를 순서대로 적용하고 `COHERE_API_KEY`를 Production에 등록하기 전에는 새 제품 경로를 Production 완료로 표시하지 않는다. `B-RETRIEVAL-01`은 새 평가와 별도 Adoption PR 전까지 `NOT-EVALUATED`다.
