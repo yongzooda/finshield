@@ -1,3 +1,11 @@
+## 2026-09-10 Claim 판정 품질 평가셋 사전등록
+
+- ADR 14.3 의 Gate 전환 조건 7번을 수행했다. 20가족 60 Claim 평가셋 `claim-quality-v1` 과 지표·산식·수용값을 측정 전에 고정했다. 기능을 만든 뒤 판정 품질을 처음 정의하지 않기 위한 것이다.
+- `N-QLT-004` 의 여섯 상태 정답 표본을 모두 넣었다. `CONTRADICTED` 15, `UNKNOWN` 17, `VERIFIED` 10, `NEED_MORE_INFORMATION` 8, `CONFLICT` 6, `WITHHELD` 4 이며 한 가족 안에서 세 Claim 의 정답이 서로 다르다.
+- 수용값은 추출 Recall·Precision 0.95, 확정 Precision 0.95, 근거 없는 확정 0건, 공식 근거 Coverage 1.00, 보류·충돌 재현 0.90, 정상 오탐 0건, 금지 동작 8종 각 0건이다. 분모 0은 `N/A` 이고 상태 표본 누락은 평가 실패다.
+- 금지 동작 여덟 가지를 함정 Claim 으로 배치했다. 전부 보류해 오탐을 피하는 회피와 지난 자료를 현재 값으로 쓰는 회피가 서로 반대 방향에서 잡힌다.
+- `claim-quality-policy.mjs` 가 원장에서 지표를 다시 계산하고 계약 시험이 변조 29건을 거부한다. `B-CLAIM-01` 은 Release Gate 항목이라 Implementation `GO` 전에는 평가를 시작할 수 없고 policy 미등록으로 `PASS` 자체가 거부된다. Implementation `NO-GO`, Release `NOT-EVALUATED` 를 유지한다.
+
 ## 2026-09-10 Workflow 장애 20종과 입력별 기한 사전등록
 
 - 재검증 Workflow 의 장애 20종과 Text 120초·Image/PDF 180초 기한 표본을 측정 전에 고정했다. 목록·기대 종결·합격식은 `docs/ops/workflow-fault-preregistration.md` 를 따르고 결과를 본 뒤 바꾸지 않는다.

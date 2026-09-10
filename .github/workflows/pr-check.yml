@@ -115,6 +115,9 @@ jobs:
       - name: Consent Isolation Contract Test
         run: node .github/scripts/test-consent-evidence.mjs
 
+      - name: Claim 판정 품질 평가셋 계약 시험
+        run: node .github/scripts/test-claim-quality-evidence.mjs
+
       - name: Storage Contract Test
         run: node .github/scripts/test-storage-evidence.mjs
 
