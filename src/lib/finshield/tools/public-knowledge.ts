@@ -13,6 +13,8 @@ import { toSnapshotItem, SNAPSHOT_FIELDS, FETCH_JOIN, type SnapshotRow } from ".
 const queryInput = z.object({ query: z.string().trim().min(1).max(2000) }).strict();
 const snapshotInput = z.object({ query: z.string().trim().max(2000).optional(), values: z.array(z.string().min(1).max(128)).max(10).optional() }).strict();
 const DAY = () => new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul" }).format(new Date());
+/** 공개 Demo 의 승인 범위 검색. Provider 를 부르지 않는 설정이며 저하가 아니다. */
+const APPROVED_SCOPE = "APPROVED_SCOPE_KEYWORD_ONLY";
 export type ChunkRow = SnapshotRow & { chunk_id: string; chunk_text: string; source_locator: Record<string, unknown>; document_type: string;
   document_active?: boolean; valid_from: string | null; valid_to: string | null; effective_to: string | null; keyword_rank: number | null; vector_distance: number | null };
 
@@ -65,11 +67,16 @@ export async function searchPublicKnowledge(input: unknown, ctx: ToolCallContext
   ctx.signal?.throwIfAborted();
   const sql = ctx.sql;
   const sourceScope = ctx.allowedSourceSnapshotIds ?? [];
+  // 공개 Demo 는 승인된 Seed 범위만 본다. Cohere 비용 예약은 회원 Run 만 받으므로 호출하지 않는다.
+  const providerEligible = sourceScope.length === 0;
   const [release] = await queryWithSignal(sql`select embedding_model,embedding_dimension,embedding_model_version,
     (select count(*)::int from kb.knowledge_documents where kb_release_id=r.id and document_type=any(${types}::text[])) as documents
     from kb.kb_releases r where id=${ctx.manifest.kbReleaseId}::uuid`, ctx.signal);
-  let vector: number[] | null = null, vectorStatus = "NOT_CONFIGURED";
-  if (release?.documents && release.embedding_model === "embed-v4.0" && release.embedding_dimension === 1024) {
+  const vectorExpected = Boolean(release?.documents && release.embedding_model === "embed-v4.0"
+    && release.embedding_dimension === 1024);
+  let vector: number[] | null = null;
+  let vectorStatus = !vectorExpected ? "NOT_CONFIGURED" : providerEligible ? "NOT_RUN" : APPROVED_SCOPE;
+  if (vectorExpected && providerEligible) {
     try { vector = await embedQuery(parsed.data.query, ctx); vectorStatus = "AVAILABLE"; }
     catch (error) { ctx.signal?.throwIfAborted(); vectorStatus = error instanceof RetrievalProviderError ? error.code : "VECTOR_BUDGET_UNAVAILABLE"; }
   }
@@ -106,8 +113,9 @@ export async function searchPublicKnowledge(input: unknown, ctx: ToolCallContext
     limit ${RETRIEVAL_POLICY.maxRerankCandidates}`, ctx.signal);
   ctx.signal?.throwIfAborted();
   const candidates = rows as unknown as ChunkRow[];
-  let relevanceScores: number[] | undefined, rerankStatus = candidates.length ? "NOT_RUN" : "NO_CANDIDATES";
-  if (candidates.length) {
+  let relevanceScores: number[] | undefined;
+  let rerankStatus = !candidates.length ? "NO_CANDIDATES" : providerEligible ? "NOT_RUN" : APPROVED_SCOPE;
+  if (candidates.length && providerEligible) {
     try {
       relevanceScores = await rerankKnowledge(parsed.data.query, candidates.map(row => row.chunk_text), ctx);
       rerankStatus = "AVAILABLE";
@@ -116,10 +124,14 @@ export async function searchPublicKnowledge(input: unknown, ctx: ToolCallContext
       rerankStatus = error instanceof RetrievalProviderError ? error.code : "RERANK_PROVIDER_UNCONFIRMED";
     }
   }
-  const degraded = candidates.length > 0 && (!vector || !relevanceScores);
+  // 저하는 시도해야 했던 Provider 단계가 실패한 경우만이다. Embedding 이 없는 Release 와
+  // 승인 범위 Demo 는 설정된 검색 범위이지 실패가 아니다. 두 경우도 이유 코드는 남긴다.
+  const degraded = candidates.length > 0 && providerEligible && ((vectorExpected && !vector) || !relevanceScores);
   const reasonCode = !rows.length ? "NO_DOCUMENT_MATCH"
-    : !vector ? vectorStatus
-      : !relevanceScores ? rerankStatus : null;
+    : !providerEligible ? APPROVED_SCOPE
+      : vectorExpected && !vector ? vectorStatus
+        : !relevanceScores ? rerankStatus
+          : !vectorExpected ? "KEYWORD_ONLY_VECTOR_PENDING" : null;
   return { items: rankKnowledge(candidates, relevanceScores).map(row => knowledgeItem(row,
     relevanceScores ? "PUBLIC_KB_FAST_RERANK_MATCH" : vector ? "PUBLIC_KB_HYBRID_MATCH" : "PUBLIC_KB_KEYWORD_MATCH")),
     provenanceComplete: true, candidateCount: rows.length,

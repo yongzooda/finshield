@@ -29,3 +29,12 @@ Fast search unit과 총 USD 0.25 비용 상한을 포함한다. 이 계약은 �
 ## 배포 조건
 
 실행 Manifest v21과 비용 함수는 Migration 0070에 있다. 운영 FinShield DB에는 2026-09-10에 0070을 적용하고 `finshield_worker` 읽기 전용 접속으로 v21·예산 상한·함수 권한을 대조했다(`evidence/development/deployment/2026-09-10-migration-0070-0071/apply.json`). `COHERE_API_KEY`는 아직 Production에 없으므로 Vector·Fast 단계는 `RETRIEVAL_PROVIDER_NOT_CONFIGURED`로 끝나며, 등록 전에는 새 제품 경로를 Production 완료로 표시하지 않는다. `B-RETRIEVAL-01`은 새 평가와 별도 Adoption PR 전까지 `NOT-EVALUATED`다.
+
+## 2026-09-10 저하 판정 범위 정정
+
+운영 공개 Demo 두 번이 모두 Product·CoVe·Red Team `PARTIAL` 로 끝났다. 원인은 이 결정을 구현한 판정식 `degraded = candidates.length > 0 && (!vector || !relevanceScores)` 가 계약보다 넓었던 데 있다. 계약은 Embed 또는 Fast 가 **실패**하면 `RETRIEVAL_DEGRADED` 로 기록하는 것인데, 구현은 벡터 결과가 없기만 하면 저하로 봤다.
+
+운영에서 벡터 결과가 없는 이유는 두 가지이며 둘 다 실패가 아니다. 운영 공용 KB Release 에는 문서 2건만 있고 Embedding 이 0건이라 벡터 조회를 시도하지 않는다. 공개 Demo 는 승인된 Seed 범위만 보는데 Cohere 비용 예약 함수가 회원 `verification_runs` 만 받아 재정렬 예약이 설계상 거부된다.
+
+그래서 판정을 계약에 맞췄다. Embedding 이 있는 Release 에서 벡터 조회가 실패하거나 회원 검색의 Fast 가 실패할 때만 저하다. Embedding 이 없는 Release 는 `KEYWORD_ONLY_VECTOR_PENDING`, 승인 범위 Demo 는 Cohere 를 부르지 않고 `APPROVED_SCOPE_KEYWORD_ONLY` 를 이유 코드로 남긴다. `no_match_is_safe=false` 는 그대로다.
+
