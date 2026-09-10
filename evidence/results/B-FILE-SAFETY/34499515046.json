@@ -1,0 +1,1449 @@
+{
+  "schema_version": 3,
+  "blocker_id": "B-FILE-SAFETY",
+  "requirements_blob_sha": "27ce706010344fbcedebe3abd707febff0f1dc26",
+  "adr_decision_sha256": "a4d9e44c915148088eb5502198b4581b6c81e7e01f89ea20a28ad8997c910f95",
+  "code_under_test_sha": "7ac52bd5f223919efe1df69e8cadc00c950e9e92",
+  "workflow_head_sha": "7ac52bd5f223919efe1df69e8cadc00c950e9e92",
+  "scope_sha256": "8b017b9106abe82e05e216b4e9a7aa8a9971f73cf7557300f2ce1d9b2d2db2ef",
+  "run": {
+    "id": 34499515046,
+    "attempt": 1
+  },
+  "observations": {
+    "contract": {
+      "formula_version": "file-safety-isolated-parser-fixture-matrix-v1",
+      "fixture_generator_version": "file-safety-fixtures-v1",
+      "limits": {
+        "MAX_BYTES": 10485760,
+        "MAX_PAGES": 10,
+        "MAX_IMAGE_PIXELS": 25000000,
+        "MAX_TOTAL_IMAGE_PIXELS": 100000000,
+        "MAX_DECODED_BYTES": 33554432,
+        "MAX_OBJECTS": 50000,
+        "MAX_NESTING": 128,
+        "MAX_TRAILING_BYTES": 1024,
+        "EOCD_SEARCH_BYTES": 65557
+      },
+      "categories": {
+        "benign": {
+          "expected": "ACCEPT",
+          "minimum": 8
+        },
+        "encrypted": {
+          "expected": "REJECT",
+          "minimum": 3
+        },
+        "active": {
+          "expected": "REJECT",
+          "minimum": 8
+        },
+        "embedded": {
+          "expected": "REJECT",
+          "minimum": 3
+        },
+        "polyglot": {
+          "expected": "REJECT",
+          "minimum": 10
+        },
+        "bomb": {
+          "expected": "REJECT",
+          "minimum": 8
+        },
+        "malformed": {
+          "expected": "REJECT",
+          "minimum": 8
+        },
+        "fault": {
+          "expected": "FAULT",
+          "minimum": 5
+        }
+      },
+      "parser": {
+        "package": "pdfjs-dist",
+        "version": "6.3.289",
+        "integrity": "sha512-ZHjSVpDa3D6izMq8/04lvkhkATUmL9px6ChPaXc1k6nU2Mrhlg1/7F0bdUqCwUjw3NsPTfPZsMDUU6ZIcRaeQw==",
+        "lockfile_path": ".github/fixtures/file-safety-parser/package-lock.json"
+      },
+      "isolation": {
+        "permission_model": true,
+        "network_namespace": true,
+        "network_namespace_mode": "sudo",
+        "env_allowlist": [
+          "PATH"
+        ],
+        "max_old_space_mb": 512,
+        "wall_ms_default": 30000
+      }
+    },
+    "fixtures": {
+      "total": 103,
+      "by_category": {
+        "benign": 15,
+        "encrypted": 4,
+        "active": 15,
+        "embedded": 5,
+        "polyglot": 26,
+        "bomb": 14,
+        "malformed": 18,
+        "fault": 6
+      },
+      "sha256": {
+        "benign-pdf-1page": "eb34c9b808d587330b04455ed33a797bbbe3b1a65c8a6d614ba0a94bb6049822",
+        "benign-pdf-3pages": "168d1836e98c9d430065c8979d4a889ec9aefcff43e95526b2efbf6240a5608e",
+        "benign-pdf-10pages": "8f6208a483dc458bad0721714ec8c5d2169855301a13e8cf257ae5a5e45b0d66",
+        "benign-pdf-flate-content": "eb2ec5889f7fd45b96317d55acccd1b3d0129c37c82d2a413d495585c6222a66",
+        "benign-pdf-small-image": "514a45f2346fe7869e5f3a208cb31d52cd742e36a5bedbbc28eaf3146ff31c9f",
+        "benign-pdf-openaction-goto-array": "a9b67bcab6ef187d140c99bd907470aa5c726b9c45b3e9511e4e3a2271ff5719",
+        "benign-pdf-openaction-goto-dict": "4da4556203131e4170f245c4127f4eee525ecb75c4e3be05ba234f28d0851c2d",
+        "benign-pdf-uri-link": "2eb177eb30b56c5a306ce6f0ea2d1356e28321f8c59790644c152abce059cd72",
+        "benign-pdf-version-1.7": "4ae0cb473a1e1c8167fea3a119b3466ceeebf35d664fb634c4f710b81536c6e7",
+        "benign-pdf-trailing-under-limit": "dc5bb2394a1976aad8bc3820cb465ec52e601c1ca2e3d7bff5db5b13ab415594",
+        "benign-pdf-exact-10mib": "c9b2827b40544de42aea8f9b5a94def277dc83b1810007f286314ffd79f26328",
+        "benign-png-100x100": "53bb2c22f20ac6a6be7cc6c82871822ea82c651aa7416c30d7b06f5c0e39d4f2",
+        "benign-png-3000x3000": "a9dc13662e8d03e1b0afbbdbdbeafa2d6850c7e7a50064262316465c420e7ec0",
+        "benign-jpeg-640x480": "9f001ffbb0d825a8876dffbc5aa8158ffad5977fd81517c4d3471364da356a4d",
+        "benign-jpeg-progressive-1920x1080": "9dfce8d311f21c7a074534001d485c16b6a4553a436a17d77ac67e38387b4a88",
+        "encrypted-rc4": "af95f4a7e6d1dacf9afd9b7966d6aacd9e2bbdb9ea08bf215bce04fb0c8b11f9",
+        "encrypted-aes": "99dd0564e1896a4a452632ef9f8cda05e1438bc03d63810c6a6b1549003ecbdc",
+        "encrypted-pubsec": "f5e4fc736c71c48a20aceb1e78383f1b5c023fe584085d3ffdffdac7299aafd6",
+        "encrypted-xref-stream-dict": "e08e4a6e1a1a51e5e7877dc8cf5169f0d08f63d801edf5fab703be9ff8ec97a9",
+        "active-openaction-javascript": "639920c5864b617e1d0950e45fbe5c629481239470d79aecd5ee209a1ce9c613",
+        "active-openaction-indirect-javascript": "091d31e25c832c1919564a25279b349fc0a55e5d44fc81bf2bed95a03e4aadbc",
+        "active-names-javascript-tree": "c3bade26bef282f9b3fa930e13f9c7eff427d2b860badcf08692e4d6f0a919af",
+        "active-page-additional-action": "10ad7215209560c040f2d767a17ee86b2e833a2b044628a2f79f019a65159ac1",
+        "active-launch": "3ee5ba20cbfa7b34d344cb617a31038f40bb269ba57f7a06d927cecd0a031307",
+        "active-submitform": "fd4dd58f0417ec4f743f28e484f818777ffb60c0bae4bd560081e7d7d675a7ab",
+        "active-importdata": "4d5404b57ca65f2fcf86356601322394315ef6afd45babe4840c050b72f476c2",
+        "active-richmedia": "3b40e978e0a330e6e416d4e59b322bad9c6eb84cd8388b169ae9576d8166990c",
+        "active-xfa": "b74aa6a8557d82e0a8da2c702c4561d82139a884196481e4c7826b589621e8fd",
+        "active-name-escaped-javascript": "770ebb72b2b0a046d410f3a73e63e357bd6abe7df74cba94318f9faee028d7e5",
+        "active-javascript-in-object-stream": "61286955539baeeb70dd1b773b6396ebd4132a0d51200b84d684ef825cc4adf8",
+        "active-gotor-remote": "364613a13945c978872fdf9678dba6b5b3cd7c3ea35aef2b9bdcb6f044ff11fc",
+        "active-movie-annotation": "b3e17d44a2919b8f87fc08c52a8590e2ec7b34a23db3e81749a48fe3fc562a82",
+        "active-javascript-nested-flate": "799b943e05df6235d4783e6830e3d80000181dccc9ce9e7799873a111b9d9b9b",
+        "active-openaction-mixed-actions": "f4adb54d5bcb14164caca839b297b8c307d2e3999415cd8a9115c0428c649f38",
+        "embedded-file-name-tree": "7629f4974eb5eb9daed24787a2d0003151658d53f09c34205bb976c1e3894cb0",
+        "embedded-fileattachment-annotation": "9b9d48e3f025d74db4d4d52d814e84c68cb6dac1cc03e8a0d1c2c64cb3b103b5",
+        "embedded-executable-payload": "3e02bc7e6bb3c2b034463cab5f672ce9c1ab115538f7535f762147cd2e553e25",
+        "embedded-filespec-only": "110a7d513369f1bca054ef5f9f935d8b5f14ea65b75f0b8d6b73a4208bfaebb7",
+        "embedded-raw-executable-stream": "7a637f8259dd3ba4ac79fea134da1f3714fd21b39a7a65b4d9dad8906b554b42",
+        "polyglot-pdf-zip-appended": "8ba5efbe8f9630d607071076053fb00386e613c04df8c8422bf30d532c225569",
+        "polyglot-zip-then-pdf": "8bf65db2c654958f44dde01cb5b0bded8a7ce1badd3a345f7ea5928daca55b96",
+        "polyglot-pdf-html-comment": "1578b53dd10f20a10a9c4434187a7cde1a7f847460a2d7152895b60d16a90b7c",
+        "polyglot-png-pdf-appended": "28969fcc59f7613a56e873612b58e76639c458c0914a43cad36c5359f5fdb848",
+        "polyglot-jpeg-zip-appended": "f6ca8d8e7ca93785423e5a22e8e40b5381bd4531a23ce5793711ec8bf39fa81c",
+        "polyglot-gifar": "146ef7e7a5257fada1311e56a198e20eac77803a8baa7f755c9f417c47cb228c",
+        "mismatch-pdf-declared-png": "eb34c9b808d587330b04455ed33a797bbbe3b1a65c8a6d614ba0a94bb6049822",
+        "mismatch-png-declared-pdf": "7f702029271931c85599822660c8f0df876b9d68c6706ac1c1cf319d14aa0492",
+        "mismatch-png-bytes-jpg-name": "7f702029271931c85599822660c8f0df876b9d68c6706ac1c1cf319d14aa0492",
+        "double-extension-pdf-exe": "eb34c9b808d587330b04455ed33a797bbbe3b1a65c8a6d614ba0a94bb6049822",
+        "double-extension-exe-pdf": "eb34c9b808d587330b04455ed33a797bbbe3b1a65c8a6d614ba0a94bb6049822",
+        "double-extension-html-png": "7f702029271931c85599822660c8f0df876b9d68c6706ac1c1cf319d14aa0492",
+        "renamed-pe-executable": "3df33aba1a5ff844792965d0f45707cbd37ee3c3b22f8eb5e9b33dcbd2578d12",
+        "renamed-elf": "75e8e6052533319492e0dced279324a4d36e8ea5cf62202398b9d7b42add59b8",
+        "renamed-macho": "59dbd0cb8e0eeca8e9a251ba1628c477c702ba7c2da0e4b953ff29e2e4882e61",
+        "renamed-shell-script": "cebf25e0668376ce72d60cc05894de697b174396e5036fdb525363c351bf1f9b",
+        "svg-script-declared-png": "3f67c8be987aa1db0ef99ce330286efe1929e729f5f9d1695b5fd0b987246244",
+        "html-declared-pdf": "7a1655581863f7d02bde0813d56c4dfef0d115877f452cf17c9d0b063dc20660",
+        "unsafe-filename-traversal": "eb34c9b808d587330b04455ed33a797bbbe3b1a65c8a6d614ba0a94bb6049822",
+        "unsafe-filename-nul": "eb34c9b808d587330b04455ed33a797bbbe3b1a65c8a6d614ba0a94bb6049822",
+        "unsafe-filename-dotfile": "eb34c9b808d587330b04455ed33a797bbbe3b1a65c8a6d614ba0a94bb6049822",
+        "pdf-trailing-junk-2kib": "9eed167ff74a8a119ce4f84fd2c4c80cab8dd846b8142da0ea98e05ad91a8992",
+        "pdf-header-offset": "6b25bd11555f15251c30a876dbeaf4144dde6aa9c868b72af6f5b97be4fd4293",
+        "png-trailing-data": "3443712eaace6eb30e30fea8b1000a777b5f02e233922f3d895de7ed9ed8805e",
+        "jpeg-trailing-data": "b2ad2d7d42b77bdb079561a561ad1a606a9fad56976b38822afc647fb83a40c2",
+        "ole-document-declared-pdf": "a899fb4496afa7230c378d5be03cf3461990994993110fd2dad3257111081275",
+        "bomb-pdf-11pages": "52a44530cbd9c489a7316ef064dd2dfed8fc47d1c51421a2bdf3cc9a4c60c7da",
+        "bomb-pdf-200pages": "8618e5595fef118280919bb4eed73004340af0711163cfc8e69ea190d60c7780",
+        "bomb-pdf-page-count-lie": "35b033a5bc875bb26b2e7930f61ea95ac9e7c8451ca10063b22c64d8217355d1",
+        "bomb-pdf-image-20000x20000": "73c60656579c57797507111c1b1cff43e0c18ff4e30c57aed47cc949abaad5e3",
+        "bomb-pdf-total-image-pixels": "bead98c4ed3723b61b3c6b6bf0514738b459c451fba2540175e323dad94edc67",
+        "bomb-pdf-flate-40mib": "1e9ba9d2c6baf9f2564888180da3e30dfbe5bf0ba088343a150d4e2e555f0612",
+        "bomb-pdf-nested-flate": "60cfb47bf03cc641eb8d923adfaa0bbd89e31f87047cd4070342bb5bd5fe283c",
+        "bomb-pdf-many-streams-200mib": "59120b76a5a197b60f750fd219ff035543fb4ffe826922cc1a67c15e3a779be6",
+        "bomb-pdf-object-count": "d718920ecbd4737815063843361afa391f91572499f892ff4c01739f6515a8d6",
+        "bomb-pdf-nesting-depth": "f82553a9b3057d9a73b58cee8f76390e6b1b197cb0b67b8717fcd34c2bae871e",
+        "bomb-pdf-over-10mib": "f82d840985bed9f62b8c8d28d34d234c17c829f84ebcb9cdd6382f01bf177c27",
+        "bomb-png-30000x30000-header": "f53d270c007e94b8ebc92eb6172c14e626dcd97bebbd849d579bd92a897de0e3",
+        "bomb-png-max-dimensions": "20704c0cbb1c2215008b0bef0a8e4b73fe919932c32af9d3310780b82862dad6",
+        "bomb-jpeg-sof-30000x30000": "8996f3e10360f0aaca315164e9ecec68199586104e67a46af8517aa5071f22ab",
+        "malformed-empty": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "malformed-one-byte": "bbf3f11cb5b43e700273a78d12de55e4a7eab741ed2abf13787a4d2dc832b8ec",
+        "malformed-header-only": "e5c62df5dab5c87b6a015ef3d43597074d1eec433b15f51aec63b8582d0e4ab4",
+        "malformed-truncated-mid-object": "ae03065aa36773037f00c28ce43b17eb679df782bb6a4e67ab7b69304a137ec6",
+        "malformed-missing-eof": "d36ffbbaf3be3e613792c3741bb746c2c2435c21de2270b0193b5c469bf83058",
+        "malformed-bad-startxref": "0a1ec306470e66e909fa9438e451e69817bd5ffb81cdeb9a6344804d8c4b5683",
+        "malformed-no-pages-object": "060c95425121ccabdb5995539a934bc7914f048a9ade417e48247b0d542733da",
+        "malformed-negative-page-count": "4583dec00559a09590a9243fef3c794921ed13336714483ca764442cf1089a21",
+        "malformed-pdf-version-9": "9ace763cbfb19483171f1870595ee94d1cdfd686aa916d3c57e738d0b26d9297",
+        "malformed-utf16-text-declared-pdf": "babffd2beb370f0e9570c0848a4ced20092771123982e921b7d328c1d1b67bcd",
+        "malformed-kids-dangling-reference": "62796b7887153bb6e0eebd7d9c6a3297b3f99f1cfee802bb6c4f43b9b8fcbc77",
+        "malformed-png-bad-crc": "6a3106f99acfc3a5df916b58253dc84c9033f1a5117a67b253175e92be91d8f8",
+        "malformed-png-truncated": "be869a9ff3d0c9c2349d2e3c58e69266436869981e0ef52a8a5a388001e46ea7",
+        "malformed-png-zero-width": "97059afd6c56d7092675cc608267401fcb7041b428057db1ba8fe6e1c8a0d502",
+        "malformed-png-missing-iend": "a9fafd4d1aae909f2174b1668b7cc7325cffdf3d2a0e729fb9502d351c9f5be7",
+        "malformed-jpeg-no-sof": "493311ee44565069dc8cbfddba3e99baba080c6ab80b1685c25a817f182aa6df",
+        "malformed-jpeg-truncated": "132a3e2ccb69fa909347bc04fa097c673edf62a647eed247b6eee3faba06dc66",
+        "malformed-jpeg-zero-height": "262973cf6bc2ccd9bb059b7e13040543030178614f3c52203f68848dba5d7832",
+        "fault-crash-abort": "eb34c9b808d587330b04455ed33a797bbbe3b1a65c8a6d614ba0a94bb6049822",
+        "fault-hang-wall-timeout": "eb34c9b808d587330b04455ed33a797bbbe3b1a65c8a6d614ba0a94bb6049822",
+        "fault-oom-heap-limit": "eb34c9b808d587330b04455ed33a797bbbe3b1a65c8a6d614ba0a94bb6049822",
+        "fault-exit-nonzero": "eb34c9b808d587330b04455ed33a797bbbe3b1a65c8a6d614ba0a94bb6049822",
+        "fault-stdout-garbage": "eb34c9b808d587330b04455ed33a797bbbe3b1a65c8a6d614ba0a94bb6049822",
+        "fault-network-canary": "eb34c9b808d587330b04455ed33a797bbbe3b1a65c8a6d614ba0a94bb6049822"
+      }
+    },
+    "runs": [
+      {
+        "name": "benign-pdf-1page",
+        "category": "benign",
+        "verdict": "ACCEPT",
+        "stage": "parser",
+        "reason_codes": [],
+        "ms": 217,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "benign-pdf-3pages",
+        "category": "benign",
+        "verdict": "ACCEPT",
+        "stage": "parser",
+        "reason_codes": [],
+        "ms": 213,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "benign-pdf-10pages",
+        "category": "benign",
+        "verdict": "ACCEPT",
+        "stage": "parser",
+        "reason_codes": [],
+        "ms": 225,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "benign-pdf-flate-content",
+        "category": "benign",
+        "verdict": "ACCEPT",
+        "stage": "parser",
+        "reason_codes": [],
+        "ms": 215,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "benign-pdf-small-image",
+        "category": "benign",
+        "verdict": "ACCEPT",
+        "stage": "parser",
+        "reason_codes": [],
+        "ms": 208,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "benign-pdf-openaction-goto-array",
+        "category": "benign",
+        "verdict": "ACCEPT",
+        "stage": "parser",
+        "reason_codes": [],
+        "ms": 208,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "benign-pdf-openaction-goto-dict",
+        "category": "benign",
+        "verdict": "ACCEPT",
+        "stage": "parser",
+        "reason_codes": [],
+        "ms": 211,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "benign-pdf-uri-link",
+        "category": "benign",
+        "verdict": "ACCEPT",
+        "stage": "parser",
+        "reason_codes": [],
+        "ms": 213,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "benign-pdf-version-1.7",
+        "category": "benign",
+        "verdict": "ACCEPT",
+        "stage": "parser",
+        "reason_codes": [],
+        "ms": 212,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "benign-pdf-trailing-under-limit",
+        "category": "benign",
+        "verdict": "ACCEPT",
+        "stage": "parser",
+        "reason_codes": [],
+        "ms": 206,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "benign-pdf-exact-10mib",
+        "category": "benign",
+        "verdict": "ACCEPT",
+        "stage": "parser",
+        "reason_codes": [],
+        "ms": 243,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "benign-png-100x100",
+        "category": "benign",
+        "verdict": "ACCEPT",
+        "stage": "inspector",
+        "reason_codes": [],
+        "ms": 71,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "benign-png-3000x3000",
+        "category": "benign",
+        "verdict": "ACCEPT",
+        "stage": "inspector",
+        "reason_codes": [],
+        "ms": 77,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "benign-jpeg-640x480",
+        "category": "benign",
+        "verdict": "ACCEPT",
+        "stage": "inspector",
+        "reason_codes": [],
+        "ms": 75,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "benign-jpeg-progressive-1920x1080",
+        "category": "benign",
+        "verdict": "ACCEPT",
+        "stage": "inspector",
+        "reason_codes": [],
+        "ms": 72,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "encrypted-rc4",
+        "category": "encrypted",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "encrypted"
+        ],
+        "ms": 75,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "encrypted-aes",
+        "category": "encrypted",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "encrypted"
+        ],
+        "ms": 73,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "encrypted-pubsec",
+        "category": "encrypted",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "encrypted"
+        ],
+        "ms": 78,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "encrypted-xref-stream-dict",
+        "category": "encrypted",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "encrypted"
+        ],
+        "ms": 83,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "active-openaction-javascript",
+        "category": "active",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "active-content",
+          "open-action"
+        ],
+        "ms": 80,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "active-openaction-indirect-javascript",
+        "category": "active",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "active-content",
+          "open-action"
+        ],
+        "ms": 79,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "active-names-javascript-tree",
+        "category": "active",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "active-content"
+        ],
+        "ms": 83,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "active-page-additional-action",
+        "category": "active",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "active-content"
+        ],
+        "ms": 75,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "active-launch",
+        "category": "active",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "active-content",
+          "open-action"
+        ],
+        "ms": 75,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "active-submitform",
+        "category": "active",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "active-content"
+        ],
+        "ms": 75,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "active-importdata",
+        "category": "active",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "active-content"
+        ],
+        "ms": 78,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "active-richmedia",
+        "category": "active",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "active-content"
+        ],
+        "ms": 76,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "active-xfa",
+        "category": "active",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "active-content",
+          "polyglot-html"
+        ],
+        "ms": 74,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "active-name-escaped-javascript",
+        "category": "active",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "active-content",
+          "open-action"
+        ],
+        "ms": 74,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "active-javascript-in-object-stream",
+        "category": "active",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "active-content"
+        ],
+        "ms": 73,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "active-gotor-remote",
+        "category": "active",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "active-content"
+        ],
+        "ms": 77,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "active-movie-annotation",
+        "category": "active",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "active-content"
+        ],
+        "ms": 76,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "active-javascript-nested-flate",
+        "category": "active",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "active-content"
+        ],
+        "ms": 76,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "active-openaction-mixed-actions",
+        "category": "active",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "active-content",
+          "open-action"
+        ],
+        "ms": 77,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "embedded-file-name-tree",
+        "category": "embedded",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "embedded-file"
+        ],
+        "ms": 74,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "embedded-fileattachment-annotation",
+        "category": "embedded",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "embedded-file"
+        ],
+        "ms": 72,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "embedded-executable-payload",
+        "category": "embedded",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "embedded-file",
+          "executable-payload"
+        ],
+        "ms": 75,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "embedded-filespec-only",
+        "category": "embedded",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "embedded-file"
+        ],
+        "ms": 75,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "embedded-raw-executable-stream",
+        "category": "embedded",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "executable-payload"
+        ],
+        "ms": 77,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "polyglot-pdf-zip-appended",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "zip-appended"
+        ],
+        "ms": 75,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "polyglot-zip-then-pdf",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "foreign-signature",
+          "unknown-type"
+        ],
+        "ms": 78,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "polyglot-pdf-html-comment",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "polyglot-html"
+        ],
+        "ms": 80,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "polyglot-png-pdf-appended",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "foreign-signature",
+          "trailing-data"
+        ],
+        "ms": 74,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "polyglot-jpeg-zip-appended",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "trailing-data",
+          "zip-appended"
+        ],
+        "ms": 77,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "polyglot-gifar",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "foreign-signature",
+          "unknown-type"
+        ],
+        "ms": 74,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "mismatch-pdf-declared-png",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "extension-mismatch",
+          "type-mismatch"
+        ],
+        "ms": 76,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "mismatch-png-declared-pdf",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "extension-mismatch",
+          "type-mismatch"
+        ],
+        "ms": 79,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "mismatch-png-bytes-jpg-name",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "extension-mismatch"
+        ],
+        "ms": 78,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "double-extension-pdf-exe",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "double-extension",
+          "extension-mismatch"
+        ],
+        "ms": 77,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "double-extension-exe-pdf",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "double-extension"
+        ],
+        "ms": 74,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "double-extension-html-png",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "double-extension"
+        ],
+        "ms": 78,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "renamed-pe-executable",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "foreign-signature",
+          "unknown-type"
+        ],
+        "ms": 75,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "renamed-elf",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "foreign-signature",
+          "unknown-type"
+        ],
+        "ms": 74,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "renamed-macho",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "foreign-signature",
+          "unknown-type"
+        ],
+        "ms": 75,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "renamed-shell-script",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "foreign-signature",
+          "unknown-type"
+        ],
+        "ms": 75,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "svg-script-declared-png",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "foreign-signature",
+          "unknown-type"
+        ],
+        "ms": 77,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "html-declared-pdf",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "foreign-signature",
+          "unknown-type"
+        ],
+        "ms": 79,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "unsafe-filename-traversal",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "unsafe-filename"
+        ],
+        "ms": 76,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "unsafe-filename-nul",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "unsafe-filename"
+        ],
+        "ms": 78,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "unsafe-filename-dotfile",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "unsafe-filename"
+        ],
+        "ms": 77,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "pdf-trailing-junk-2kib",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "trailing-data"
+        ],
+        "ms": 80,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "pdf-header-offset",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "unknown-type"
+        ],
+        "ms": 74,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "png-trailing-data",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "trailing-data"
+        ],
+        "ms": 74,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "jpeg-trailing-data",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "trailing-data"
+        ],
+        "ms": 75,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "ole-document-declared-pdf",
+        "category": "polyglot",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "foreign-signature",
+          "unknown-type"
+        ],
+        "ms": 77,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "bomb-pdf-11pages",
+        "category": "bomb",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "page-limit"
+        ],
+        "ms": 78,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "bomb-pdf-200pages",
+        "category": "bomb",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "page-limit"
+        ],
+        "ms": 85,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "bomb-pdf-page-count-lie",
+        "category": "bomb",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "page-limit"
+        ],
+        "ms": 75,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "bomb-pdf-image-20000x20000",
+        "category": "bomb",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "pixel-limit"
+        ],
+        "ms": 82,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "bomb-pdf-total-image-pixels",
+        "category": "bomb",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "pixel-limit"
+        ],
+        "ms": 78,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "bomb-pdf-flate-40mib",
+        "category": "bomb",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "decompression-bomb"
+        ],
+        "ms": 109,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "bomb-pdf-nested-flate",
+        "category": "bomb",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "decompression-bomb"
+        ],
+        "ms": 101,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "bomb-pdf-many-streams-200mib",
+        "category": "bomb",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "decompression-bomb"
+        ],
+        "ms": 197,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "bomb-pdf-object-count",
+        "category": "bomb",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "object-limit"
+        ],
+        "ms": 109,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "bomb-pdf-nesting-depth",
+        "category": "bomb",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "nesting-limit"
+        ],
+        "ms": 75,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "bomb-pdf-over-10mib",
+        "category": "bomb",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "too-large"
+        ],
+        "ms": 78,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "bomb-png-30000x30000-header",
+        "category": "bomb",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "pixel-limit"
+        ],
+        "ms": 78,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "bomb-png-max-dimensions",
+        "category": "bomb",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "pixel-limit"
+        ],
+        "ms": 75,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "bomb-jpeg-sof-30000x30000",
+        "category": "bomb",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "pixel-limit"
+        ],
+        "ms": 79,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "malformed-empty",
+        "category": "malformed",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "empty"
+        ],
+        "ms": 78,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "malformed-one-byte",
+        "category": "malformed",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "unknown-type"
+        ],
+        "ms": 78,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "malformed-header-only",
+        "category": "malformed",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "malformed",
+          "malformed-xref",
+          "no-pages"
+        ],
+        "ms": 77,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "malformed-truncated-mid-object",
+        "category": "malformed",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "malformed",
+          "malformed-xref"
+        ],
+        "ms": 74,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "malformed-missing-eof",
+        "category": "malformed",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "malformed"
+        ],
+        "ms": 78,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "malformed-bad-startxref",
+        "category": "malformed",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "malformed-xref"
+        ],
+        "ms": 74,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "malformed-no-pages-object",
+        "category": "malformed",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "no-pages"
+        ],
+        "ms": 78,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "malformed-negative-page-count",
+        "category": "malformed",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "malformed"
+        ],
+        "ms": 78,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "malformed-pdf-version-9",
+        "category": "malformed",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "malformed"
+        ],
+        "ms": 78,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "malformed-utf16-text-declared-pdf",
+        "category": "malformed",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "foreign-signature",
+          "unknown-type"
+        ],
+        "ms": 73,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "malformed-kids-dangling-reference",
+        "category": "malformed",
+        "verdict": "REJECT",
+        "stage": "parser",
+        "reason_codes": [
+          "parser-malformed"
+        ],
+        "ms": 191,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "malformed-png-bad-crc",
+        "category": "malformed",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "malformed-png"
+        ],
+        "ms": 77,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "malformed-png-truncated",
+        "category": "malformed",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "malformed-png"
+        ],
+        "ms": 74,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "malformed-png-zero-width",
+        "category": "malformed",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "malformed-png"
+        ],
+        "ms": 80,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "malformed-png-missing-iend",
+        "category": "malformed",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "malformed-png"
+        ],
+        "ms": 79,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "malformed-jpeg-no-sof",
+        "category": "malformed",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "malformed-jpeg"
+        ],
+        "ms": 77,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "malformed-jpeg-truncated",
+        "category": "malformed",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "malformed-jpeg"
+        ],
+        "ms": 74,
+        "exit_status": 0,
+        "signal": null
+      },
+      {
+        "name": "malformed-jpeg-zero-height",
+        "category": "malformed",
+        "verdict": "REJECT",
+        "stage": "inspector",
+        "reason_codes": [
+          "malformed-jpeg"
+        ],
+        "ms": 74,
+        "exit_status": 0,
+        "signal": null
+      }
+    ],
+    "faults": [
+      {
+        "name": "fault-crash-abort",
+        "mode": "crash",
+        "contained": true,
+        "exit_status": null,
+        "signal": "SIGABRT",
+        "wall_timeout": false,
+        "stdout_parsable": false
+      },
+      {
+        "name": "fault-hang-wall-timeout",
+        "mode": "hang",
+        "contained": true,
+        "exit_status": null,
+        "signal": "SIGTERM",
+        "wall_timeout": true,
+        "stdout_parsable": false
+      },
+      {
+        "name": "fault-oom-heap-limit",
+        "mode": "oom",
+        "contained": true,
+        "exit_status": null,
+        "signal": "SIGABRT",
+        "wall_timeout": false,
+        "stdout_parsable": false
+      },
+      {
+        "name": "fault-exit-nonzero",
+        "mode": "exit-nonzero",
+        "contained": true,
+        "exit_status": 3,
+        "signal": null,
+        "wall_timeout": false,
+        "stdout_parsable": false
+      },
+      {
+        "name": "fault-stdout-garbage",
+        "mode": "garbage",
+        "contained": true,
+        "exit_status": 0,
+        "signal": null,
+        "wall_timeout": false,
+        "stdout_parsable": false
+      },
+      {
+        "name": "fault-network-canary",
+        "mode": "network-canary",
+        "contained": true,
+        "exit_status": 0,
+        "signal": null,
+        "wall_timeout": false,
+        "stdout_parsable": true
+      }
+    ],
+    "isolation": {
+      "env_secret_like_max": 0,
+      "env_unexpected": [],
+      "canary_leaks": 0,
+      "network_attempts": 0,
+      "probes_denied": {
+        "fs_write": true,
+        "fs_read_outside": true,
+        "child_process": true,
+        "worker_threads": true
+      },
+      "negative_control": {
+        "canary_visible": true,
+        "detected": true,
+        "network": {
+          "loopback": "ENETUNREACH",
+          "external": "ENETUNREACH",
+          "lookup": "EAI_AGAIN"
+        }
+      }
+    },
+    "totals": {
+      "mismatches": 0,
+      "benign_accepted": 15,
+      "dangerous_rejected": 82,
+      "parser_stage_runs": 12,
+      "max_ms": 6702
+    }
+  },
+  "environment": {
+    "node_version": "v24.20.0",
+    "region": "github-hosted",
+    "isolation": "unshare-net+node-permission"
+  },
+  "redactions_applied": true
+}
