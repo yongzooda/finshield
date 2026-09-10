@@ -1,0 +1,92 @@
+{
+  "schema_version": "source-freshness-refresh-v1",
+  "refreshed_on": "2026-09-10",
+  "reason": "상품·안내 Snapshot 의 24시간 신선도가 2026-09-08T19:39Z 에 만료돼 공개 Demo·회원 검증의 확정 판정이 UNKNOWN 으로 떨어졌다.",
+  "collection": {
+    "workflow": "source-evidence.yml",
+    "blocker_id": "B-SOURCE-03",
+    "run_id": 34493420069,
+    "code_under_test_sha": "98c2d56e1d24cbd4ca08ca1201cd62f8293ebb51",
+    "fetched_at": "2026-09-10T15:06:29.941Z",
+    "formula_version": "source-snapshot-two-api-cross-check-v6",
+    "fsc": {
+      "result_code": "00",
+      "total_count": 19,
+      "latest_bas_ym": "202602"
+    },
+    "kinfa": {
+      "result_code": "00",
+      "total_count": 16,
+      "institution_matches": 16
+    },
+    "adopted_as_gate_evidence": false
+  },
+  "hash_comparison": {
+    "method": "새 수집 결과의 레코드·페이지 SHA-256 을 운영 kb.source_snapshots.content_hash 와 대조",
+    "unchanged": 18,
+    "changed": 1,
+    "unchanged_items": [
+      "금융위 햇살론15 202602 기록 1건",
+      "서민금융진흥원 취급기관 16건",
+      "사칭 신고센터 페이지"
+    ],
+    "changed_items": [
+      "햇살론15 안내 페이지 전체 HTML (bdfe0ce5 → 92a46f28)"
+    ]
+  },
+  "load": {
+    "tool": "scripts/kb/load-source-snapshots.mjs --apply",
+    "role": "finshield_worker",
+    "executed_by": "사용자 터미널 (자동 권한 검사가 에이전트의 운영 쓰기를 막아 사용자가 직접 실행)",
+    "freshness_window_hours": 24,
+    "after_counts": {
+      "snapshots": 42,
+      "fetch_events": 224,
+      "channels": 6
+    }
+  },
+  "seed_link": {
+    "reason": "적재기는 웹페이지 버전을 수집 날짜로 잡아 같은 원문도 새 Snapshot 으로 넣는다. Demo 가 고정한 사칭 신고센터 v=2026-09-05 에는 기록이 남지 않았다.",
+    "method": "Migration 0048 과 같은 방식. 새 수집의 원문 해시가 고정본과 같을 때만 고정 Snapshot 에 UNCHANGED 재수집 기록을 추가",
+    "verified_hash": "0b7ff634837f01e9df7a760bd8ca72e6cc4cf80f9a205354ae686fb3e029d1b2",
+    "inserted_events": 3
+  },
+  "demo_pins_after": {
+    "PRODUCT_BASELINE": {
+      "official_id": "data.go.kr:15094787:햇살론15:202602:1",
+      "fresh_until": "2026-09-11T15:06Z",
+      "fresh": true
+    },
+    "IMPERSONATION_BASELINE": {
+      "official_id": "kinfa:declare-center",
+      "source_version": "2026-09-05",
+      "fresh_until": "2026-09-11T15:06Z",
+      "fresh": true
+    }
+  },
+  "demo_after_refresh": {
+    "mode": "LIVE",
+    "is_precomputed": false,
+    "elapsed_seconds": 43,
+    "claim_states": {
+      "CONTRADICTED": 1,
+      "UNKNOWN": 3,
+      "NEED_MORE_INFORMATION": 1
+    },
+    "contradicted_claim": "햇살론15를 연 3.2% 고정금리로 최대 2,000만원까지 받을 수 있다.",
+    "evidence_freshness": {
+      "FRESH": 4
+    },
+    "partial_agents": [
+      "PRODUCT_INSTITUTION",
+      "COVE",
+      "RED_TEAM"
+    ],
+    "partial_cause": "PR #306 의 RETRIEVAL_DEGRADED 판정식이 설계상 벡터·Fast 가 돌지 않는 경우까지 저하로 표시. 이 기록과 같은 PR 에서 수정"
+  },
+  "expires": "2026-09-11T15:06Z 뒤 다시 STALE. 심사 등 날짜가 정해진 시연 전에는 재수집을 반복해야 한다",
+  "follow_ups": [
+    "적재기가 같은 원문의 웹페이지를 새 Snapshot 으로 넣지 않도록 해시 기준 UNCHANGED 처리",
+    "출처 유형별 신선도 기준을 원천 갱신 주기에 맞춰 사전에 정하고 자동 재수집 Job 을 둘지 결정"
+  ]
+}
