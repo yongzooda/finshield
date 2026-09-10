@@ -1,3 +1,11 @@
+## 2026-09-11 심사 체험 공백 정리
+
+- 공개 Demo 결과가 회원 결과와 같은 최종화 규칙·종합 결과 Matrix·행동 안내를 쓴다(PR #314). 운영에서 실제 실행해 `지금 하실 일`·`서민금융콜센터 1397`·`중대한 위험 신호`·세 축이 나오는 것을 확인했다.
+- 옛 PreCase 단독 화면 16개를 FinShield 화면으로 영구 이동했다(PR #315). 운영에서 500 을 내던 세 화면과 실제 정책과 다른 PreCase 처리방침이 더는 열리지 않는다. 신뢰센터는 빌드할 때 ADR 표와 증거 index 를 읽어 채택 PR 을 따라간다.
+- 공개 Demo 도 진흥원 공식 페이지의 햇살론15 보증 종료(2025-12-31) 고지를 근거 후보로 읽는다(PR #316).
+- 공식 근거 신선도를 6시간마다 자동 갱신한다. 원문 해시가 같을 때만 Demo 고정 근거에 재수집 기록을 잇고, 신선하지 않은 고정 근거가 남으면 실행이 실패한다. [운영 기준](docs/ops/source-refresh-schedule.md)을 따른다.
+- Gate 증거 scope 에 걸리는 파일은 바꾸지 않았다. Implementation `NO-GO`, Release `NOT-EVALUATED` 를 유지한다.
+
 ## 2026-09-11 Cohere Fast 결정 뒤 main 증거 12건 채택
 
 - main `7ac52bd5`에서 측정을 걸고 채택이 끝날 때까지 main 을 얼렸다. Model·Retrieval·File-safety·Law·Runtime·Health·Rate·Consent·Storage·Delete·Source 두 건이 각 strict policy 를 통과해 PR #313 에서 채택한다. 현재 부분 PASS 는 12/20 이다.
