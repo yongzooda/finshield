@@ -26,14 +26,28 @@ export function DemoRunner() {
   const [seedClaims, setSeedClaims] = useState<Claim[]>([]);
   const [agents, setAgents] = useState<AgentLine[]>([]);
   const [result, setResult] = useState<DemoResult | null>(null);
+  const [limited, setLimited] = useState(false);
+
+  // 상한에 걸린 방문자에게 가장 최근의 실제 실행 기록을 따로 보여 준다. 새 실행이 아니다.
+  const showRecent = async () => {
+    setNotice(null);
+    const response = await fetch("/api/finshield/demo/recent").catch(() => null);
+    const body = await response?.json().catch(() => null);
+    if (!response?.ok || !body) {
+      setNotice(body?.error ?? "최근 실행 결과를 불러오지 못했습니다. 잠시 뒤에 다시 시도해 주세요.");
+      return;
+    }
+    setSeedText(null); setSeedClaims([]); setResult(body as DemoResult); setStep("done");
+  };
 
   const start = async () => {
-    setNotice(null); setAgents([]); setResult(null); setStep("running");
+    setNotice(null); setLimited(false); setAgents([]); setResult(null); setStep("running");
     try {
       const response = await fetch("/api/finshield/demo", { method: "POST" });
       if (!response.ok || !response.body) {
         const body = await response.json().catch(() => null);
         setNotice(body?.error ?? "실행하지 못했습니다");
+        setLimited(body?.code === "DEMO_LIMIT_REACHED");
         setStep("idle");
         return;
       }
@@ -69,7 +83,16 @@ export function DemoRunner() {
         <p className="fs-lead mt-3">준비된 가상 문자로 검증 과정과 공식 근거를 확인해 보세요. 회원가입은 필요하지 않습니다.</p>
       </header>
 
-      {notice ? <FsCard><p role="alert" className="fs-body">{notice}</p></FsCard> : null}
+      {notice ? (
+        <FsCard>
+          <p role="alert" className="fs-body">{notice}</p>
+          {limited ? (
+            <button type="button" onClick={() => void showRecent()} className="fs-btn fs-btn--quiet mt-3">
+              가장 최근 실행 결과 보기
+            </button>
+          ) : null}
+        </FsCard>
+      ) : null}
 
       {seedText ? (
         <FsCard>
@@ -97,7 +120,7 @@ export function DemoRunner() {
         <FsCard>
           <h2 className="fs-h2">가상 대출 문자 확인</h2>
           <p className="fs-body mt-2">
-            시작하면 공식 자료를 조회해 항목별 결과를 만듭니다. 체험은 한 시간에 세 번까지 가능합니다.
+            시작하면 공식 자료를 조회해 항목별 결과를 만듭니다. 한 네트워크에서 한 시간에 여섯 번까지 실행할 수 있습니다.
           </p>
           <button type="button" onClick={() => void start()} className="fs-btn fs-btn--primary mt-4">
             체험 시작하기

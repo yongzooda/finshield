@@ -78,3 +78,13 @@ describe("공개 Demo 결과 화면 (S-001·RES-005)", () => {
     expect(html).toContain("항목별 확인 결과");
   });
 });
+
+describe("상한에 걸린 방문자에게 보이는 지난 실행 결과", () => {
+  it("지금 실행한 결과처럼 보이지 않게 실행 시각과 함께 표시한다", () => {
+    const html = renderToStaticMarkup(<DemoResultView result={{ ...v2, mode: "RECENT_LIVE", computed_at: "2026-09-10T22:56:00Z" }} />);
+    expect(html).toContain("지난 실제 실행 결과");
+    expect(html).toContain("9월 11일 07:56 에 실제로 실행한 결과입니다");
+    expect(html).toContain("지금 다시 실행한 결과가 아니며");
+    expect(html).not.toContain(">실제 실행 결과<");
+  });
+});

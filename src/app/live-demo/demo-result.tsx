@@ -28,6 +28,8 @@ type Axis = { axis: string; result_code: string; summary_masked: string; limitat
 
 export type DemoResult = {
   seed_version: string; partial: boolean; is_precomputed: boolean;
+  // RECENT_LIVE 는 지금 실행한 것이 아니라 가장 최근에 성공한 실제 실행 기록이다.
+  mode?: string; computed_at?: string;
   // demo-result-v1 에는 아래 넷이 없다. 없으면 그 칸을 그리지 않는다.
   overall_result?: string;
   axes?: Axis[];
@@ -41,6 +43,10 @@ export type DemoResult = {
   }[];
   evidence: Evidence[];
 };
+
+const kstTime = (iso: string) => new Intl.DateTimeFormat("ko-KR", {
+  timeZone: "Asia/Seoul", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false,
+}).format(new Date(iso));
 
 /** 회원 결과 화면과 같은 규칙으로 검토가 제한된 까닭을 모은다 (RES-008). */
 const reviewReasonsOf = (result: DemoResult): string[] => [
@@ -59,12 +65,15 @@ export function DemoResultView({ result }: { result: DemoResult }) {
     : null;
   const overall = result.overall_result ? overallResultOf(result.overall_result) : null;
   const channels = result.guide?.channels ?? [];
+  const replayed = result.mode === "RECENT_LIVE" && result.computed_at ? kstTime(result.computed_at) : null;
 
   return (
     <>
       <FsCard>
         <div className="flex flex-wrap items-center gap-3">
-          <FsChip tone={result.is_precomputed ? "caution" : "verified"}>{result.is_precomputed ? "사전 계산 결과" : "실제 실행 결과"}</FsChip>
+          <FsChip tone={result.is_precomputed || replayed ? "caution" : "verified"}>
+            {result.is_precomputed ? "사전 계산 결과" : replayed ? "지난 실제 실행 결과" : "실제 실행 결과"}
+          </FsChip>
           <span className="fs-meta">체험 자료 {result.seed_version}</span>
           {result.partial ? <FsChip tone="caution">일부만 확인</FsChip> : null}
         </div>
@@ -87,7 +96,9 @@ export function DemoResultView({ result }: { result: DemoResult }) {
         <p className="fs-meta mt-3">
           {result.is_precomputed
             ? "미리 계산된 결과입니다. 현재 실행 결과와 구분해 확인해 주세요."
-            : "이번에 조회한 공식 자료를 바탕으로 회원 검증과 같은 규칙으로 정리한 결과입니다."}
+            : replayed
+              ? `${replayed} 에 실제로 실행한 결과입니다. 지금 다시 실행한 결과가 아니며, 그때 조회한 공식 자료를 기준으로 합니다.`
+              : "이번에 조회한 공식 자료를 바탕으로 회원 검증과 같은 규칙으로 정리한 결과입니다."}
         </p>
       </FsCard>
 

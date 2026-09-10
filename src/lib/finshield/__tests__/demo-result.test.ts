@@ -22,7 +22,7 @@ vi.mock("../action-guide", () => ({
   }),
 }));
 
-const { overallInputs, runDemo } = await import("../demo");
+const { allowDemo, DEMO_LIMITS, overallInputs, readRecentResult, runDemo } = await import("../demo");
 
 const final = (claim_id: string, status: FinalClaim["status"], reason_code = "AS_JUDGED"): FinalClaim => ({
   claim_id, status, reason_code, cove_status: "NOT_REQUIRED", red_team_status: "NOT_REQUIRED",
@@ -143,5 +143,50 @@ describe("공개 Demo 실행 결과", () => {
     expect((manifest.axes as { axis: string }[]).map((axis) => axis.axis)).toEqual(["AUTHENTICITY", "TRANSACTION_SALES_RISK", "SUITABILITY"]);
     expect(runUpdate).toContain("MATERIAL_RISK_FOUND");
     expect(snapshot).toMatchObject({ overall_result: "MATERIAL_RISK_FOUND" });
+  });
+});
+
+describe("공개 실행 상한", () => {
+  const txOf = (denied: string | null, calls: string[]) => vi.fn((parts: TemplateStringsArray, ...values: unknown[]) => {
+    calls.push(String(values[2]));
+    return Promise.resolve([{ allowed: values[2] !== denied }]);
+  });
+  const sqlWith = (denied: string | null, calls: string[]) => ({
+    begin: vi.fn(async (fn: (tx: unknown) => Promise<unknown>) => fn(txOf(denied, calls))),
+  });
+
+  it("주소별 시간·하루 상한과 전체 하루 상한을 모두 통과해야 실행한다", async () => {
+    const calls: string[] = [];
+    expect(await allowDemo(sqlWith(null, calls) as never, "visitor")).toBe(true);
+    expect(calls).toEqual(DEMO_LIMITS.map((bucket) => bucket.operation));
+    expect(DEMO_LIMITS.find((bucket) => bucket.operation === "DEMO_RUN")?.limit).toBeGreaterThan(3);
+  });
+
+  it("하나라도 차면 거부하고 트랜잭션을 되돌려 앞선 횟수를 쓰지 않는다", async () => {
+    const calls: string[] = [];
+    const sql = sqlWith("DEMO_RUN_DAY", calls);
+    expect(await allowDemo(sql as never, "visitor")).toBe(false);
+    // 콜백이 예외로 끝나야 postgres.js 가 rollback 한다.
+    await expect(sql.begin.mock.results[0].value).rejects.toThrow();
+    expect(calls).toEqual(["DEMO_RUN", "DEMO_RUN_DAY"]);
+  });
+
+  it("DB 오류는 상한 초과로 바꾸지 않고 그대로 올린다", async () => {
+    const sql = { begin: vi.fn(async () => { throw Object.assign(new Error("db"), { code: "57P01" }); }) };
+    await expect(allowDemo(sql as never, "visitor")).rejects.toMatchObject({ code: "57P01" });
+  });
+
+  it("최근 결과는 끝까지 성공한 실제 실행만 고른다", async () => {
+    const queries: string[] = [];
+    const sql = vi.fn((parts: TemplateStringsArray) => {
+      queries.push(parts.join("?"));
+      return Promise.resolve([{ result_manifest: { schema_version: "demo-result-v2", claims: [] }, computed_at: "2026-09-11T00:00:00Z" }]);
+    });
+    expect(await readRecentResult(sql as never)).toEqual({
+      computedAt: "2026-09-11T00:00:00.000Z", manifest: { schema_version: "demo-result-v2", claims: [] },
+    });
+    expect(queries[0]).toMatch(/r\.status = 'SUCCEEDED' and rs\.is_precomputed = false/);
+    const empty = vi.fn(() => Promise.resolve([]));
+    expect(await readRecentResult(empty as never)).toBeNull();
   });
 });
