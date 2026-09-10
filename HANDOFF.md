@@ -1,3 +1,10 @@
+## 2026-09-10 공개 Demo PARTIAL 회귀 수정
+
+- PR #306 병합 뒤 운영 공개 Demo 두 번이 모두 Product·CoVe·Red Team `PARTIAL`(`TOOL_LOOKUP_FAILED`)로 끝났다. Demo 의 상품·경고 조회는 공용 KB 검색을 타는데, #306 의 판정식이 벡터 결과가 없기만 하면 `RETRIEVAL_DEGRADED` 로 표시했다. 운영 KB 에는 Embedding 이 0건이고 Demo Run 은 Cohere 비용 예약 대상이 아니어서 벡터·Fast 가 설계상 돌지 않는데도 매번 저하로 찍혔다.
+- #306 의 계약대로 Embedding 이 있는 Release 에서 벡터 조회가 실패하거나 회원 검색의 Fast 가 실패할 때만 저하로 고쳤다. Embedding 없는 Release 는 `KEYWORD_ONLY_VECTOR_PENDING`, 승인 범위 Demo 는 Cohere 를 부르지 않고 `APPROVED_SCOPE_KEYWORD_ONLY` 로 남긴다. 새 시험 4건 중 3건이 수정 전 코드에서 실패하는 것을 확인했다.
+- 공식 근거 신선도가 2026-09-08T19:39Z 에 만료돼 공개 Demo·회원 검증이 확정 판정을 못 내리던 문제는 B-SOURCE-03 run `34493420069` 로 다시 수집해 풀었다. 19건 중 18건이 원문 해시가 같았고 적재기를 worker 로 실행했으며 Demo 고정 사칭 신고센터에는 해시가 같을 때만 재수집 기록을 연결했다. 기록은 `evidence/development/sources/2026-09-10-freshness-refresh.json` 이고 2026-09-11T15:06Z 에 다시 만료된다.
+- 같은 날 공식 근거 재수집으로 Demo 고정 근거 2건이 신선해진 뒤 "연 3.2%" Claim 은 `CONTRADICTED` 로 돌아왔다. 이 수정은 그 위에서 Agent PARTIAL 을 없애기 위한 것이다. Implementation `NO-GO`, Release `NOT-EVALUATED` 를 유지한다.
+
 ## 2026-09-10 운영 DB Migration 0070·0071 적용
 
 - 운영 FinShield DB(0069 상태)에 0070·0071을 Supabase SQL Editor의 `postgres` 역할로 한 번의 트랜잭션(lock_timeout 5초·statement_timeout 30초)에 적용했다. 로컬 `.env.local`에는 소유자 자격증명이 없고 `finshield_worker`는 `private` 스키마 CREATE 권한이 없어 이 경로를 택했다.
