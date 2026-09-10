@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import { DemoResultView, type DemoResult } from "../demo-result";
+import { DemoResultView, groupEvidence, type DemoResult } from "../demo-result";
 
 const evidence = {
   ref: "E1", title: "햇살론15 (1, 기준 202602)", source: "PRODUCT", grade: "A",
@@ -86,5 +86,24 @@ describe("상한에 걸린 방문자에게 보이는 지난 실행 결과", () =
     expect(html).toContain("9월 11일 07:56 에 실제로 실행한 결과입니다");
     expect(html).toContain("지금 다시 실행한 결과가 아니며");
     expect(html).not.toContain(">실제 실행 결과<");
+  });
+});
+
+describe("같은 공식 자료를 여러 단계가 인용할 때", () => {
+  const same = (ref: string) => ({ ...evidence, ref });
+  const notice = { ...evidence, ref: "E3", title: "햇살론15 공식 보증 종료 고지", official_id: "kinfa:hessalLoan", content_hash: "b".repeat(64) };
+  const claim = {
+    ...v2.claims[0], evidence_refs: ["E1", "E6", "E10", "E3"],
+    relations: { E1: "CONTEXT", E6: "CONTRADICT", E10: "SUPPORT", E3: "CONTRADICT" },
+  };
+
+  it("원문 하나로 묶고 가장 강한 관계를 남긴다", () => {
+    const grouped = groupEvidence(claim, [same("E1"), same("E6"), same("E10"), notice]);
+    expect(grouped.map((entry) => [entry.item.ref, entry.relation])).toEqual([["E1", "CONTRADICT"], ["E3", "CONTRADICT"]]);
+  });
+
+  it("묶은 개수로 근거 수를 적는다", () => {
+    const html = renderToStaticMarkup(<DemoResultView result={{ ...v2, claims: [claim], evidence: [same("E1"), same("E6"), same("E10"), notice] }} />);
+    expect(html).toContain("근거 2건 보기");
   });
 });
