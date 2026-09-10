@@ -98,5 +98,31 @@ ADR 15.1 은 미달일 때 최적화·범위 변경·Provider 변경 중에서 �
 - v5 corpus 240개 문서의 `source_fingerprint`가 모두 다르다. 중복 출처 지표는 구조적으로 0이며 중복 제거가 동작한다는 증거가 되지 못한다. 파이프라인은 중복 제거를 구현하고 접힌 수를 원장에 남기되 그 수치를 통과한 시험으로 표시하지 않는다. 사전등록 8.4가 같은 내용을 적어 두었다.
 - 평가셋은 합성 문서다. 실제 공시·약관의 다양성을 대신하지 않는다.
 - 이 blocker는 검색 단계의 품질만 measure한다. Claim 판정 품질은 `B-CLAIM-01`이 별도로 사전등록한다.
-- Rerank는 이 harness의 결정적 구현이다. 제품이 같은 점수를 쓰도록 구현할 때 이 문서를 기준으로 삼는다.
+- 이 문서의 Rerank는 두 번 실패한 결정적 구현의 측정 계약이다. 2026-09-08 Provider 변경 결정 뒤 제품 relevance는 Cohere Fast가 담당하며, 기존 Gate 결과는 이력과 섞지 않는다.
 - 첫 gate 측정(run `34027686263`)은 미달이었다. 그때의 `freshness` 규칙이 종료일 유무만 보고 현재 유효한 자료를 절반으로 깎는 설계 오류였고 위 규칙으로 고쳤다. 이 수정이 측정 뒤에 이뤄졌다는 사실을 제출 문서에 명시한다.
+
+## 2026-09-08 Provider 변경
+
+후속 개발 run `34128723611`에서 Cohere `rerank-v4.0-fast`를 개발 split 20 Claim에 적용해 네 가족의 macro Recall·Precision 1.00을 관측했다. 이 결과는 Gate가 아니며 기존 두 실패를 덮지 않는다. ADR Provider 변경과 제품 실패 계약은 `retrieval-fast-runtime-decision.md`에 기록했다. 다음 정식 평가는 기존 gate 가족을 재사용하지 않고 새 평가 가족과 합격식을 먼저 병합한 뒤 한 번 실행한다.
+
+## 2026-09-08 v6 정식 재평가 절차
+
+위의 v5 계약·두 실패·개발 진단은 변경 이력으로 보존한다. 현재 다음 정식 실행 계약은
+`retrieval-blocker-preregistration.md` 9절과 v6 코드가 정본이다.
+
+- 새 평가셋은 전부 Gate인 20가족·100 Claim·240문서다. 기존 v5와 개발 run에 노출된
+  가족을 재사용하지 않는다.
+- Metadata Filter 뒤 Keyword 20개와 Vector 20개의 합집합 최대 40개를
+  `rerank-v4.0-fast`에 보내 Case top 5를 만든다.
+- 각 Claim의 Embed+Fast 합산 지연과 Fast 단독 지연, 203개 Provider 요청의 고유 ID
+  digest, Embed token, Fast search unit, 단계별 후보 수, 비용을 원장에 남긴다.
+- 재게시 fingerprint 20개를 실제 후보로 포함하며 모든 가족에서 중복 제거가 관측돼야
+  한다.
+- workflow의 `mode` 입력은 제거했다. main에 사전등록을 병합한 뒤
+  `B-RETRIEVAL-01`을 한 번 dispatch한다.
+- 정책 미달이면 성공 artifact가 생성되지 않는다. 실패 run을 보존하고 같은 v6을 결과에
+  맞춰 수정하거나 반복하지 않는다.
+
+품질 기준은 기존 값과 같다. Claim별 Embed+Fast 합산 P95와 Fast 단독 P95는 각각
+1,500ms 이하, 총 Provider 비용은 USD 0.25 이하여야 한다. 통과 뒤에도 별도 Adoption이
+끝날 때까지 상태는 `NOT-EVALUATED`다.

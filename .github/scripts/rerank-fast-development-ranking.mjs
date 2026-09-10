@@ -1,4 +1,4 @@
-// 개발 전용: 기존 Case 자리 배분·출처 중복 제거를 유지하고 relevance만 Fast로 대체한다.
+// 제품·Gate 공용 산식: Case 자리 배분·출처 중복 제거를 유지하고 relevance는 Fast가 계산한다.
 import { AUTHORITY_SCORE, candidateScore, TOP_K } from "./retrieval-pipeline.mjs";
 export const rerankFastCase = ({ claimResults, provenance }) => {
   const best = new Map(); // chunk_id → 후보
@@ -68,4 +68,3 @@ export const rerankFastCase = ({ claimResults, provenance }) => {
     || String(left.unit).localeCompare(String(right.unit))).slice(0, TOP_K);
   return { top, poolSize: best.size, deduped: byFingerprint.size, collapsed, ordered, effectiveRange };
 };
-

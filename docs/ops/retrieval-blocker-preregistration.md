@@ -266,3 +266,89 @@ v5 corpus 240개 문서의 `source_fingerprint` 는 모두 서로 다르다. 그
 - Case 단위가 미달하면 ADR 15.1 의 미달 규칙으로 돌아간다. 측정 뒤에 단위를 다시
   바꾸는 선택은 없다.
 - 이 확정이 `B-EMBED-01` 채택 뒤에 이뤄졌다는 사실을 제출 문서에 명시한다.
+
+## 9. Fast Provider 변경 뒤 v6 재평가 사전등록 (2026-09-08)
+
+### 9.1 변경 사유와 이전 실패 보존
+
+v5 종단 Gate는 main run `34027686263`과 `34029362670`에서 모두 미달했다. 두 번째
+실행은 Recall@5·Precision@5가 각각 0.910이었지만 위험 핵심 Recall@5 0.967,
+fees·freshness·mixed_name slice와 한 가족의 Precision 기준을 충족하지 못했다. 이
+결과와 원본은 그대로 보존하며 새 측정으로 소급해 덮지 않는다.
+
+ADR 15.1의 미달 절차에 따라 결정적 relevance 재정렬에서 Cohere
+`rerank-v4.0-fast`로 Provider를 변경했다. 노출된 개발 split의 run `34128723611`은
+변경 선택의 근거일 뿐 Gate 증거가 아니다. v6은 그 개발·Gate 가족과 문장을 재사용하지
+않는다.
+
+### 9.2 고정 평가셋
+
+- 평가셋: `finshield-korean-finance-retrieval-fast-v6`
+- 전부 Gate인 새 20가족·100 Claim·240문서, 위험 6가족
+- 고유 `source_fingerprint` 220개와 재게시 중복 문서 20개. 각 가족에서 한 중복을
+  실제 후보로 넣고 최종 독립 근거 수가 늘지 않는지 잰다.
+- 가족마다 Claim 5개와 관련 unit 5개, 문서 12개를 둔다. 비슷한 기관, 만료 자료,
+  미래 자료, 인접 상품, 비공식 홍보, 재게시를 hard negative로 포함한다.
+- slice는 `channel`, `eligibility`, `fees`, `freshness`, `mixed_name`, `numeric`,
+  `product`, `regulation`, `risk`다.
+
+가족 ID는 다음과 같이 고정한다.
+
+`guarantee_fee_refund`, `prepayment_waiver`, `variable_rate_reset`,
+`grace_period_limit`, `bridge_loan_cost`, `refinance_cash_request`,
+`consultant_deposit`, `remote_app_install`, `account_transfer_check`,
+`loan_certificate_fee`, `collection_threat`, `credit_line_renewal`,
+`mortgage_ltv`, `policy_loan_eligibility`, `student_repayment`,
+`auto_loan_title`, `rent_deposit_guarantee`, `microcredit_rate`,
+`debt_adjustment_effect`, `broker_disclosure`.
+
+생성기는 `.github/scripts/generate-retrieval-fast-v6.mjs`, 커밋된 결과는
+`.github/fixtures/retrieval-fast-v6.json`이다. 계약 시험이 두 값의 byte-equivalent
+구조와 규모·중복·정답 참조를 검사한다. 이 평가셋에는 개발 split이 없다.
+
+### 9.3 고정 파이프라인과 입력 경계
+
+1. 기관과 기준일 Metadata Filter를 적용한다.
+2. 실제 Postgres FTS Keyword 20개와 Cohere `embed-v4.0` 1024차원 Exact KNN
+   Vector 20개를 만든다.
+3. 합집합 최대 40개를 Cohere `rerank-v4.0-fast`에 보낸다.
+4. Fast relevance 0.60, Authority 0.25, Freshness 0.15를 합성하고 같은
+   `source_fingerprint`를 하나로 접는다.
+5. Claim마다 최고 후보 한 자리를 먼저 보장한 뒤 Case top 5를 확정한다.
+
+Fast 질의는 최대 8,192 bytes, 문서는 각 32,768 bytes, 문서당
+`max_tokens_per_doc=4096`으로 고정한다. Claim 하나에 Embed 1회와 Fast 1회를 쓰며,
+문서 Embed 3 batch를 포함해 전체 Provider 요청은 203회다. 요청 ID 원문은 저장하지
+않고 고유 개수와 SHA-256만 남긴다.
+
+### 9.4 합격선과 비용
+
+기존 품질 합격선을 낮추지 않는다.
+
+| 항목 | 기준 |
+|---|---|
+| Recall@5 | `>= 0.90` |
+| 위험 핵심 Recall@5 | `= 1.00` |
+| Precision@5 | `>= 0.80` |
+| 모든 slice Recall@5 | `>= 0.90` |
+| 가족별 Precision@5 | `>= 0.80` |
+| Claim Embed+Fast 합산 Provider P95 | `<= 1,500ms` |
+| Fast 단독 P95 | `<= 1,500ms` |
+| Filter 정답 제외 | `0건` |
+| 중복 fingerprint의 독립 근거 증가 | `0건` |
+| 총 Provider 비용 | `<= USD 0.25` |
+
+Fast는 Claim당 search unit 1개, 전체 100개를 정확히 기록하며 현재 고정 단가로
+USD 0.20이다. Embed 과금 입력 token과 비용을 합쳐 총액 상한을 검사한다. 사용자가
+승인한 제품 검증 예산 범위이며 과금 단위가 불명확하면 성공 artifact를 만들지 않는다.
+
+### 9.5 실행과 실패 보존
+
+- 이 절·평가셋·harness·정책·trusted SHA가 main에 먼저 병합되기 전에는 Provider를
+  호출하지 않는다.
+- main 첫 attempt에서 한 번만 실행한다. workflow에는 개발 모드나 평가셋 선택 입력을
+  두지 않는다.
+- 정책 미달·timeout·응답 형식 오류·DB 오류면 결과 artifact를 만들지 않고 실행 로그와
+  실패 run을 보존한다. 같은 v6을 튜닝해 다시 통과시키지 않는다.
+- 통과하더라도 원본 artifact의 `A=W`, scope digest, TTL과 실제 artifact 존재를 확인한
+  별도 Adoption PR 전에는 `B-RETRIEVAL-01`을 `PASS`로 바꾸지 않는다.

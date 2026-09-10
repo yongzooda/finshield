@@ -232,7 +232,9 @@ P0 corpus는 작고 재현 가능한 평가가 우선이므로 초기에는 Exac
 
 이 결정은 2026-09-05 v3·v4 측정 뒤에 내렸다. 문단 단위 다중 항목 질의는 Filter 없이 Recall@20 0.902, Filter 뒤 0.970으로 두 번 미달했고, 단일 사실 질의는 두 번 다 1.00이었다. 미달을 보고 합격선을 낮춘 것이 아니라 §15.1의 미달 규칙에 따라 검색 단위를 제품 구조에 맞춘 것이며, 합격선·후보 풀 크기·Filter 계약은 그대로다. 측정 뒤 재구성이라는 사실은 제출 문서에 명시한다.
 
-Keyword 단계는 `kb.knowledge_chunks.search_vector`의 실제 Postgres FTS 경로를 사용한다. 따라서 `B-RETRIEVAL-01`은 `B-SUPABASE-01` 통과에 의존하며, FTS를 응용 코드의 근사 구현으로 대체해 통과시키지 않는다. Rerank는 `kb.source_snapshots`의 `authority_level`·`effective_from`·`effective_to`·`source_fingerprint`를 사용하는 결정적 단계이고, 같은 `source_fingerprint`는 독립 근거 수를 늘리지 않는다.
+Keyword 단계는 `kb.knowledge_chunks.search_vector`의 실제 Postgres FTS 경로를 사용한다. 따라서 `B-RETRIEVAL-01`은 `B-SUPABASE-01` 통과에 의존하며, FTS를 응용 코드의 근사 구현으로 대체해 통과시키지 않는다.
+
+2026-09-08부터 종단 Retrieval의 relevance는 Cohere `rerank-v4.0-fast`가 계산한다. 기존 두 Gate가 위험 핵심과 fees·freshness·mixed_name에서 미달했고, §15.1의 미달 절차에 따라 Provider 변경을 택했다. 노출된 개발 split 20 Claim에서 Fast가 네 가족을 모두 회수한 결과는 선택 근거일 뿐 Gate 증거가 아니다. Metadata Filter 뒤 Postgres Keyword 20개와 Exact KNN 20개의 합집합 최대 40개를 Fast에 보내고 최종 top 5를 고른다. Fast relevance 0.60에 권위 0.25와 적용 시작일 신선도 0.15를 합성하고, 같은 `source_fingerprint`는 하나만 남긴다. Fast가 실패하면 기존 결정적 순서의 참고 결과를 보존하되 Tool을 `RETRIEVAL_DEGRADED`로 기록한다. 실행 Manifest에는 Embed·Fast 모델, 두 후보 풀, 합집합 상한, top-k, 단가 판을 함께 고정한다.
 
 Live Gate 평가셋은 최소 다음을 포함한다.
 
@@ -625,24 +627,24 @@ Keyword-only 결과는 존재하는 공식 근거를 찾은 범위만 표시할 
 | 차단 ID | 실제로 필요한 증거 | 현재 상태 | 해제 조건 |
 |---|---|---|---|
 | `B-MODEL-01` | Anthropic Sonnet 5 auth·quota·structured output·strict tool·P95·cost | NOT-EVALUATED | §15.1 Model schema·policy·비용 합격 + sanitized artifact |
-| `B-EMBED-01` | Cohere Claim 단위 1차 후보 생성 Recall@20·P95·cost | PASS | §15.1 후보 생성 합격 + versioned raw metric artifact |
+| `B-EMBED-01` | Cohere Claim 단위 1차 후보 생성 Recall@20·P95·cost | NOT-EVALUATED | §15.1 후보 생성 합격 + versioned raw metric artifact |
 | `B-RETRIEVAL-01` | Metadata Filter·Keyword FTS·Vector·Rerank 종단 top 5 품질 | NOT-EVALUATED | §15.1 종단 Retrieval 합격 + query별 단계 원장; `B-SUPABASE-01` 선행 |
 | `B-OCR-01` | PDF.js·CLOVA 한국어 숫자·부정어·기관명·URL·표 Fixture | NOT-EVALUATED | §15.1 OCR·Parser 합격 + page별 diff |
-| `B-FILE-SAFETY` | encrypted/active/polyglot/bomb·격리 parser·dependency advisory | PASS | §15.1 File safety 합격 |
+| `B-FILE-SAFETY` | encrypted/active/polyglot/bomb·격리 parser·dependency advisory | NOT-EVALUATED | §15.1 File safety 합격 |
 | `B-CONSENT-01` | OCR 동의/거절·외부 전송·삭제 격리 prototype | NOT-EVALUATED | §15.1 동의 거절 전송 0건 + 감사 row |
 | `B-STORAGE-01` | authenticated TUS·one-use slot·10 MiB·MIME/Magic Byte·cross-user/worker RLS | NOT-EVALUATED | positive/negative test와 발급 URL/token 재사용 거부 |
 | `B-DELETE-01` | 확인·중단·Case 삭제·기발급 URL·24시간 cleanup | NOT-EVALUATED | §15.1 물리 삭제 합격 + deletion ledger |
 | `B-SUPABASE-01` | 전용 Project·최소권한 role·pooler 6543·pgvector·Migration/RLS | NOT-EVALUATED | §15.1 cross-user/worker 시험과 preflight 합격 |
 | `B-PROCESSOR-PRIVACY` | Anthropic·Cohere·CLOVA·Supabase 학습/보존/DPA/region/하위처리자·PII fail-closed | NOT-EVALUATED | §15.1 Processor privacy + 계약 inventory |
 | `B-PRIVACY-VERCEL` | Hobby plan·고객 콘텐츠 조건·region·Log 보존·Workflow RBAC과 실개인정보 미처리 강제 | NOT-EVALUATED | plan 조건 기록 + §15.1 Processor privacy 합격; 실데이터 운영 시 DPA plan 재평가 |
-| `B-LAW-01` | OC·등록 도메인 `Referer`·Preview/Production 403/429/5xx·D+1 | PASS | sanitized response ledger와 snapshot hash |
-| `B-SOURCE-02` | 공공데이터/FSS key·quota·pagination·license label | PASS | API response metadata와 source registry |
-| `B-SOURCE-03` | Demo `햇살론15` 정확 product/institution record | PASS | 두 API의 immutable snapshot과 official product URL |
+| `B-LAW-01` | OC·등록 도메인 `Referer`·Preview/Production 403/429/5xx·D+1 | NOT-EVALUATED | sanitized response ledger와 snapshot hash |
+| `B-SOURCE-02` | 공공데이터/FSS key·quota·pagination·license label | NOT-EVALUATED | API response metadata와 source registry |
+| `B-SOURCE-03` | Demo `햇살론15` 정확 product/institution record | NOT-EVALUATED | 두 API의 immutable snapshot과 official product URL |
 | `B-JOB-01` | Workflow deploy·replay·retry·orphan·fencing·cancel·ambiguous Provider | NOT-EVALUATED | §15.1 Workflow 합격 + fault run/DB state |
 | `B-RATE-01` | 원자 reserve/settle·multi-instance rate·CLOVA 기본 1 TPS | NOT-EVALUATED | §15.1 Rate·Budget 합격 |
 | `B-DEADLINE-01` | Text 120초·Image/PDF 180초 abort·status 조회·partial save | NOT-EVALUATED | §4.3 예산 합·§15.1 P95/단절 복원 합격 + terminal row |
 | `B-HEALTH-01` | 저비용 health와 cached provider status | NOT-EVALUATED | §15.1 Health 합격 + provider 호출 없는 trace |
-| `B-RUNTIME-01` | Preview/Production 실제 Node minor/patch·deployment·region | PASS | §15.1 Runtime 합격 + manifest |
+| `B-RUNTIME-01` | Preview/Production 실제 Node minor/patch·deployment·region | NOT-EVALUATED | §15.1 Runtime 합격 + manifest |
 | `B-SPIKE-01` | 실제 Provider·Source·Storage·DB·Workflow component vertical | NOT-EVALUATED | §15.1 합성 Text·Image·PDF spike 합격; 제품 UI 요구 없음 |
 
 ### 14.3 Implementation Gate 전환 규칙

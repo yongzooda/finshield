@@ -1,7 +1,7 @@
 // ============================================================
 // B-RETRIEVAL-01 corpus 적재.
 //
-// v5 평가셋의 문서 240개를 실제 KB 스키마에 넣는다. Keyword 단계가 Postgres
+// v6 Fast 평가셋의 문서 240개를 실제 KB 스키마에 넣는다. Keyword 단계가 Postgres
 // tsvector 를 쓰도록 Node 근사 구현을 두지 않는다 (사전등록 4.3).
 //
 // 모든 id 는 이름에서 결정적으로 만든다. 같은 평가셋을 다시 적재하면 같은 id 가 나온다.
@@ -9,11 +9,11 @@
 import { createHash } from "node:crypto";
 
 export const CORPUS_SCHEMA_VERSION = 1;
-export const KB_RELEASE_VERSION = "v5-retrieval-gate";
-export const MANIFEST_VERSION = "v5-retrieval-gate";
-export const NORMALIZATION_VERSION = "v5-plain";
+export const KB_RELEASE_VERSION = "v6-retrieval-fast-gate";
+export const MANIFEST_VERSION = "v6-retrieval-fast-gate";
+export const NORMALIZATION_VERSION = "v6-plain";
 export const POLICY_VERSIONS = Object.freeze({
-  EVIDENCE: "v5-eval", RESULT_MATRIX: "v5-eval", COVERAGE: "v5-eval", PROFILE: "v5-eval", PII: "v5-eval",
+  EVIDENCE: "v6-eval", RESULT_MATRIX: "v6-eval", COVERAGE: "v6-eval", PROFILE: "v6-eval", PII: "v6-eval",
 });
 
 const sha256 = (text) => createHash("sha256").update(text).digest("hex");
@@ -29,7 +29,7 @@ export const stableUuid = (namespace, name) => {
 export const lit = (value) => (value === null || value === undefined ? "null" : `'${String(value).replace(/'/g, "''")}'`);
 const textArray = (values) => (values.length === 0 ? "'{}'::text[]" : `array[${values.map(lit).join(", ")}]::text[]`);
 
-// v5 문서 하나가 KB 문서·Chunk 하나가 된다. 평가셋의 unit 이 곧 인용 단위다.
+// v6 문서 하나가 KB 문서·Chunk 하나가 된다. 평가셋의 unit이 곧 인용 단위다.
 export const documentRows = (fixture) => fixture.cases.flatMap((kase) => kase.documents.map((doc) => ({
   case_id: kase.id,
   split: kase.split,

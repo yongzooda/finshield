@@ -5,18 +5,21 @@
 // 측정 단위는 사전등록 8.2 가 정한 Case 다. gate 20 Case 가 분모다.
 // ============================================================
 import {
-  AUTHORITY_SCORE, CANDIDATE_POOL_K, RELEVANCE_WEIGHTS, RERANK_WEIGHTS, TOP_K,
+  AUTHORITY_SCORE, CANDIDATE_POOL_K, RERANK_WEIGHTS, TOP_K,
 } from "./retrieval-pipeline.mjs";
 import { KB_RELEASE_VERSION, MANIFEST_VERSION } from "./retrieval-corpus.mjs";
+import { PRICE_PER_1000_SEARCH_UNITS_USD, RERANK_MODEL } from "./provider-rerank-spike.mjs";
 
-export const FORMULA_VERSION = "retrieval-case-top5-filter-keyword-vector-rerank-v1";
-export const FIXTURE_SET = "finshield-korean-finance-embed-v5";
+export const FORMULA_VERSION = "retrieval-case-top5-filter-keyword-vector-fast-v2";
+export const FIXTURE_SET = "finshield-korean-finance-retrieval-fast-v6";
 export const EMBEDDING_MODEL = "embed-v4.0";
 export const DIMENSION = 1024;
 export const GATE_CASES = 20;
 export const GATE_CLAIMS = 100;
 export const CORPUS_DOCUMENTS = 240;
 export const RISK_CASES = 6;
+export const DISTINCT_FINGERPRINTS = 220;
+export const PROVIDER_REQUESTS = 203;
 
 export const THRESHOLDS = Object.freeze({
   recall_at_5: 0.90,
@@ -25,6 +28,8 @@ export const THRESHOLDS = Object.freeze({
   slice_recall_at_5: 0.90,
   family_precision_at_5: 0.80,
   query_p95_ms: 1500,
+  rerank_p95_ms: 1500,
+  max_total_cost_usd: 0.25,
   filter_excluded_answers: 0,
   duplicate_fingerprint_inflation: 0,
 });
@@ -36,27 +41,26 @@ const atLeast = (value, bound) => typeof value === "number" && Number.isFinite(v
 
 export const validateRetrievalEvidenceResult = (result, fail) => {
   const o = result?.observations;
-  if (!exactKeys(o, ["contract", "corpus", "cases", "totals", "ledger"])) {
-    fail("observations 는 contract·corpus·cases·totals·ledger 만 가져야 합니다.");
+  if (!exactKeys(o, ["contract", "corpus", "cases", "totals", "usage", "ledger"])) {
+    fail("observations 는 contract·corpus·cases·totals·usage·ledger 만 가져야 합니다.");
     return;
   }
 
   // 1. 계약: 산식·단계 상수·Rerank 가중치를 코드와 대조한다.
   const c = o.contract;
   if (!exactKeys(c, ["formula_version", "fixture_set", "measurement_unit", "embedding_model", "dimension",
-    "candidate_pool_k", "top_k", "rerank_weights", "relevance_weights", "authority_score",
+    "candidate_pool_k", "top_k", "rerank_model", "rerank_weights", "authority_score", "rerank_price_per_1000_search_units_usd",
     "kb_release_version", "manifest_version", "thresholds"])
     || c.formula_version !== FORMULA_VERSION || c.fixture_set !== FIXTURE_SET
     || c.measurement_unit !== "case" || c.embedding_model !== EMBEDDING_MODEL || c.dimension !== DIMENSION
     || c.candidate_pool_k !== CANDIDATE_POOL_K || c.top_k !== TOP_K
+    || c.rerank_model !== RERANK_MODEL
+    || c.rerank_price_per_1000_search_units_usd !== PRICE_PER_1000_SEARCH_UNITS_USD
     || c.kb_release_version !== KB_RELEASE_VERSION || c.manifest_version !== MANIFEST_VERSION) {
     fail("contract 의 산식·평가셋·측정 단위·단계 상수가 현재 코드와 다릅니다.");
   }
   for (const [key, value] of Object.entries(RERANK_WEIGHTS)) {
     if (c.rerank_weights?.[key] !== value) fail(`Rerank 가중치 ${key} 가 고정값과 다릅니다.`);
-  }
-  for (const [key, value] of Object.entries(RELEVANCE_WEIGHTS)) {
-    if (c.relevance_weights?.[key] !== value) fail(`Relevance 가중치 ${key} 가 고정값과 다릅니다.`);
   }
   for (const [key, value] of Object.entries(AUTHORITY_SCORE)) {
     if (c.authority_score?.[key] !== value) fail(`Authority 점수 ${key} 가 고정값과 다릅니다.`);
@@ -67,9 +71,11 @@ export const validateRetrievalEvidenceResult = (result, fail) => {
 
   // 2. corpus: 평가셋 규모가 사전등록 7.5 와 같아야 한다.
   const corpus = o.corpus;
-  if (!exactKeys(corpus, ["documents", "gate_cases", "gate_claims", "risk_cases", "development_cases", "distinct_fingerprints"])
+  if (!exactKeys(corpus, ["documents", "gate_cases", "gate_claims", "risk_cases", "development_cases", "distinct_fingerprints", "duplicate_documents"])
     || corpus.documents !== CORPUS_DOCUMENTS || corpus.gate_cases !== GATE_CASES
-    || corpus.gate_claims !== GATE_CLAIMS || corpus.risk_cases !== RISK_CASES) {
+    || corpus.gate_claims !== GATE_CLAIMS || corpus.risk_cases !== RISK_CASES
+    || corpus.development_cases !== 0 || corpus.distinct_fingerprints !== DISTINCT_FINGERPRINTS
+    || corpus.duplicate_documents !== CORPUS_DOCUMENTS - DISTINCT_FINGERPRINTS) {
     fail("corpus 규모가 사전등록 표본과 다릅니다.");
   }
 
@@ -88,6 +94,7 @@ export const validateRetrievalEvidenceResult = (result, fail) => {
     if (row.top_units.length !== TOP_K) fail(`Case '${row.case_id}' 의 top 5 가 5건이 아닙니다.`);
     if (new Set(row.top_units).size !== row.top_units.length) fail(`Case '${row.case_id}' 의 top 5 에 같은 unit 이 두 번 있습니다.`);
     if (row.pool_size < TOP_K) fail(`Case '${row.case_id}' 의 후보 풀이 top 5 보다 작습니다.`);
+    if (row.collapsed_fingerprints < 1) fail(`Case '${row.case_id}' 에 재게시 fingerprint가 포함되지 않았습니다.`);
     if (row.filter_excluded_answers !== 0) fail(`Case '${row.case_id}' 에서 Filter 가 정답을 제외했습니다.`);
     if (!atLeast(row.precision_at_5, THRESHOLDS.family_precision_at_5)) {
       fail(`가족 '${row.case_id}' 의 Precision@5 가 ${THRESHOLDS.family_precision_at_5} 에 못 미칩니다.`);
@@ -108,7 +115,8 @@ export const validateRetrievalEvidenceResult = (result, fail) => {
   // 4. 합계. slice 는 결과가 아니라 기록에서 다시 계산해 대조한다.
   const t = o.totals;
   if (!exactKeys(t, ["recall_at_5", "precision_at_5", "critical_recall_at_5", "slice_recall_at_5",
-    "query_p95_ms", "query_p50_ms", "db_p95_ms", "filter_excluded_answers", "duplicate_fingerprint_inflation", "collapsed_fingerprints"])) {
+    "query_p95_ms", "query_p50_ms", "embed_p95_ms", "rerank_p95_ms", "db_p95_ms",
+    "filter_excluded_answers", "duplicate_fingerprint_inflation", "collapsed_fingerprints"])) {
     fail("합계가 계약과 다릅니다.");
     return;
   }
@@ -116,8 +124,11 @@ export const validateRetrievalEvidenceResult = (result, fail) => {
   if (!atLeast(t.precision_at_5, THRESHOLDS.precision_at_5)) fail(`Precision@5 가 ${THRESHOLDS.precision_at_5} 에 못 미칩니다.`);
   if (!atLeast(t.critical_recall_at_5, THRESHOLDS.critical_recall_at_5)) fail("위험 핵심 unit Recall@5 가 1.00 이 아닙니다.");
   if (!(typeof t.query_p95_ms === "number") || t.query_p95_ms > THRESHOLDS.query_p95_ms) fail(`질의 P95 가 ${THRESHOLDS.query_p95_ms}ms 를 넘습니다.`);
+  if (!Number.isFinite(t.embed_p95_ms) || t.embed_p95_ms <= 0) fail("Embed P95가 없습니다.");
+  if (!(typeof t.rerank_p95_ms === "number") || t.rerank_p95_ms > THRESHOLDS.rerank_p95_ms) fail(`Fast P95 가 ${THRESHOLDS.rerank_p95_ms}ms 를 넘습니다.`);
   if (t.filter_excluded_answers !== THRESHOLDS.filter_excluded_answers) fail("Filter 가 정답을 제외한 건이 있습니다.");
   if (t.duplicate_fingerprint_inflation !== THRESHOLDS.duplicate_fingerprint_inflation) fail("중복 출처가 독립 근거 수를 늘렸습니다.");
+  if (t.collapsed_fingerprints < GATE_CASES) fail("재게시 fingerprint 중복 제거가 모든 가족에서 관측되지 않았습니다.");
   for (const [slice, value] of Object.entries(t.slice_recall_at_5 ?? {})) {
     const bucket = sliceTotals.get(slice);
     if (!bucket || Math.abs((bucket.sum / bucket.count) - value) > 1e-6) fail(`slice '${slice}' 의 Recall 이 Case 기록과 맞지 않습니다.`);
@@ -125,17 +136,39 @@ export const validateRetrievalEvidenceResult = (result, fail) => {
   }
   if (sliceTotals.size !== Object.keys(t.slice_recall_at_5 ?? {}).length) fail("slice 목록이 Case 기록과 다릅니다.");
 
-  // 5. 원장. 단계별 후보 수가 Claim 마다 남아야 한다 (AI-007).
+  // 5. Provider 사용량·비용. 요청 ID 원문은 저장하지 않고 집계와 digest만 남긴다.
+  const usage = o.usage;
+  if (!exactKeys(usage, ["provider_requests", "unique_request_ids", "request_ids_sha256", "billed_input_tokens",
+    "billed_search_units", "embedding_cost_usd", "rerank_cost_usd", "total_cost_usd", "rate_limit_headers_observed"])
+    || usage.provider_requests !== PROVIDER_REQUESTS || usage.unique_request_ids !== PROVIDER_REQUESTS
+    || !/^[0-9a-f]{64}$/.test(usage.request_ids_sha256 ?? "")
+    || !Number.isSafeInteger(usage.billed_input_tokens) || usage.billed_input_tokens <= 0
+    || usage.billed_search_units !== GATE_CLAIMS
+    || !Number.isFinite(usage.embedding_cost_usd) || usage.embedding_cost_usd < 0
+    || usage.rerank_cost_usd !== GATE_CLAIMS * PRICE_PER_1000_SEARCH_UNITS_USD / 1000
+    || Math.abs(usage.total_cost_usd - (usage.embedding_cost_usd + usage.rerank_cost_usd)) > 1e-9
+    || usage.total_cost_usd > THRESHOLDS.max_total_cost_usd
+    || typeof usage.rate_limit_headers_observed !== "boolean") {
+    fail("Provider 요청 수·고유 ID·과금 단위·비용이 사전등록 계약과 다릅니다.");
+  }
+
+  // 6. 원장. 단계별 후보 수와 Embed·Fast 지연이 Claim마다 남아야 한다 (AI-007).
   const ledger = Array.isArray(o.ledger) ? o.ledger : [];
   if (ledger.length !== GATE_CLAIMS) fail("단계 원장이 gate Claim 100건에 대해 남아 있지 않습니다.");
   for (const row of ledger) {
-    if (!exactKeys(row, ["claim_key", "case_id", "filtered", "keyword", "vector", "merged", "relevant_in_pool", "provider_ms", "db_ms"])) {
+    if (!exactKeys(row, ["claim_key", "case_id", "filtered", "keyword", "vector", "merged", "relevant_in_pool",
+      "embed_provider_ms", "rerank_provider_ms", "combined_provider_ms", "db_ms"])) {
       fail(`원장 '${row?.claim_key ?? "이름 없음"}' 이 계약과 다릅니다.`);
       continue;
     }
     if (row.filtered < row.merged) fail(`원장 '${row.claim_key}' 의 Filter 통과 수가 후보 수보다 작습니다.`);
     if (row.merged > CANDIDATE_POOL_K * 2) fail(`원장 '${row.claim_key}' 의 후보 수가 상한을 넘습니다.`);
     if (row.keyword === 0 && row.vector === 0) fail(`원장 '${row.claim_key}' 에 어느 단계의 후보도 없습니다.`);
-    if (!Number.isFinite(row.provider_ms) || row.provider_ms <= 0) fail(`원장 '${row.claim_key}' 에 Provider 질의 지연이 없습니다.`);
+    if (row.relevant_in_pool !== 1) fail(`원장 '${row.claim_key}' 의 정답이 후보 풀에 없습니다.`);
+    if (!Number.isFinite(row.embed_provider_ms) || row.embed_provider_ms <= 0
+      || !Number.isFinite(row.rerank_provider_ms) || row.rerank_provider_ms <= 0
+      || row.combined_provider_ms !== row.embed_provider_ms + row.rerank_provider_ms) {
+      fail(`원장 '${row.claim_key}' 에 Embed·Fast 합산 지연이 없습니다.`);
+    }
   }
 };

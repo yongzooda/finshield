@@ -1,3 +1,17 @@
+## 2026-09-10 운영 DB Migration 0070·0071 적용
+
+- 운영 FinShield DB(0069 상태)에 0070·0071을 Supabase SQL Editor의 `postgres` 역할로 한 번의 트랜잭션(lock_timeout 5초·statement_timeout 30초)에 적용했다. 로컬 `.env.local`에는 소유자 자격증명이 없고 `finshield_worker`는 `private` 스키마 CREATE 권한이 없어 이 경로를 택했다.
+- 적용 전에 운영과 같은 0069 상태의 격리 PostgreSQL 17에 같은 SQL(sha256 `bcff92f6…`)을 먼저 적용해 8개 대조를 통과시켰다. 리허설의 `settle_revalidation_cancel` md5 `bd8bc64f`가 운영과 같아 드리프트가 없음을 함께 확인했다.
+- 적용 뒤 `finshield_worker` 읽기 전용 접속으로 9개를 다시 대조했다. Manifest v21과 Agent 7·Tool 20 연결, v21 Retrieval 설정, Fast 네 범위 예산 상한, 정책 함수 생성, 가입 후 Fast 예약 허용, 취소 종결 멱등 보강(md5 `bd8bc64f`→`0f703960`, 리허설과 같음), 함수 권한이 모두 맞았다. 진행 중 Run 3건·Job 0건·미정산 예약 7건은 적용 전과 같다.
+- 기록은 `evidence/development/deployment/2026-09-10-migration-0070-0071/apply.json` 이다. 이 적용은 Gate 증거 채택이 아니며 `COHERE_API_KEY` 가 Production 에 없어 Vector·Fast 단계는 여전히 `RETRIEVAL_PROVIDER_NOT_CONFIGURED` 로 끝난다.
+
+## 2026-09-10 Cohere Fast 제품 Retrieval을 최신 main에 정렬
+
+- `rerank-v4.0-fast`를 제품 relevance 단계에 연결한 변경을 main `c2bdce9` 위로 다시 쌓았다. Keyword 20개·Vector 20개 합집합 최대 40개, 최종 top 5, 네 범위 비용 상한은 그대로다. Manifest는 v8이 아니라 현재 v20 위의 `finshield-p0-loan-v21`이고 Migration 번호는 0052에서 0070으로 옮겼다. 원격에는 2026-09-10 에 0070·0071 을 적용했다.
+- 이전 branch의 SQL 계약 파일 이름 `09a_retrieval_fast_runtime.sql`은 `supabase/tests/run-local.sh`의 `[0-9][0-9]_*.sql` 목록에 잡히지 않아 한 번도 실행되지 않았다. `09_retrieval_fast_runtime.sql`로 바꿔 실제 실행되게 했다. 예산 원장을 합성 Fixture로 덮어쓰고 commit하는 `10_budget_rate_invariants` 앞에서 돌아야 Migration이 남긴 실제 상한을 검사할 수 있다.
+- 이 Provider 결정으로 ADR decision digest가 바뀌어 채택 증거를 재사용하지 않는다. main `c2bdce9`의 채택 6건은 `evidence/development/runtime/pre-0070-adopted-entries.json`에 보존했고 현재 부분 PASS는 0/20이다. Implementation `NO-GO`, Release `NOT-EVALUATED`를 유지한다.
+- 새 평가셋 v6은 노출하지 않은 20가족·100 Claim이며 측정 전이다. GitHub Actions가 과금으로 막혀 있어 정식 main 단일 측정과 별도 Adoption은 아직 수행할 수 없다. 로컬 실행 결과를 Gate 증거로 채택하지 않는다.
+
 ## 2026-09-10 처리자 개인정보 계약 inventory
 
 - `B-PROCESSOR-PRIVACY`·`B-PRIVACY-VERCEL` 이 요구하는 확인 대상을 처리자 다섯과 축 서른으로 나눠 `.github/fixtures/processor-privacy/inventory.json` 에 고정했다. 지금까지 두 항목은 문장으로만 추적돼 무엇을 얼마나 확인했는지 셀 수 없었다.
@@ -254,6 +268,17 @@ Migration 0038~0041과 SQL 시험을 기능 Draft #192에서 분리했다. 새 �
 - 상세 이력과 남은 장애는 `docs/ops/2026-09-07-development-resume.md`를 따른다. 확정 제출 문서는 보존했다.
 
 # FinShield HANDOFF
+
+## 2026-09-08 Fast Retrieval v6 사전등록
+
+- v5 종단 Retrieval Gate 두 번의 실패는 보존한다. 새 20가족·100 Claim·240문서와
+  재게시 중복 20건을 쓰는 v6 계약을 사전등록했다.
+- 현재 경로는 Metadata Filter → Keyword 20 → Vector 20 → Cohere
+  `rerank-v4.0-fast` → Authority/Freshness/Fingerprint → Case top 5다. Embed와 Fast
+  합산 P95, 요청 203개, Fast search unit 100개와 총 USD 0.25 상한을 검증한다.
+- 사전등록을 main에 병합한 뒤 첫 attempt 한 번만 실행하고 별도 Adoption 전에는
+  `B-RETRIEVAL-01`을 `PASS`로 표시하지 않는다. Production에는 Migration
+  0045·0050·0051·0052와 `COHERE_API_KEY`가 적용되기 전까지 이 경로를 배포하지 않는다.
 
 ## 2026-09-07 제출 이후 개발 재개
 

@@ -1,23 +1,30 @@
 // B-RETRIEVAL-01 계약 시험. 외부 호출 없이 corpus 생성·Rerank·지표·정책을 확인한다.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { fixture as generatedFixture } from "./generate-retrieval-fast-v6.mjs";
 import { claimRows, corpusStatements, documentRows, lit, stableUuid, KB_RELEASE_VERSION, MANIFEST_VERSION } from "./retrieval-corpus.mjs";
 import {
   AUTHORITY_SCORE, CANDIDATE_POOL_K, RELEVANCE_WEIGHTS, RERANK_WEIGHTS, TOP_K,
-  candidateScore, caseMetrics, freshnessScore, keywordScore, macroAverage, percentile, rerankCase, vectorScore,
+  candidateScore, caseMetrics, freshnessScore, keywordScore, macroAverage, percentile, vectorScore,
 } from "./retrieval-pipeline.mjs";
+import { rerankFastCase } from "./rerank-fast-development-ranking.mjs";
 import {
-  CORPUS_DOCUMENTS, DIMENSION, EMBEDDING_MODEL, FIXTURE_SET, FORMULA_VERSION, GATE_CASES, GATE_CLAIMS,
-  RISK_CASES, THRESHOLDS, validateRetrievalEvidenceResult,
+  buildRerankRequest, MAX_DOCUMENTS, MAX_TOKENS_PER_DOCUMENT, PRICE_PER_1000_SEARCH_UNITS_USD,
+  RERANK_MODEL, parseRerankResponse, rerankCostUsd,
+} from "./provider-rerank-spike.mjs";
+import {
+  CORPUS_DOCUMENTS, DIMENSION, DISTINCT_FINGERPRINTS, EMBEDDING_MODEL, FIXTURE_SET, FORMULA_VERSION,
+  GATE_CASES, GATE_CLAIMS, PROVIDER_REQUESTS, RISK_CASES, THRESHOLDS, validateRetrievalEvidenceResult,
 } from "./retrieval-evidence-policy.mjs";
 
 let passed = 0;
 let rejected = 0;
 const ok = (condition, message) => { assert.ok(condition, message); passed += 1; };
-const fixture = JSON.parse(readFileSync(new URL("../fixtures/provider-embed-v5.json", import.meta.url), "utf8"));
+const fixture = JSON.parse(readFileSync(new URL("../fixtures/retrieval-fast-v6.json", import.meta.url), "utf8"));
 
 // ---------- 1. 평가셋과 측정 단위 ----------
 ok(fixture.fixture_set === FIXTURE_SET, "평가셋 이름이 계약과 같아야 한다");
+ok(JSON.stringify(fixture) === JSON.stringify(generatedFixture), "커밋된 v6 평가셋은 생성기 출력과 같아야 한다");
 const documents = documentRows(fixture);
 const claims = claimRows(fixture);
 const gate = claims.filter((c) => c.split === "gate");
@@ -26,6 +33,7 @@ ok(gate.length === GATE_CLAIMS, "gate Claim 이 100건이어야 한다");
 const gateCases = new Set(gate.map((c) => c.case_id));
 ok(gateCases.size === GATE_CASES, "gate 가족이 20개여야 한다");
 ok(new Set(gate.filter((c) => c.risk_critical).map((c) => c.case_id)).size === RISK_CASES, "위험 가족이 6개여야 한다");
+ok(new Set(documents.map((d) => d.source_fingerprint)).size === DISTINCT_FINGERPRINTS, "재게시 중복 fingerprint 20건이 고정돼야 한다");
 for (const caseId of gateCases) {
   const rows = gate.filter((c) => c.case_id === caseId);
   ok(rows.length === 5, `가족 ${caseId} 는 Claim 5개여야 한다`);
@@ -81,7 +89,8 @@ ok(keywordScore(0.5, 1) === 0.5 && keywordScore(null, 1) === 0 && keywordScore(1
 const makeRows = (units, provenance, { distance = 0.1, rank = 0.5 } = {}) => units.map((unit) => {
   const snapshot = `snap-${unit}`;
   provenance.set(snapshot, { unit, fingerprint: `fp-${unit}`, authority_level: "A", effective_from: "2026-01-01" });
-  return { chunk_id: `chunk-${unit}`, source_snapshot_id: snapshot, vector_distance: distance, keyword_rank: rank, matched_by: "KEYWORD_AND_VECTOR", valid_to: null };
+  return { chunk_id: `chunk-${unit}`, source_snapshot_id: snapshot, vector_distance: distance, keyword_rank: rank,
+    matched_by: "KEYWORD_AND_VECTOR", valid_to: null, fast_score: Math.max(0, 1 - distance) };
 });
 {
   const provenance = new Map();
@@ -89,7 +98,7 @@ const makeRows = (units, provenance, { distance = 0.1, rank = 0.5 } = {}) => uni
     { claim: { key: "c1" }, rows: makeRows(["u1", "u2", "n1"], provenance, { distance: 0.1 }) },
     { claim: { key: "c2" }, rows: makeRows(["u3", "u4", "u5"], provenance, { distance: 0.2 }) },
   ];
-  const { top, poolSize, collapsed } = rerankCase({ claimResults, provenance });
+  const { top, poolSize, collapsed } = rerankFastCase({ claimResults, provenance });
   ok(poolSize === 6 && collapsed === 0, "합집합 크기와 중복 제거 수가 맞아야 한다");
   ok(top.length === TOP_K, "top 은 5건이어야 한다");
   // Claim 마다 한 자리를 먼저 준다. 두 Claim 이 있으면 각 Claim 의 최고 후보가 반드시 들어간다.
@@ -107,7 +116,7 @@ const makeRows = (units, provenance, { distance = 0.1, rank = 0.5 } = {}) => uni
   const provenance = new Map();
   const rows = makeRows(["u1", "u1copy"], provenance);
   provenance.get("snap-u1copy").fingerprint = "fp-u1";
-  const { poolSize, deduped, collapsed } = rerankCase({ claimResults: [{ claim: { key: "c1" }, rows }], provenance });
+  const { poolSize, deduped, collapsed } = rerankFastCase({ claimResults: [{ claim: { key: "c1" }, rows }], provenance });
   ok(poolSize === 2 && deduped === 1 && collapsed === 1, "같은 지문은 하나로 접혀야 한다");
 }
 {
@@ -122,18 +131,28 @@ const makeRows = (units, provenance, { distance = 0.1, rank = 0.5 } = {}) => uni
   for (const entry of claimResults) {
     const loud = entry.rows.find((r) => provenance.get(r.source_snapshot_id).unit === "loud");
     loud.vector_distance = 0.2;
+    loud.fast_score = 0.8;
   }
-  const { top } = rerankCase({ claimResults, provenance });
+  const { top } = rerankFastCase({ claimResults, provenance });
   ok(top.length === TOP_K, "Claim 5개면 top 이 5건이어야 한다");
   for (let index = 0; index < 5; index += 1) {
     ok(top.some((c) => c.unit === `own${index}`), `Claim ${index + 1} 의 고유 근거가 밀려나지 않아야 한다`);
   }
 }
 ok(percentile([10, 20, 30, 40, 50], 0.95) === 50 && percentile([], 0.95) === null, "백분위 계산이 맞아야 한다");
+ok(buildRerankRequest("가".repeat(200), ["합성 문서"]).model === RERANK_MODEL, "512바이트를 넘는 한국어 질의도 제품 경계에서 허용해야 한다");
+ok(buildRerankRequest("대출", ["문서"]).max_tokens_per_doc === MAX_TOKENS_PER_DOCUMENT, "Fast 문서 token 상한이 고정돼야 한다");
+assert.throws(() => buildRerankRequest("대출", Array(MAX_DOCUMENTS + 1).fill("문서")), /input boundary/);
+passed += 1;
+ok(rerankCostUsd(100) === 0.2, "100 search unit 비용이 USD 0.20이어야 한다");
+const parsedFast = await parseRerankResponse(Response.json({ id: "synthetic-fast-request", results: [
+  { index: 1, relevance_score: .9 }, { index: 0, relevance_score: .1 },
+], meta: { billed_units: { search_units: 1 } } }), 2);
+ok(JSON.stringify(parsedFast.scores) === JSON.stringify([.1, .9]), "Fast 응답은 원래 후보 순서의 점수로 복원해야 한다");
 
 // ---------- 4. 정책 ----------
 const caseRow = (id, { risk = false, found = 5, coverage = ["product"] } = {}) => ({
-  case_id: id, risk_critical: risk, coverage, claims: 5, pool_size: 30, deduped_size: 30, collapsed_fingerprints: 0,
+  case_id: id, risk_critical: risk, coverage, claims: 5, pool_size: 30, deduped_size: 29, collapsed_fingerprints: 1,
   top_units: ["a", "b", "c", "d", "e"], relevant_units: ["r1", "r2", "r3", "r4", "r5"],
   critical_units: risk ? ["r1", "r2", "r3", "r4", "r5"] : [],
   recall_at_5: found / 5, precision_at_5: found / 5, critical_recall_at_5: risk ? 1 : null, filter_excluded_answers: 0,
@@ -142,21 +161,28 @@ const cases = Array.from({ length: GATE_CASES }, (_, i) => caseRow(`case-${Strin
 const ledger = Array.from({ length: GATE_CLAIMS }, (_, i) => ({
   claim_key: `case-${String(Math.floor(i / 5)).padStart(2, "0")}:c${(i % 5) + 1}`,
   case_id: `case-${String(Math.floor(i / 5)).padStart(2, "0")}`,
-  filtered: 40, keyword: 8, vector: 20, merged: 22, relevant_in_pool: 1, provider_ms: 320, db_ms: 3,
+  filtered: 40, keyword: 8, vector: 20, merged: 22, relevant_in_pool: 1,
+  embed_provider_ms: 120, rerank_provider_ms: 280, combined_provider_ms: 400, db_ms: 3,
 }));
 const observations = {
   contract: {
     formula_version: FORMULA_VERSION, fixture_set: FIXTURE_SET, measurement_unit: "case",
     embedding_model: EMBEDDING_MODEL, dimension: DIMENSION, candidate_pool_k: CANDIDATE_POOL_K, top_k: TOP_K,
-    rerank_weights: { ...RERANK_WEIGHTS }, relevance_weights: { ...RELEVANCE_WEIGHTS }, authority_score: { ...AUTHORITY_SCORE },
+    rerank_model: RERANK_MODEL, rerank_weights: { ...RERANK_WEIGHTS }, authority_score: { ...AUTHORITY_SCORE },
+    rerank_price_per_1000_search_units_usd: PRICE_PER_1000_SEARCH_UNITS_USD,
     kb_release_version: KB_RELEASE_VERSION, manifest_version: MANIFEST_VERSION, thresholds: { ...THRESHOLDS },
   },
-  corpus: { documents: CORPUS_DOCUMENTS, gate_cases: GATE_CASES, gate_claims: GATE_CLAIMS, risk_cases: RISK_CASES, development_cases: 4, distinct_fingerprints: CORPUS_DOCUMENTS },
+  corpus: { documents: CORPUS_DOCUMENTS, gate_cases: GATE_CASES, gate_claims: GATE_CLAIMS, risk_cases: RISK_CASES,
+    development_cases: 0, distinct_fingerprints: DISTINCT_FINGERPRINTS, duplicate_documents: CORPUS_DOCUMENTS - DISTINCT_FINGERPRINTS },
   cases,
   totals: {
     recall_at_5: 1, precision_at_5: 1, critical_recall_at_5: 1, slice_recall_at_5: { product: 1 },
-    query_p95_ms: 400, query_p50_ms: 300, db_p95_ms: 4, filter_excluded_answers: 0, duplicate_fingerprint_inflation: 0, collapsed_fingerprints: 0,
+    query_p95_ms: 400, query_p50_ms: 350, embed_p95_ms: 120, rerank_p95_ms: 280, db_p95_ms: 4,
+    filter_excluded_answers: 0, duplicate_fingerprint_inflation: 0, collapsed_fingerprints: GATE_CASES,
   },
+  usage: { provider_requests: PROVIDER_REQUESTS, unique_request_ids: PROVIDER_REQUESTS, request_ids_sha256: "e".repeat(64),
+    billed_input_tokens: 1000, billed_search_units: GATE_CLAIMS, embedding_cost_usd: .00012,
+    rerank_cost_usd: .2, total_cost_usd: .20012, rate_limit_headers_observed: true },
   ledger,
 };
 const baseline = {
@@ -180,12 +206,13 @@ mustReject("평가셋 교체", (r) => { r.observations.contract.fixture_set = "o
 mustReject("측정 단위를 Claim 으로", (r) => { r.observations.contract.measurement_unit = "claim"; });
 mustReject("후보 풀 확대", (r) => { r.observations.contract.candidate_pool_k = 50; });
 mustReject("top 확대", (r) => { r.observations.contract.top_k = 10; });
+mustReject("Fast 모델 변경", (r) => { r.observations.contract.rerank_model = "other"; });
 mustReject("Rerank 가중치 변경", (r) => { r.observations.contract.rerank_weights.relevance = 0.9; });
-mustReject("Relevance 가중치 변경", (r) => { r.observations.contract.relevance_weights.vector = 1; });
 mustReject("Authority 점수 변경", (r) => { r.observations.contract.authority_score.C = 1; });
 mustReject("합격선 완화", (r) => { r.observations.contract.thresholds.precision_at_5 = 0.2; });
 mustReject("corpus 축소", (r) => { r.observations.corpus.documents = 100; });
 mustReject("gate 가족 축소", (r) => { r.observations.corpus.gate_cases = 10; });
+mustReject("중복 fingerprint 제거", (r) => { r.observations.corpus.distinct_fingerprints = CORPUS_DOCUMENTS; });
 mustReject("Case 기록 누락", (r) => { r.observations.cases.pop(); });
 mustReject("Recall 미달", (r) => { r.observations.totals.recall_at_5 = 0.85; });
 mustReject("Precision 미달", (r) => { r.observations.totals.precision_at_5 = 0.7; });
@@ -194,10 +221,14 @@ mustReject("가족별 Precision 미달", (r) => { r.observations.cases[7].precis
 mustReject("slice Recall 미달", (r) => { r.observations.cases.forEach((c) => { c.recall_at_5 = 0.8; }); r.observations.totals.slice_recall_at_5.product = 0.8; });
 mustReject("slice 값이 기록과 불일치", (r) => { r.observations.totals.slice_recall_at_5.product = 0.95; });
 mustReject("P95 초과", (r) => { r.observations.totals.query_p95_ms = 1600; });
-mustReject("Provider 지연이 없는 원장", (r) => { r.observations.ledger[0].provider_ms = null; });
+mustReject("Fast P95 초과", (r) => { r.observations.totals.rerank_p95_ms = 1600; });
+mustReject("Provider 지연이 없는 원장", (r) => { r.observations.ledger[0].rerank_provider_ms = null; });
 mustReject("DB 지연을 Provider 지연으로 표시", (r) => { delete r.observations.totals.db_p95_ms; });
 mustReject("Filter 가 정답 제외", (r) => { r.observations.totals.filter_excluded_answers = 1; r.observations.cases[0].filter_excluded_answers = 1; });
 mustReject("중복 출처가 근거를 늘림", (r) => { r.observations.totals.duplicate_fingerprint_inflation = 1; });
+mustReject("재게시 중복 제거 미관측", (r) => { r.observations.cases[0].collapsed_fingerprints = 0; });
+mustReject("Fast 비용 초과", (r) => { r.observations.usage.total_cost_usd = 0.3; });
+mustReject("Fast search unit 누락", (r) => { r.observations.usage.billed_search_units = 99; });
 mustReject("top 에 같은 unit 중복", (r) => { r.observations.cases[0].top_units = ["a", "a", "c", "d", "e"]; });
 mustReject("top 이 5건 미만", (r) => { r.observations.cases[0].top_units = ["a", "b", "c"]; });
 mustReject("원장 누락", (r) => { r.observations.ledger.pop(); });

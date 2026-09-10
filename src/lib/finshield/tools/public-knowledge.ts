@@ -3,7 +3,8 @@ import { z } from "zod";
 import { searchOfficialWarning } from "./official-warning";
 import { lookupStatute } from "./statute";
 import { queryWithSignal } from "../query-signal";
-import { embedQuery, RetrievalProviderError } from "../retrieval-provider";
+import { embedQuery, rerankKnowledge, RetrievalProviderError } from "../retrieval-provider";
+import { RETRIEVAL_POLICY } from "../manifest";
 import { gateForModel } from "@/lib/agents/pii";
 import { filterToolText } from "@/lib/tools/filter";
 import type { SourceItem, ToolCallContext, ToolOutcome } from "./runtime";
@@ -30,19 +31,32 @@ export function knowledgeItem(row: ChunkRow, reason: string): SourceItem {
 }
 
 /** 같은 출처의 복제 Chunk는 독립 근거를 늘리지 않는다. */
-export function rankKnowledge(rows: ChunkRow[]): ChunkRow[] {
+export function rankKnowledge(rows: ChunkRow[], relevanceScores?: number[]): ChunkRow[] {
+  if (relevanceScores && (relevanceScores.length !== rows.length
+    || relevanceScores.some(value => !Number.isFinite(value) || value < 0 || value > 1))) {
+    throw new RetrievalProviderError("RERANK_RESULT_INVALID");
+  }
+  const fastScores = relevanceScores
+    ? new Map(rows.map((row, index) => [row.chunk_id, relevanceScores[index]]))
+    : null;
   const maxRank = Math.max(0, ...rows.map(row => row.keyword_rank ?? 0));
   const dates = rows.map(row => row.effective_from).filter((value): value is string => Boolean(value)).sort();
   const oldest = Date.parse(dates[0]), newest = Date.parse(dates.at(-1) ?? "");
   const score = (row: ChunkRow) => {
-    const relevance = .7 * Math.max(0, Math.min(1, 1 - (row.vector_distance ?? 1)))
-      + .3 * (maxRank ? (row.keyword_rank ?? 0) / maxRank : 0);
+    const relevance = fastScores?.get(row.chunk_id)
+      ?? (.7 * Math.max(0, Math.min(1, 1 - (row.vector_distance ?? 1)))
+        + .3 * (maxRank ? (row.keyword_rank ?? 0) / maxRank : 0));
     const freshness = newest > oldest && row.effective_from ? Math.max(0, Math.min(1, (Date.parse(row.effective_from) - oldest) / (newest - oldest))) : 1;
     return .60 * relevance + .25 * ({ A: 1, B: .6, C: .3, D: 0 }[row.authority_level]) + .15 * freshness;
   };
-  const ranked = [...rows].sort((a, b) => score(b) - score(a) || a.chunk_id.localeCompare(b.chunk_id));
+  const authority = { A: 1, B: .6, C: .3, D: 0 };
+  const ranked = [...rows].sort((a, b) => score(b) - score(a)
+    || authority[b.authority_level] - authority[a.authority_level]
+    || String(b.effective_from ?? "").localeCompare(String(a.effective_from ?? ""))
+    || a.chunk_id.localeCompare(b.chunk_id));
   const seen = new Set<string>();
-  return ranked.filter(row => { if (seen.has(row.source_fingerprint)) return false; seen.add(row.source_fingerprint); return true; }).slice(0, 5);
+  return ranked.filter(row => { if (seen.has(row.source_fingerprint)) return false; seen.add(row.source_fingerprint); return true; })
+    .slice(0, RETRIEVAL_POLICY.topK);
 }
 
 export async function searchPublicKnowledge(input: unknown, ctx: ToolCallContext, types: string[]): Promise<ToolOutcome> {
@@ -71,13 +85,14 @@ export async function searchPublicKnowledge(input: unknown, ctx: ToolCallContext
     ), keyword_candidates as (
       select c.id,ts_rank(c.search_vector,private.keyword_tsquery(${parsed.data.query})) as rank
       from scoped d join kb.knowledge_chunks c on c.knowledge_document_id=d.id and c.kb_release_id=d.kb_release_id
-      where c.search_vector @@ private.keyword_tsquery(${parsed.data.query}) order by rank desc,c.id limit 20
+      where c.search_vector @@ private.keyword_tsquery(${parsed.data.query}) order by rank desc,c.id
+      limit ${RETRIEVAL_POLICY.keywordCandidatePool}
     ), vector_candidates as (
       select c.id,(e.embedding operator(extensions.<=>) ${vector ? `[${vector.join(",")}]` : null}::extensions.vector) as distance
       from scoped d join kb.knowledge_chunks c on c.knowledge_document_id=d.id and c.kb_release_id=d.kb_release_id
         join kb.knowledge_embeddings e on e.knowledge_chunk_id=c.id and e.kb_release_id=d.kb_release_id
       where ${vector !== null} and e.model_id='embed-v4.0' and e.model_version=${release?.embedding_model_version ?? ""}
-      order by distance,c.id limit 20
+      order by distance,c.id limit ${RETRIEVAL_POLICY.vectorCandidatePool}
     ), candidates as (
       select coalesce(k.id,v.id) as id,k.rank,v.distance from keyword_candidates k full outer join vector_candidates v on v.id=k.id
     )
@@ -87,12 +102,32 @@ export async function searchPublicKnowledge(input: unknown, ctx: ToolCallContext
       matched.rank as keyword_rank,matched.distance as vector_distance
     from candidates matched join kb.knowledge_chunks c on c.id=matched.id join scoped d on d.id=c.knowledge_document_id
       join kb.source_snapshots s on s.id=d.source_snapshot_id ${sql.unsafe(FETCH_JOIN)}
-    where s.authority_level in ('A','B','C') order by matched.distance nulls last,matched.rank desc nulls last,c.id limit 40`, ctx.signal);
+    where s.authority_level in ('A','B','C') order by matched.distance nulls last,matched.rank desc nulls last,c.id
+    limit ${RETRIEVAL_POLICY.maxRerankCandidates}`, ctx.signal);
   ctx.signal?.throwIfAborted();
   const candidates = rows as unknown as ChunkRow[];
-  return { items: rankKnowledge(candidates).map(row => knowledgeItem(row, vector ? "PUBLIC_KB_HYBRID_MATCH" : "PUBLIC_KB_KEYWORD_MATCH")), provenanceComplete: true,
-    candidateCount: rows.length, reasonCode: rows.length ? vector ? null : "KEYWORD_ONLY_VECTOR_PENDING" : "NO_DOCUMENT_MATCH",
-    observations: { schema_version: "1", scope: "PUBLIC_LOAN_KB", types, retrieval: vector ? "METADATA_KEYWORD_VECTOR_RERANK" : "METADATA_KEYWORD_RERANK", vector_status: vectorStatus, no_match_is_safe: false } };
+  let relevanceScores: number[] | undefined, rerankStatus = candidates.length ? "NOT_RUN" : "NO_CANDIDATES";
+  if (candidates.length) {
+    try {
+      relevanceScores = await rerankKnowledge(parsed.data.query, candidates.map(row => row.chunk_text), ctx);
+      rerankStatus = "AVAILABLE";
+    } catch (error) {
+      ctx.signal?.throwIfAborted();
+      rerankStatus = error instanceof RetrievalProviderError ? error.code : "RERANK_PROVIDER_UNCONFIRMED";
+    }
+  }
+  const degraded = candidates.length > 0 && (!vector || !relevanceScores);
+  const reasonCode = !rows.length ? "NO_DOCUMENT_MATCH"
+    : !vector ? vectorStatus
+      : !relevanceScores ? rerankStatus : null;
+  return { items: rankKnowledge(candidates, relevanceScores).map(row => knowledgeItem(row,
+    relevanceScores ? "PUBLIC_KB_FAST_RERANK_MATCH" : vector ? "PUBLIC_KB_HYBRID_MATCH" : "PUBLIC_KB_KEYWORD_MATCH")),
+    provenanceComplete: true, candidateCount: rows.length,
+    errorCode: degraded ? "RETRIEVAL_DEGRADED" : null, reasonCode,
+    observations: { schema_version: "1", scope: "PUBLIC_LOAN_KB", types,
+      retrieval: relevanceScores ? vector ? "METADATA_KEYWORD_VECTOR_FAST_RERANK" : "METADATA_KEYWORD_FAST_RERANK"
+        : vector ? "METADATA_KEYWORD_VECTOR_RERANK" : "METADATA_KEYWORD_RERANK",
+      vector_status: vectorStatus, rerank_status: rerankStatus, no_match_is_safe: false } };
 }
 
 export async function getSourceSnapshot(input: unknown, ctx: ToolCallContext): Promise<ToolOutcome> {

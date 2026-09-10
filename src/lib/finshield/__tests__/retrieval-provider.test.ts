@@ -1,5 +1,5 @@
 import { beforeEach, afterEach, expect, it, vi } from "vitest";
-import { embedQuery, rerankFast } from "../retrieval-provider";
+import { embedQuery, rerankFast, rerankKnowledge } from "../retrieval-provider";
 import type { ToolCallContext } from "../tools/runtime";
 const sql = vi.fn(); const fetchMock = vi.fn();
 const ctx = { sql, ownerId: "synthetic-owner", caseId: "synthetic-case", runId: "synthetic-run" } as unknown as ToolCallContext;
@@ -38,6 +38,24 @@ it("Fast의 원래 후보 순서와 과금 search unit을 복원한다", async (
   vi.stubEnv("FINSHIELD_RERANK_FAST_DEVELOPMENT", "1"); vi.stubEnv("FINSHIELD_PROBE_OWNER_ID", ctx.ownerId);
   fetchMock.mockResolvedValue(Response.json({ id: "synthetic-rerank", results: [{ index: 1, relevance_score: .9 }, { index: 0, relevance_score: .1 }], meta: { billed_units: { search_units: 1 } } }));
   expect(await rerankFast("대출 금리", ["상품 수수료", "상품 금리"], ctx)).toEqual([.1, .9]); expect(sql.mock.calls[1]).toContain(2000);
+});
+it("제품 Fast 재정렬은 합성 개발 플래그 없이 비용 예약 뒤 호출한다", async () => {
+  fetchMock.mockResolvedValue(Response.json({ id: "synthetic-product-rerank", results: [
+    { index: 1, relevance_score: .8 }, { index: 0, relevance_score: .2 },
+  ], meta: { billed_units: { search_units: 1 } } }));
+  expect(await rerankKnowledge("가".repeat(200), ["상품 수수료", "상품 금리"], ctx)).toEqual([.2, .8]);
+  expect(sql.mock.calls[0][0].join(" ")).toContain("reserve_finshield_retrieval_usage");
+  expect(fetchMock).toHaveBeenCalledOnce();
+  expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({
+    model: "rerank-v4.0-fast", top_n: 2, max_tokens_per_doc: 4096,
+  });
+  expect(sql.mock.calls[1]).toContain(2000);
+});
+it("제품 Fast는 합집합 40개와 DB Chunk 32KiB 경계를 넘으면 전송 전에 거부한다", async () => {
+  await expect(rerankKnowledge("대출 금리", Array(41).fill("문서"), ctx)).rejects.toThrow("RERANK_INPUT_INVALID");
+  await expect(rerankKnowledge("대출 금리", ["가".repeat(10923)], ctx)).rejects.toThrow("RERANK_INPUT_INVALID");
+  expect(sql).not.toHaveBeenCalled();
+  expect(fetchMock).not.toHaveBeenCalled();
 });
 it("이미 취소된 검색은 예약·전송하지 않는다", async () => {
   await expect(embedQuery("대출 금리", { ...ctx, signal: AbortSignal.abort() })).rejects.toThrow(); expect(sql).not.toHaveBeenCalled(); expect(fetchMock).not.toHaveBeenCalled();
