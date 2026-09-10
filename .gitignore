@@ -9,7 +9,8 @@ data/*.hwp
 *.hwp
 
 # Node
-node_modules/
+# 디렉터리뿐 아니라 작업 폴더에 건 심볼릭 링크도 막는다. 슬래시가 붙으면 링크 파일은 빠진다.
+node_modules
 .next/
 out/
 build/
