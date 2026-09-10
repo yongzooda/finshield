@@ -1,0 +1,40 @@
+{
+  "schema_version": "production-migration-apply-v1",
+  "applied_on": "2026-09-10",
+  "migrations": [
+    "0070_retrieval_fast_runtime",
+    "0071_cancel_settlement_idempotency"
+  ],
+  "method": "Supabase SQL Editor, role postgres, 단일 트랜잭션(lock_timeout 5s, statement_timeout 30s)",
+  "sql_sha256": "bcff92f613ce10bc6892bc02ef4511f8091a76977e108681bceac6bd3383292f",
+  "precondition": {
+    "manifest_v20": true,
+    "manifest_v21": false,
+    "rerank_policy_fn": false,
+    "fast_limits": 0,
+    "settle_revalidation_cancel_md5": "bd8bc64f3de9b79d8bca09d4190826ba",
+    "active_runs": 3,
+    "active_jobs": 0,
+    "reserved": 7
+  },
+  "rehearsal": "운영과 같은 0069 상태의 격리 PostgreSQL 17 에서 같은 SQL 을 먼저 적용해 8개 대조 통과",
+  "postcheck_role": "finshield_worker",
+  "postcheck": {
+    "manifest_v21": true,
+    "v21_links": true,
+    "v21_retrieval": true,
+    "fast_limits": true,
+    "rerank_policy_fn": true,
+    "precase_fast": true,
+    "cancel_idempotent": true,
+    "cancel_matches_sim": true,
+    "grants": true
+  },
+  "after": {
+    "settle_revalidation_cancel_md5": "0f703960240ea01fa2447de27dbc58f8",
+    "active_runs": 3,
+    "active_jobs": 0,
+    "reserved": 7
+  },
+  "all_passed": true
+}

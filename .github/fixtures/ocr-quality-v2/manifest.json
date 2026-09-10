@@ -1,0 +1,1712 @@
+{
+  "version": "ocr-quality-v2",
+  "synthetic_only": true,
+  "independent_blind_review": false,
+  "table_detection": false,
+  "documents": 32,
+  "pages": 112,
+  "previous_version": "ocr-quality-v1",
+  "reused_families": [],
+  "url_shapes": {
+    "tld": 4,
+    "host": 4
+  },
+  "fixtures": [
+    {
+      "id": "collateral-text",
+      "family": "collateral",
+      "kind": "text",
+      "path": "collateral-text.txt",
+      "url_shape": "tld",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: collateral\n페이지: 1\n기관: 가상한별은행\n상품: 시험담보론\n주소: https://collateral.example/loan\n연 금리: 3.1%\n한도: 250만원\n상환 기간: 15개월\n보증료율: 1.1%\n담보 없이 한도가 늘어난다고 보장하지 않습니다.\n설정 비용을 대신 내주지 않습니다.",
+          "fields": {
+            "institution": "가상한별은행",
+            "product": "시험담보론",
+            "url": "https://collateral.example/loan"
+          },
+          "negations": [
+            "담보 없이 한도가 늘어난다고 보장하지 않습니다.",
+            "설정 비용을 대신 내주지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 419,
+      "sha256": "7ad3752a5dcad6ca7788ecd207dbe688a7001e9530608b5f08e55d785fd67b16"
+    },
+    {
+      "id": "collateral-image",
+      "family": "collateral",
+      "kind": "image",
+      "path": "collateral-image.png",
+      "url_shape": "tld",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: collateral\n페이지: 1\n기관: 가상한별은행\n상품: 시험담보론\n주소: https://collateral.example/loan\n연 금리: 3.2%\n한도: 250만원\n상환 기간: 15개월\n보증료율: 2.1%\n담보 없이 한도가 늘어난다고 보장하지 않습니다.\n설정 비용을 대신 내주지 않습니다.",
+          "fields": {
+            "institution": "가상한별은행",
+            "product": "시험담보론",
+            "url": "https://collateral.example/loan"
+          },
+          "negations": [
+            "담보 없이 한도가 늘어난다고 보장하지 않습니다.",
+            "설정 비용을 대신 내주지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 66818,
+      "sha256": "87f18a356e62078c060bfff9c40e380c5a5c770fa7e34175b12f3f2607905d7b"
+    },
+    {
+      "id": "collateral-digital",
+      "family": "collateral",
+      "kind": "digital",
+      "path": "collateral-digital.pdf",
+      "url_shape": "tld",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: collateral\n페이지: 1\n기관: 가상한별은행\n상품: 시험담보론\n주소: https://collateral.example/loan\n연 금리: 3.3%\n한도: 250만원\n상환 기간: 15개월\n보증료율: 0.1%\n담보 없이 한도가 늘어난다고 보장하지 않습니다.\n설정 비용을 대신 내주지 않습니다.",
+          "fields": {
+            "institution": "가상한별은행",
+            "product": "시험담보론",
+            "url": "https://collateral.example/loan"
+          },
+          "negations": [
+            "담보 없이 한도가 늘어난다고 보장하지 않습니다.",
+            "설정 비용을 대신 내주지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: collateral\n페이지: 2\n기관: 가상한별은행\n상품: 시험담보론\n주소: https://collateral.example/loan\n연 금리: 3.4%\n한도: 375만원\n상환 기간: 18개월\n보증료율: 0.2%\n담보 없이 한도가 늘어난다고 보장하지 않습니다.\n설정 비용을 대신 내주지 않습니다.",
+          "fields": {
+            "institution": "가상한별은행",
+            "product": "시험담보론",
+            "url": "https://collateral.example/loan"
+          },
+          "negations": [
+            "담보 없이 한도가 늘어난다고 보장하지 않습니다.",
+            "설정 비용을 대신 내주지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 114344,
+      "sha256": "b8af734a94ba1fea8441db1904851ddac4afc25a43835245629cf8d2896d9eb9"
+    },
+    {
+      "id": "collateral-scanned",
+      "family": "collateral",
+      "kind": "scanned",
+      "path": "collateral-scanned.pdf",
+      "url_shape": "tld",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: collateral\n페이지: 1\n기관: 가상한별은행\n상품: 시험담보론\n주소: https://collateral.example/loan\n연 금리: 3.4%\n한도: 250만원\n상환 기간: 15개월\n보증료율: 1.1%\n담보 없이 한도가 늘어난다고 보장하지 않습니다.\n설정 비용을 대신 내주지 않습니다.",
+          "fields": {
+            "institution": "가상한별은행",
+            "product": "시험담보론",
+            "url": "https://collateral.example/loan"
+          },
+          "negations": [
+            "담보 없이 한도가 늘어난다고 보장하지 않습니다.",
+            "설정 비용을 대신 내주지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: collateral\n페이지: 2\n기관: 가상한별은행\n상품: 시험담보론\n주소: https://collateral.example/loan\n연 금리: 3.5%\n한도: 375만원\n상환 기간: 18개월\n보증료율: 1.2%\n담보 없이 한도가 늘어난다고 보장하지 않습니다.\n설정 비용을 대신 내주지 않습니다.",
+          "fields": {
+            "institution": "가상한별은행",
+            "product": "시험담보론",
+            "url": "https://collateral.example/loan"
+          },
+          "negations": [
+            "담보 없이 한도가 늘어난다고 보장하지 않습니다.",
+            "설정 비용을 대신 내주지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: collateral\n페이지: 3\n기관: 가상한별은행\n상품: 시험담보론\n주소: https://collateral.example/loan\n연 금리: 3.6%\n한도: 500만원\n상환 기간: 21개월\n보증료율: 1.3%\n담보 없이 한도가 늘어난다고 보장하지 않습니다.\n설정 비용을 대신 내주지 않습니다.",
+          "fields": {
+            "institution": "가상한별은행",
+            "product": "시험담보론",
+            "url": "https://collateral.example/loan"
+          },
+          "negations": [
+            "담보 없이 한도가 늘어난다고 보장하지 않습니다.",
+            "설정 비용을 대신 내주지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: collateral\n페이지: 4\n기관: 가상한별은행\n상품: 시험담보론\n주소: https://collateral.example/loan\n연 금리: 3.7%\n한도: 625만원\n상환 기간: 24개월\n보증료율: 1.4%\n담보 없이 한도가 늘어난다고 보장하지 않습니다.\n설정 비용을 대신 내주지 않습니다.",
+          "fields": {
+            "institution": "가상한별은행",
+            "product": "시험담보론",
+            "url": "https://collateral.example/loan"
+          },
+          "negations": [
+            "담보 없이 한도가 늘어난다고 보장하지 않습니다.",
+            "설정 비용을 대신 내주지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: collateral\n페이지: 5\n기관: 가상한별은행\n상품: 시험담보론\n주소: https://collateral.example/loan\n연 금리: 3.8%\n한도: 750만원\n상환 기간: 27개월\n보증료율: 1.5%\n담보 없이 한도가 늘어난다고 보장하지 않습니다.\n설정 비용을 대신 내주지 않습니다.",
+          "fields": {
+            "institution": "가상한별은행",
+            "product": "시험담보론",
+            "url": "https://collateral.example/loan"
+          },
+          "negations": [
+            "담보 없이 한도가 늘어난다고 보장하지 않습니다.",
+            "설정 비용을 대신 내주지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: collateral\n페이지: 6\n기관: 가상한별은행\n상품: 시험담보론\n주소: https://collateral.example/loan\n연 금리: 3.9%\n한도: 875만원\n상환 기간: 30개월\n보증료율: 1.6%\n담보 없이 한도가 늘어난다고 보장하지 않습니다.\n설정 비용을 대신 내주지 않습니다.",
+          "fields": {
+            "institution": "가상한별은행",
+            "product": "시험담보론",
+            "url": "https://collateral.example/loan"
+          },
+          "negations": [
+            "담보 없이 한도가 늘어난다고 보장하지 않습니다.",
+            "설정 비용을 대신 내주지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: collateral\n페이지: 7\n기관: 가상한별은행\n상품: 시험담보론\n주소: https://collateral.example/loan\n연 금리: 3.0%\n한도: 1,000만원\n상환 기간: 33개월\n보증료율: 1.7%\n담보 없이 한도가 늘어난다고 보장하지 않습니다.\n설정 비용을 대신 내주지 않습니다.",
+          "fields": {
+            "institution": "가상한별은행",
+            "product": "시험담보론",
+            "url": "https://collateral.example/loan"
+          },
+          "negations": [
+            "담보 없이 한도가 늘어난다고 보장하지 않습니다.",
+            "설정 비용을 대신 내주지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: collateral\n페이지: 8\n기관: 가상한별은행\n상품: 시험담보론\n주소: https://collateral.example/loan\n연 금리: 3.1%\n한도: 1,125만원\n상환 기간: 36개월\n보증료율: 1.8%\n담보 없이 한도가 늘어난다고 보장하지 않습니다.\n설정 비용을 대신 내주지 않습니다.",
+          "fields": {
+            "institution": "가상한별은행",
+            "product": "시험담보론",
+            "url": "https://collateral.example/loan"
+          },
+          "negations": [
+            "담보 없이 한도가 늘어난다고 보장하지 않습니다.",
+            "설정 비용을 대신 내주지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: collateral\n페이지: 9\n기관: 가상한별은행\n상품: 시험담보론\n주소: https://collateral.example/loan\n연 금리: 3.2%\n한도: 1,250만원\n상환 기간: 39개월\n보증료율: 1.9%\n담보 없이 한도가 늘어난다고 보장하지 않습니다.\n설정 비용을 대신 내주지 않습니다.",
+          "fields": {
+            "institution": "가상한별은행",
+            "product": "시험담보론",
+            "url": "https://collateral.example/loan"
+          },
+          "negations": [
+            "담보 없이 한도가 늘어난다고 보장하지 않습니다.",
+            "설정 비용을 대신 내주지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: collateral\n페이지: 10\n기관: 가상한별은행\n상품: 시험담보론\n주소: https://collateral.example/loan\n연 금리: 3.3%\n한도: 1,375만원\n상환 기간: 42개월\n보증료율: 1.0%\n담보 없이 한도가 늘어난다고 보장하지 않습니다.\n설정 비용을 대신 내주지 않습니다.",
+          "fields": {
+            "institution": "가상한별은행",
+            "product": "시험담보론",
+            "url": "https://collateral.example/loan"
+          },
+          "negations": [
+            "담보 없이 한도가 늘어난다고 보장하지 않습니다.",
+            "설정 비용을 대신 내주지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 643359,
+      "sha256": "5db614d45cccb2b5a8e5f3e9110938bfefa3a61f3b7f3ba5d26aa96d3ed1fa97"
+    },
+    {
+      "id": "refund-text",
+      "family": "refund",
+      "kind": "text",
+      "path": "refund-text.txt",
+      "url_shape": "tld",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: refund\n페이지: 1\n기관: 가상새롬금융\n상품: 시험환급론\n주소: https://refund.example/loan\n연 금리: 4.1%\n한도: 375만원\n상환 기간: 15개월\n보증료율: 2.1%\n보증금을 먼저 받고 환급하지 않습니다.\n환급 심사 기간을 단축해 주지 않습니다.",
+          "fields": {
+            "institution": "가상새롬금융",
+            "product": "시험환급론",
+            "url": "https://refund.example/loan"
+          },
+          "negations": [
+            "보증금을 먼저 받고 환급하지 않습니다.",
+            "환급 심사 기간을 단축해 주지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 405,
+      "sha256": "c5c2096b4345b0e9ba61fd1377a17a314d881090195447c8d3834ef24cc6366e"
+    },
+    {
+      "id": "refund-image",
+      "family": "refund",
+      "kind": "image",
+      "path": "refund-image.png",
+      "url_shape": "tld",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: refund\n페이지: 1\n기관: 가상새롬금융\n상품: 시험환급론\n주소: https://refund.example/loan\n연 금리: 4.2%\n한도: 375만원\n상환 기간: 15개월\n보증료율: 0.1%\n보증금을 먼저 받고 환급하지 않습니다.\n환급 심사 기간을 단축해 주지 않습니다.",
+          "fields": {
+            "institution": "가상새롬금융",
+            "product": "시험환급론",
+            "url": "https://refund.example/loan"
+          },
+          "negations": [
+            "보증금을 먼저 받고 환급하지 않습니다.",
+            "환급 심사 기간을 단축해 주지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 65114,
+      "sha256": "5509e04d28b3cdc838619ae9e3805a1a0f5a0dbd6dd92670f09bf9ff42e277f7"
+    },
+    {
+      "id": "refund-digital",
+      "family": "refund",
+      "kind": "digital",
+      "path": "refund-digital.pdf",
+      "url_shape": "tld",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: refund\n페이지: 1\n기관: 가상새롬금융\n상품: 시험환급론\n주소: https://refund.example/loan\n연 금리: 4.3%\n한도: 375만원\n상환 기간: 15개월\n보증료율: 1.1%\n보증금을 먼저 받고 환급하지 않습니다.\n환급 심사 기간을 단축해 주지 않습니다.",
+          "fields": {
+            "institution": "가상새롬금융",
+            "product": "시험환급론",
+            "url": "https://refund.example/loan"
+          },
+          "negations": [
+            "보증금을 먼저 받고 환급하지 않습니다.",
+            "환급 심사 기간을 단축해 주지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: refund\n페이지: 2\n기관: 가상새롬금융\n상품: 시험환급론\n주소: https://refund.example/loan\n연 금리: 4.4%\n한도: 500만원\n상환 기간: 18개월\n보증료율: 1.2%\n보증금을 먼저 받고 환급하지 않습니다.\n환급 심사 기간을 단축해 주지 않습니다.",
+          "fields": {
+            "institution": "가상새롬금융",
+            "product": "시험환급론",
+            "url": "https://refund.example/loan"
+          },
+          "negations": [
+            "보증금을 먼저 받고 환급하지 않습니다.",
+            "환급 심사 기간을 단축해 주지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 113910,
+      "sha256": "e66aa70eda22afceae42f716574fda4d3f1dd2558351c13fddd8201bfd446961"
+    },
+    {
+      "id": "refund-scanned",
+      "family": "refund",
+      "kind": "scanned",
+      "path": "refund-scanned.pdf",
+      "url_shape": "tld",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: refund\n페이지: 1\n기관: 가상새롬금융\n상품: 시험환급론\n주소: https://refund.example/loan\n연 금리: 4.4%\n한도: 375만원\n상환 기간: 15개월\n보증료율: 2.1%\n보증금을 먼저 받고 환급하지 않습니다.\n환급 심사 기간을 단축해 주지 않습니다.",
+          "fields": {
+            "institution": "가상새롬금융",
+            "product": "시험환급론",
+            "url": "https://refund.example/loan"
+          },
+          "negations": [
+            "보증금을 먼저 받고 환급하지 않습니다.",
+            "환급 심사 기간을 단축해 주지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: refund\n페이지: 2\n기관: 가상새롬금융\n상품: 시험환급론\n주소: https://refund.example/loan\n연 금리: 4.5%\n한도: 500만원\n상환 기간: 18개월\n보증료율: 2.2%\n보증금을 먼저 받고 환급하지 않습니다.\n환급 심사 기간을 단축해 주지 않습니다.",
+          "fields": {
+            "institution": "가상새롬금융",
+            "product": "시험환급론",
+            "url": "https://refund.example/loan"
+          },
+          "negations": [
+            "보증금을 먼저 받고 환급하지 않습니다.",
+            "환급 심사 기간을 단축해 주지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: refund\n페이지: 3\n기관: 가상새롬금융\n상품: 시험환급론\n주소: https://refund.example/loan\n연 금리: 4.6%\n한도: 625만원\n상환 기간: 21개월\n보증료율: 2.3%\n보증금을 먼저 받고 환급하지 않습니다.\n환급 심사 기간을 단축해 주지 않습니다.",
+          "fields": {
+            "institution": "가상새롬금융",
+            "product": "시험환급론",
+            "url": "https://refund.example/loan"
+          },
+          "negations": [
+            "보증금을 먼저 받고 환급하지 않습니다.",
+            "환급 심사 기간을 단축해 주지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: refund\n페이지: 4\n기관: 가상새롬금융\n상품: 시험환급론\n주소: https://refund.example/loan\n연 금리: 4.7%\n한도: 750만원\n상환 기간: 24개월\n보증료율: 2.4%\n보증금을 먼저 받고 환급하지 않습니다.\n환급 심사 기간을 단축해 주지 않습니다.",
+          "fields": {
+            "institution": "가상새롬금융",
+            "product": "시험환급론",
+            "url": "https://refund.example/loan"
+          },
+          "negations": [
+            "보증금을 먼저 받고 환급하지 않습니다.",
+            "환급 심사 기간을 단축해 주지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: refund\n페이지: 5\n기관: 가상새롬금융\n상품: 시험환급론\n주소: https://refund.example/loan\n연 금리: 4.8%\n한도: 875만원\n상환 기간: 27개월\n보증료율: 2.5%\n보증금을 먼저 받고 환급하지 않습니다.\n환급 심사 기간을 단축해 주지 않습니다.",
+          "fields": {
+            "institution": "가상새롬금융",
+            "product": "시험환급론",
+            "url": "https://refund.example/loan"
+          },
+          "negations": [
+            "보증금을 먼저 받고 환급하지 않습니다.",
+            "환급 심사 기간을 단축해 주지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: refund\n페이지: 6\n기관: 가상새롬금융\n상품: 시험환급론\n주소: https://refund.example/loan\n연 금리: 4.9%\n한도: 1,000만원\n상환 기간: 30개월\n보증료율: 2.6%\n보증금을 먼저 받고 환급하지 않습니다.\n환급 심사 기간을 단축해 주지 않습니다.",
+          "fields": {
+            "institution": "가상새롬금융",
+            "product": "시험환급론",
+            "url": "https://refund.example/loan"
+          },
+          "negations": [
+            "보증금을 먼저 받고 환급하지 않습니다.",
+            "환급 심사 기간을 단축해 주지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: refund\n페이지: 7\n기관: 가상새롬금융\n상품: 시험환급론\n주소: https://refund.example/loan\n연 금리: 4.0%\n한도: 1,125만원\n상환 기간: 33개월\n보증료율: 2.7%\n보증금을 먼저 받고 환급하지 않습니다.\n환급 심사 기간을 단축해 주지 않습니다.",
+          "fields": {
+            "institution": "가상새롬금융",
+            "product": "시험환급론",
+            "url": "https://refund.example/loan"
+          },
+          "negations": [
+            "보증금을 먼저 받고 환급하지 않습니다.",
+            "환급 심사 기간을 단축해 주지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: refund\n페이지: 8\n기관: 가상새롬금융\n상품: 시험환급론\n주소: https://refund.example/loan\n연 금리: 4.1%\n한도: 1,250만원\n상환 기간: 36개월\n보증료율: 2.8%\n보증금을 먼저 받고 환급하지 않습니다.\n환급 심사 기간을 단축해 주지 않습니다.",
+          "fields": {
+            "institution": "가상새롬금융",
+            "product": "시험환급론",
+            "url": "https://refund.example/loan"
+          },
+          "negations": [
+            "보증금을 먼저 받고 환급하지 않습니다.",
+            "환급 심사 기간을 단축해 주지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: refund\n페이지: 9\n기관: 가상새롬금융\n상품: 시험환급론\n주소: https://refund.example/loan\n연 금리: 4.2%\n한도: 1,375만원\n상환 기간: 39개월\n보증료율: 2.9%\n보증금을 먼저 받고 환급하지 않습니다.\n환급 심사 기간을 단축해 주지 않습니다.",
+          "fields": {
+            "institution": "가상새롬금융",
+            "product": "시험환급론",
+            "url": "https://refund.example/loan"
+          },
+          "negations": [
+            "보증금을 먼저 받고 환급하지 않습니다.",
+            "환급 심사 기간을 단축해 주지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: refund\n페이지: 10\n기관: 가상새롬금융\n상품: 시험환급론\n주소: https://refund.example/loan\n연 금리: 4.3%\n한도: 1,500만원\n상환 기간: 42개월\n보증료율: 2.0%\n보증금을 먼저 받고 환급하지 않습니다.\n환급 심사 기간을 단축해 주지 않습니다.",
+          "fields": {
+            "institution": "가상새롬금융",
+            "product": "시험환급론",
+            "url": "https://refund.example/loan"
+          },
+          "negations": [
+            "보증금을 먼저 받고 환급하지 않습니다.",
+            "환급 심사 기간을 단축해 주지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 629245,
+      "sha256": "aee9be797b377e6241b5e04fef45d4dfe079b1a15ae914bb06f12ba187616f24"
+    },
+    {
+      "id": "credit-text",
+      "family": "credit",
+      "kind": "text",
+      "path": "credit-text.txt",
+      "url_shape": "tld",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: credit\n페이지: 1\n기관: 가상도담은행\n상품: 시험등급론\n주소: https://credit.example/loan\n연 금리: 5.1%\n한도: 500만원\n상환 기간: 15개월\n보증료율: 0.1%\n신용점수를 대신 올려 주지 않습니다.\n기존 연체 기록을 삭제하지 않습니다.",
+          "fields": {
+            "institution": "가상도담은행",
+            "product": "시험등급론",
+            "url": "https://credit.example/loan"
+          },
+          "negations": [
+            "신용점수를 대신 올려 주지 않습니다.",
+            "기존 연체 기록을 삭제하지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 398,
+      "sha256": "c0e0b64137b10ea56cd103a2b77c4bec0c2a647571a896770ef4ccc4272b0a2b"
+    },
+    {
+      "id": "credit-image",
+      "family": "credit",
+      "kind": "image",
+      "path": "credit-image.png",
+      "url_shape": "tld",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: credit\n페이지: 1\n기관: 가상도담은행\n상품: 시험등급론\n주소: https://credit.example/loan\n연 금리: 5.2%\n한도: 500만원\n상환 기간: 15개월\n보증료율: 1.1%\n신용점수를 대신 올려 주지 않습니다.\n기존 연체 기록을 삭제하지 않습니다.",
+          "fields": {
+            "institution": "가상도담은행",
+            "product": "시험등급론",
+            "url": "https://credit.example/loan"
+          },
+          "negations": [
+            "신용점수를 대신 올려 주지 않습니다.",
+            "기존 연체 기록을 삭제하지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 64255,
+      "sha256": "4bfcedbc879b7b26e16ec30618b829dc1fae19659c0012bb51089f9d1baeac8c"
+    },
+    {
+      "id": "credit-digital",
+      "family": "credit",
+      "kind": "digital",
+      "path": "credit-digital.pdf",
+      "url_shape": "tld",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: credit\n페이지: 1\n기관: 가상도담은행\n상품: 시험등급론\n주소: https://credit.example/loan\n연 금리: 5.3%\n한도: 500만원\n상환 기간: 15개월\n보증료율: 2.1%\n신용점수를 대신 올려 주지 않습니다.\n기존 연체 기록을 삭제하지 않습니다.",
+          "fields": {
+            "institution": "가상도담은행",
+            "product": "시험등급론",
+            "url": "https://credit.example/loan"
+          },
+          "negations": [
+            "신용점수를 대신 올려 주지 않습니다.",
+            "기존 연체 기록을 삭제하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: credit\n페이지: 2\n기관: 가상도담은행\n상품: 시험등급론\n주소: https://credit.example/loan\n연 금리: 5.4%\n한도: 625만원\n상환 기간: 18개월\n보증료율: 2.2%\n신용점수를 대신 올려 주지 않습니다.\n기존 연체 기록을 삭제하지 않습니다.",
+          "fields": {
+            "institution": "가상도담은행",
+            "product": "시험등급론",
+            "url": "https://credit.example/loan"
+          },
+          "negations": [
+            "신용점수를 대신 올려 주지 않습니다.",
+            "기존 연체 기록을 삭제하지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 114228,
+      "sha256": "8420deb0dfb3e31764de4fb06b6f7fe3c252731c22c76e4dd343d37d322bd010"
+    },
+    {
+      "id": "credit-scanned",
+      "family": "credit",
+      "kind": "scanned",
+      "path": "credit-scanned.pdf",
+      "url_shape": "tld",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: credit\n페이지: 1\n기관: 가상도담은행\n상품: 시험등급론\n주소: https://credit.example/loan\n연 금리: 5.4%\n한도: 500만원\n상환 기간: 15개월\n보증료율: 0.1%\n신용점수를 대신 올려 주지 않습니다.\n기존 연체 기록을 삭제하지 않습니다.",
+          "fields": {
+            "institution": "가상도담은행",
+            "product": "시험등급론",
+            "url": "https://credit.example/loan"
+          },
+          "negations": [
+            "신용점수를 대신 올려 주지 않습니다.",
+            "기존 연체 기록을 삭제하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: credit\n페이지: 2\n기관: 가상도담은행\n상품: 시험등급론\n주소: https://credit.example/loan\n연 금리: 5.5%\n한도: 625만원\n상환 기간: 18개월\n보증료율: 0.2%\n신용점수를 대신 올려 주지 않습니다.\n기존 연체 기록을 삭제하지 않습니다.",
+          "fields": {
+            "institution": "가상도담은행",
+            "product": "시험등급론",
+            "url": "https://credit.example/loan"
+          },
+          "negations": [
+            "신용점수를 대신 올려 주지 않습니다.",
+            "기존 연체 기록을 삭제하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: credit\n페이지: 3\n기관: 가상도담은행\n상품: 시험등급론\n주소: https://credit.example/loan\n연 금리: 5.6%\n한도: 750만원\n상환 기간: 21개월\n보증료율: 0.3%\n신용점수를 대신 올려 주지 않습니다.\n기존 연체 기록을 삭제하지 않습니다.",
+          "fields": {
+            "institution": "가상도담은행",
+            "product": "시험등급론",
+            "url": "https://credit.example/loan"
+          },
+          "negations": [
+            "신용점수를 대신 올려 주지 않습니다.",
+            "기존 연체 기록을 삭제하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: credit\n페이지: 4\n기관: 가상도담은행\n상품: 시험등급론\n주소: https://credit.example/loan\n연 금리: 5.7%\n한도: 875만원\n상환 기간: 24개월\n보증료율: 0.4%\n신용점수를 대신 올려 주지 않습니다.\n기존 연체 기록을 삭제하지 않습니다.",
+          "fields": {
+            "institution": "가상도담은행",
+            "product": "시험등급론",
+            "url": "https://credit.example/loan"
+          },
+          "negations": [
+            "신용점수를 대신 올려 주지 않습니다.",
+            "기존 연체 기록을 삭제하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: credit\n페이지: 5\n기관: 가상도담은행\n상품: 시험등급론\n주소: https://credit.example/loan\n연 금리: 5.8%\n한도: 1,000만원\n상환 기간: 27개월\n보증료율: 0.5%\n신용점수를 대신 올려 주지 않습니다.\n기존 연체 기록을 삭제하지 않습니다.",
+          "fields": {
+            "institution": "가상도담은행",
+            "product": "시험등급론",
+            "url": "https://credit.example/loan"
+          },
+          "negations": [
+            "신용점수를 대신 올려 주지 않습니다.",
+            "기존 연체 기록을 삭제하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: credit\n페이지: 6\n기관: 가상도담은행\n상품: 시험등급론\n주소: https://credit.example/loan\n연 금리: 5.9%\n한도: 1,125만원\n상환 기간: 30개월\n보증료율: 0.6%\n신용점수를 대신 올려 주지 않습니다.\n기존 연체 기록을 삭제하지 않습니다.",
+          "fields": {
+            "institution": "가상도담은행",
+            "product": "시험등급론",
+            "url": "https://credit.example/loan"
+          },
+          "negations": [
+            "신용점수를 대신 올려 주지 않습니다.",
+            "기존 연체 기록을 삭제하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: credit\n페이지: 7\n기관: 가상도담은행\n상품: 시험등급론\n주소: https://credit.example/loan\n연 금리: 5.0%\n한도: 1,250만원\n상환 기간: 33개월\n보증료율: 0.7%\n신용점수를 대신 올려 주지 않습니다.\n기존 연체 기록을 삭제하지 않습니다.",
+          "fields": {
+            "institution": "가상도담은행",
+            "product": "시험등급론",
+            "url": "https://credit.example/loan"
+          },
+          "negations": [
+            "신용점수를 대신 올려 주지 않습니다.",
+            "기존 연체 기록을 삭제하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: credit\n페이지: 8\n기관: 가상도담은행\n상품: 시험등급론\n주소: https://credit.example/loan\n연 금리: 5.1%\n한도: 1,375만원\n상환 기간: 36개월\n보증료율: 0.8%\n신용점수를 대신 올려 주지 않습니다.\n기존 연체 기록을 삭제하지 않습니다.",
+          "fields": {
+            "institution": "가상도담은행",
+            "product": "시험등급론",
+            "url": "https://credit.example/loan"
+          },
+          "negations": [
+            "신용점수를 대신 올려 주지 않습니다.",
+            "기존 연체 기록을 삭제하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: credit\n페이지: 9\n기관: 가상도담은행\n상품: 시험등급론\n주소: https://credit.example/loan\n연 금리: 5.2%\n한도: 1,500만원\n상환 기간: 39개월\n보증료율: 0.9%\n신용점수를 대신 올려 주지 않습니다.\n기존 연체 기록을 삭제하지 않습니다.",
+          "fields": {
+            "institution": "가상도담은행",
+            "product": "시험등급론",
+            "url": "https://credit.example/loan"
+          },
+          "negations": [
+            "신용점수를 대신 올려 주지 않습니다.",
+            "기존 연체 기록을 삭제하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: credit\n페이지: 10\n기관: 가상도담은행\n상품: 시험등급론\n주소: https://credit.example/loan\n연 금리: 5.3%\n한도: 1,625만원\n상환 기간: 42개월\n보증료율: 0.0%\n신용점수를 대신 올려 주지 않습니다.\n기존 연체 기록을 삭제하지 않습니다.",
+          "fields": {
+            "institution": "가상도담은행",
+            "product": "시험등급론",
+            "url": "https://credit.example/loan"
+          },
+          "negations": [
+            "신용점수를 대신 올려 주지 않습니다.",
+            "기존 연체 기록을 삭제하지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 624997,
+      "sha256": "e4577e72ed14a616c76e8da91035dfe564bf9c97af39653763c2aa53aa8fac2b"
+    },
+    {
+      "id": "bridge-text",
+      "family": "bridge",
+      "kind": "text",
+      "path": "bridge-text.txt",
+      "url_shape": "tld",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: bridge\n페이지: 1\n기관: 가상바로금융\n상품: 시험연결론\n주소: https://bridge.example/loan\n연 금리: 6.1%\n한도: 625만원\n상환 기간: 15개월\n보증료율: 1.1%\n기존 대출 상환을 대신 처리하지 않습니다.\n전환만으로 금리가 낮아지지 않습니다.",
+          "fields": {
+            "institution": "가상바로금융",
+            "product": "시험연결론",
+            "url": "https://bridge.example/loan"
+          },
+          "negations": [
+            "기존 대출 상환을 대신 처리하지 않습니다.",
+            "전환만으로 금리가 낮아지지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 407,
+      "sha256": "cd7d4b94f551647dbefbbdb4c7e694382d670d4c8b77f15125cdeef2347277ab"
+    },
+    {
+      "id": "bridge-image",
+      "family": "bridge",
+      "kind": "image",
+      "path": "bridge-image.png",
+      "url_shape": "tld",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: bridge\n페이지: 1\n기관: 가상바로금융\n상품: 시험연결론\n주소: https://bridge.example/loan\n연 금리: 6.2%\n한도: 625만원\n상환 기간: 15개월\n보증료율: 2.1%\n기존 대출 상환을 대신 처리하지 않습니다.\n전환만으로 금리가 낮아지지 않습니다.",
+          "fields": {
+            "institution": "가상바로금융",
+            "product": "시험연결론",
+            "url": "https://bridge.example/loan"
+          },
+          "negations": [
+            "기존 대출 상환을 대신 처리하지 않습니다.",
+            "전환만으로 금리가 낮아지지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 66231,
+      "sha256": "df0178e8d8fc04f8a164d55ffd777a643c1153147c794bf609bb685af5746225"
+    },
+    {
+      "id": "bridge-digital",
+      "family": "bridge",
+      "kind": "digital",
+      "path": "bridge-digital.pdf",
+      "url_shape": "tld",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: bridge\n페이지: 1\n기관: 가상바로금융\n상품: 시험연결론\n주소: https://bridge.example/loan\n연 금리: 6.3%\n한도: 625만원\n상환 기간: 15개월\n보증료율: 0.1%\n기존 대출 상환을 대신 처리하지 않습니다.\n전환만으로 금리가 낮아지지 않습니다.",
+          "fields": {
+            "institution": "가상바로금융",
+            "product": "시험연결론",
+            "url": "https://bridge.example/loan"
+          },
+          "negations": [
+            "기존 대출 상환을 대신 처리하지 않습니다.",
+            "전환만으로 금리가 낮아지지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: bridge\n페이지: 2\n기관: 가상바로금융\n상품: 시험연결론\n주소: https://bridge.example/loan\n연 금리: 6.4%\n한도: 750만원\n상환 기간: 18개월\n보증료율: 0.2%\n기존 대출 상환을 대신 처리하지 않습니다.\n전환만으로 금리가 낮아지지 않습니다.",
+          "fields": {
+            "institution": "가상바로금융",
+            "product": "시험연결론",
+            "url": "https://bridge.example/loan"
+          },
+          "negations": [
+            "기존 대출 상환을 대신 처리하지 않습니다.",
+            "전환만으로 금리가 낮아지지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 114253,
+      "sha256": "e25d8b5ef430094aeff9a4a55de90156d9a2a376040564bf4d532ae8af8b75d4"
+    },
+    {
+      "id": "bridge-scanned",
+      "family": "bridge",
+      "kind": "scanned",
+      "path": "bridge-scanned.pdf",
+      "url_shape": "tld",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: bridge\n페이지: 1\n기관: 가상바로금융\n상품: 시험연결론\n주소: https://bridge.example/loan\n연 금리: 6.4%\n한도: 625만원\n상환 기간: 15개월\n보증료율: 1.1%\n기존 대출 상환을 대신 처리하지 않습니다.\n전환만으로 금리가 낮아지지 않습니다.",
+          "fields": {
+            "institution": "가상바로금융",
+            "product": "시험연결론",
+            "url": "https://bridge.example/loan"
+          },
+          "negations": [
+            "기존 대출 상환을 대신 처리하지 않습니다.",
+            "전환만으로 금리가 낮아지지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: bridge\n페이지: 2\n기관: 가상바로금융\n상품: 시험연결론\n주소: https://bridge.example/loan\n연 금리: 6.5%\n한도: 750만원\n상환 기간: 18개월\n보증료율: 1.2%\n기존 대출 상환을 대신 처리하지 않습니다.\n전환만으로 금리가 낮아지지 않습니다.",
+          "fields": {
+            "institution": "가상바로금융",
+            "product": "시험연결론",
+            "url": "https://bridge.example/loan"
+          },
+          "negations": [
+            "기존 대출 상환을 대신 처리하지 않습니다.",
+            "전환만으로 금리가 낮아지지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: bridge\n페이지: 3\n기관: 가상바로금융\n상품: 시험연결론\n주소: https://bridge.example/loan\n연 금리: 6.6%\n한도: 875만원\n상환 기간: 21개월\n보증료율: 1.3%\n기존 대출 상환을 대신 처리하지 않습니다.\n전환만으로 금리가 낮아지지 않습니다.",
+          "fields": {
+            "institution": "가상바로금융",
+            "product": "시험연결론",
+            "url": "https://bridge.example/loan"
+          },
+          "negations": [
+            "기존 대출 상환을 대신 처리하지 않습니다.",
+            "전환만으로 금리가 낮아지지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: bridge\n페이지: 4\n기관: 가상바로금융\n상품: 시험연결론\n주소: https://bridge.example/loan\n연 금리: 6.7%\n한도: 1,000만원\n상환 기간: 24개월\n보증료율: 1.4%\n기존 대출 상환을 대신 처리하지 않습니다.\n전환만으로 금리가 낮아지지 않습니다.",
+          "fields": {
+            "institution": "가상바로금융",
+            "product": "시험연결론",
+            "url": "https://bridge.example/loan"
+          },
+          "negations": [
+            "기존 대출 상환을 대신 처리하지 않습니다.",
+            "전환만으로 금리가 낮아지지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: bridge\n페이지: 5\n기관: 가상바로금융\n상품: 시험연결론\n주소: https://bridge.example/loan\n연 금리: 6.8%\n한도: 1,125만원\n상환 기간: 27개월\n보증료율: 1.5%\n기존 대출 상환을 대신 처리하지 않습니다.\n전환만으로 금리가 낮아지지 않습니다.",
+          "fields": {
+            "institution": "가상바로금융",
+            "product": "시험연결론",
+            "url": "https://bridge.example/loan"
+          },
+          "negations": [
+            "기존 대출 상환을 대신 처리하지 않습니다.",
+            "전환만으로 금리가 낮아지지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: bridge\n페이지: 6\n기관: 가상바로금융\n상품: 시험연결론\n주소: https://bridge.example/loan\n연 금리: 6.9%\n한도: 1,250만원\n상환 기간: 30개월\n보증료율: 1.6%\n기존 대출 상환을 대신 처리하지 않습니다.\n전환만으로 금리가 낮아지지 않습니다.",
+          "fields": {
+            "institution": "가상바로금융",
+            "product": "시험연결론",
+            "url": "https://bridge.example/loan"
+          },
+          "negations": [
+            "기존 대출 상환을 대신 처리하지 않습니다.",
+            "전환만으로 금리가 낮아지지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: bridge\n페이지: 7\n기관: 가상바로금융\n상품: 시험연결론\n주소: https://bridge.example/loan\n연 금리: 6.0%\n한도: 1,375만원\n상환 기간: 33개월\n보증료율: 1.7%\n기존 대출 상환을 대신 처리하지 않습니다.\n전환만으로 금리가 낮아지지 않습니다.",
+          "fields": {
+            "institution": "가상바로금융",
+            "product": "시험연결론",
+            "url": "https://bridge.example/loan"
+          },
+          "negations": [
+            "기존 대출 상환을 대신 처리하지 않습니다.",
+            "전환만으로 금리가 낮아지지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: bridge\n페이지: 8\n기관: 가상바로금융\n상품: 시험연결론\n주소: https://bridge.example/loan\n연 금리: 6.1%\n한도: 1,500만원\n상환 기간: 36개월\n보증료율: 1.8%\n기존 대출 상환을 대신 처리하지 않습니다.\n전환만으로 금리가 낮아지지 않습니다.",
+          "fields": {
+            "institution": "가상바로금융",
+            "product": "시험연결론",
+            "url": "https://bridge.example/loan"
+          },
+          "negations": [
+            "기존 대출 상환을 대신 처리하지 않습니다.",
+            "전환만으로 금리가 낮아지지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: bridge\n페이지: 9\n기관: 가상바로금융\n상품: 시험연결론\n주소: https://bridge.example/loan\n연 금리: 6.2%\n한도: 1,625만원\n상환 기간: 39개월\n보증료율: 1.9%\n기존 대출 상환을 대신 처리하지 않습니다.\n전환만으로 금리가 낮아지지 않습니다.",
+          "fields": {
+            "institution": "가상바로금융",
+            "product": "시험연결론",
+            "url": "https://bridge.example/loan"
+          },
+          "negations": [
+            "기존 대출 상환을 대신 처리하지 않습니다.",
+            "전환만으로 금리가 낮아지지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: bridge\n페이지: 10\n기관: 가상바로금융\n상품: 시험연결론\n주소: https://bridge.example/loan\n연 금리: 6.3%\n한도: 1,750만원\n상환 기간: 42개월\n보증료율: 1.0%\n기존 대출 상환을 대신 처리하지 않습니다.\n전환만으로 금리가 낮아지지 않습니다.",
+          "fields": {
+            "institution": "가상바로금융",
+            "product": "시험연결론",
+            "url": "https://bridge.example/loan"
+          },
+          "negations": [
+            "기존 대출 상환을 대신 처리하지 않습니다.",
+            "전환만으로 금리가 낮아지지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 636992,
+      "sha256": "bd07b0b79e7c2b3cb38fe352c8be86500da8fc72270d3dc573f5365f6e0d8bf6"
+    },
+    {
+      "id": "insurance-text",
+      "family": "insurance",
+      "kind": "text",
+      "path": "insurance-text.txt",
+      "url_shape": "host",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: insurance\n페이지: 1\n기관: 가상해든은행\n상품: 시험보험론\n주소: https://www.example.com/insurance\n연 금리: 7.1%\n한도: 750만원\n상환 기간: 15개월\n보증료율: 2.1%\n보험료를 개인 계좌로 받지 않습니다.\n보험 가입이 승인 조건이 아닙니다.",
+          "fields": {
+            "institution": "가상해든은행",
+            "product": "시험보험론",
+            "url": "https://www.example.com/insurance"
+          },
+          "negations": [
+            "보험료를 개인 계좌로 받지 않습니다.",
+            "보험 가입이 승인 조건이 아닙니다."
+          ]
+        }
+      ],
+      "bytes": 404,
+      "sha256": "a003811a37e4b8b81601991afd366a70500cd7c83eaac242dfdb596837ab6486"
+    },
+    {
+      "id": "insurance-image",
+      "family": "insurance",
+      "kind": "image",
+      "path": "insurance-image.png",
+      "url_shape": "host",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: insurance\n페이지: 1\n기관: 가상해든은행\n상품: 시험보험론\n주소: https://www.example.com/insurance\n연 금리: 7.2%\n한도: 750만원\n상환 기간: 15개월\n보증료율: 0.1%\n보험료를 개인 계좌로 받지 않습니다.\n보험 가입이 승인 조건이 아닙니다.",
+          "fields": {
+            "institution": "가상해든은행",
+            "product": "시험보험론",
+            "url": "https://www.example.com/insurance"
+          },
+          "negations": [
+            "보험료를 개인 계좌로 받지 않습니다.",
+            "보험 가입이 승인 조건이 아닙니다."
+          ]
+        }
+      ],
+      "bytes": 64857,
+      "sha256": "d8da33e5018afacedb748cc3f1ffadf799b45b251729a0fa7891bd8f35c7509c"
+    },
+    {
+      "id": "insurance-digital",
+      "family": "insurance",
+      "kind": "digital",
+      "path": "insurance-digital.pdf",
+      "url_shape": "host",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: insurance\n페이지: 1\n기관: 가상해든은행\n상품: 시험보험론\n주소: https://www.example.com/insurance\n연 금리: 7.3%\n한도: 750만원\n상환 기간: 15개월\n보증료율: 1.1%\n보험료를 개인 계좌로 받지 않습니다.\n보험 가입이 승인 조건이 아닙니다.",
+          "fields": {
+            "institution": "가상해든은행",
+            "product": "시험보험론",
+            "url": "https://www.example.com/insurance"
+          },
+          "negations": [
+            "보험료를 개인 계좌로 받지 않습니다.",
+            "보험 가입이 승인 조건이 아닙니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: insurance\n페이지: 2\n기관: 가상해든은행\n상품: 시험보험론\n주소: https://www.example.com/insurance\n연 금리: 7.4%\n한도: 875만원\n상환 기간: 18개월\n보증료율: 1.2%\n보험료를 개인 계좌로 받지 않습니다.\n보험 가입이 승인 조건이 아닙니다.",
+          "fields": {
+            "institution": "가상해든은행",
+            "product": "시험보험론",
+            "url": "https://www.example.com/insurance"
+          },
+          "negations": [
+            "보험료를 개인 계좌로 받지 않습니다.",
+            "보험 가입이 승인 조건이 아닙니다."
+          ]
+        }
+      ],
+      "bytes": 113976,
+      "sha256": "93d0b7dec08376c3ef9a38692a73350ada97174a85ac44b1a36b767934bac941"
+    },
+    {
+      "id": "insurance-scanned",
+      "family": "insurance",
+      "kind": "scanned",
+      "path": "insurance-scanned.pdf",
+      "url_shape": "host",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: insurance\n페이지: 1\n기관: 가상해든은행\n상품: 시험보험론\n주소: https://www.example.com/insurance\n연 금리: 7.4%\n한도: 750만원\n상환 기간: 15개월\n보증료율: 2.1%\n보험료를 개인 계좌로 받지 않습니다.\n보험 가입이 승인 조건이 아닙니다.",
+          "fields": {
+            "institution": "가상해든은행",
+            "product": "시험보험론",
+            "url": "https://www.example.com/insurance"
+          },
+          "negations": [
+            "보험료를 개인 계좌로 받지 않습니다.",
+            "보험 가입이 승인 조건이 아닙니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: insurance\n페이지: 2\n기관: 가상해든은행\n상품: 시험보험론\n주소: https://www.example.com/insurance\n연 금리: 7.5%\n한도: 875만원\n상환 기간: 18개월\n보증료율: 2.2%\n보험료를 개인 계좌로 받지 않습니다.\n보험 가입이 승인 조건이 아닙니다.",
+          "fields": {
+            "institution": "가상해든은행",
+            "product": "시험보험론",
+            "url": "https://www.example.com/insurance"
+          },
+          "negations": [
+            "보험료를 개인 계좌로 받지 않습니다.",
+            "보험 가입이 승인 조건이 아닙니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: insurance\n페이지: 3\n기관: 가상해든은행\n상품: 시험보험론\n주소: https://www.example.com/insurance\n연 금리: 7.6%\n한도: 1,000만원\n상환 기간: 21개월\n보증료율: 2.3%\n보험료를 개인 계좌로 받지 않습니다.\n보험 가입이 승인 조건이 아닙니다.",
+          "fields": {
+            "institution": "가상해든은행",
+            "product": "시험보험론",
+            "url": "https://www.example.com/insurance"
+          },
+          "negations": [
+            "보험료를 개인 계좌로 받지 않습니다.",
+            "보험 가입이 승인 조건이 아닙니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: insurance\n페이지: 4\n기관: 가상해든은행\n상품: 시험보험론\n주소: https://www.example.com/insurance\n연 금리: 7.7%\n한도: 1,125만원\n상환 기간: 24개월\n보증료율: 2.4%\n보험료를 개인 계좌로 받지 않습니다.\n보험 가입이 승인 조건이 아닙니다.",
+          "fields": {
+            "institution": "가상해든은행",
+            "product": "시험보험론",
+            "url": "https://www.example.com/insurance"
+          },
+          "negations": [
+            "보험료를 개인 계좌로 받지 않습니다.",
+            "보험 가입이 승인 조건이 아닙니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: insurance\n페이지: 5\n기관: 가상해든은행\n상품: 시험보험론\n주소: https://www.example.com/insurance\n연 금리: 7.8%\n한도: 1,250만원\n상환 기간: 27개월\n보증료율: 2.5%\n보험료를 개인 계좌로 받지 않습니다.\n보험 가입이 승인 조건이 아닙니다.",
+          "fields": {
+            "institution": "가상해든은행",
+            "product": "시험보험론",
+            "url": "https://www.example.com/insurance"
+          },
+          "negations": [
+            "보험료를 개인 계좌로 받지 않습니다.",
+            "보험 가입이 승인 조건이 아닙니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: insurance\n페이지: 6\n기관: 가상해든은행\n상품: 시험보험론\n주소: https://www.example.com/insurance\n연 금리: 7.9%\n한도: 1,375만원\n상환 기간: 30개월\n보증료율: 2.6%\n보험료를 개인 계좌로 받지 않습니다.\n보험 가입이 승인 조건이 아닙니다.",
+          "fields": {
+            "institution": "가상해든은행",
+            "product": "시험보험론",
+            "url": "https://www.example.com/insurance"
+          },
+          "negations": [
+            "보험료를 개인 계좌로 받지 않습니다.",
+            "보험 가입이 승인 조건이 아닙니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: insurance\n페이지: 7\n기관: 가상해든은행\n상품: 시험보험론\n주소: https://www.example.com/insurance\n연 금리: 7.0%\n한도: 1,500만원\n상환 기간: 33개월\n보증료율: 2.7%\n보험료를 개인 계좌로 받지 않습니다.\n보험 가입이 승인 조건이 아닙니다.",
+          "fields": {
+            "institution": "가상해든은행",
+            "product": "시험보험론",
+            "url": "https://www.example.com/insurance"
+          },
+          "negations": [
+            "보험료를 개인 계좌로 받지 않습니다.",
+            "보험 가입이 승인 조건이 아닙니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: insurance\n페이지: 8\n기관: 가상해든은행\n상품: 시험보험론\n주소: https://www.example.com/insurance\n연 금리: 7.1%\n한도: 1,625만원\n상환 기간: 36개월\n보증료율: 2.8%\n보험료를 개인 계좌로 받지 않습니다.\n보험 가입이 승인 조건이 아닙니다.",
+          "fields": {
+            "institution": "가상해든은행",
+            "product": "시험보험론",
+            "url": "https://www.example.com/insurance"
+          },
+          "negations": [
+            "보험료를 개인 계좌로 받지 않습니다.",
+            "보험 가입이 승인 조건이 아닙니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: insurance\n페이지: 9\n기관: 가상해든은행\n상품: 시험보험론\n주소: https://www.example.com/insurance\n연 금리: 7.2%\n한도: 1,750만원\n상환 기간: 39개월\n보증료율: 2.9%\n보험료를 개인 계좌로 받지 않습니다.\n보험 가입이 승인 조건이 아닙니다.",
+          "fields": {
+            "institution": "가상해든은행",
+            "product": "시험보험론",
+            "url": "https://www.example.com/insurance"
+          },
+          "negations": [
+            "보험료를 개인 계좌로 받지 않습니다.",
+            "보험 가입이 승인 조건이 아닙니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: insurance\n페이지: 10\n기관: 가상해든은행\n상품: 시험보험론\n주소: https://www.example.com/insurance\n연 금리: 7.3%\n한도: 1,875만원\n상환 기간: 42개월\n보증료율: 2.0%\n보험료를 개인 계좌로 받지 않습니다.\n보험 가입이 승인 조건이 아닙니다.",
+          "fields": {
+            "institution": "가상해든은행",
+            "product": "시험보험론",
+            "url": "https://www.example.com/insurance"
+          },
+          "negations": [
+            "보험료를 개인 계좌로 받지 않습니다.",
+            "보험 가입이 승인 조건이 아닙니다."
+          ]
+        }
+      ],
+      "bytes": 626691,
+      "sha256": "f491206ac71803348da2311998887a2cb5b754e6b34c7c92a514299489b93ccd"
+    },
+    {
+      "id": "remote-text",
+      "family": "remote",
+      "kind": "text",
+      "path": "remote-text.txt",
+      "url_shape": "host",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: remote\n페이지: 1\n기관: 가상늘봄금융\n상품: 시험간편론\n주소: https://www.example.com/remote\n연 금리: 8.1%\n한도: 875만원\n상환 기간: 15개월\n보증료율: 0.1%\n원격 제어 앱 설치를 요구하지 않습니다.\n휴대전화 인증만으로 실행하지 않습니다.",
+          "fields": {
+            "institution": "가상늘봄금융",
+            "product": "시험간편론",
+            "url": "https://www.example.com/remote"
+          },
+          "negations": [
+            "원격 제어 앱 설치를 요구하지 않습니다.",
+            "휴대전화 인증만으로 실행하지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 410,
+      "sha256": "5456cc12a47ab119d1f9e0c088333cb9f3df47aa961ea96fc19ee66d524de053"
+    },
+    {
+      "id": "remote-image",
+      "family": "remote",
+      "kind": "image",
+      "path": "remote-image.png",
+      "url_shape": "host",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: remote\n페이지: 1\n기관: 가상늘봄금융\n상품: 시험간편론\n주소: https://www.example.com/remote\n연 금리: 8.2%\n한도: 875만원\n상환 기간: 15개월\n보증료율: 1.1%\n원격 제어 앱 설치를 요구하지 않습니다.\n휴대전화 인증만으로 실행하지 않습니다.",
+          "fields": {
+            "institution": "가상늘봄금융",
+            "product": "시험간편론",
+            "url": "https://www.example.com/remote"
+          },
+          "negations": [
+            "원격 제어 앱 설치를 요구하지 않습니다.",
+            "휴대전화 인증만으로 실행하지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 67435,
+      "sha256": "a423e983c392b90e01fc74c9cb37e517a345b7eb42e807ce463d75607309de51"
+    },
+    {
+      "id": "remote-digital",
+      "family": "remote",
+      "kind": "digital",
+      "path": "remote-digital.pdf",
+      "url_shape": "host",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: remote\n페이지: 1\n기관: 가상늘봄금융\n상품: 시험간편론\n주소: https://www.example.com/remote\n연 금리: 8.3%\n한도: 875만원\n상환 기간: 15개월\n보증료율: 2.1%\n원격 제어 앱 설치를 요구하지 않습니다.\n휴대전화 인증만으로 실행하지 않습니다.",
+          "fields": {
+            "institution": "가상늘봄금융",
+            "product": "시험간편론",
+            "url": "https://www.example.com/remote"
+          },
+          "negations": [
+            "원격 제어 앱 설치를 요구하지 않습니다.",
+            "휴대전화 인증만으로 실행하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: remote\n페이지: 2\n기관: 가상늘봄금융\n상품: 시험간편론\n주소: https://www.example.com/remote\n연 금리: 8.4%\n한도: 1,000만원\n상환 기간: 18개월\n보증료율: 2.2%\n원격 제어 앱 설치를 요구하지 않습니다.\n휴대전화 인증만으로 실행하지 않습니다.",
+          "fields": {
+            "institution": "가상늘봄금융",
+            "product": "시험간편론",
+            "url": "https://www.example.com/remote"
+          },
+          "negations": [
+            "원격 제어 앱 설치를 요구하지 않습니다.",
+            "휴대전화 인증만으로 실행하지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 114564,
+      "sha256": "86d3196b48b5129df9fe35def5478562598056798f75f4b293b732eea7e9a3a1"
+    },
+    {
+      "id": "remote-scanned",
+      "family": "remote",
+      "kind": "scanned",
+      "path": "remote-scanned.pdf",
+      "url_shape": "host",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: remote\n페이지: 1\n기관: 가상늘봄금융\n상품: 시험간편론\n주소: https://www.example.com/remote\n연 금리: 8.4%\n한도: 875만원\n상환 기간: 15개월\n보증료율: 0.1%\n원격 제어 앱 설치를 요구하지 않습니다.\n휴대전화 인증만으로 실행하지 않습니다.",
+          "fields": {
+            "institution": "가상늘봄금융",
+            "product": "시험간편론",
+            "url": "https://www.example.com/remote"
+          },
+          "negations": [
+            "원격 제어 앱 설치를 요구하지 않습니다.",
+            "휴대전화 인증만으로 실행하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: remote\n페이지: 2\n기관: 가상늘봄금융\n상품: 시험간편론\n주소: https://www.example.com/remote\n연 금리: 8.5%\n한도: 1,000만원\n상환 기간: 18개월\n보증료율: 0.2%\n원격 제어 앱 설치를 요구하지 않습니다.\n휴대전화 인증만으로 실행하지 않습니다.",
+          "fields": {
+            "institution": "가상늘봄금융",
+            "product": "시험간편론",
+            "url": "https://www.example.com/remote"
+          },
+          "negations": [
+            "원격 제어 앱 설치를 요구하지 않습니다.",
+            "휴대전화 인증만으로 실행하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: remote\n페이지: 3\n기관: 가상늘봄금융\n상품: 시험간편론\n주소: https://www.example.com/remote\n연 금리: 8.6%\n한도: 1,125만원\n상환 기간: 21개월\n보증료율: 0.3%\n원격 제어 앱 설치를 요구하지 않습니다.\n휴대전화 인증만으로 실행하지 않습니다.",
+          "fields": {
+            "institution": "가상늘봄금융",
+            "product": "시험간편론",
+            "url": "https://www.example.com/remote"
+          },
+          "negations": [
+            "원격 제어 앱 설치를 요구하지 않습니다.",
+            "휴대전화 인증만으로 실행하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: remote\n페이지: 4\n기관: 가상늘봄금융\n상품: 시험간편론\n주소: https://www.example.com/remote\n연 금리: 8.7%\n한도: 1,250만원\n상환 기간: 24개월\n보증료율: 0.4%\n원격 제어 앱 설치를 요구하지 않습니다.\n휴대전화 인증만으로 실행하지 않습니다.",
+          "fields": {
+            "institution": "가상늘봄금융",
+            "product": "시험간편론",
+            "url": "https://www.example.com/remote"
+          },
+          "negations": [
+            "원격 제어 앱 설치를 요구하지 않습니다.",
+            "휴대전화 인증만으로 실행하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: remote\n페이지: 5\n기관: 가상늘봄금융\n상품: 시험간편론\n주소: https://www.example.com/remote\n연 금리: 8.8%\n한도: 1,375만원\n상환 기간: 27개월\n보증료율: 0.5%\n원격 제어 앱 설치를 요구하지 않습니다.\n휴대전화 인증만으로 실행하지 않습니다.",
+          "fields": {
+            "institution": "가상늘봄금융",
+            "product": "시험간편론",
+            "url": "https://www.example.com/remote"
+          },
+          "negations": [
+            "원격 제어 앱 설치를 요구하지 않습니다.",
+            "휴대전화 인증만으로 실행하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: remote\n페이지: 6\n기관: 가상늘봄금융\n상품: 시험간편론\n주소: https://www.example.com/remote\n연 금리: 8.9%\n한도: 1,500만원\n상환 기간: 30개월\n보증료율: 0.6%\n원격 제어 앱 설치를 요구하지 않습니다.\n휴대전화 인증만으로 실행하지 않습니다.",
+          "fields": {
+            "institution": "가상늘봄금융",
+            "product": "시험간편론",
+            "url": "https://www.example.com/remote"
+          },
+          "negations": [
+            "원격 제어 앱 설치를 요구하지 않습니다.",
+            "휴대전화 인증만으로 실행하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: remote\n페이지: 7\n기관: 가상늘봄금융\n상품: 시험간편론\n주소: https://www.example.com/remote\n연 금리: 8.0%\n한도: 1,625만원\n상환 기간: 33개월\n보증료율: 0.7%\n원격 제어 앱 설치를 요구하지 않습니다.\n휴대전화 인증만으로 실행하지 않습니다.",
+          "fields": {
+            "institution": "가상늘봄금융",
+            "product": "시험간편론",
+            "url": "https://www.example.com/remote"
+          },
+          "negations": [
+            "원격 제어 앱 설치를 요구하지 않습니다.",
+            "휴대전화 인증만으로 실행하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: remote\n페이지: 8\n기관: 가상늘봄금융\n상품: 시험간편론\n주소: https://www.example.com/remote\n연 금리: 8.1%\n한도: 1,750만원\n상환 기간: 36개월\n보증료율: 0.8%\n원격 제어 앱 설치를 요구하지 않습니다.\n휴대전화 인증만으로 실행하지 않습니다.",
+          "fields": {
+            "institution": "가상늘봄금융",
+            "product": "시험간편론",
+            "url": "https://www.example.com/remote"
+          },
+          "negations": [
+            "원격 제어 앱 설치를 요구하지 않습니다.",
+            "휴대전화 인증만으로 실행하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: remote\n페이지: 9\n기관: 가상늘봄금융\n상품: 시험간편론\n주소: https://www.example.com/remote\n연 금리: 8.2%\n한도: 1,875만원\n상환 기간: 39개월\n보증료율: 0.9%\n원격 제어 앱 설치를 요구하지 않습니다.\n휴대전화 인증만으로 실행하지 않습니다.",
+          "fields": {
+            "institution": "가상늘봄금융",
+            "product": "시험간편론",
+            "url": "https://www.example.com/remote"
+          },
+          "negations": [
+            "원격 제어 앱 설치를 요구하지 않습니다.",
+            "휴대전화 인증만으로 실행하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: remote\n페이지: 10\n기관: 가상늘봄금융\n상품: 시험간편론\n주소: https://www.example.com/remote\n연 금리: 8.3%\n한도: 2,000만원\n상환 기간: 42개월\n보증료율: 0.0%\n원격 제어 앱 설치를 요구하지 않습니다.\n휴대전화 인증만으로 실행하지 않습니다.",
+          "fields": {
+            "institution": "가상늘봄금융",
+            "product": "시험간편론",
+            "url": "https://www.example.com/remote"
+          },
+          "negations": [
+            "원격 제어 앱 설치를 요구하지 않습니다.",
+            "휴대전화 인증만으로 실행하지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 656153,
+      "sha256": "f09ca394ab89dbe086019326b8afed755f9bd0f2e2790c2ba7b741b607055462"
+    },
+    {
+      "id": "paperwork-text",
+      "family": "paperwork",
+      "kind": "text",
+      "path": "paperwork-text.txt",
+      "url_shape": "host",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: paperwork\n페이지: 1\n기관: 가상가온은행\n상품: 시험서류론\n주소: https://www.example.com/paperwork\n연 금리: 9.1%\n한도: 1,000만원\n상환 기간: 15개월\n보증료율: 1.1%\n서류를 대신 작성해 주지 않습니다.\n소득 자료 수정 요청에 응하지 않습니다.",
+          "fields": {
+            "institution": "가상가온은행",
+            "product": "시험서류론",
+            "url": "https://www.example.com/paperwork"
+          },
+          "negations": [
+            "서류를 대신 작성해 주지 않습니다.",
+            "소득 자료 수정 요청에 응하지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 410,
+      "sha256": "5e97bcf223846ab78935e7b797fb4f4ae738a28cdcb2d2bc1163e7b2b4d0df46"
+    },
+    {
+      "id": "paperwork-image",
+      "family": "paperwork",
+      "kind": "image",
+      "path": "paperwork-image.png",
+      "url_shape": "host",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: paperwork\n페이지: 1\n기관: 가상가온은행\n상품: 시험서류론\n주소: https://www.example.com/paperwork\n연 금리: 9.2%\n한도: 1,000만원\n상환 기간: 15개월\n보증료율: 2.1%\n서류를 대신 작성해 주지 않습니다.\n소득 자료 수정 요청에 응하지 않습니다.",
+          "fields": {
+            "institution": "가상가온은행",
+            "product": "시험서류론",
+            "url": "https://www.example.com/paperwork"
+          },
+          "negations": [
+            "서류를 대신 작성해 주지 않습니다.",
+            "소득 자료 수정 요청에 응하지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 67810,
+      "sha256": "5e14a87e00e41a0e8d8252beb59919b19bd4af199af4909ccd2ac8b2ce0386c8"
+    },
+    {
+      "id": "paperwork-digital",
+      "family": "paperwork",
+      "kind": "digital",
+      "path": "paperwork-digital.pdf",
+      "url_shape": "host",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: paperwork\n페이지: 1\n기관: 가상가온은행\n상품: 시험서류론\n주소: https://www.example.com/paperwork\n연 금리: 9.3%\n한도: 1,000만원\n상환 기간: 15개월\n보증료율: 0.1%\n서류를 대신 작성해 주지 않습니다.\n소득 자료 수정 요청에 응하지 않습니다.",
+          "fields": {
+            "institution": "가상가온은행",
+            "product": "시험서류론",
+            "url": "https://www.example.com/paperwork"
+          },
+          "negations": [
+            "서류를 대신 작성해 주지 않습니다.",
+            "소득 자료 수정 요청에 응하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: paperwork\n페이지: 2\n기관: 가상가온은행\n상품: 시험서류론\n주소: https://www.example.com/paperwork\n연 금리: 9.4%\n한도: 1,125만원\n상환 기간: 18개월\n보증료율: 0.2%\n서류를 대신 작성해 주지 않습니다.\n소득 자료 수정 요청에 응하지 않습니다.",
+          "fields": {
+            "institution": "가상가온은행",
+            "product": "시험서류론",
+            "url": "https://www.example.com/paperwork"
+          },
+          "negations": [
+            "서류를 대신 작성해 주지 않습니다.",
+            "소득 자료 수정 요청에 응하지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 114500,
+      "sha256": "bea76ad96a675e1f0affe494a38448e78dd70e602c7e42259ba7c7b849591b18"
+    },
+    {
+      "id": "paperwork-scanned",
+      "family": "paperwork",
+      "kind": "scanned",
+      "path": "paperwork-scanned.pdf",
+      "url_shape": "host",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: paperwork\n페이지: 1\n기관: 가상가온은행\n상품: 시험서류론\n주소: https://www.example.com/paperwork\n연 금리: 9.4%\n한도: 1,000만원\n상환 기간: 15개월\n보증료율: 1.1%\n서류를 대신 작성해 주지 않습니다.\n소득 자료 수정 요청에 응하지 않습니다.",
+          "fields": {
+            "institution": "가상가온은행",
+            "product": "시험서류론",
+            "url": "https://www.example.com/paperwork"
+          },
+          "negations": [
+            "서류를 대신 작성해 주지 않습니다.",
+            "소득 자료 수정 요청에 응하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: paperwork\n페이지: 2\n기관: 가상가온은행\n상품: 시험서류론\n주소: https://www.example.com/paperwork\n연 금리: 9.5%\n한도: 1,125만원\n상환 기간: 18개월\n보증료율: 1.2%\n서류를 대신 작성해 주지 않습니다.\n소득 자료 수정 요청에 응하지 않습니다.",
+          "fields": {
+            "institution": "가상가온은행",
+            "product": "시험서류론",
+            "url": "https://www.example.com/paperwork"
+          },
+          "negations": [
+            "서류를 대신 작성해 주지 않습니다.",
+            "소득 자료 수정 요청에 응하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: paperwork\n페이지: 3\n기관: 가상가온은행\n상품: 시험서류론\n주소: https://www.example.com/paperwork\n연 금리: 9.6%\n한도: 1,250만원\n상환 기간: 21개월\n보증료율: 1.3%\n서류를 대신 작성해 주지 않습니다.\n소득 자료 수정 요청에 응하지 않습니다.",
+          "fields": {
+            "institution": "가상가온은행",
+            "product": "시험서류론",
+            "url": "https://www.example.com/paperwork"
+          },
+          "negations": [
+            "서류를 대신 작성해 주지 않습니다.",
+            "소득 자료 수정 요청에 응하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: paperwork\n페이지: 4\n기관: 가상가온은행\n상품: 시험서류론\n주소: https://www.example.com/paperwork\n연 금리: 9.7%\n한도: 1,375만원\n상환 기간: 24개월\n보증료율: 1.4%\n서류를 대신 작성해 주지 않습니다.\n소득 자료 수정 요청에 응하지 않습니다.",
+          "fields": {
+            "institution": "가상가온은행",
+            "product": "시험서류론",
+            "url": "https://www.example.com/paperwork"
+          },
+          "negations": [
+            "서류를 대신 작성해 주지 않습니다.",
+            "소득 자료 수정 요청에 응하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: paperwork\n페이지: 5\n기관: 가상가온은행\n상품: 시험서류론\n주소: https://www.example.com/paperwork\n연 금리: 9.8%\n한도: 1,500만원\n상환 기간: 27개월\n보증료율: 1.5%\n서류를 대신 작성해 주지 않습니다.\n소득 자료 수정 요청에 응하지 않습니다.",
+          "fields": {
+            "institution": "가상가온은행",
+            "product": "시험서류론",
+            "url": "https://www.example.com/paperwork"
+          },
+          "negations": [
+            "서류를 대신 작성해 주지 않습니다.",
+            "소득 자료 수정 요청에 응하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: paperwork\n페이지: 6\n기관: 가상가온은행\n상품: 시험서류론\n주소: https://www.example.com/paperwork\n연 금리: 9.9%\n한도: 1,625만원\n상환 기간: 30개월\n보증료율: 1.6%\n서류를 대신 작성해 주지 않습니다.\n소득 자료 수정 요청에 응하지 않습니다.",
+          "fields": {
+            "institution": "가상가온은행",
+            "product": "시험서류론",
+            "url": "https://www.example.com/paperwork"
+          },
+          "negations": [
+            "서류를 대신 작성해 주지 않습니다.",
+            "소득 자료 수정 요청에 응하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: paperwork\n페이지: 7\n기관: 가상가온은행\n상품: 시험서류론\n주소: https://www.example.com/paperwork\n연 금리: 9.0%\n한도: 1,750만원\n상환 기간: 33개월\n보증료율: 1.7%\n서류를 대신 작성해 주지 않습니다.\n소득 자료 수정 요청에 응하지 않습니다.",
+          "fields": {
+            "institution": "가상가온은행",
+            "product": "시험서류론",
+            "url": "https://www.example.com/paperwork"
+          },
+          "negations": [
+            "서류를 대신 작성해 주지 않습니다.",
+            "소득 자료 수정 요청에 응하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: paperwork\n페이지: 8\n기관: 가상가온은행\n상품: 시험서류론\n주소: https://www.example.com/paperwork\n연 금리: 9.1%\n한도: 1,875만원\n상환 기간: 36개월\n보증료율: 1.8%\n서류를 대신 작성해 주지 않습니다.\n소득 자료 수정 요청에 응하지 않습니다.",
+          "fields": {
+            "institution": "가상가온은행",
+            "product": "시험서류론",
+            "url": "https://www.example.com/paperwork"
+          },
+          "negations": [
+            "서류를 대신 작성해 주지 않습니다.",
+            "소득 자료 수정 요청에 응하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: paperwork\n페이지: 9\n기관: 가상가온은행\n상품: 시험서류론\n주소: https://www.example.com/paperwork\n연 금리: 9.2%\n한도: 2,000만원\n상환 기간: 39개월\n보증료율: 1.9%\n서류를 대신 작성해 주지 않습니다.\n소득 자료 수정 요청에 응하지 않습니다.",
+          "fields": {
+            "institution": "가상가온은행",
+            "product": "시험서류론",
+            "url": "https://www.example.com/paperwork"
+          },
+          "negations": [
+            "서류를 대신 작성해 주지 않습니다.",
+            "소득 자료 수정 요청에 응하지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: paperwork\n페이지: 10\n기관: 가상가온은행\n상품: 시험서류론\n주소: https://www.example.com/paperwork\n연 금리: 9.3%\n한도: 2,125만원\n상환 기간: 42개월\n보증료율: 1.0%\n서류를 대신 작성해 주지 않습니다.\n소득 자료 수정 요청에 응하지 않습니다.",
+          "fields": {
+            "institution": "가상가온은행",
+            "product": "시험서류론",
+            "url": "https://www.example.com/paperwork"
+          },
+          "negations": [
+            "서류를 대신 작성해 주지 않습니다.",
+            "소득 자료 수정 요청에 응하지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 652549,
+      "sha256": "0caca57ac2128ba0e907e4f829535e5c52a3eb921ccc88135c49908c236c1231"
+    },
+    {
+      "id": "earlyrepay-text",
+      "family": "earlyrepay",
+      "kind": "text",
+      "path": "earlyrepay-text.txt",
+      "url_shape": "host",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: earlyrepay\n페이지: 1\n기관: 가상한울금융\n상품: 시험중도론\n주소: https://www.example.com/earlyrepay\n연 금리: 10.1%\n한도: 1,125만원\n상환 기간: 15개월\n보증료율: 2.1%\n중도상환 수수료가 항상 면제되지 않습니다.\n상환 순서를 임의로 바꾸지 않습니다.",
+          "fields": {
+            "institution": "가상한울금융",
+            "product": "시험중도론",
+            "url": "https://www.example.com/earlyrepay"
+          },
+          "negations": [
+            "중도상환 수수료가 항상 면제되지 않습니다.",
+            "상환 순서를 임의로 바꾸지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 421,
+      "sha256": "3f6d60b307c42efd33a9409effdc3b48bfcad1208e72dd6551c8d7e9f17077d4"
+    },
+    {
+      "id": "earlyrepay-image",
+      "family": "earlyrepay",
+      "kind": "image",
+      "path": "earlyrepay-image.png",
+      "url_shape": "host",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: earlyrepay\n페이지: 1\n기관: 가상한울금융\n상품: 시험중도론\n주소: https://www.example.com/earlyrepay\n연 금리: 10.2%\n한도: 1,125만원\n상환 기간: 15개월\n보증료율: 0.1%\n중도상환 수수료가 항상 면제되지 않습니다.\n상환 순서를 임의로 바꾸지 않습니다.",
+          "fields": {
+            "institution": "가상한울금융",
+            "product": "시험중도론",
+            "url": "https://www.example.com/earlyrepay"
+          },
+          "negations": [
+            "중도상환 수수료가 항상 면제되지 않습니다.",
+            "상환 순서를 임의로 바꾸지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 68621,
+      "sha256": "62532925b1efd28a1f3ab83ce50fce5a9969512ea85041f347f7327a2eb2ae25"
+    },
+    {
+      "id": "earlyrepay-digital",
+      "family": "earlyrepay",
+      "kind": "digital",
+      "path": "earlyrepay-digital.pdf",
+      "url_shape": "host",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: earlyrepay\n페이지: 1\n기관: 가상한울금융\n상품: 시험중도론\n주소: https://www.example.com/earlyrepay\n연 금리: 10.3%\n한도: 1,125만원\n상환 기간: 15개월\n보증료율: 1.1%\n중도상환 수수료가 항상 면제되지 않습니다.\n상환 순서를 임의로 바꾸지 않습니다.",
+          "fields": {
+            "institution": "가상한울금융",
+            "product": "시험중도론",
+            "url": "https://www.example.com/earlyrepay"
+          },
+          "negations": [
+            "중도상환 수수료가 항상 면제되지 않습니다.",
+            "상환 순서를 임의로 바꾸지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: earlyrepay\n페이지: 2\n기관: 가상한울금융\n상품: 시험중도론\n주소: https://www.example.com/earlyrepay\n연 금리: 10.4%\n한도: 1,250만원\n상환 기간: 18개월\n보증료율: 1.2%\n중도상환 수수료가 항상 면제되지 않습니다.\n상환 순서를 임의로 바꾸지 않습니다.",
+          "fields": {
+            "institution": "가상한울금융",
+            "product": "시험중도론",
+            "url": "https://www.example.com/earlyrepay"
+          },
+          "negations": [
+            "중도상환 수수료가 항상 면제되지 않습니다.",
+            "상환 순서를 임의로 바꾸지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 114130,
+      "sha256": "dca2c87b1dcf0a08a68a8bdc34d8011a20d1a7285af15e84dfea892518bbe860"
+    },
+    {
+      "id": "earlyrepay-scanned",
+      "family": "earlyrepay",
+      "kind": "scanned",
+      "path": "earlyrepay-scanned.pdf",
+      "url_shape": "host",
+      "pages": [
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: earlyrepay\n페이지: 1\n기관: 가상한울금융\n상품: 시험중도론\n주소: https://www.example.com/earlyrepay\n연 금리: 10.4%\n한도: 1,125만원\n상환 기간: 15개월\n보증료율: 2.1%\n중도상환 수수료가 항상 면제되지 않습니다.\n상환 순서를 임의로 바꾸지 않습니다.",
+          "fields": {
+            "institution": "가상한울금융",
+            "product": "시험중도론",
+            "url": "https://www.example.com/earlyrepay"
+          },
+          "negations": [
+            "중도상환 수수료가 항상 면제되지 않습니다.",
+            "상환 순서를 임의로 바꾸지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: earlyrepay\n페이지: 2\n기관: 가상한울금융\n상품: 시험중도론\n주소: https://www.example.com/earlyrepay\n연 금리: 10.5%\n한도: 1,250만원\n상환 기간: 18개월\n보증료율: 2.2%\n중도상환 수수료가 항상 면제되지 않습니다.\n상환 순서를 임의로 바꾸지 않습니다.",
+          "fields": {
+            "institution": "가상한울금융",
+            "product": "시험중도론",
+            "url": "https://www.example.com/earlyrepay"
+          },
+          "negations": [
+            "중도상환 수수료가 항상 면제되지 않습니다.",
+            "상환 순서를 임의로 바꾸지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: earlyrepay\n페이지: 3\n기관: 가상한울금융\n상품: 시험중도론\n주소: https://www.example.com/earlyrepay\n연 금리: 10.6%\n한도: 1,375만원\n상환 기간: 21개월\n보증료율: 2.3%\n중도상환 수수료가 항상 면제되지 않습니다.\n상환 순서를 임의로 바꾸지 않습니다.",
+          "fields": {
+            "institution": "가상한울금융",
+            "product": "시험중도론",
+            "url": "https://www.example.com/earlyrepay"
+          },
+          "negations": [
+            "중도상환 수수료가 항상 면제되지 않습니다.",
+            "상환 순서를 임의로 바꾸지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: earlyrepay\n페이지: 4\n기관: 가상한울금융\n상품: 시험중도론\n주소: https://www.example.com/earlyrepay\n연 금리: 10.7%\n한도: 1,500만원\n상환 기간: 24개월\n보증료율: 2.4%\n중도상환 수수료가 항상 면제되지 않습니다.\n상환 순서를 임의로 바꾸지 않습니다.",
+          "fields": {
+            "institution": "가상한울금융",
+            "product": "시험중도론",
+            "url": "https://www.example.com/earlyrepay"
+          },
+          "negations": [
+            "중도상환 수수료가 항상 면제되지 않습니다.",
+            "상환 순서를 임의로 바꾸지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: earlyrepay\n페이지: 5\n기관: 가상한울금융\n상품: 시험중도론\n주소: https://www.example.com/earlyrepay\n연 금리: 10.8%\n한도: 1,625만원\n상환 기간: 27개월\n보증료율: 2.5%\n중도상환 수수료가 항상 면제되지 않습니다.\n상환 순서를 임의로 바꾸지 않습니다.",
+          "fields": {
+            "institution": "가상한울금융",
+            "product": "시험중도론",
+            "url": "https://www.example.com/earlyrepay"
+          },
+          "negations": [
+            "중도상환 수수료가 항상 면제되지 않습니다.",
+            "상환 순서를 임의로 바꾸지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: earlyrepay\n페이지: 6\n기관: 가상한울금융\n상품: 시험중도론\n주소: https://www.example.com/earlyrepay\n연 금리: 10.9%\n한도: 1,750만원\n상환 기간: 30개월\n보증료율: 2.6%\n중도상환 수수료가 항상 면제되지 않습니다.\n상환 순서를 임의로 바꾸지 않습니다.",
+          "fields": {
+            "institution": "가상한울금융",
+            "product": "시험중도론",
+            "url": "https://www.example.com/earlyrepay"
+          },
+          "negations": [
+            "중도상환 수수료가 항상 면제되지 않습니다.",
+            "상환 순서를 임의로 바꾸지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: earlyrepay\n페이지: 7\n기관: 가상한울금융\n상품: 시험중도론\n주소: https://www.example.com/earlyrepay\n연 금리: 10.0%\n한도: 1,875만원\n상환 기간: 33개월\n보증료율: 2.7%\n중도상환 수수료가 항상 면제되지 않습니다.\n상환 순서를 임의로 바꾸지 않습니다.",
+          "fields": {
+            "institution": "가상한울금융",
+            "product": "시험중도론",
+            "url": "https://www.example.com/earlyrepay"
+          },
+          "negations": [
+            "중도상환 수수료가 항상 면제되지 않습니다.",
+            "상환 순서를 임의로 바꾸지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: earlyrepay\n페이지: 8\n기관: 가상한울금융\n상품: 시험중도론\n주소: https://www.example.com/earlyrepay\n연 금리: 10.1%\n한도: 2,000만원\n상환 기간: 36개월\n보증료율: 2.8%\n중도상환 수수료가 항상 면제되지 않습니다.\n상환 순서를 임의로 바꾸지 않습니다.",
+          "fields": {
+            "institution": "가상한울금융",
+            "product": "시험중도론",
+            "url": "https://www.example.com/earlyrepay"
+          },
+          "negations": [
+            "중도상환 수수료가 항상 면제되지 않습니다.",
+            "상환 순서를 임의로 바꾸지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: earlyrepay\n페이지: 9\n기관: 가상한울금융\n상품: 시험중도론\n주소: https://www.example.com/earlyrepay\n연 금리: 10.2%\n한도: 2,125만원\n상환 기간: 39개월\n보증료율: 2.9%\n중도상환 수수료가 항상 면제되지 않습니다.\n상환 순서를 임의로 바꾸지 않습니다.",
+          "fields": {
+            "institution": "가상한울금융",
+            "product": "시험중도론",
+            "url": "https://www.example.com/earlyrepay"
+          },
+          "negations": [
+            "중도상환 수수료가 항상 면제되지 않습니다.",
+            "상환 순서를 임의로 바꾸지 않습니다."
+          ]
+        },
+        {
+          "text": "FinShield 합성 품질 평가 문서\n실제 상품 조건과 사용자 문서가 아닙니다.\n문서 구분: earlyrepay\n페이지: 10\n기관: 가상한울금융\n상품: 시험중도론\n주소: https://www.example.com/earlyrepay\n연 금리: 10.3%\n한도: 2,250만원\n상환 기간: 42개월\n보증료율: 2.0%\n중도상환 수수료가 항상 면제되지 않습니다.\n상환 순서를 임의로 바꾸지 않습니다.",
+          "fields": {
+            "institution": "가상한울금융",
+            "product": "시험중도론",
+            "url": "https://www.example.com/earlyrepay"
+          },
+          "negations": [
+            "중도상환 수수료가 항상 면제되지 않습니다.",
+            "상환 순서를 임의로 바꾸지 않습니다."
+          ]
+        }
+      ],
+      "bytes": 664875,
+      "sha256": "a682c74f7ab0e54a7758e5f4bb76c658a8a156e0c84a6c7d6c6b188cba677fc4"
+    }
+  ]
+}

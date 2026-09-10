@@ -1,9 +1,47 @@
+## 2026-09-10 운영 DB Migration 0070·0071 적용
+
+- 운영 FinShield DB(0069 상태)에 0070·0071을 Supabase SQL Editor의 `postgres` 역할로 한 번의 트랜잭션(lock_timeout 5초·statement_timeout 30초)에 적용했다. 로컬 `.env.local`에는 소유자 자격증명이 없고 `finshield_worker`는 `private` 스키마 CREATE 권한이 없어 이 경로를 택했다.
+- 적용 전에 운영과 같은 0069 상태의 격리 PostgreSQL 17에 같은 SQL(sha256 `bcff92f6…`)을 먼저 적용해 8개 대조를 통과시켰다. 리허설의 `settle_revalidation_cancel` md5 `bd8bc64f`가 운영과 같아 드리프트가 없음을 함께 확인했다.
+- 적용 뒤 `finshield_worker` 읽기 전용 접속으로 9개를 다시 대조했다. Manifest v21과 Agent 7·Tool 20 연결, v21 Retrieval 설정, Fast 네 범위 예산 상한, 정책 함수 생성, 가입 후 Fast 예약 허용, 취소 종결 멱등 보강(md5 `bd8bc64f`→`0f703960`, 리허설과 같음), 함수 권한이 모두 맞았다. 진행 중 Run 3건·Job 0건·미정산 예약 7건은 적용 전과 같다.
+- 기록은 `evidence/development/deployment/2026-09-10-migration-0070-0071/apply.json` 이다. 이 적용은 Gate 증거 채택이 아니며 `COHERE_API_KEY` 가 Production 에 없어 Vector·Fast 단계는 여전히 `RETRIEVAL_PROVIDER_NOT_CONFIGURED` 로 끝난다.
+
 ## 2026-09-10 Cohere Fast 제품 Retrieval을 최신 main에 정렬
 
-- `rerank-v4.0-fast`를 제품 relevance 단계에 연결한 변경을 main `c2bdce9` 위로 다시 쌓았다. Keyword 20개·Vector 20개 합집합 최대 40개, 최종 top 5, 네 범위 비용 상한은 그대로다. Manifest는 v8이 아니라 현재 v20 위의 `finshield-p0-loan-v21`이고 Migration 번호는 0052에서 0070으로 옮겼다. 원격은 0069까지 적용돼 있어 0070만 새로 적용하면 된다.
+- `rerank-v4.0-fast`를 제품 relevance 단계에 연결한 변경을 main `c2bdce9` 위로 다시 쌓았다. Keyword 20개·Vector 20개 합집합 최대 40개, 최종 top 5, 네 범위 비용 상한은 그대로다. Manifest는 v8이 아니라 현재 v20 위의 `finshield-p0-loan-v21`이고 Migration 번호는 0052에서 0070으로 옮겼다. 원격에는 2026-09-10 에 0070·0071 을 적용했다.
 - 이전 branch의 SQL 계약 파일 이름 `09a_retrieval_fast_runtime.sql`은 `supabase/tests/run-local.sh`의 `[0-9][0-9]_*.sql` 목록에 잡히지 않아 한 번도 실행되지 않았다. `09_retrieval_fast_runtime.sql`로 바꿔 실제 실행되게 했다. 예산 원장을 합성 Fixture로 덮어쓰고 commit하는 `10_budget_rate_invariants` 앞에서 돌아야 Migration이 남긴 실제 상한을 검사할 수 있다.
 - 이 Provider 결정으로 ADR decision digest가 바뀌어 채택 증거를 재사용하지 않는다. main `c2bdce9`의 채택 6건은 `evidence/development/runtime/pre-0070-adopted-entries.json`에 보존했고 현재 부분 PASS는 0/20이다. Implementation `NO-GO`, Release `NOT-EVALUATED`를 유지한다.
 - 새 평가셋 v6은 노출하지 않은 20가족·100 Claim이며 측정 전이다. GitHub Actions가 과금으로 막혀 있어 정식 main 단일 측정과 별도 Adoption은 아직 수행할 수 없다. 로컬 실행 결과를 Gate 증거로 채택하지 않는다.
+
+## 2026-09-10 처리자 개인정보 계약 inventory
+
+- `B-PROCESSOR-PRIVACY`·`B-PRIVACY-VERCEL` 이 요구하는 확인 대상을 처리자 다섯과 축 서른으로 나눠 `.github/fixtures/processor-privacy/inventory.json` 에 고정했다. 지금까지 두 항목은 문장으로만 추적돼 무엇을 얼마나 확인했는지 셀 수 없었다.
+- 검사는 fail-closed 다. `OBSERVED` 는 `evidence/` 아래의 실제 관측 파일과 관측일, 관측 방법이 모두 있을 때만 허용하고 파일이 없으면 거부한다. `UNVERIFIED`·`NOT_APPLICABLE` 은 관측 항목이 비어 있어야 한다. 축 누락·경로 탈출·저장소 밖 경로도 거부한다.
+- 현재 관측된 축은 0개다. Cohere 학습 사용은 2026-09-07 관측에서 켜져 있었고 이후 껐다는 기록은 있으나 같은 형식의 재관측 파일이 없어 `UNVERIFIED` 로 둔다. 근거 없이 상태를 올리지 않는다.
+- `actor` 가 `account-owner` 인 축은 콘솔 로그인이 필요해 저장소에서 대신 확인할 수 없다. 확인 항목과 관측 파일 형식은 `docs/ops/processor-privacy-inventory.md` 를 따른다.
+- 계약 시험이 변조 17건을 거부한다. 두 차단 항목은 policy 미등록·항목 없음이라 `PASS` 자체가 거부되며 Implementation `NO-GO`, Release `NOT-EVALUATED` 를 유지한다. 실제 사용자 개인정보는 계속 처리하지 않는다.
+
+## 2026-09-10 Claim 판정 품질 평가셋 사전등록
+
+- ADR 14.3 의 Gate 전환 조건 7번을 수행했다. 20가족 60 Claim 평가셋 `claim-quality-v1` 과 지표·산식·수용값을 측정 전에 고정했다. 기능을 만든 뒤 판정 품질을 처음 정의하지 않기 위한 것이다.
+- `N-QLT-004` 의 여섯 상태 정답 표본을 모두 넣었다. `CONTRADICTED` 15, `UNKNOWN` 17, `VERIFIED` 10, `NEED_MORE_INFORMATION` 8, `CONFLICT` 6, `WITHHELD` 4 이며 한 가족 안에서 세 Claim 의 정답이 서로 다르다.
+- 수용값은 추출 Recall·Precision 0.95, 확정 Precision 0.95, 근거 없는 확정 0건, 공식 근거 Coverage 1.00, 보류·충돌 재현 0.90, 정상 오탐 0건, 금지 동작 8종 각 0건이다. 분모 0은 `N/A` 이고 상태 표본 누락은 평가 실패다.
+- 금지 동작 여덟 가지를 함정 Claim 으로 배치했다. 전부 보류해 오탐을 피하는 회피와 지난 자료를 현재 값으로 쓰는 회피가 서로 반대 방향에서 잡힌다.
+- `claim-quality-policy.mjs` 가 원장에서 지표를 다시 계산하고 계약 시험이 변조 29건을 거부한다. `B-CLAIM-01` 은 Release Gate 항목이라 Implementation `GO` 전에는 평가를 시작할 수 없고 policy 미등록으로 `PASS` 자체가 거부된다. Implementation `NO-GO`, Release `NOT-EVALUATED` 를 유지한다.
+
+## 2026-09-10 Workflow 장애 20종과 입력별 기한 사전등록
+
+- 재검증 Workflow 의 장애 20종과 Text 120초·Image/PDF 180초 기한 표본을 측정 전에 고정했다. 목록·기대 종결·합격식은 `docs/ops/workflow-fault-preregistration.md` 를 따르고 결과를 본 뒤 바꾸지 않는다.
+- 20종 중 DB 경계에서 결정적으로 볼 수 있는 항목을 `supabase/tests/56_workflow_fault_matrix.sql` 로 실제 실행했다. 중복 전달 합류, 같은 키 다른 본문 거부, 응답 유실 재요청 거부, 동시 선점 거부, 알 수 없는 token 진행 기록 거부, 실행 중 취소의 Worker 확인, 취소 종결 뒤 최종화 거부, 다른 세션 terminal 복원, 미확정 예약 보존과 확정 뒤 정산, 이중 정산 거부, 상한 초과 예약 거부, 만료 예약 sweep 의 예산 보존이 통과했다.
+- `private.settle_revalidation_cancel` 이 이미 종결된 Job 에도 상태·Lease·이벤트를 다시 쓰는 것을 확인했다. 지금까지는 호출자가 상태를 먼저 보는 데 기대고 있었다. Migration `0071` 로 종결된 Job 에서 조기 반환하게 해 중복 전달이 이벤트를 늘리지 않는다. 기존 terminal 행과 이벤트는 바꾸지 않는다.
+- 합격식은 `.github/scripts/workflow-fault-policy.mjs` 가 원장에서 다시 계산하고 계약 시험이 변조 34건을 거부한다. `transport` 가 `vercel` 인 열 개 항목은 실제 배포 전달 경계 관측이 남아 있다.
+- 격리 PostgreSQL 17 에서 Migration 67개와 SQL 계약 54파일이 통과했다. `B-JOB-01`·`B-DEADLINE-01` 은 policy 미등록·항목 없음이라 `PASS` 자체가 거부되며 `NOT-EVALUATED` 다. Implementation `NO-GO`, Release `NOT-EVALUATED` 를 유지한다.
+
+## 2026-09-10 OCR 재평가 표본 사전등록
+
+- `B-OCR-01`의 첫 정식 측정은 field F1 0.9791666667로 기준 0.98에 미달했고 진단에서 `refinance-scanned` 7쪽의 `example`이 `exaimple`로 인식된 것이 원인이었다. 그 표본은 이미 노출됐으므로 새 평가셋 `ocr-quality-v2`를 측정 전에 고정했다.
+- 산식과 합격선은 바꾸지 않는다. `FORMULA_VERSION`은 `ocr-page-field-exact-v1` 그대로이고 문서 32건·112쪽·문서 구조·150dpi도 v1과 같다. 시나리오 가족 여덟 개만 전부 새로 만들었고 `loadQualityFixtures`가 v1 manifest를 읽어 겹치는 가족을 `FIXTURE_FAMILY_EXPOSED`로 거부한다.
+- 주소는 RFC 2606 예약 이름만 쓰되 v1과 같은 맨 `.example` TLD 네 가족과 실제 문서에 더 흔한 `www.example.com` 경로형 네 가족을 4대4로 고정했다. 어려운 경우를 없애지 않으려고 절반을 그대로 남겼고, 점수가 오르면 그 원인을 결과에 적는다.
+- v1 평가셋과 실패 artifact는 그대로 둔다. v2는 아직 측정하지 않았으며 GitHub Actions 과금 장애 동안에는 정식 main 단일 실행과 별도 Adoption을 할 수 없다. `B-OCR-01`은 `NOT-EVALUATED`, Implementation `NO-GO`, Release `NOT-EVALUATED`를 유지한다.
 
 ## 2026-09-09 의존성 보안 패치 진행
 
@@ -421,6 +459,7 @@ Migration 0038~0041과 SQL 시험을 기능 Draft #192에서 분리했다. 새 �
 기록·삭제 목록에 50건 이후 Cursor 조회를 추가했다. 생성 시각의 microsecond와 ID 동점을 보존하고 계정 전환 시 과거 목록/지연 응답을 격리한다. 기본 573건·선택적 skip 96건과 빌드 통과이며 실제 다기기 대량 목록은 별도 검증이 필요하다.
 
 알림 INSERT·Outbox 완료의 원자성과 과거 PROCESSING 복구를 Migration 0040으로 추가했다. SQL 29파일·기본 572건·빌드가 통과했고 알림은 저장된 Job/Passport 판으로 이동한다. 전역 주기 Dispatcher·원격 적용·Live UI는 아직 검증하지 않았다. 별도 보호 Preview API에서 합성 Case 51개를 두 로그인 세션으로 페이지 조회하고 모두 삭제했다. 기록은 `evidence/development/notifications/`·`evidence/development/records/`를 따른다.
+
 ## 2026-09-07 Fast 합성 개발 시험
 
 사용자 승인 범위의 개발 전용 실행 경로를 추가했다. `docs/ops/2026-09-07-rerank-fast-development.md`에 산식·개발 split·최대 USD 0.05·첫 dispatch/attempt·원장 보존을 사전등록했다. 제품 기능 Draft #192와 별도이며 기존 실패 Gate를 재평가하거나 제품 Rerank를 바꾸지 않는다. 현재 계약 시험·기본 449건과 빌드를 통과했고 선택적 85건은 건너뛰었다. 실제 Provider 결과는 실행 뒤 별도 기록한다.
