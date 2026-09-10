@@ -1,3 +1,11 @@
+## 2026-09-11 Cohere Fast 결정 뒤 main 증거 12건 채택
+
+- main `7ac52bd5`에서 측정을 걸고 채택이 끝날 때까지 main 을 얼렸다. Model·Retrieval·File-safety·Law·Runtime·Health·Rate·Consent·Storage·Delete·Source 두 건이 각 strict policy 를 통과해 PR #313 에서 채택한다. 현재 부분 PASS 는 12/20 이다.
+- Retrieval 은 미노출 v6 100 Claim 에서 Cohere `rerank-v4.0-fast` 종단 top 5 가 Recall@5·Precision@5·위험 핵심 모두 1.00 이다. 질의 P95 638ms, 총비용 USD 0.2016 이다. 같은 창의 Supabase 측정이 실패해 ADR 의 선행 조건은 아직 채워지지 않았고 원장에 그대로 적었다.
+- Source 두 건은 첫 실행이 공공데이터 접속 시간 초과로 결과를 만들기 전에 멈춰 같은 main 에서 다시 실행했다.
+- OCR v2 는 필드 F1 0.9732 로 기준 0.98 에 미달해 `FAIL` 로 적었다. 차이 9쌍은 모두 스캔 PDF 한 가족의 주소 필드다. Embed 는 수집기가 이미 쓴 v5 평가셋 재측정을 거부해 새 평가셋 사전등록이 필요하다. Supabase 는 불변식 시험 14파일의 완료 표시 문구 차이로 실패해 문구를 고친 뒤 다시 잰다.
+- 측정 범위와 제외 사유는 `evidence/adoption/2026-09-11-fast-retrieval-main.md` 를 따른다. Implementation `NO-GO`, Release `NOT-EVALUATED` 를 유지한다.
+
 ## 2026-09-10 공개 Demo PARTIAL 회귀 수정
 
 - PR #306 병합 뒤 운영 공개 Demo 두 번이 모두 Product·CoVe·Red Team `PARTIAL`(`TOOL_LOOKUP_FAILED`)로 끝났다. Demo 의 상품·경고 조회는 공용 KB 검색을 타는데, #306 의 판정식이 벡터 결과가 없기만 하면 `RETRIEVAL_DEGRADED` 로 표시했다. 운영 KB 에는 Embedding 이 0건이고 Demo Run 은 Cohere 비용 예약 대상이 아니어서 벡터·Fast 가 설계상 돌지 않는데도 매번 저하로 찍혔다.

@@ -1,0 +1,68 @@
+{
+  "schema_version": 3,
+  "blocker_id": "B-MODEL-01",
+  "requirements_blob_sha": "27ce706010344fbcedebe3abd707febff0f1dc26",
+  "adr_decision_sha256": "a4d9e44c915148088eb5502198b4581b6c81e7e01f89ea20a28ad8997c910f95",
+  "code_under_test_sha": "7ac52bd5f223919efe1df69e8cadc00c950e9e92",
+  "workflow_head_sha": "7ac52bd5f223919efe1df69e8cadc00c950e9e92",
+  "scope_sha256": "d67a4f68414ba92d0ebd783164edc76610e7e115d9da4dac8c80fded5acb73c2",
+  "run": {
+    "id": 34499501128,
+    "attempt": 1
+  },
+  "observations": {
+    "auth": {
+      "http_status": 200,
+      "model_id": "claude-sonnet-5",
+      "request_id_present": true,
+      "rate_limit_headers_present": true,
+      "request_limit_observed": 10000,
+      "input_token_limit_observed": 10000000,
+      "output_token_limit_observed": 2000000
+    },
+    "normal": {
+      "total": 50,
+      "schema_passed": 50,
+      "strict_tool_passed": 50,
+      "post_validation_passed": 50,
+      "live_provider_requests": 100
+    },
+    "faults": {
+      "total": 20,
+      "categories": [
+        "429",
+        "refusal",
+        "schema_error",
+        "timeout"
+      ],
+      "false_successes": 0,
+      "fixture_mode": "deterministic_adapter_boundary"
+    },
+    "latency": {
+      "samples": 100,
+      "p95_ms": 3449
+    },
+    "text_runs": {
+      "samples": 20,
+      "p95_ms": 6913,
+      "p95_cost_usd": 0.006418
+    },
+    "file_runs": {
+      "samples": 20,
+      "p95_ms": 5252,
+      "p95_cost_usd": 0.006364
+    }
+  },
+  "environment": {
+    "node_version": "v24.20.0",
+    "region": "github-hosted",
+    "fixture_set_hash": "5ea9603f32b646011054f9263f9f6400cca505231b302429dabc8cae62317681",
+    "pricing_snapshot_date": "2026-09-04",
+    "pricing_input_per_million_usd": 2,
+    "pricing_output_per_million_usd": 10,
+    "sdk_version": "0.117.1",
+    "provider_request_ids_hash": "8a069ab41eddab87618fb7b42bd777c1f579439cbd546405a80c825aef267629",
+    "fault_fixture_mode": "deterministic_adapter_boundary"
+  },
+  "redactions_applied": true
+}

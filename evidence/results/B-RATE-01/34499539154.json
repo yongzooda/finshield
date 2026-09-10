@@ -1,0 +1,73 @@
+{
+  "schema_version": 3,
+  "blocker_id": "B-RATE-01",
+  "requirements_blob_sha": "27ce706010344fbcedebe3abd707febff0f1dc26",
+  "adr_decision_sha256": "a4d9e44c915148088eb5502198b4581b6c81e7e01f89ea20a28ad8997c910f95",
+  "code_under_test_sha": "7ac52bd5f223919efe1df69e8cadc00c950e9e92",
+  "workflow_head_sha": "7ac52bd5f223919efe1df69e8cadc00c950e9e92",
+  "scope_sha256": "ce1e15fd5eabdab3531e384df0cd1455d820befd6ffac65b363e27838e85b299",
+  "run": {
+    "id": 34499539154,
+    "attempt": 1
+  },
+  "observations": {
+    "contract": {
+      "formula_version": "rate-budget-concurrent-ledger-v1",
+      "concurrency": 60,
+      "unit_microunits": 100,
+      "run_limit_microunits": 2000,
+      "rate_limit": 10,
+      "rate_window_seconds": 60,
+      "rate_attempts": 40,
+      "provider_min_interval_ms": 1000,
+      "provider_slots": 5
+    },
+    "budget": {
+      "attempts": 60,
+      "accepted": 20,
+      "rejected": 40,
+      "rejected_hints": [
+        "BUDGET_EXCEEDED"
+      ],
+      "limit_microunits": 2000,
+      "reserved_after_accept": 2000,
+      "consumed_after_accept": 0,
+      "over_limit_accepts": 0
+    },
+    "ledger": {
+      "settled": 10,
+      "released": 10,
+      "open": 0,
+      "actual_sum": 1000,
+      "reserved_after_settle": 0,
+      "consumed_after_settle": 1000,
+      "mismatch": 0
+    },
+    "rate": {
+      "attempts": 40,
+      "allowed": 10,
+      "denied": 30,
+      "denied_without_retry_after": 0,
+      "max_retry_after_seconds": 41
+    },
+    "provider": {
+      "slots": 5,
+      "circuit_states": [
+        "CLOSED"
+      ],
+      "min_gap_ms": 1000,
+      "gaps_ms": [
+        1000,
+        1000,
+        1000,
+        1000
+      ]
+    }
+  },
+  "environment": {
+    "node_version": "v24.20.0",
+    "region": "github-hosted",
+    "transport": "postgres"
+  },
+  "redactions_applied": true
+}
