@@ -1,3 +1,11 @@
+## 2026-09-10 Claim 판정 품질 평가셋 사전등록
+
+- ADR 14.3 의 Gate 전환 조건 7번을 수행했다. 20가족 60 Claim 평가셋 `claim-quality-v1` 과 지표·산식·수용값을 측정 전에 고정했다. 기능을 만든 뒤 판정 품질을 처음 정의하지 않기 위한 것이다.
+- `N-QLT-004` 의 여섯 상태 정답 표본을 모두 넣었다. `CONTRADICTED` 15, `UNKNOWN` 17, `VERIFIED` 10, `NEED_MORE_INFORMATION` 8, `CONFLICT` 6, `WITHHELD` 4 이며 한 가족 안에서 세 Claim 의 정답이 서로 다르다.
+- 수용값은 추출 Recall·Precision 0.95, 확정 Precision 0.95, 근거 없는 확정 0건, 공식 근거 Coverage 1.00, 보류·충돌 재현 0.90, 정상 오탐 0건, 금지 동작 8종 각 0건이다. 분모 0은 `N/A` 이고 상태 표본 누락은 평가 실패다.
+- 금지 동작 여덟 가지를 함정 Claim 으로 배치했다. 전부 보류해 오탐을 피하는 회피와 지난 자료를 현재 값으로 쓰는 회피가 서로 반대 방향에서 잡힌다.
+- `claim-quality-policy.mjs` 가 원장에서 지표를 다시 계산하고 계약 시험이 변조 29건을 거부한다. `B-CLAIM-01` 은 Release Gate 항목이라 Implementation `GO` 전에는 평가를 시작할 수 없고 policy 미등록으로 `PASS` 자체가 거부된다. Implementation `NO-GO`, Release `NOT-EVALUATED` 를 유지한다.
+
 ## 2026-09-09 의존성 보안 패치 진행
 
 npm audit에서 새로 확인된 Next/Sharp/Vitest/js-yaml 경고5건을 수정판으로 갱신했고 clean 설치 뒤 audit0·빌드·727 기본 테스트·lint 오류0이다. 새 package 범위 때문에 Model·Health를 재측정 대기로 바꿨고 기존 결과를 보존했다(현행6/20, Gate NO-GO·NOT-EVALUATED). 로컬 검사 병합 승인은 PR303을 통해 main에 기록돼 있다. 상세는 docs/ops/2026-09-09-dependency-security.md와 후속 보안 PR을 따른다.
