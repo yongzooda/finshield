@@ -44,9 +44,29 @@ export type DemoResult = {
   evidence: Evidence[];
 };
 
+// 반대가 가장 강하고, 뒷받침, 맥락 순이다. 모르는 관계는 맨 뒤다.
+const RELATION_RANK: Record<string, number> = { CONTRADICT: 0, SUPPORT: 1, CONTEXT: 2 };
+const relationRank = (relation?: string) => RELATION_RANK[relation ?? ""] ?? 3;
+
 const kstTime = (iso: string) => new Intl.DateTimeFormat("ko-KR", {
   timeZone: "Asia/Seoul", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false,
 }).format(new Date(iso));
+
+/**
+ * 여러 단계가 같은 공식 자료를 따로 조회하면 같은 원문이 인용 이름만 달리해 여러 번 온다.
+ * 화면에는 원문 하나로 묶어 보여 주고 가장 강한 관계를 남긴다. 저장된 인용은 그대로다.
+ */
+export const groupEvidence = (claim: DemoResult["claims"][number], evidence: Evidence[]) => {
+  const grouped = new Map<string, { item: Evidence; relation: string | undefined }>();
+  for (const item of evidence.filter((entry) => claim.evidence_refs.includes(entry.ref))) {
+    const key = `${item.official_id ?? item.ref}|${item.content_hash ?? item.ref}|${item.title}`;
+    const relation = claim.relations?.[item.ref];
+    const previous = grouped.get(key);
+    if (!previous) grouped.set(key, { item, relation });
+    else if (relationRank(relation) < relationRank(previous.relation)) previous.relation = relation;
+  }
+  return [...grouped.values()];
+};
 
 /** 회원 결과 화면과 같은 규칙으로 검토가 제한된 까닭을 모은다 (RES-008). */
 const reviewReasonsOf = (result: DemoResult): string[] => [
@@ -57,7 +77,7 @@ const reviewReasonsOf = (result: DemoResult): string[] => [
 
 export function DemoResultView({ result }: { result: DemoResult }) {
   const [opened, setOpened] = useState<Set<string>>(new Set());
-  const evidenceOf = (refs: string[]) => result.evidence.filter((item) => refs.includes(item.ref));
+  const evidenceOf = (claim: DemoResult["claims"][number]) => groupEvidence(claim, result.evidence);
   const axes = result.axes ?? [];
   // 회원 결과와 같은 함수로 지금 할 일을 정한다. 두 화면이 다른 말을 하지 않는다.
   const action = result.claims.length > 0
@@ -126,7 +146,7 @@ export function DemoResultView({ result }: { result: DemoResult }) {
         <ul className="mt-5 space-y-5">
           {result.claims.map((claim) => {
             const view = claimViewOf(claim.state, claim.reason_code ?? undefined);
-            const items = evidenceOf(claim.evidence_refs);
+            const items = evidenceOf(claim);
             const isOpen = opened.has(claim.claim_ref);
             return (
               <li key={claim.claim_ref} className="border-t border-[var(--fs-line)] pt-5 first:border-0 first:pt-0">
@@ -152,8 +172,7 @@ export function DemoResultView({ result }: { result: DemoResult }) {
                     </button>
                     {isOpen ? (
                       <ul className="mt-3 space-y-3">
-                        {items.map((item) => {
-                          const relation = claim.relations?.[item.ref];
+                        {items.map(({ item, relation }) => {
                           return (
                             <li key={item.ref} className="rounded-[10px] bg-[var(--fs-canvas)] px-4 py-3">
                               <div className="flex flex-wrap items-center gap-2">
