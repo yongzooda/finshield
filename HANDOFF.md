@@ -6,6 +6,13 @@
 - 합격식은 `.github/scripts/workflow-fault-policy.mjs` 가 원장에서 다시 계산하고 계약 시험이 변조 34건을 거부한다. `transport` 가 `vercel` 인 열 개 항목은 실제 배포 전달 경계 관측이 남아 있다.
 - 격리 PostgreSQL 17 에서 Migration 67개와 SQL 계약 54파일이 통과했다. `B-JOB-01`·`B-DEADLINE-01` 은 policy 미등록·항목 없음이라 `PASS` 자체가 거부되며 `NOT-EVALUATED` 다. Implementation `NO-GO`, Release `NOT-EVALUATED` 를 유지한다.
 
+## 2026-09-10 OCR 재평가 표본 사전등록
+
+- `B-OCR-01`의 첫 정식 측정은 field F1 0.9791666667로 기준 0.98에 미달했고 진단에서 `refinance-scanned` 7쪽의 `example`이 `exaimple`로 인식된 것이 원인이었다. 그 표본은 이미 노출됐으므로 새 평가셋 `ocr-quality-v2`를 측정 전에 고정했다.
+- 산식과 합격선은 바꾸지 않는다. `FORMULA_VERSION`은 `ocr-page-field-exact-v1` 그대로이고 문서 32건·112쪽·문서 구조·150dpi도 v1과 같다. 시나리오 가족 여덟 개만 전부 새로 만들었고 `loadQualityFixtures`가 v1 manifest를 읽어 겹치는 가족을 `FIXTURE_FAMILY_EXPOSED`로 거부한다.
+- 주소는 RFC 2606 예약 이름만 쓰되 v1과 같은 맨 `.example` TLD 네 가족과 실제 문서에 더 흔한 `www.example.com` 경로형 네 가족을 4대4로 고정했다. 어려운 경우를 없애지 않으려고 절반을 그대로 남겼고, 점수가 오르면 그 원인을 결과에 적는다.
+- v1 평가셋과 실패 artifact는 그대로 둔다. v2는 아직 측정하지 않았으며 GitHub Actions 과금 장애 동안에는 정식 main 단일 실행과 별도 Adoption을 할 수 없다. `B-OCR-01`은 `NOT-EVALUATED`, Implementation `NO-GO`, Release `NOT-EVALUATED`를 유지한다.
+
 ## 2026-09-09 의존성 보안 패치 진행
 
 npm audit에서 새로 확인된 Next/Sharp/Vitest/js-yaml 경고5건을 수정판으로 갱신했고 clean 설치 뒤 audit0·빌드·727 기본 테스트·lint 오류0이다. 새 package 범위 때문에 Model·Health를 재측정 대기로 바꿨고 기존 결과를 보존했다(현행6/20, Gate NO-GO·NOT-EVALUATED). 로컬 검사 병합 승인은 PR303을 통해 main에 기록돼 있다. 상세는 docs/ops/2026-09-09-dependency-security.md와 후속 보안 PR을 따른다.
@@ -411,6 +418,7 @@ Migration 0038~0041과 SQL 시험을 기능 Draft #192에서 분리했다. 새 �
 기록·삭제 목록에 50건 이후 Cursor 조회를 추가했다. 생성 시각의 microsecond와 ID 동점을 보존하고 계정 전환 시 과거 목록/지연 응답을 격리한다. 기본 573건·선택적 skip 96건과 빌드 통과이며 실제 다기기 대량 목록은 별도 검증이 필요하다.
 
 알림 INSERT·Outbox 완료의 원자성과 과거 PROCESSING 복구를 Migration 0040으로 추가했다. SQL 29파일·기본 572건·빌드가 통과했고 알림은 저장된 Job/Passport 판으로 이동한다. 전역 주기 Dispatcher·원격 적용·Live UI는 아직 검증하지 않았다. 별도 보호 Preview API에서 합성 Case 51개를 두 로그인 세션으로 페이지 조회하고 모두 삭제했다. 기록은 `evidence/development/notifications/`·`evidence/development/records/`를 따른다.
+
 ## 2026-09-07 Fast 합성 개발 시험
 
 사용자 승인 범위의 개발 전용 실행 경로를 추가했다. `docs/ops/2026-09-07-rerank-fast-development.md`에 산식·개발 split·최대 USD 0.05·첫 dispatch/attempt·원장 보존을 사전등록했다. 제품 기능 Draft #192와 별도이며 기존 실패 Gate를 재평가하거나 제품 Rerank를 바꾸지 않는다. 현재 계약 시험·기본 449건과 빌드를 통과했고 선택적 85건은 건너뛰었다. 실제 Provider 결과는 실행 뒤 별도 기록한다.
