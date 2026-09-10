@@ -1,0 +1,74 @@
+name: 공식 근거 신선도 갱신
+
+# 공식 근거는 마지막 수집 뒤 24시간이 지나면 STALE 이 되고 확정 판정에 쓰이지 않는다.
+# 6시간마다 공공데이터·진흥원 공식 자료를 다시 수집해 운영 KB 에 적재하고,
+# 원문이 같은 공개 Demo 고정 근거에 재수집 기록을 잇는다. 세 번 연속 실패해도
+# 기한 안에 한 번 더 시도할 수 있는 간격이다. Gate 증거 수집이 아니므로 결과를
+# 증거 artifact 로 올리지 않는다.
+
+on:
+  schedule:
+    - cron: "41 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: source-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: source-refresh
+    if: github.ref == 'refs/heads/main'
+    environment: provider-spike
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: trusted
+          persist-credentials: false
+          ref: ${{ github.sha }}
+
+      - name: Set up Node 24
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm --prefix trusted ci --ignore-scripts
+
+      - name: 공식 자료 수집
+        env:
+          BLOCKER_ID: B-SOURCE-03
+          CODE_UNDER_TEST_SHA: ${{ github.sha }}
+          DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
+          EVIDENCE_REGION: github-hosted
+          GITHUB_RUN_ATTEMPT: ${{ github.run_attempt }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          TRUSTED_REPOSITORY: ${{ github.workspace }}/trusted
+          WORKFLOW_HEAD_SHA: ${{ github.sha }}
+        run: node trusted/.github/scripts/run-source-evidence.mjs --run
+
+      - name: 수집 결과 정책 검사
+        env:
+          BLOCKER_ID: B-SOURCE-03
+          CODE_UNDER_TEST_SHA: ${{ github.sha }}
+          GITHUB_RUN_ATTEMPT: ${{ github.run_attempt }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          TRUSTED_REPOSITORY: ${{ github.workspace }}/trusted
+          WORKFLOW_HEAD_SHA: ${{ github.sha }}
+        run: node trusted/.github/scripts/run-source-evidence.mjs --validate
+
+      - name: 운영 KB 적재
+        env:
+          DATABASE_URL: ${{ secrets.FINSHIELD_DATABASE_URL }}
+        run: node trusted/scripts/kb/load-source-snapshots.mjs --result evidence-output/result.json --apply
+
+      - name: Demo 고정 근거 재수집 연결
+        env:
+          DATABASE_URL: ${{ secrets.FINSHIELD_DATABASE_URL }}
+        run: node trusted/scripts/kb/refresh-demo-seed-sources.mjs --result evidence-output/result.json
