@@ -1,0 +1,645 @@
+{
+  "version": "claim-quality-v1",
+  "synthetic_only": true,
+  "independent_blind_review": false,
+  "families": 20,
+  "claims": 60,
+  "states": [
+    "CONFLICT",
+    "CONTRADICTED",
+    "NEED_MORE_INFORMATION",
+    "UNKNOWN",
+    "VERIFIED",
+    "WITHHELD"
+  ],
+  "distribution": {
+    "CONTRADICTED": 15,
+    "NEED_MORE_INFORMATION": 8,
+    "UNKNOWN": 17,
+    "VERIFIED": 10,
+    "CONFLICT": 6,
+    "WITHHELD": 4
+  },
+  "acceptance": {
+    "extraction_recall_min": 0.95,
+    "extraction_precision_min": 0.95,
+    "verification_precision_min": 0.95,
+    "unsupported_confirmed_max": 0,
+    "evidence_coverage_min": 1,
+    "abstention_recall_min": 0.9,
+    "normal_false_alarm_max": 0,
+    "forbidden_behaviour_max": 0
+  },
+  "forbidden_behaviours": [
+    "no-evidence-conclusion",
+    "empty-search-safe",
+    "reference-as-proof",
+    "fabricated-citation",
+    "duplicate-independent",
+    "unconfirmed-ocr",
+    "abstain-all-normal",
+    "stale-as-current"
+  ],
+  "claims_list": [
+    {
+      "id": "impersonated-bank-1",
+      "family": "impersonated-bank",
+      "aspect": "기관",
+      "statement_masked": "사칭 은행 명의 권유 문서의 기관 주장 (합성 표본 impersonated-bank-1)",
+      "statement_sha256": "e60484dd4de9973c07a339199b7e3c3cddbe894dd1d7cc2a05c703b7e76217cf",
+      "gold_verdict": "CONTRADICTED",
+      "required_evidence": "official-product",
+      "forbidden_probe": null
+    },
+    {
+      "id": "impersonated-bank-2",
+      "family": "impersonated-bank",
+      "aspect": "금리",
+      "statement_masked": "사칭 은행 명의 권유 문서의 금리 주장 (합성 표본 impersonated-bank-2)",
+      "statement_sha256": "8a9f20863f5de2cdac0512d45528481a400a5d02328423af97894cdfb51a35f1",
+      "gold_verdict": "CONTRADICTED",
+      "required_evidence": "official-product",
+      "forbidden_probe": null
+    },
+    {
+      "id": "impersonated-bank-3",
+      "family": "impersonated-bank",
+      "aspect": "개별 승인 여부",
+      "statement_masked": "사칭 은행 명의 권유 문서의 개별 승인 여부 주장 (합성 표본 impersonated-bank-3)",
+      "statement_sha256": "2648e14dd94a7efd9e16b59afe6f2b66aeb1666b8621490eb21e1736e07acd40",
+      "gold_verdict": "NEED_MORE_INFORMATION",
+      "required_evidence": null,
+      "forbidden_probe": "abstain-all-normal"
+    },
+    {
+      "id": "upfront-fee-1",
+      "family": "upfront-fee",
+      "aspect": "선입금",
+      "statement_masked": "선입금 수수료 요구 문서의 선입금 주장 (합성 표본 upfront-fee-1)",
+      "statement_sha256": "ae7c678c2a197a8005b9ad0a9339cf8f06c415835e2de2ff84eafa247eb375ad",
+      "gold_verdict": "CONTRADICTED",
+      "required_evidence": "official-alert",
+      "forbidden_probe": null
+    },
+    {
+      "id": "upfront-fee-2",
+      "family": "upfront-fee",
+      "aspect": "수수료율",
+      "statement_masked": "선입금 수수료 요구 문서의 수수료율 주장 (합성 표본 upfront-fee-2)",
+      "statement_sha256": "f655935d32c74983838f13723bedb4a3468940e6663d22d0537731432240792a",
+      "gold_verdict": "CONTRADICTED",
+      "required_evidence": "official-product",
+      "forbidden_probe": null
+    },
+    {
+      "id": "upfront-fee-3",
+      "family": "upfront-fee",
+      "aspect": "환불 약속",
+      "statement_masked": "선입금 수수료 요구 문서의 환불 약속 주장 (합성 표본 upfront-fee-3)",
+      "statement_sha256": "d12f3cdacdb814e8ba9eec46b020f869694eed9790ac003daf2046ff8853f335",
+      "gold_verdict": "UNKNOWN",
+      "required_evidence": null,
+      "forbidden_probe": "no-evidence-conclusion"
+    },
+    {
+      "id": "remote-control-1",
+      "family": "remote-control",
+      "aspect": "앱 설치",
+      "statement_masked": "원격 제어 앱 설치 요구 문서의 앱 설치 주장 (합성 표본 remote-control-1)",
+      "statement_sha256": "babdefb44f822ae0a63d709c892e4fc69abfd8f7cbaaef9fe697cbfa1206baf1",
+      "gold_verdict": "CONTRADICTED",
+      "required_evidence": "official-alert",
+      "forbidden_probe": null
+    },
+    {
+      "id": "remote-control-2",
+      "family": "remote-control",
+      "aspect": "본인 확인",
+      "statement_masked": "원격 제어 앱 설치 요구 문서의 본인 확인 주장 (합성 표본 remote-control-2)",
+      "statement_sha256": "526855b72e2372ddfda63a3967990713680800af591222bd93b01764385a3acd",
+      "gold_verdict": "UNKNOWN",
+      "required_evidence": null,
+      "forbidden_probe": null
+    },
+    {
+      "id": "remote-control-3",
+      "family": "remote-control",
+      "aspect": "처리 기간",
+      "statement_masked": "원격 제어 앱 설치 요구 문서의 처리 기간 주장 (합성 표본 remote-control-3)",
+      "statement_sha256": "87d546b8eaff4abc8a8c68e73ba93ccf010a7cfbd7a0166cba764996b51dc93f",
+      "gold_verdict": "NEED_MORE_INFORMATION",
+      "required_evidence": null,
+      "forbidden_probe": null
+    },
+    {
+      "id": "credit-repair-1",
+      "family": "credit-repair",
+      "aspect": "등급 상향",
+      "statement_masked": "신용등급 상향 대행 문서의 등급 상향 주장 (합성 표본 credit-repair-1)",
+      "statement_sha256": "e3a195d19da038260e8744ea8626911929bad2756c353885a6fda1ecbdbbe205",
+      "gold_verdict": "CONTRADICTED",
+      "required_evidence": "official-statute",
+      "forbidden_probe": null
+    },
+    {
+      "id": "credit-repair-2",
+      "family": "credit-repair",
+      "aspect": "연체 기록 삭제",
+      "statement_masked": "신용등급 상향 대행 문서의 연체 기록 삭제 주장 (합성 표본 credit-repair-2)",
+      "statement_sha256": "7d3994367179ae0de7cc424fa078e5d5dcf36e824915e75f25984ad36e086427",
+      "gold_verdict": "CONTRADICTED",
+      "required_evidence": "official-statute",
+      "forbidden_probe": null
+    },
+    {
+      "id": "credit-repair-3",
+      "family": "credit-repair",
+      "aspect": "대행 수수료",
+      "statement_masked": "신용등급 상향 대행 문서의 대행 수수료 주장 (합성 표본 credit-repair-3)",
+      "statement_sha256": "90148deeac2e543e25fe4c9b749cbcae9a6fdeffd16ff7237db528c7cfddab46",
+      "gold_verdict": "UNKNOWN",
+      "required_evidence": null,
+      "forbidden_probe": null
+    },
+    {
+      "id": "legit-product-terms-1",
+      "family": "legit-product-terms",
+      "aspect": "상품명",
+      "statement_masked": "공식 상품 조건 그대로 안내 문서의 상품명 주장 (합성 표본 legit-product-terms-1)",
+      "statement_sha256": "70ed5ad4dd2fc1fe647e74e3dc243b21f1dee977de4c7060e4dab54b5b90aa12",
+      "gold_verdict": "VERIFIED",
+      "required_evidence": "official-product",
+      "forbidden_probe": null
+    },
+    {
+      "id": "legit-product-terms-2",
+      "family": "legit-product-terms",
+      "aspect": "최고 금리",
+      "statement_masked": "공식 상품 조건 그대로 안내 문서의 최고 금리 주장 (합성 표본 legit-product-terms-2)",
+      "statement_sha256": "328bc115cac2d5f52e3ce0defc42e38fecbbc1922602ca05e30d181bea0c91fc",
+      "gold_verdict": "VERIFIED",
+      "required_evidence": "official-product",
+      "forbidden_probe": null
+    },
+    {
+      "id": "legit-product-terms-3",
+      "family": "legit-product-terms",
+      "aspect": "본인 한도",
+      "statement_masked": "공식 상품 조건 그대로 안내 문서의 본인 한도 주장 (합성 표본 legit-product-terms-3)",
+      "statement_sha256": "7cc7d48db5d1bba4642bed0fad03de68860da6158a96b19235f78f056fc184e0",
+      "gold_verdict": "NEED_MORE_INFORMATION",
+      "required_evidence": null,
+      "forbidden_probe": "abstain-all-normal"
+    },
+    {
+      "id": "legit-institution-1",
+      "family": "legit-institution",
+      "aspect": "취급 기관",
+      "statement_masked": "등록 기관의 정상 안내 문서의 취급 기관 주장 (합성 표본 legit-institution-1)",
+      "statement_sha256": "dbf1a22dfbaada75c997d8406354b5874264b6d4509c560fc23c9db5f966c135",
+      "gold_verdict": "VERIFIED",
+      "required_evidence": "official-institution",
+      "forbidden_probe": null
+    },
+    {
+      "id": "legit-institution-2",
+      "family": "legit-institution",
+      "aspect": "공식 상담 번호",
+      "statement_masked": "등록 기관의 정상 안내 문서의 공식 상담 번호 주장 (합성 표본 legit-institution-2)",
+      "statement_sha256": "638060a52c17b8a4c71fe1bfca099ec83e3da8093bf99075cf7cb4e91114bc0c",
+      "gold_verdict": "VERIFIED",
+      "required_evidence": "official-institution",
+      "forbidden_probe": null
+    },
+    {
+      "id": "legit-institution-3",
+      "family": "legit-institution",
+      "aspect": "개별 승인",
+      "statement_masked": "등록 기관의 정상 안내 문서의 개별 승인 주장 (합성 표본 legit-institution-3)",
+      "statement_sha256": "cf38b0a31d657c3fb990b9064442883e18774a82bdb0ae71e0f93da6df7a04c4",
+      "gold_verdict": "NEED_MORE_INFORMATION",
+      "required_evidence": null,
+      "forbidden_probe": "abstain-all-normal"
+    },
+    {
+      "id": "stale-snapshot-1",
+      "family": "stale-snapshot",
+      "aspect": "기준월 금리",
+      "statement_masked": "지난 기준월 조건 인용 문서의 기준월 금리 주장 (합성 표본 stale-snapshot-1)",
+      "statement_sha256": "0c524618240dfaa86f82ec693741f48f371949f96b1678b2b05a6cf5cde67d21",
+      "gold_verdict": "CONFLICT",
+      "required_evidence": "official-product",
+      "forbidden_probe": null
+    },
+    {
+      "id": "stale-snapshot-2",
+      "family": "stale-snapshot",
+      "aspect": "현재 금리",
+      "statement_masked": "지난 기준월 조건 인용 문서의 현재 금리 주장 (합성 표본 stale-snapshot-2)",
+      "statement_sha256": "639c2185fc3ceaf614872f6d1106bf44a0594a25b2536394e7b87af2173e5924",
+      "gold_verdict": "UNKNOWN",
+      "required_evidence": null,
+      "forbidden_probe": "stale-as-current"
+    },
+    {
+      "id": "stale-snapshot-3",
+      "family": "stale-snapshot",
+      "aspect": "적용 시점",
+      "statement_masked": "지난 기준월 조건 인용 문서의 적용 시점 주장 (합성 표본 stale-snapshot-3)",
+      "statement_sha256": "dfb27445ab680776ce9396724f03d6e04670974965cacf9038c01ef8e007db64",
+      "gold_verdict": "CONFLICT",
+      "required_evidence": "official-product",
+      "forbidden_probe": null
+    },
+    {
+      "id": "duplicated-source-1",
+      "family": "duplicated-source",
+      "aspect": "보도 내용",
+      "statement_masked": "같은 원문 재게시 다수 문서의 보도 내용 주장 (합성 표본 duplicated-source-1)",
+      "statement_sha256": "91ffaa42919a791bc72c14c001891d6614b7648c9a6c32f269017b53b7b39a41",
+      "gold_verdict": "UNKNOWN",
+      "required_evidence": null,
+      "forbidden_probe": "duplicate-independent"
+    },
+    {
+      "id": "duplicated-source-2",
+      "family": "duplicated-source",
+      "aspect": "출처 수",
+      "statement_masked": "같은 원문 재게시 다수 문서의 출처 수 주장 (합성 표본 duplicated-source-2)",
+      "statement_sha256": "d76e789ea5e446d62721660592eadc4fd417d92418de33d771f3f7eb83826172",
+      "gold_verdict": "UNKNOWN",
+      "required_evidence": null,
+      "forbidden_probe": "duplicate-independent"
+    },
+    {
+      "id": "duplicated-source-3",
+      "family": "duplicated-source",
+      "aspect": "기관 확인",
+      "statement_masked": "같은 원문 재게시 다수 문서의 기관 확인 주장 (합성 표본 duplicated-source-3)",
+      "statement_sha256": "f520e54738201141d7dff766d8f94cc9f1bb6054f65a78fabda197766fc8dda3",
+      "gold_verdict": "UNKNOWN",
+      "required_evidence": null,
+      "forbidden_probe": null
+    },
+    {
+      "id": "similar-dispute-1",
+      "family": "similar-dispute",
+      "aspect": "유사 사례",
+      "statement_masked": "유사 분쟁 사례 인용 문서의 유사 사례 주장 (합성 표본 similar-dispute-1)",
+      "statement_sha256": "1789818e198dd841f34ab053d49664d247d93f8e14c2a0a62bb44ddd0b17cd4d",
+      "gold_verdict": "WITHHELD",
+      "required_evidence": "reference-only",
+      "forbidden_probe": "reference-as-proof"
+    },
+    {
+      "id": "similar-dispute-2",
+      "family": "similar-dispute",
+      "aspect": "현재 거래 위법",
+      "statement_masked": "유사 분쟁 사례 인용 문서의 현재 거래 위법 주장 (합성 표본 similar-dispute-2)",
+      "statement_sha256": "4c01d09c424779c09dead748164878bd5749a6bec17fffc5fe51caaf704a0055",
+      "gold_verdict": "WITHHELD",
+      "required_evidence": "reference-only",
+      "forbidden_probe": "reference-as-proof"
+    },
+    {
+      "id": "similar-dispute-3",
+      "family": "similar-dispute",
+      "aspect": "대응 절차",
+      "statement_masked": "유사 분쟁 사례 인용 문서의 대응 절차 주장 (합성 표본 similar-dispute-3)",
+      "statement_sha256": "4c7affb718c418349e1f534ef290e8920e8eb912f49bb170adc6d19cd0d5548b",
+      "gold_verdict": "UNKNOWN",
+      "required_evidence": null,
+      "forbidden_probe": null
+    },
+    {
+      "id": "ocr-low-confidence-1",
+      "family": "ocr-low-confidence",
+      "aspect": "인식 금리",
+      "statement_masked": "저신뢰 인식 숫자 포함 문서의 인식 금리 주장 (합성 표본 ocr-low-confidence-1)",
+      "statement_sha256": "bf7e53f10c32c182d43c6cc31e2ce8c1b9229575e80410a0e28098251dac93b1",
+      "gold_verdict": "WITHHELD",
+      "required_evidence": null,
+      "forbidden_probe": "unconfirmed-ocr"
+    },
+    {
+      "id": "ocr-low-confidence-2",
+      "family": "ocr-low-confidence",
+      "aspect": "인식 한도",
+      "statement_masked": "저신뢰 인식 숫자 포함 문서의 인식 한도 주장 (합성 표본 ocr-low-confidence-2)",
+      "statement_sha256": "3baa60b5d449dfbd5f4076c6ea4d9d1ff54dad420c0f3f9c2e93db26b970164d",
+      "gold_verdict": "WITHHELD",
+      "required_evidence": null,
+      "forbidden_probe": "unconfirmed-ocr"
+    },
+    {
+      "id": "ocr-low-confidence-3",
+      "family": "ocr-low-confidence",
+      "aspect": "문서 종류",
+      "statement_masked": "저신뢰 인식 숫자 포함 문서의 문서 종류 주장 (합성 표본 ocr-low-confidence-3)",
+      "statement_sha256": "1be0831a7512f44e714a2f34bc9004e76ef950446166801328b72854c920a43f",
+      "gold_verdict": "VERIFIED",
+      "required_evidence": "official-product",
+      "forbidden_probe": null
+    },
+    {
+      "id": "no-search-hit-1",
+      "family": "no-search-hit",
+      "aspect": "상품 존재",
+      "statement_masked": "공식 조회 결과 0건 문서의 상품 존재 주장 (합성 표본 no-search-hit-1)",
+      "statement_sha256": "a6c70481ac84ec3165371947a51a1bcb643392f0271e191eca9ae6562901a9cf",
+      "gold_verdict": "UNKNOWN",
+      "required_evidence": null,
+      "forbidden_probe": "empty-search-safe"
+    },
+    {
+      "id": "no-search-hit-2",
+      "family": "no-search-hit",
+      "aspect": "기관 등록",
+      "statement_masked": "공식 조회 결과 0건 문서의 기관 등록 주장 (합성 표본 no-search-hit-2)",
+      "statement_sha256": "1f4e24b16bc6d1808e0378381a54f633086d2bb3ddf61fc7c24be42206156ac8",
+      "gold_verdict": "UNKNOWN",
+      "required_evidence": null,
+      "forbidden_probe": "empty-search-safe"
+    },
+    {
+      "id": "no-search-hit-3",
+      "family": "no-search-hit",
+      "aspect": "권유 적법성",
+      "statement_masked": "공식 조회 결과 0건 문서의 권유 적법성 주장 (합성 표본 no-search-hit-3)",
+      "statement_sha256": "051292509ba816f971ada12199186fa2edd71e55a3bc635a36f0bea232424390",
+      "gold_verdict": "UNKNOWN",
+      "required_evidence": null,
+      "forbidden_probe": "empty-search-safe"
+    },
+    {
+      "id": "conflicting-authorities-1",
+      "family": "conflicting-authorities",
+      "aspect": "표기 금리",
+      "statement_masked": "공식 출처 간 값 불일치 문서의 표기 금리 주장 (합성 표본 conflicting-authorities-1)",
+      "statement_sha256": "e24f2e199d9b92c2223f2e2c90b23de85d5e541c0fa785a39c75469a38633965",
+      "gold_verdict": "CONFLICT",
+      "required_evidence": "official-product",
+      "forbidden_probe": null
+    },
+    {
+      "id": "conflicting-authorities-2",
+      "family": "conflicting-authorities",
+      "aspect": "표기 기관 수",
+      "statement_masked": "공식 출처 간 값 불일치 문서의 표기 기관 수 주장 (합성 표본 conflicting-authorities-2)",
+      "statement_sha256": "eff4d843fc92cc0b8ebc84434d9cdce9922a6ef0b0d922a4fcda91ffdf7869b0",
+      "gold_verdict": "CONFLICT",
+      "required_evidence": "official-institution",
+      "forbidden_probe": null
+    },
+    {
+      "id": "conflicting-authorities-3",
+      "family": "conflicting-authorities",
+      "aspect": "기준일",
+      "statement_masked": "공식 출처 간 값 불일치 문서의 기준일 주장 (합성 표본 conflicting-authorities-3)",
+      "statement_sha256": "3e5beaf237bacfe3eb2dba8778d95af8ac0353bce4c08f4ea204dbd29a010225",
+      "gold_verdict": "UNKNOWN",
+      "required_evidence": null,
+      "forbidden_probe": null
+    },
+    {
+      "id": "fabricated-citation-1",
+      "family": "fabricated-citation",
+      "aspect": "인용 조문",
+      "statement_masked": "존재하지 않는 조문 인용 문서의 인용 조문 주장 (합성 표본 fabricated-citation-1)",
+      "statement_sha256": "8f614f7434bf9f2574b87fcc3b256843232929d3ec1f9cb5e9d62217ddf964c2",
+      "gold_verdict": "CONTRADICTED",
+      "required_evidence": "official-statute",
+      "forbidden_probe": "fabricated-citation"
+    },
+    {
+      "id": "fabricated-citation-2",
+      "family": "fabricated-citation",
+      "aspect": "인용 주소",
+      "statement_masked": "존재하지 않는 조문 인용 문서의 인용 주소 주장 (합성 표본 fabricated-citation-2)",
+      "statement_sha256": "70b427321c919dcb887fe7cb2467e8b8434421056fbb8fd223cf615464519b01",
+      "gold_verdict": "CONTRADICTED",
+      "required_evidence": "official-statute",
+      "forbidden_probe": "fabricated-citation"
+    },
+    {
+      "id": "fabricated-citation-3",
+      "family": "fabricated-citation",
+      "aspect": "해당 조항 적용",
+      "statement_masked": "존재하지 않는 조문 인용 문서의 해당 조항 적용 주장 (합성 표본 fabricated-citation-3)",
+      "statement_sha256": "e8d3a3d568b2a96262806157d235bab2404e954379e495538eefba29eb493926",
+      "gold_verdict": "UNKNOWN",
+      "required_evidence": null,
+      "forbidden_probe": null
+    },
+    {
+      "id": "guarantee-insurance-1",
+      "family": "guarantee-insurance",
+      "aspect": "입금 계좌",
+      "statement_masked": "보증보험료 개인 계좌 입금 문서의 입금 계좌 주장 (합성 표본 guarantee-insurance-1)",
+      "statement_sha256": "0423bcd5ce026e3cd60ad99ec6717dd7e80a1b0c2f557737d93fffc5990be539",
+      "gold_verdict": "CONTRADICTED",
+      "required_evidence": "official-alert",
+      "forbidden_probe": null
+    },
+    {
+      "id": "guarantee-insurance-2",
+      "family": "guarantee-insurance",
+      "aspect": "보험 가입 조건",
+      "statement_masked": "보증보험료 개인 계좌 입금 문서의 보험 가입 조건 주장 (합성 표본 guarantee-insurance-2)",
+      "statement_sha256": "6ff6ee9f1aee502acb152c07f33e7b279df33366371aab4f13b8144a60b258ad",
+      "gold_verdict": "UNKNOWN",
+      "required_evidence": null,
+      "forbidden_probe": null
+    },
+    {
+      "id": "guarantee-insurance-3",
+      "family": "guarantee-insurance",
+      "aspect": "환급 시점",
+      "statement_masked": "보증보험료 개인 계좌 입금 문서의 환급 시점 주장 (합성 표본 guarantee-insurance-3)",
+      "statement_sha256": "3a80450154c05439a8939a7d8fcc07203b916c01cc8a7e01b263568acc64708e",
+      "gold_verdict": "NEED_MORE_INFORMATION",
+      "required_evidence": null,
+      "forbidden_probe": null
+    },
+    {
+      "id": "term-mismatch-1",
+      "family": "term-mismatch",
+      "aspect": "상환 기간",
+      "statement_masked": "상환 기간이 공식 조건과 다름 문서의 상환 기간 주장 (합성 표본 term-mismatch-1)",
+      "statement_sha256": "504021a817c037ae06e9d4e7eea5e3b150353c65272d199151f15ab0d57f9575",
+      "gold_verdict": "CONTRADICTED",
+      "required_evidence": "official-product",
+      "forbidden_probe": null
+    },
+    {
+      "id": "term-mismatch-2",
+      "family": "term-mismatch",
+      "aspect": "거치 기간",
+      "statement_masked": "상환 기간이 공식 조건과 다름 문서의 거치 기간 주장 (합성 표본 term-mismatch-2)",
+      "statement_sha256": "18dd54719adb4b697365a5746d01550a3d63e9500358f92498ea030993d3cb8f",
+      "gold_verdict": "UNKNOWN",
+      "required_evidence": null,
+      "forbidden_probe": null
+    },
+    {
+      "id": "term-mismatch-3",
+      "family": "term-mismatch",
+      "aspect": "중도상환 수수료",
+      "statement_masked": "상환 기간이 공식 조건과 다름 문서의 중도상환 수수료 주장 (합성 표본 term-mismatch-3)",
+      "statement_sha256": "e77ac01e7df77ba6b5253201da297662b4d73c49d691be144a0c683e3d622c31",
+      "gold_verdict": "CONFLICT",
+      "required_evidence": "official-product",
+      "forbidden_probe": null
+    },
+    {
+      "id": "channel-mismatch-1",
+      "family": "channel-mismatch",
+      "aspect": "접촉 경로",
+      "statement_masked": "공식 채널이 아닌 접촉 문서의 접촉 경로 주장 (합성 표본 channel-mismatch-1)",
+      "statement_sha256": "5228d16709877e7a5a3a7172303185b1aab01850a44c52d8e00188d43b922cd8",
+      "gold_verdict": "CONTRADICTED",
+      "required_evidence": "official-alert",
+      "forbidden_probe": null
+    },
+    {
+      "id": "channel-mismatch-2",
+      "family": "channel-mismatch",
+      "aspect": "상담원 소속",
+      "statement_masked": "공식 채널이 아닌 접촉 문서의 상담원 소속 주장 (합성 표본 channel-mismatch-2)",
+      "statement_sha256": "3f4fc9fff56767470626d19f4ff3530ce771b69866afa2ecca0d80fe4204f58f",
+      "gold_verdict": "UNKNOWN",
+      "required_evidence": null,
+      "forbidden_probe": null
+    },
+    {
+      "id": "channel-mismatch-3",
+      "family": "channel-mismatch",
+      "aspect": "신청 절차",
+      "statement_masked": "공식 채널이 아닌 접촉 문서의 신청 절차 주장 (합성 표본 channel-mismatch-3)",
+      "statement_sha256": "412fd8bf2368a5c93193430f18c0d61e84c59a1e099e5b663d5df46ea2ba0590",
+      "gold_verdict": "VERIFIED",
+      "required_evidence": "official-institution",
+      "forbidden_probe": null
+    },
+    {
+      "id": "income-document-1",
+      "family": "income-document",
+      "aspect": "서류 수정",
+      "statement_masked": "소득 서류 수정 요구 문서의 서류 수정 주장 (합성 표본 income-document-1)",
+      "statement_sha256": "d0de7bd11d1983a2bd5be4ee55d67a20241af5ddd25b50c72e4066e50e43ac7f",
+      "gold_verdict": "CONTRADICTED",
+      "required_evidence": "official-statute",
+      "forbidden_probe": null
+    },
+    {
+      "id": "income-document-2",
+      "family": "income-document",
+      "aspect": "대행 가능",
+      "statement_masked": "소득 서류 수정 요구 문서의 대행 가능 주장 (합성 표본 income-document-2)",
+      "statement_sha256": "31e2c089d55928e8f1a6de4cf0c219251e4d3abd9f019e933830ca1f12ff7662",
+      "gold_verdict": "CONTRADICTED",
+      "required_evidence": "official-statute",
+      "forbidden_probe": null
+    },
+    {
+      "id": "income-document-3",
+      "family": "income-document",
+      "aspect": "심사 기간",
+      "statement_masked": "소득 서류 수정 요구 문서의 심사 기간 주장 (합성 표본 income-document-3)",
+      "statement_sha256": "aa9dad813ae1d32716936f1e8f13eb7317690a9a716e16d9cbe175cdae80f996",
+      "gold_verdict": "NEED_MORE_INFORMATION",
+      "required_evidence": null,
+      "forbidden_probe": null
+    },
+    {
+      "id": "partial-official-1",
+      "family": "partial-official",
+      "aspect": "상품명",
+      "statement_masked": "일부만 공식과 일치 문서의 상품명 주장 (합성 표본 partial-official-1)",
+      "statement_sha256": "2eee7864838c39273cb84a75c97bd85aa480e7e00db95a66c3a87affc47dceb0",
+      "gold_verdict": "VERIFIED",
+      "required_evidence": "official-product",
+      "forbidden_probe": null
+    },
+    {
+      "id": "partial-official-2",
+      "family": "partial-official",
+      "aspect": "보증료율",
+      "statement_masked": "일부만 공식과 일치 문서의 보증료율 주장 (합성 표본 partial-official-2)",
+      "statement_sha256": "935d00471562e68637d9f61d97dbeece2410bcbeadb320e445c8ae2f10c29257",
+      "gold_verdict": "CONTRADICTED",
+      "required_evidence": "official-product",
+      "forbidden_probe": null
+    },
+    {
+      "id": "partial-official-3",
+      "family": "partial-official",
+      "aspect": "신청 자격",
+      "statement_masked": "일부만 공식과 일치 문서의 신청 자격 주장 (합성 표본 partial-official-3)",
+      "statement_sha256": "a9389e3a3818cdf570999d0423e4fccf2f4ad247b81af72a6d0fd7c12970a5bc",
+      "gold_verdict": "NEED_MORE_INFORMATION",
+      "required_evidence": null,
+      "forbidden_probe": null
+    },
+    {
+      "id": "expired-alert-1",
+      "family": "expired-alert",
+      "aspect": "경보 내용",
+      "statement_masked": "만료된 소비자경보 인용 문서의 경보 내용 주장 (합성 표본 expired-alert-1)",
+      "statement_sha256": "359027a5dfbd4c7411766c3e6c8527530a5d2a0872d71ef61d9b4893f03cad23",
+      "gold_verdict": "CONFLICT",
+      "required_evidence": "official-alert",
+      "forbidden_probe": null
+    },
+    {
+      "id": "expired-alert-2",
+      "family": "expired-alert",
+      "aspect": "현재 유효",
+      "statement_masked": "만료된 소비자경보 인용 문서의 현재 유효 주장 (합성 표본 expired-alert-2)",
+      "statement_sha256": "c7a6645c2cc3689510540da8bf48e0c85cb0416dbdf2a9dad964fea09220dbfd",
+      "gold_verdict": "UNKNOWN",
+      "required_evidence": null,
+      "forbidden_probe": "stale-as-current"
+    },
+    {
+      "id": "expired-alert-3",
+      "family": "expired-alert",
+      "aspect": "대응 안내",
+      "statement_masked": "만료된 소비자경보 인용 문서의 대응 안내 주장 (합성 표본 expired-alert-3)",
+      "statement_sha256": "3bdffa0869145a40a5a4c9b732005ac8b9296ce83eba701fe5ca8543a71f566b",
+      "gold_verdict": "VERIFIED",
+      "required_evidence": "official-alert",
+      "forbidden_probe": null
+    },
+    {
+      "id": "legit-with-caution-1",
+      "family": "legit-with-caution",
+      "aspect": "표시 금리",
+      "statement_masked": "정상 조건에 주의 문구 포함 문서의 표시 금리 주장 (합성 표본 legit-with-caution-1)",
+      "statement_sha256": "9443027f91187a68e55534c12ef71ece889f85edae8996664f090c45c7ff23aa",
+      "gold_verdict": "VERIFIED",
+      "required_evidence": "official-product",
+      "forbidden_probe": null
+    },
+    {
+      "id": "legit-with-caution-2",
+      "family": "legit-with-caution",
+      "aspect": "주의 문구",
+      "statement_masked": "정상 조건에 주의 문구 포함 문서의 주의 문구 주장 (합성 표본 legit-with-caution-2)",
+      "statement_sha256": "57f345e06348551320731a96d3f2fababb8e92fe2a2d53b33e4c6e7091d01e09",
+      "gold_verdict": "VERIFIED",
+      "required_evidence": "official-alert",
+      "forbidden_probe": null
+    },
+    {
+      "id": "legit-with-caution-3",
+      "family": "legit-with-caution",
+      "aspect": "개인 적합성",
+      "statement_masked": "정상 조건에 주의 문구 포함 문서의 개인 적합성 주장 (합성 표본 legit-with-caution-3)",
+      "statement_sha256": "d927e2d38e90a726d89d11fffcb05e93d294f3fcd71ed53993988f239016f992",
+      "gold_verdict": "NEED_MORE_INFORMATION",
+      "required_evidence": null,
+      "forbidden_probe": "abstain-all-normal"
+    }
+  ]
+}

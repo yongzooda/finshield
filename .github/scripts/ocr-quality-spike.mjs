@@ -7,20 +7,31 @@ import {probeNetworkNamespace} from './file-safety-spike.mjs';
 import {inspectFile} from './file-safety-inspector.mjs';
 import {linesFromBoxes,observePage} from './ocr-quality-text.mjs';
 export const FORMULA_VERSION='ocr-page-field-exact-v1';
-export const FIXTURE_DIR='.github/fixtures/ocr-quality-v1';
+export const FIXTURE_DIR='.github/fixtures/ocr-quality-v2';
+// 이미 노출돼 실패로 끝난 첫 평가셋이다. 재사용 여부를 코드로 막으려고 경로만 남긴다.
+export const EXPOSED_FIXTURE_DIR='.github/fixtures/ocr-quality-v1';
 const hash=value=>createHash('sha256').update(value).digest('hex');
 const fail=code=>{throw Error(code);};
 export function loadQualityFixtures(repository) {
  const manifest=JSON.parse(readFileSync(resolve(repository,FIXTURE_DIR,'manifest.json'),'utf8'));
- if(manifest.version!=='ocr-quality-v1'||manifest.synthetic_only!==true||manifest.documents!==32||manifest.pages!==112||manifest.fixtures?.length!==32)fail('FIXTURE_INVALID');
- const seen=new Set();const kinds={text:0,image:0,digital:0,scanned:0};let pages=0;
+ if(manifest.version!=='ocr-quality-v2'||manifest.synthetic_only!==true||manifest.documents!==32||manifest.pages!==112||manifest.fixtures?.length!==32)fail('FIXTURE_INVALID');
+ // 산식과 합격선은 그대로 두고 표본만 바꾼다. 노출된 가족이 하나라도 섞이면 거부한다.
+ if(manifest.previous_version!=='ocr-quality-v1'||!Array.isArray(manifest.reused_families)||manifest.reused_families.length!==0)fail('FIXTURE_PREREGISTRATION_INVALID');
+ const exposed=JSON.parse(readFileSync(resolve(repository,EXPOSED_FIXTURE_DIR,'manifest.json'),'utf8'));
+ const exposedFamilies=new Set(exposed.fixtures.map(f=>f.family));
+ const seen=new Set();const kinds={text:0,image:0,digital:0,scanned:0};const shapes={tld:0,host:0};const families=new Set();let pages=0;
  for(const f of manifest.fixtures){
   if(!/^[a-z]+-(text\.txt|image\.png|digital\.pdf|scanned\.pdf)$/.test(f.path)||seen.has(f.path)||!(f.kind in kinds))fail('FIXTURE_PATH_INVALID');
+  if(exposedFamilies.has(f.family))fail('FIXTURE_FAMILY_EXPOSED');
+  if(!(f.url_shape in shapes))fail('FIXTURE_URL_SHAPE_INVALID');
   const bytes=readFileSync(resolve(repository,FIXTURE_DIR,f.path));seen.add(f.path);kinds[f.kind]++;pages+=f.pages.length;
+  if(!families.has(f.family)){families.add(f.family);shapes[f.url_shape]++;}
   if(bytes.length!==f.bytes||bytes.length>10485760||hash(bytes)!==f.sha256||f.pages.length!==({text:1,image:1,digital:2,scanned:10})[f.kind])fail('FIXTURE_HASH_INVALID');
   for(const p of f.pages)if(!p.text||Object.keys(p.fields).sort().join(',')!=='institution,product,url')fail('FIXTURE_LABEL_INVALID');
+  for(const p of f.pages)if(!/^https:\/\/([a-z]+\.example\/loan|www\.example\.com\/[a-z]+)$/.test(p.fields.url))fail('FIXTURE_URL_RESERVED_ONLY');
  }
- if(pages!==112||Object.values(kinds).some(n=>n!==8))fail('FIXTURE_COVERAGE_INVALID');
+ if(pages!==112||Object.values(kinds).some(n=>n!==8)||families.size!==8)fail('FIXTURE_COVERAGE_INVALID');
+ if(shapes.tld!==manifest.url_shapes?.tld||shapes.host!==manifest.url_shapes?.host||shapes.tld!==4||shapes.host!==4)fail('FIXTURE_URL_SHAPE_MIX_INVALID');
  return manifest;
 }
 function parsePdf(repository, fixture, namespace) {
