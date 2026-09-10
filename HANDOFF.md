@@ -1,3 +1,11 @@
+## 2026-09-10 처리자 개인정보 계약 inventory
+
+- `B-PROCESSOR-PRIVACY`·`B-PRIVACY-VERCEL` 이 요구하는 확인 대상을 처리자 다섯과 축 서른으로 나눠 `.github/fixtures/processor-privacy/inventory.json` 에 고정했다. 지금까지 두 항목은 문장으로만 추적돼 무엇을 얼마나 확인했는지 셀 수 없었다.
+- 검사는 fail-closed 다. `OBSERVED` 는 `evidence/` 아래의 실제 관측 파일과 관측일, 관측 방법이 모두 있을 때만 허용하고 파일이 없으면 거부한다. `UNVERIFIED`·`NOT_APPLICABLE` 은 관측 항목이 비어 있어야 한다. 축 누락·경로 탈출·저장소 밖 경로도 거부한다.
+- 현재 관측된 축은 0개다. Cohere 학습 사용은 2026-09-07 관측에서 켜져 있었고 이후 껐다는 기록은 있으나 같은 형식의 재관측 파일이 없어 `UNVERIFIED` 로 둔다. 근거 없이 상태를 올리지 않는다.
+- `actor` 가 `account-owner` 인 축은 콘솔 로그인이 필요해 저장소에서 대신 확인할 수 없다. 확인 항목과 관측 파일 형식은 `docs/ops/processor-privacy-inventory.md` 를 따른다.
+- 계약 시험이 변조 17건을 거부한다. 두 차단 항목은 policy 미등록·항목 없음이라 `PASS` 자체가 거부되며 Implementation `NO-GO`, Release `NOT-EVALUATED` 를 유지한다. 실제 사용자 개인정보는 계속 처리하지 않는다.
+
 ## 2026-09-09 의존성 보안 패치 진행
 
 npm audit에서 새로 확인된 Next/Sharp/Vitest/js-yaml 경고5건을 수정판으로 갱신했고 clean 설치 뒤 audit0·빌드·727 기본 테스트·lint 오류0이다. 새 package 범위 때문에 Model·Health를 재측정 대기로 바꿨고 기존 결과를 보존했다(현행6/20, Gate NO-GO·NOT-EVALUATED). 로컬 검사 병합 승인은 PR303을 통해 main에 기록돼 있다. 상세는 docs/ops/2026-09-09-dependency-security.md와 후속 보안 PR을 따른다.
