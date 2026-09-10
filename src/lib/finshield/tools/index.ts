@@ -17,12 +17,33 @@ import {
 import { parseUrlHost } from "./url";
 import { analyzeRiskPattern, checkDocuments, getSourceSnapshot, searchDisputeCase, searchPublicKnowledge } from "./public-knowledge";
 import { searchOfficialWarning } from "./official-warning";
+import { readOfficialProduct } from "./official-product";
 
+/**
+ * 공개 Demo 는 승인한 상품 Snapshot 을 조회하고, 회원 실행과 같은 공식 상품 페이지도
+ * 실시간으로 함께 읽는다.
+ *
+ * 승인 Snapshot 은 금리·한도 같은 조건만 담는다. 진흥원 공식 페이지의 보증 종료 고지는
+ * 현재 권유를 반박하는 가장 직접적인 근거인데, Demo 만 이를 모르면 같은 문자에 회원과
+ * 다른 결론을 낸다. 페이지를 읽지 못하면 승인 Snapshot 결과만 돌려주고 그 사실을
+ * 관측으로 남긴다. 종료 여부를 추정해 채우지 않는다.
+ */
 const searchProductForContext: ToolImpl = async (input, ctx) => {
-  if (ctx.allowedSourceSnapshotIds?.length) {
-    return searchPublicKnowledge(input, ctx, ["PRODUCT"]);
-  }
-  return searchFinancialProduct(input, ctx);
+  if (!ctx.allowedSourceSnapshotIds?.length) return searchFinancialProduct(input, ctx);
+  const stored = await searchPublicKnowledge(input, ctx, ["PRODUCT"]);
+  if (!/햇살론\s*15/i.test(String((input as { query?: unknown })?.query ?? ""))) return stored;
+  const live = await readOfficialProduct(input, ctx).catch(() => null);
+  return {
+    ...stored,
+    items: [...stored.items, ...(live?.items ?? [])],
+    candidateCount: stored.candidateCount + (live?.items.length ?? 0),
+    observations: {
+      ...stored.observations,
+      official_product_page: live
+        ? String(live.items[0]?.locator.temporal_status ?? "UNKNOWN")
+        : "UNAVAILABLE",
+    },
+  };
 };
 
 const searchWarningForContext: ToolImpl = async (input, ctx) => {
