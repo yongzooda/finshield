@@ -1,3 +1,10 @@
+## 2026-09-10 OCR 재평가 표본 사전등록
+
+- `B-OCR-01`의 첫 정식 측정은 field F1 0.9791666667로 기준 0.98에 미달했고 진단에서 `refinance-scanned` 7쪽의 `example`이 `exaimple`로 인식된 것이 원인이었다. 그 표본은 이미 노출됐으므로 새 평가셋 `ocr-quality-v2`를 측정 전에 고정했다.
+- 산식과 합격선은 바꾸지 않는다. `FORMULA_VERSION`은 `ocr-page-field-exact-v1` 그대로이고 문서 32건·112쪽·문서 구조·150dpi도 v1과 같다. 시나리오 가족 여덟 개만 전부 새로 만들었고 `loadQualityFixtures`가 v1 manifest를 읽어 겹치는 가족을 `FIXTURE_FAMILY_EXPOSED`로 거부한다.
+- 주소는 RFC 2606 예약 이름만 쓰되 v1과 같은 맨 `.example` TLD 네 가족과 실제 문서에 더 흔한 `www.example.com` 경로형 네 가족을 4대4로 고정했다. 어려운 경우를 없애지 않으려고 절반을 그대로 남겼고, 점수가 오르면 그 원인을 결과에 적는다.
+- v1 평가셋과 실패 artifact는 그대로 둔다. v2는 아직 측정하지 않았으며 GitHub Actions 과금 장애 동안에는 정식 main 단일 실행과 별도 Adoption을 할 수 없다. `B-OCR-01`은 `NOT-EVALUATED`, Implementation `NO-GO`, Release `NOT-EVALUATED`를 유지한다.
+
 ## 2026-09-09 의존성 보안 패치 진행
 
 npm audit에서 새로 확인된 Next/Sharp/Vitest/js-yaml 경고5건을 수정판으로 갱신했고 clean 설치 뒤 audit0·빌드·727 기본 테스트·lint 오류0이다. 새 package 범위 때문에 Model·Health를 재측정 대기로 바꿨고 기존 결과를 보존했다(현행6/20, Gate NO-GO·NOT-EVALUATED). 로컬 검사 병합 승인은 PR303을 통해 main에 기록돼 있다. 상세는 docs/ops/2026-09-09-dependency-security.md와 후속 보안 PR을 따른다.
