@@ -1,3 +1,11 @@
+## 2026-09-10 Workflow 장애 20종과 입력별 기한 사전등록
+
+- 재검증 Workflow 의 장애 20종과 Text 120초·Image/PDF 180초 기한 표본을 측정 전에 고정했다. 목록·기대 종결·합격식은 `docs/ops/workflow-fault-preregistration.md` 를 따르고 결과를 본 뒤 바꾸지 않는다.
+- 20종 중 DB 경계에서 결정적으로 볼 수 있는 항목을 `supabase/tests/56_workflow_fault_matrix.sql` 로 실제 실행했다. 중복 전달 합류, 같은 키 다른 본문 거부, 응답 유실 재요청 거부, 동시 선점 거부, 알 수 없는 token 진행 기록 거부, 실행 중 취소의 Worker 확인, 취소 종결 뒤 최종화 거부, 다른 세션 terminal 복원, 미확정 예약 보존과 확정 뒤 정산, 이중 정산 거부, 상한 초과 예약 거부, 만료 예약 sweep 의 예산 보존이 통과했다.
+- `private.settle_revalidation_cancel` 이 이미 종결된 Job 에도 상태·Lease·이벤트를 다시 쓰는 것을 확인했다. 지금까지는 호출자가 상태를 먼저 보는 데 기대고 있었다. Migration `0071` 로 종결된 Job 에서 조기 반환하게 해 중복 전달이 이벤트를 늘리지 않는다. 기존 terminal 행과 이벤트는 바꾸지 않는다.
+- 합격식은 `.github/scripts/workflow-fault-policy.mjs` 가 원장에서 다시 계산하고 계약 시험이 변조 34건을 거부한다. `transport` 가 `vercel` 인 열 개 항목은 실제 배포 전달 경계 관측이 남아 있다.
+- 격리 PostgreSQL 17 에서 Migration 67개와 SQL 계약 54파일이 통과했다. `B-JOB-01`·`B-DEADLINE-01` 은 policy 미등록·항목 없음이라 `PASS` 자체가 거부되며 `NOT-EVALUATED` 다. Implementation `NO-GO`, Release `NOT-EVALUATED` 를 유지한다.
+
 ## 2026-09-09 의존성 보안 패치 진행
 
 npm audit에서 새로 확인된 Next/Sharp/Vitest/js-yaml 경고5건을 수정판으로 갱신했고 clean 설치 뒤 audit0·빌드·727 기본 테스트·lint 오류0이다. 새 package 범위 때문에 Model·Health를 재측정 대기로 바꿨고 기존 결과를 보존했다(현행6/20, Gate NO-GO·NOT-EVALUATED). 로컬 검사 병합 승인은 PR303을 통해 main에 기록돼 있다. 상세는 docs/ops/2026-09-09-dependency-security.md와 후속 보안 PR을 따른다.
