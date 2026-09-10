@@ -191,7 +191,7 @@ export function PrivacyActions() {
                   ) : asking === row.id ? (
                     <div className="mt-3 rounded-[10px] bg-[var(--fs-canvas)] px-4 py-3">
                       <p className="fs-body">
-                        이 기록을 지우면 확인 결과와 Evidence Passport 도 함께 사라집니다. 되돌릴 수 없습니다.
+                        이 기록을 지우면 확인 결과와 검증 근거 기록도 함께 사라집니다. 되돌릴 수 없습니다.
                       </p>
                       <div className="mt-3 flex flex-wrap gap-3">
                         <button type="button" disabled={busy || signingOut || Boolean(reauthCase)} onClick={() => void requestDelete(row.id)}

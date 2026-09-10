@@ -56,7 +56,7 @@ export function AccountDeletion({ token, setToken }: { token: string | null; set
   const pending = status !== "NONE" && status !== "COMPLETED";
   return <FsCard>
     <h2 className="fs-h2">전체 계정 탈퇴</h2>
-    <p className="fs-body mt-2">탈퇴를 시작하면 새 작업과 기록 접근을 차단합니다. 모든 Case와 첨부 자료를 정리한 뒤 계정을 마지막에 삭제합니다.</p>
+    <p className="fs-body mt-2">탈퇴를 시작하면 새 작업과 기록 접근을 차단합니다. 모든 검증 기록과 첨부 자료를 정리한 뒤 계정을 마지막에 삭제합니다.</p>
     <div role="status" aria-live="polite">
       {status === "COMPLETED" ? <p className="fs-body mt-3">자료 정리와 계정 삭제를 확인했습니다.</p> : null}
       {pending ? <p className="fs-body mt-3">삭제를 처리 중입니다. 화면을 닫아도 계속 진행하며, 실제 삭제를 확인한 뒤 완료로 표시합니다.</p> : null}
@@ -64,7 +64,7 @@ export function AccountDeletion({ token, setToken }: { token: string | null; set
     </div>
     {reauth ? <FsLoginCard title="탈퇴 전에 비밀번호로 다시 로그인" onToken={next => { setToken(next); setReauth(false); setAsking(true); }} /> : null}
     {asking ? <div className="mt-4">
-      <p className="fs-body">모든 검증 기록, Passport, 가입 후 점검과 계정을 삭제합니다. 되돌릴 수 없습니다. 계속하시겠습니까?</p>
+      <p className="fs-body">모든 검증 기록, 검증 근거 기록, 가입 후 점검과 계정을 삭제합니다. 되돌릴 수 없습니다. 계속하시겠습니까?</p>
       <button type="button" className="fs-btn fs-btn--primary mt-3" disabled={busy} onClick={() => void remove()}>전체 자료 삭제와 탈퇴 시작</button>
       <button type="button" className="fs-btn fs-btn--quiet mt-3" disabled={busy} onClick={() => setAsking(false)}>그만두기</button>
     </div> : status === "NONE" && !reauth ? <button type="button" className="fs-btn fs-btn--quiet mt-4" onClick={() => setAsking(true)}>계정 탈퇴 확인</button> : null}

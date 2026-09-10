@@ -1,15 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FsCard, FsChip, FsShell } from "../fs-shell";
+import { readGateStatus, type GateRow } from "@/lib/finshield/gate-status";
+import { BLOCKER_LABEL } from "./blocker-labels";
 
 export const metadata: Metadata = { title: "신뢰센터 | FinShield" };
+// 빌드할 때 ADR 과 증거 index 를 읽어 만든다. 채택 PR 이 병합되면 다음 배포에 반영된다.
+export const dynamic = "force-static";
 
-// ADR-001 metadata·14.2 기준. 과거 시험 이력을 현재 버전의 통과로 표시하지 않는다.
-const CONNECTED = ["텍스트·이미지·PDF 입력과 별도 동의 OCR", "항목 확인·근거 여권·재검증", "같은 Case의 가입 후 문서 점검", "회원 탈퇴·세션 갱신·자료 삭제"];
-const ACCEPTED = ["생성 모델의 응답 형식·비용", "임베딩 1차 후보 검색", "파일 안전성 격리 시험", "법제처 접근 조건", "공식 상품·취급기관 자료", "실행 환경"];
-const PENDING = ["OCR 정식 인식 품질", "공식 지식 자료 적재와 결합 검색 품질", "개인 적합성의 실질적인 판단", "배포 장애·취소·복구 20종", "제공자 개인정보 운영 계약", "정상 복수 항목 판단 품질", "전체 이용 과정과 출시 검증"];
+const CONNECTED = ["텍스트·이미지·PDF 입력과 별도 동의 OCR", "항목 확인·근거 여권·재검증", "같은 기록의 가입 후 문서 점검", "회원 탈퇴·세션 갱신·자료 삭제"];
+
+const labelOf = (row: GateRow) => BLOCKER_LABEL[row.id] ?? row.id;
+const kstDate = (iso: string) => new Intl.DateTimeFormat("ko-KR", {
+  timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit",
+}).format(new Date(iso)).replace(/\s/g, "").replace(/\.$/, "");
 
 export default function TrustPage() {
+  const gate = readGateStatus();
+  const passed = gate.implementationBlockers.filter((row) => row.status === "PASS");
+  const failed = gate.implementationBlockers.filter((row) => row.status === "FAIL");
+  const pending = gate.implementationBlockers.filter((row) => row.status !== "PASS" && row.status !== "FAIL");
   return (
     <FsShell>
       <header><p className="fs-eyebrow">신뢰센터</p><h1 className="fs-h1 mt-2">어디까지 확인할 수 있나요?</h1><p className="fs-lead mt-3">지원 범위와 검증 상태를 공개합니다. 확인하지 못한 내용은 결과에 따로 표시합니다.</p></header>
@@ -34,11 +44,19 @@ export default function TrustPage() {
       </FsCard>
       <FsCard>
         <div className="flex flex-wrap items-center gap-3"><h2 className="fs-h2">아직 완료되지 않은 기능</h2><FsChip tone="neutral">출시 검증 전</FsChip></div>
-        <ul className="fs-body mt-4 grid gap-2 sm:grid-cols-2">{PENDING.map(item=><li key={item}>· {item}</li>)}</ul>
-        <details className="fs-details"><summary>기술 검증 현황 · 2026.09.08 기준</summary>
-          <p className="fs-meta mt-2">현재 코드 버전의 구현 게이트는 NO-GO, 출시 게이트는 NOT-EVALUATED입니다. 아래는 구성요소별 채택 이력이며 서비스 전체의 정확도나 출시 완료를 뜻하지 않습니다.</p>
-          <ul className="fs-meta mt-3 space-y-1">{ACCEPTED.map(item=><li key={item}>· {item}: 채택된 시험 증거 있음</li>)}</ul>
-          <p className="fs-meta mt-3">최신 기능 변경 뒤 DB 권한·동의·저장소·삭제·호출 제한 증거는 재측정이 필요합니다. 시험 증거는 저장소에서 관리하며 외부 기관의 독립 인증이 아닙니다.</p>
+        <ul className="fs-body mt-4 grid gap-2 sm:grid-cols-2">
+          {[...failed, ...pending].map((row) => <li key={row.id}>· {labelOf(row)}{row.status === "FAIL" ? " (기준 미달, 다시 준비 중)" : ""}</li>)}
+          <li>· 개인 적합성의 실질적인 판단</li>
+          {gate.releaseBlockers.filter((row) => row.status !== "PASS").map((row) => <li key={row.id}>· {labelOf(row)}</li>)}
+        </ul>
+        <details className="fs-details"><summary>기술 검증 현황{gate.lastAdoptedAt ? ` · ${kstDate(gate.lastAdoptedAt)} 채택 기준` : ""}</summary>
+          <p className="fs-meta mt-2">
+            현재 코드 버전의 구현 게이트는 {gate.implementationGate}, 출시 게이트는 {gate.releaseGate}입니다.
+            구성요소 시험 {gate.implementationBlockers.length}개 중 {passed.length}개가 채택 기준을 통과했습니다.
+            아래는 구성요소별 채택 현황이며 서비스 전체의 정확도나 출시 완료를 뜻하지 않습니다.
+          </p>
+          <ul className="fs-meta mt-3 space-y-1">{passed.map((row) => <li key={row.id}>· {labelOf(row)}: 채택된 시험 증거 있음</li>)}</ul>
+          <p className="fs-meta mt-3">시험 증거는 저장소에서 관리하며 외부 기관의 독립 인증이 아닙니다.</p>
         </details>
       </FsCard>
       <Link href="/privacy-center" className="fs-text-link mt-4">개인정보와 데이터 처리 기준 보기 →</Link>

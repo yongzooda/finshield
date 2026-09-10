@@ -47,7 +47,7 @@ export function AftercareDocuments({token,caseId,basePassport,prior,onUse,onBusy
   },[caseId,basePassport,sessionKey]);
   const apply=(value:Document)=>{
     const selected=value.terms.filter(t=>t.confirmed&&t.base_passport_id===basePassport&&t.target_claim_id);
-    if(!selected.length)throw new Error("현재 기준 Passport에 연결한 문구가 없습니다.");
+    if(!selected.length)throw new Error("현재 검증 근거 기록에 연결한 문구가 없습니다.");
     onUse(Object.fromEntries(selected.map(t=>[t.target_claim_id!,t.statement_masked])),Object.fromEntries(selected.map(t=>[t.target_claim_id!,t.id])));
     setMessage("확인한 문구를 아래 계약 비교에 적용했습니다. 아직 점검을 시작하지 않았습니다.");
   };
@@ -75,7 +75,7 @@ export function AftercareDocuments({token,caseId,basePassport,prior,onUse,onBusy
   const confirmed=document?.terms.some(t=>t.confirmed);
   return <section aria-label="가입 후 계약 문서" className="mt-5">
     <h3 className="fs-h2">계약 파일의 문구 확인</h3>
-    <p className="fs-meta mt-2">인식한 숫자·단위·부정 표현을 원본과 대조하고 필요한 문구를 수정하세요. 확인한 문구는 같은 Case의 가입 후 비교에만 사용합니다.</p>
+    <p className="fs-meta mt-2">인식한 숫자·단위·부정 표현을 원본과 대조하고 필요한 문구를 수정하세요. 확인한 문구는 같은 기록의 가입 후 비교에만 사용합니다.</p>
     {document?<div className="mt-4">
       <p className="fs-meta">{document.input.raw_delete_status==="SUCCEEDED"?"서버 원본 삭제 확인":"원본 임시 처리 또는 삭제 진행 중"} · 원본은 본인 기기에 보관하세요.</p>
       {!document.terms.length?<p className="fs-body mt-2">문장 추출을 끝내지 못한 입력입니다. 중단하고 새로 올릴 수 있습니다.</p>:null}

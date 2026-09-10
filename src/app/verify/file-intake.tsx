@@ -30,7 +30,7 @@ export function FileIntake({token,caseId,onPrepared,onBusyChange}:{token:string;
     try{
       const opened=await sessionFetch("/api/finshield/files/slot",token,{method:"POST",headers,body:JSON.stringify({mime:file.type,size:file.size,...(caseId?{case_id:caseId}:{})}),signal:abort.signal});
       const data=await opened.json();if(!opened.ok)throw new Error(data.error??"업로드를 준비하지 못했습니다.");
-      if(caseId && data.case_id!==caseId)throw new Error("계약 파일의 Case 연결을 확인하지 못했습니다.");
+      if(caseId && data.case_id!==caseId)throw new Error("계약 파일과 검증 기록의 연결을 확인하지 못했습니다.");
       slot.current={case_id:data.case_id,input_id:data.input_id};
       await uploadFile({file,supabaseUrl:data.supabase_url,publishableKey:data.publishable_key,objectPath:data.object_path,token:()=>freshSessionToken(token),signal:abort.signal,
         onProgress:(sent,total)=>setMessage(`파일 업로드 ${Math.round(sent/total*100)}%`)});
