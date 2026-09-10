@@ -78,15 +78,64 @@ export class DemoUnavailableError extends Error {}
 const sha256 = (value: string): string => createHash("sha256").update(value).digest("hex");
 
 /**
- * 이 방문자가 최근에 얼마나 돌렸는지 본다. 공개 경로라 상한이 필요하다.
+ * 공개 실행 상한. 한 회에 모델 비용이 약 USD 0.11 든다.
  *
- * 범위 값은 데이터베이스가 정한 다섯 가지 중에서 고른다. 주소를 해시로만 들고
+ * 심사장처럼 여러 사람이 한 주소를 함께 쓰면 주소별 시간 상한이 금방 찬다. 그래서
+ * 주소별 시간 상한을 넉넉히 두고, 한 주소가 하루 예산을 다 쓰지 못하게 주소별 하루
+ * 상한과 전체 하루 상한을 함께 둔다. 전체 하루 상한은 모델 전체 일일 예산
+ * (USD 20, 0046)의 절반 남짓이라 회원 검증 몫을 남긴다.
+ *
+ * 범위 값은 데이터베이스가 정한 다섯 가지 중에서 고른다. 주소는 해시로만 들고
  * 있으므로 `IP_HMAC` 이다. 없는 낱말을 새로 만들면 제약이 막는다.
  */
+export const DEMO_LIMITS = [
+  { scope: "IP_HMAC", operation: "DEMO_RUN", limit: 6, windowSeconds: 3600 },
+  { scope: "IP_HMAC", operation: "DEMO_RUN_DAY", limit: 30, windowSeconds: 86400 },
+  { scope: "GLOBAL", operation: "DEMO_RUN_ALL_DAY", limit: 100, windowSeconds: 86400 },
+] as const;
+
+class DemoLimitReached extends Error {}
+
+/**
+ * 세 상한을 한 트랜잭션에서 차례로 쓴다. 하나라도 차면 앞서 올린 횟수까지 되돌린다.
+ * 실행하지 못한 요청이 다른 상한을 깎아 먹지 않게 하기 위해서다.
+ */
 export const allowDemo = async (sql: Sql, visitorKey: string): Promise<boolean> => {
+  try {
+    await sql.begin(async (tx) => {
+      for (const bucket of DEMO_LIMITS) {
+        const key = bucket.scope === "GLOBAL" ? "public-demo" : visitorKey;
+        const rows = await tx`
+          select allowed from private.consume_rate_limit(${bucket.scope}, ${key}, ${bucket.operation},
+                                                         ${bucket.limit}, ${bucket.windowSeconds})`;
+        if (rows[0]?.allowed !== true) throw new DemoLimitReached();
+      }
+    });
+    return true;
+  } catch (error) {
+    if (error instanceof DemoLimitReached) return false;
+    throw error;
+  }
+};
+
+/**
+ * 가장 최근에 끝까지 성공한 실제 공개 실행 결과를 읽는다.
+ *
+ * 상한에 걸린 방문자에게 빈 화면 대신 보여 줄 수 있게 한다. 사전 계산 결과가
+ * 아니라 과거의 실제 실행 기록이며, 화면은 실행 시각을 함께 적어 지금 실행한
+ * 결과처럼 보이지 않게 한다 (OPS-004). 부분 실행이나 사전 계산 결과는 고르지 않는다.
+ */
+export const readRecentResult = async (sql: Sql): Promise<{ computedAt: string; manifest: Record<string, unknown> } | null> => {
   const rows = await sql`
-    select allowed from private.consume_rate_limit('IP_HMAC', ${visitorKey}, 'DEMO_RUN', 3, 3600)`;
-  return rows[0]?.allowed === true;
+    select rs.result_manifest, rs.computed_at
+      from demo.result_snapshots rs
+      join demo.runs r on r.id = rs.demo_run_id
+     where r.status = 'SUCCEEDED' and rs.is_precomputed = false
+     order by rs.computed_at desc
+     limit 1`;
+  const row = rows[0];
+  if (!row) return null;
+  return { computedAt: new Date(row.computed_at as string).toISOString(), manifest: row.result_manifest as Record<string, unknown> };
 };
 
 export const createSession = async (sql: Sql): Promise<DemoSession> => {

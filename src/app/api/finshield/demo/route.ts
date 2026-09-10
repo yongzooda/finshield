@@ -37,8 +37,11 @@ export async function POST(request: Request): Promise<Response> {
   let seed;
   try {
     if (!(await allowDemo(sql, visitorKey(request)))) {
+      // 상한에 걸려도 사전 계산 결과로 바꿔 돌리지 않는다. 화면이 지난 실제 실행 기록을
+      // 실행 시각과 함께 따로 보여 줄 수 있게만 알린다.
       return jsonNoStore({
-        error: "잠시 뒤에 다시 해 주세요. 공개 실행은 한 시간에 세 번까지입니다",
+        error: "지금은 공개 체험 실행 한도에 도달했습니다. 잠시 뒤에 다시 시도하거나 가장 최근 실행 결과를 확인해 주세요.",
+        code: "DEMO_LIMIT_REACHED",
       }, 429);
     }
     session = await createSession(sql);
