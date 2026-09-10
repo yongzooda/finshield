@@ -21,11 +21,50 @@ import { createAgentModel, createJudgeModel } from "./agents/model-adapter";
 import { TOOLS } from "./manifest";
 import { recordSnapshot, type PendingToolRun, type RunRecorder } from "./tools/runtime";
 import type { ConfirmedClaim } from "./schemas";
+import { buildActionGuide } from "./action-guide";
+import { buildAxisResults, buildFinalClaims, type FinalClaim } from "./finalize";
+import { hasHighRiskAction } from "./high-risk-actions";
 
 type Sql = ReturnType<typeof postgres>;
 
 export const DEMO_SEED_CODE = "sunshine-loan-15";
-export const RESULT_SCHEMA_VERSION = "demo-result-v1";
+// v2 부터 회원 결과와 같은 최종 상태·종합 결과·세 축·행동 안내를 담는다.
+export const RESULT_SCHEMA_VERSION = "demo-result-v2";
+
+const UNDECIDED_STATES = ["UNKNOWN", "NEED_MORE_INFORMATION", "WITHHELD"];
+// 0016 finalize_verification_run 의 기본 pre_action_codes 와 같다.
+const PRE_ACTION_CODES = ["VERIFY_OFFICIAL_CHANNEL", "CONFIRM_CONTRACT_TERMS", "CONFIRM_BEFORE_TRANSFER"];
+
+/**
+ * 종합 결과 Matrix 의 입력을 센다.
+ *
+ * 회원 Run 은 DB 의 finalize_verification_run 이 같은 여덟 값을 세어
+ * private.decide_overall_result 에 넘긴다. Demo 는 회원 표를 쓰지 않으므로 값만
+ * 여기서 세고 결과 범주는 같은 DB 함수가 정한다. 두 화면이 다른 결론을 내지 않게
+ * 하기 위해서다.
+ */
+export const overallInputs = (args: {
+  finals: FinalClaim[];
+  isMaterial: (claimId: string) => boolean;
+  agentPartial: boolean;
+  guideActionCodes: string[];
+}) => {
+  const material = args.finals.filter((entry) => args.isMaterial(entry.claim_id));
+  const supporting = args.finals.filter((entry) => !args.isMaterial(entry.claim_id));
+  const undecided = material.some((entry) => UNDECIDED_STATES.includes(entry.status));
+  return {
+    materialContradicted: material.some((entry) => entry.status === "CONTRADICTED"),
+    highRisk: hasHighRiskAction(args.finals),
+    nonMaterialContradicted: supporting.some((entry) => entry.status === "CONTRADICTED"),
+    materialConflict: material.some((entry) => entry.status === "CONFLICT"),
+    materialUndecided: undecided,
+    agentPartial: args.agentPartial,
+    // Demo Seed 의 Claim 은 미리 확인된 것이고 필수 Claim 유형 계약도 비어 있다.
+    coverageSatisfied: !undecided,
+    preActionRemaining: supporting.some((entry) => entry.status !== "VERIFIED")
+      || args.guideActionCodes.some((code) => PRE_ACTION_CODES.includes(code)),
+  };
+};
 
 export type DemoSession = {
   sessionId: string;
@@ -192,30 +231,58 @@ export const runDemo = async (args: {
       progress: args.progress,
     });
 
-    const results = run.judgeOutput?.claim_results ?? [];
-    // 결과 범주는 Enum 에 있는 값만 쓴다. 없는 낱말을 만들지 않는다 (RES-002).
-    const overall = results.some((entry) => entry.state === "CONTRADICTED") ? "MATERIAL_RISK_FOUND"
-      : results.some((entry) => entry.state === "CONFLICT") ? "VERIFY_BEFORE_PROCEEDING"
-        : results.length > 0 && results.every((entry) => entry.state === "VERIFIED")
-          ? "NO_SPECIAL_RISK_IN_VERIFIED_SCOPE"
-          : "INSUFFICIENT_INFORMATION";
+    // 회원 Run 과 같은 최종화 규칙을 쓴다. 독립 재확인이 확인하지 못한 중요 Claim 은
+    // 확정하지 않고 낮춘다 (규칙 3). Demo 기록기는 인용 이름을 그대로 근거 ID 로 쓴다.
+    const finals = buildFinalClaims({
+      claims: seed.claims.map((claim) => ({ ...claim, claimId: claim.claim_ref })),
+      run,
+    });
+    const axes = buildAxisResults(finals, false);
+    // 행동 안내 실패는 회원 Run 처럼 결과를 막지 않는다. 안내 없이 한계로 남긴다.
+    const guide = await buildActionGuide(sql, finals).then((built) => built.display).catch(() => null);
+    const isMaterial = (claimId: string) =>
+      seed.claims.find((claim) => claim.claim_ref === claimId)?.materiality === "MATERIAL";
+    const inputs = overallInputs({
+      finals, isMaterial,
+      // Manifest 의 일곱 Agent 가 모두 필수다. Judge 실패도 부분 실행으로 센다.
+      agentPartial: run.partial,
+      guideActionCodes: guide?.actions.map((action) => action.action_code) ?? [],
+    });
+    // 결과 범주는 회원 Passport 와 같은 DB 함수가 정한다. 없는 낱말을 만들지 않는다 (RES-002).
+    const [decided] = await sql`
+      select private.decide_overall_result(
+        ${inputs.materialContradicted}::boolean, ${inputs.highRisk}::boolean,
+        ${inputs.nonMaterialContradicted}::boolean, ${inputs.materialConflict}::boolean,
+        ${inputs.materialUndecided}::boolean, ${inputs.agentPartial}::boolean,
+        ${inputs.coverageSatisfied}::boolean, ${inputs.preActionRemaining}::boolean) as overall`;
+    const overall = String(decided.overall);
 
     const payload = {
       schema_version: RESULT_SCHEMA_VERSION,
       seed_code: DEMO_SEED_CODE,
       seed_version: seed.version,
       partial: run.partial,
+      overall_result: overall,
+      axes,
+      guide,
       agents: run.agentResults.map((entry) => ({
         agent_code: entry.agentCode, status: entry.status, tool_calls: entry.toolCalls,
+        reason_code: entry.reasonCode ?? null,
       })),
+      judge_reason_code: run.judgeReasonCode,
       claims: seed.claims.map((claim) => {
-        const judged = results.find((entry) => entry.claim_ref === claim.claim_ref);
+        const settled = finals.find((entry) => entry.claim_id === claim.claim_ref);
         return {
           claim_ref: claim.claim_ref,
           statement_masked: claim.statement_masked,
-          state: judged?.state ?? "UNKNOWN",
-          rationale_masked: judged?.rationale_masked ?? "확인하지 못했습니다.",
-          evidence_refs: judged?.evidence_refs ?? [],
+          materiality: claim.materiality,
+          state: settled?.status ?? "UNKNOWN",
+          reason_code: settled?.reason_code ?? null,
+          cove_status: settled?.cove_status ?? null,
+          red_team_status: settled?.red_team_status ?? null,
+          rationale_masked: settled?.decision_summary_masked ?? "확인하지 못했습니다.",
+          evidence_refs: settled?.evidences.map((entry) => entry.evidence_id) ?? [],
+          relations: Object.fromEntries(settled?.evidences.map((entry) => [entry.evidence_id, entry.relation]) ?? []),
         };
       }),
       evidence: run.evidence.map((item) => ({
