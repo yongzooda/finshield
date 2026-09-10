@@ -3,7 +3,6 @@
 // docs/ops/claim-quality-preregistration.md 가 측정 전에 고정한 값이다.
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 export const FORMULA_VERSION = 'claim-verdict-state-ledger-v1';
 export const FIXTURE_DIR = '.github/fixtures/claim-quality-v1';
