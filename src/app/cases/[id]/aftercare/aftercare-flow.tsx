@@ -185,7 +185,7 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
 
   if (pending) return <FsCard>
     <h1 className="fs-h2">설명·계약과 공식 자료를 점검하고 있습니다</h1>
-    <p className="fs-body mt-3" role="status">{reviewJob?.status === "QUEUED" ? "점검 실행 대기 중" : "가입 후 Agent 검토 중"} · 화면을 닫아도 같은 Case에서 진행 상태를 복원합니다.</p>
+    <p className="fs-body mt-3" role="status">{reviewJob?.status === "QUEUED" ? "점검 실행 대기 중" : "가입 후 검토 중"} · 화면을 닫아도 같은 기록에서 진행 상태를 복원합니다.</p>
     <p className="fs-meta mt-3">서류 원본은 본인 기기에 따로 보관해 주세요. 이 점검은 위법·사기를 확정하지 않습니다.</p>
     {notice ? <p className="fs-body mt-3">{notice}</p> : null}
     {reviewJob?.status === "QUEUED" ? <button type="button" disabled={busy} onClick={() => void operate("RESUME")} className="fs-btn fs-btn--quiet mt-4">대기 중인 요청 다시 연결</button> : null}
@@ -204,7 +204,7 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
           <h1 className="fs-h1 mt-2">{result.result === "CORRECTION_OR_INQUIRY" && result.comparison?.some(row => row.result === "DIFFERENT_TEXT") ? "설명과 다른 계약 조건을 확인해 주세요" : view.label}</h1>
           <div className="mt-3"><FsChip tone={view.tone}>{view.state}</FsChip></div>
           <p className="fs-lead mt-3">{view.lead}</p>
-          {reviewJob?.status === "PARTIAL" ? <p className="fs-body mt-3" role="status">Agent 조회·판단 중 일부를 확인하지 못했습니다. 아래 결과는 확보된 답변과 근거 범위의 안내입니다.</p> : null}
+          {reviewJob?.status === "PARTIAL" ? <p className="fs-body mt-3" role="status">자료 조회·판단 중 일부를 확인하지 못했습니다. 아래 결과는 확보된 답변과 근거 범위의 안내입니다.</p> : null}
           {reviewJob && ["FAILED", "CANCELLED"].includes(reviewJob.status) ? <p className="fs-body mt-3" role="status">새 점검은 끝내지 못했습니다. 아래에는 이전에 저장한 점검 결과를 보여 줍니다.</p> : null}
           <div className="mt-4 flex flex-wrap gap-3">
             <Link href={`/cases/${caseId}`} className="fs-btn fs-btn--quiet">기록으로 돌아가기</Link>

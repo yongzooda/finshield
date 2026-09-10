@@ -17,7 +17,7 @@ export default function HomePage() {
             <Link href="/verify" className="fs-btn fs-btn--primary">대출 권유 확인하기 <FsIcon name="arrow" /></Link>
             <Link href="/live-demo" className="fs-btn fs-btn--quiet">로그인 없이 체험</Link>
           </div>
-          <p className="fs-meta mt-4">현재 지원: 햇살론15 관련 권유 · 텍스트 입력</p>
+          <p className="fs-meta mt-4">현재 지원: 햇살론15 관련 대출 권유 · 회원은 텍스트·이미지·PDF 입력, 비회원은 가상 문자 체험</p>
         </div>
         <div className="fs-hero-visual" aria-label="금융 권유 확인 과정 안내">
           <div className="fs-message-preview">
