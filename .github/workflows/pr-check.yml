@@ -109,9 +109,6 @@ jobs:
       - name: Rate Budget Contract Test
         run: node .github/scripts/test-rate-evidence.mjs
 
-      - name: 처리자 개인정보 inventory 계약 시험
-        run: node .github/scripts/test-processor-privacy-evidence.mjs
-
       - name: Consent Isolation Contract Test
         run: node .github/scripts/test-consent-evidence.mjs
 
@@ -120,6 +117,9 @@ jobs:
 
       - name: Delete Contract Test
         run: node .github/scripts/test-delete-evidence.mjs
+
+      - name: 처리자 개인정보 inventory 계약 시험
+        run: node .github/scripts/test-processor-privacy-evidence.mjs
 
       - name: Runtime Contract Test
         run: node .github/scripts/test-runtime-evidence.mjs
