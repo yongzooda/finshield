@@ -29,7 +29,7 @@ export function FileIntake({token,caseId,onPrepared,onBusyChange}:{token:string;
     const abort=new AbortController();controller.current=abort;
     try{
       const opened=await sessionFetch("/api/finshield/files/slot",token,{method:"POST",headers,body:JSON.stringify({mime:file.type,size:file.size,...(caseId?{case_id:caseId}:{})}),signal:abort.signal});
-      const data=await opened.json();if(!opened.ok)throw new Error(data.error??"업로드를 준비하지 못했습니다.");
+      const data=await opened.json().catch(()=>({}));if(!opened.ok)throw new Error(data.error??"업로드를 준비하지 못했습니다. 잠시 뒤 다시 시도해 주세요.");
       if(caseId && data.case_id!==caseId)throw new Error("계약 파일과 검증 기록의 연결을 확인하지 못했습니다.");
       slot.current={case_id:data.case_id,input_id:data.input_id};
       await uploadFile({file,supabaseUrl:data.supabase_url,publishableKey:data.publishable_key,objectPath:data.object_path,token:()=>freshSessionToken(token),signal:abort.signal,
@@ -37,11 +37,15 @@ export function FileIntake({token,caseId,onPrepared,onBusyChange}:{token:string;
       setMessage("파일의 안전성을 확인하고 문장을 읽고 있습니다.");
       const processed=await sessionFetch("/api/finshield/files/process",token,{method:"POST",headers,
         body:JSON.stringify({...slot.current,ocr_consent:consent}),signal:abort.signal});
-      const result=await processed.json();if(!processed.ok)throw new Error(result.error??"파일을 읽지 못했습니다.");
+      const result=await processed.json().catch(()=>({}));if(!processed.ok)throw new Error(result.error??"파일을 읽지 못했습니다. 잠시 뒤 다시 시도하거나 내용을 직접 붙여 넣어 주세요.");
       slot.current=null;
       if(alive.current&&sessionIdentity(readSessionToken())===sessionIdentity(token)){setFile(null);onPrepared(result);}
     }catch(error){
-      const reason=abort.signal.aborted?"파일 처리를 중단했습니다.":(error as Error).message;
+      const raw=(error as Error).message;
+      // 업로드 모듈의 내부 코드(UPLOAD_…)를 화면에 그대로 내보내지 않는다.
+      const reason=abort.signal.aborted?"파일 처리를 중단했습니다."
+        :/^UPLOAD_/.test(raw)?"파일을 올리는 중 연결이 끊겼습니다. 네트워크를 확인하고 다시 시도해 주세요."
+        :raw;
       try{await stop();setMessage(reason);}catch(e){setMessage((e as Error).message);}
     }finally{controller.current=null;setBusy(false);onBusyChange(false);}
   };

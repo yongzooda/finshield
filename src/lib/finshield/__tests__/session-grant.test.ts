@@ -64,7 +64,17 @@ it("P0 직접 가입은 공유 제한 뒤 Auth Admin 생성과 비밀번호 세�
  fetchMock.mockResolvedValueOnce(Response.json({id})).mockResolvedValueOnce(pair());
  const r=await signup(req("POST"));expect(r.status).toBe(200);expect((await r.json()).needs_confirmation).toBe(false);
  expect(fetchMock).toHaveBeenCalledTimes(2);expect(fetchMock.mock.calls[0][0]).toContain("/auth/v1/admin/users");
- expect(fetchMock.mock.calls[1][0]).toContain("grant_type=password");expect(sqlMock).toHaveBeenCalledOnce();
+ expect(fetchMock.mock.calls[1][0]).toContain("grant_type=password");
+ // 주소별 시간 상한(20)과 전체 하루 상한(300)을 차례로 쓴다. 심사장처럼 한 주소를 여럿이 써도 막히지 않게 한다.
+ expect(sqlMock).toHaveBeenCalledTimes(2);
+ expect(sqlMock.mock.calls[0]).toEqual(expect.arrayContaining([20]));
+ expect(sqlMock.mock.calls[1]).toEqual(expect.arrayContaining([300]));
+});
+it("P0 직접 가입 전체 하루 상한이 차면 Auth에 보내기 전에 막는다",async()=>{
+ vi.stubEnv("FINSHIELD_P0_DIRECT_SIGNUP","true");
+ sqlMock.mockResolvedValueOnce([{allowed:true,retry_after_seconds:0}]).mockResolvedValueOnce([{allowed:false,retry_after_seconds:3000}]);
+ const r=await signup(req("POST"));expect(r.status).toBe(429);expect(r.headers.get("retry-after")).toBe("3000");
+ expect(fetchMock).not.toHaveBeenCalled();
 });
 it("P0 직접 가입 공유 제한은 Auth에 비밀번호를 보내기 전에 차단한다",async()=>{
  vi.stubEnv("FINSHIELD_P0_DIRECT_SIGNUP","true");sqlMock.mockResolvedValue([{allowed:false,retry_after_seconds:125}]);

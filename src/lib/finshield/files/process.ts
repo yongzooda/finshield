@@ -43,7 +43,8 @@ export function locateFileQuote(pages: Pick<ParsedPage,"page_no"|"text">[], quot
 export async function processFileInput(args: {sql:Sql;ownerId:string;caseId:string;inputId:string;
   ocrConsent:boolean;extractClaims:ClaimExtractor;signal?:AbortSignal}) {
   const {sql,ownerId,caseId,inputId}=args;
-  const signal=AbortSignal.any([AbortSignal.timeout(35000),...(args.signal?[args.signal]:[])]);
+  // 검사·OCR(실측 약 17초)과 항목 추출(최대 30초)을 함께 덮는다. route maxDuration(90초) 안이다.
+  const signal=AbortSignal.any([AbortSignal.timeout(75000),...(args.signal?[args.signal]:[])]);
   const [row]=await sql`select private.file_input_context(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid) as context`.catch(error => {
     if (error.code === "42501") throw new FileInputAccessError();
     throw error;

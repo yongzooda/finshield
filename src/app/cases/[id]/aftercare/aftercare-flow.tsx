@@ -314,6 +314,12 @@ export function AftercareFlow({ caseId }: { caseId: string }) {
         </ul>
 
         <div className="mt-8">
+          {!basePassport ? (
+            <p className="fs-inline-notice mb-3">
+              이 기록에는 아직 확정된 검증 결과가 없어 가입 후 점검과 비교할 기준이 없습니다.
+              {" "}<Link href={`/cases/${caseId}`} className="underline">기록 화면</Link>에서 검증을 먼저 끝내 주세요.
+            </p>
+          ) : null}
           <button type="button" disabled={busy || fileBusy || answered === 0 || !basePassport} onClick={() => void submit()}
             className="fs-btn fs-btn--primary">
             {busy ? "정리하는 중" : "점검 결과 보기"}

@@ -14,7 +14,7 @@ export function readCaseCursor(raw: string | null): Cursor | null {
   } catch { throw new Error("INVALID_CASE_CURSOR"); }
 }
 export function casePageQuery(cursor: Cursor | null): Record<string, string> {
-  return { select: "id,scenario,lifecycle,title_masked,created_at,updated_at,deletion_status,deleted_at",
+  return { select: "id,scenario,lifecycle,title_masked,created_at,updated_at,deletion_status,deleted_at,latest_passport_id",
     order: "created_at.desc,id.desc", limit: String(CASE_PAGE_SIZE + 1),
     ...(cursor ? { or: `(created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id}))` } : {}) };
 }

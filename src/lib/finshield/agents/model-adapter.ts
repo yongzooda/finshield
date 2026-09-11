@@ -444,16 +444,39 @@ export const createClaimExtractor = (): ClaimExtractor => async (maskedText, opt
         materiality: z.enum(["MATERIAL", "NON_MATERIAL", "UNDETERMINED"]),
       })).max(8),
     }),
-    maxTokens: 1600, effort: "low", maxRetries: 0, timeoutMs: 10_000, signal: options?.signal,
+    maxTokens: 1600, effort: "low", maxRetries: 0, timeoutMs: 30_000, signal: options?.signal,
   }, options?.budget);
-  return result.claims.map((claim) => {
-    const source = options?.pages ? options.pages.find(page => page.page_no === claim.source_page_no)?.text : maskedText;
-    if (source === undefined) throw new Error("CLAIM_SOURCE_NOT_FOUND");
-    assertClaimSource(source, claim.source_quote, claim.statement_masked);
-    return { sourceQuote: claim.source_quote, sourcePageNo: claim.source_page_no ?? undefined,
-      claimType: claim.claim_type, statementMasked: claim.statement_masked, materiality: claim.materiality };
-  });
+  return acceptExtractedClaims(result.claims, maskedText, options?.pages);
 };
+
+type RawExtractedClaim = {
+  claim_type: "PRODUCT_TERM" | "INSTITUTION" | "CHANNEL" | "ELIGIBILITY" | "CONDUCT" | "OTHER";
+  statement_masked: string; source_quote: string; source_page_no: number | null;
+  materiality: "MATERIAL" | "NON_MATERIAL" | "UNDETERMINED";
+};
+
+/**
+ * 원문에 없는 구절·바뀐 숫자를 담은 항목은 그 항목만 버린다. 하나 때문에 접수 전체를
+ * 실패시키면 이용자는 이유도 모른 채 같은 입력을 되풀이한다. 전부 버려지면 실패다.
+ */
+export function acceptExtractedClaims(claims: RawExtractedClaim[], maskedText: string,
+  pages?: { page_no: number; text: string }[]) {
+  let firstProblem: Error | null = null;
+  const accepted = claims.flatMap((claim) => {
+    try {
+      const source = pages ? pages.find(page => page.page_no === claim.source_page_no)?.text : maskedText;
+      if (source === undefined) throw new Error("CLAIM_SOURCE_NOT_FOUND");
+      assertClaimSource(source, claim.source_quote, claim.statement_masked);
+      return [{ sourceQuote: claim.source_quote, sourcePageNo: claim.source_page_no ?? undefined,
+        claimType: claim.claim_type, statementMasked: claim.statement_masked, materiality: claim.materiality }];
+    } catch (error) {
+      firstProblem ??= error instanceof Error ? error : new Error("CLAIM_SOURCE_NOT_FOUND");
+      return [];
+    }
+  });
+  if (accepted.length === 0 && firstProblem) throw firstProblem;
+  return accepted;
+}
 
 /** CLM-002: 추출은 금융 조건을 익명 자리표시자로 바꾸거나 숫자를 만들어서는 안 된다. */
 export function assertClaimSource(input: string, quote: string, statement: string) {

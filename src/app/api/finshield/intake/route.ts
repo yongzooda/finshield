@@ -17,9 +17,12 @@ import { fsql } from "@/lib/finshield/db";
 import { resolveOwner, UnauthenticatedError } from "@/lib/finshield/auth";
 import { startIntake } from "@/lib/finshield/intake";
 import { createClaimExtractor } from "@/lib/finshield/agents/model-adapter";
+import { intakeErrorMessage } from "@/lib/finshield/intake-messages";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// 접수 예산(45초)과 저장 여유를 덮는다.
+export const maxDuration = 60;
 
 const MAX_CHARS = 4000;
 
@@ -78,7 +81,8 @@ export async function POST(request: Request): Promise<Response> {
         })),
       });
     } catch (error) {
-      push({ type: "error", message: "접수하지 못했습니다", code: (error as { code?: string })?.code ?? null });
+      const code = (error as { code?: string })?.code ?? null;
+      push({ type: "error", message: intakeErrorMessage(error), code });
     } finally {
       finished = true;
       wake();

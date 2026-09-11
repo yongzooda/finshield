@@ -12,6 +12,8 @@ const signupKey = (request: Request, secret: string): string => {
   return createHmac("sha256",secret).update(address).digest("hex");
 };
 
+export const SIGNUP_LIMITS = Object.freeze({ perAddressPerHour: 20, allPerDay: 300 });
+
 /** AUTH-002·SEC-AUTH-005: refresh는 HttpOnly Cookie에서만 읽고 발급처가 회전한다. */
 export async function sessionGrant(request: Request, kind: "login" | "signup" | "refresh"): Promise<Response> {
   if (!sameSessionOrigin(request)) return jsonNoStore({ code: "ORIGIN_REJECTED", error: "이 화면에서 다시 요청해 주세요" }, 403);
@@ -35,10 +37,14 @@ export async function sessionGrant(request: Request, kind: "login" | "signup" | 
     const directSignup = kind === "signup" && process.env.FINSHIELD_P0_DIRECT_SIGNUP === "true";
     if (directSignup) {
       if (!env.SUPABASE_SECRET_KEY) throw new Error();
+      // 심사장처럼 여러 사람이 한 주소를 함께 쓰면 주소별 시간 상한이 금방 찬다(예전 3건).
+      // 주소별 시간 상한을 넉넉히 두고, 전체 하루 상한으로 대량 가입을 막는다.
       const limits = await fsql()`select allowed,retry_after_seconds from private.consume_rate_limit(
-        'IP_HMAC',${signupKey(request,env.SUPABASE_SECRET_KEY)},'AUTH_SIGNUP',3,3600)`;
-      if (limits[0]?.allowed !== true) {
-        const retryAfter = Number(limits[0]?.retry_after_seconds ?? 3600);
+        'IP_HMAC',${signupKey(request,env.SUPABASE_SECRET_KEY)},'AUTH_SIGNUP',${SIGNUP_LIMITS.perAddressPerHour},3600)`;
+      const global = limits[0]?.allowed === true ? await fsql()`select allowed,retry_after_seconds from private.consume_rate_limit(
+        'GLOBAL','finshield-signup','AUTH_SIGNUP_ALL_DAY',${SIGNUP_LIMITS.allPerDay},86400)` : limits;
+      if (limits[0]?.allowed !== true || global[0]?.allowed !== true) {
+        const retryAfter = Number((limits[0]?.allowed !== true ? limits : global)[0]?.retry_after_seconds ?? 3600);
         const response = jsonNoStore({ code: "AUTH_SIGNUP_RATE_LIMIT",
           error: `가입 요청이 많습니다. 약 ${Math.max(1,Math.ceil(retryAfter/60))}분 후 다시 시도해 주세요.` },429);
         response.headers.set("Retry-After",String(Math.max(1,retryAfter)));

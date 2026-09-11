@@ -109,6 +109,8 @@ export function CaseDetail({ caseId }: { caseId: string }) {
   const passport = detail.passports.find((row) => row.verification_run_id === latest?.id);
   const partialReasons = latest?.partial_reason_codes ?? [];
   const assessments = detail.assessments ?? [];
+  const latestResult = assessments.find((row) => row.result)?.result ?? null;
+  const latestAssessmentView = latestResult ? AFTERCARE_RESULT[latestResult] ?? null : null;
   const action = finals.length > 0 ? nextAction(finals.map((row) => row.status), axes.some(axis => axis.result_code === "HIGH_RISK_ACTION")) : null;
   const evidenceOf = (finalId: string) => detail.claim_evidences
     .filter((link) => link.final_claim_version_id === finalId)
@@ -254,9 +256,15 @@ export function CaseDetail({ caseId }: { caseId: string }) {
           <FsChip tone={detail.case.journey_stage === "PRE_TRANSACTION" ? "neutral" : "caution"}>
             {JOURNEY_STAGE[detail.case.journey_stage] ?? detail.case.journey_stage}
           </FsChip>
-          <FsChip tone={detail.case.aftercare_status === "ACTION_REQUIRED" ? "contra" : "neutral"}>
-            {AFTERCARE_STATUS[detail.case.aftercare_status] ?? detail.case.aftercare_status}
-          </FsChip>
+          {/* 점검 결과에는 늘 「계약서·기록 보관」 행동이 붙어 상태가 언제나 「할 일 있음」이 된다.
+              결과가 있으면 결과 자체(계약 자료 보관·추가 설명 필요·분쟁 준비 등)를 보여 준다. */}
+          {latestAssessmentView ? (
+            <FsChip tone={latestAssessmentView.tone}>{latestAssessmentView.label}</FsChip>
+          ) : (
+            <FsChip tone={detail.case.aftercare_status === "ACTION_REQUIRED" ? "contra" : "neutral"}>
+              {AFTERCARE_STATUS[detail.case.aftercare_status] ?? detail.case.aftercare_status}
+            </FsChip>
+          )}
           {detail.case.enrollment_confirmed_at ? (
             <span className="fs-meta">
               가입 확인 {new Date(detail.case.enrollment_confirmed_at).toLocaleString("ko-KR")}
