@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { inflateSync } from "node:zlib";
-import { CATEGORY_RULES, FIXTURE_GENERATOR_VERSION, buildFixtures, fixtureDigests, storedZlib, zerosZlib } from "./file-safety-fixtures.mjs";
+import { CATEGORY_RULES, FIXTURE_GENERATOR_VERSION, buildFixtures, fixtureDigests, literalZlib, storedZlib, zerosZlib } from "./file-safety-fixtures.mjs";
 import { LIMITS, REASON_CODES, inspectFile } from "./file-safety-inspector.mjs";
 import { FORMULA_VERSION, MAX_OLD_SPACE_MB, PARSER_INTEGRITY, PARSER_VERSION, validateFileSafetyEvidenceResult } from "./file-safety-policy.mjs";
 import { probeNetworkNamespace, runFileSafetySpike } from "./file-safety-spike.mjs";
@@ -36,6 +36,11 @@ for (const n of [1, 2, 3, 257, 258, 259, 30_100, 1_048_576]) {
   ok(out.length === n && out.every((b) => b === 0), `반복 부호가 0 ${n}바이트를 왕복해야 한다`);
 }
 ok(zerosZlib(1_048_576).length * 50 < 1_048_576, "반복 부호는 50배 넘게 압축돼야 한다");
+for (const sample of [Buffer.from("7 0 << /S /JavaScript /JS (x) >>", "latin1"), Buffer.from(Array.from({ length: 256 }, (_, i) => i))]) {
+  const packed = literalZlib(sample);
+  ok(inflateSync(packed).equals(sample), `리터럴 부호가 ${sample.length}바이트를 왕복해야 한다`);
+  ok(!packed.includes(Buffer.from("/JavaScript", "latin1")), "리터럴 부호는 원문 문자열을 그대로 드러내지 않는다");
+}
 ok(fixtures.some((f) => f.filename.includes("\0")), "NUL 이 든 파일명 Fixture 가 있어야 한다");
 ok(fixtures.some((f) => f.filename.includes("..")), "경로 상위 이동 파일명 Fixture 가 있어야 한다");
 
@@ -51,6 +56,10 @@ for (const f of fixtures) {
   }
   assert.ok(r.reasons.every((x) => REASON_CODES.includes(x.code)), `${f.name}: 사유 코드가 목록에 있어야 한다`);
   passed += 1;
+}
+for (const name of ["benign-jpeg-samsung-trailer", "benign-jpeg-mpf-gain-map", "benign-jpeg-mpf-and-samsung-trailer", "benign-png-samsung-trailer", "benign-pdf-image-bytes-like-tokens",
+  "active-object-stream-after-name-escapes", "polyglot-jpeg-fake-samsung-trailer", "polyglot-jpeg-samsung-trailer-gap", "polyglot-jpeg-mpf-offset-mismatch", "polyglot-jpeg-mpf-then-junk"]) {
+  ok(fixtures.some((f) => f.name === name), `v2 Fixture ${name} 가 있어야 한다`);
 }
 ok(inspectFile({ bytes: Buffer.alloc(LIMITS.MAX_BYTES + 1), declaredMime: "application/pdf", filename: "a.pdf" }).reasons.some((r) => r.code === "too-large"), "10 MiB 초과는 거부");
 ok(inspectFile({ bytes: Buffer.alloc(0), declaredMime: "application/pdf", filename: "a.pdf" }).reasons.some((r) => r.code === "empty"), "빈 파일은 거부");

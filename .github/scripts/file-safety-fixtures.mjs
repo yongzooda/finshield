@@ -56,9 +56,26 @@ export const zerosZlib = (length) => {
   bits.forEach((bit, index) => { if (bit) bytes[index >> 3] |= 1 << (index & 7); });
   return zlibWrap(bytes, adler32(Buffer.alloc(length)));
 };
+// 고정 Huffman 리터럴만 쓰는 한 블록. 출력이 규격으로 완전히 정해지면서 원문 바이트가
+// 압축 결과에 그대로 드러나지 않는다. 원시 바이트만 훑어서는 찾을 수 없는 내용을 만들 때 쓴다.
+export const literalZlib = (input) => {
+  const bits = [];
+  const pushBits = (value, count) => { for (let i = 0; i < count; i += 1) bits.push((value >> i) & 1); };
+  const pushCode = (value, count) => { for (let i = count - 1; i >= 0; i -= 1) bits.push((value >> i) & 1); };
+  pushBits(1, 1); // BFINAL
+  pushBits(1, 2); // BTYPE = 고정 Huffman
+  for (const value of input) {
+    if (value <= 143) pushCode(0x30 + value, 8);
+    else pushCode(0x190 + (value - 144), 9);
+  }
+  pushCode(0, 7); // end of block
+  const bytes = Buffer.alloc(Math.ceil(bits.length / 8));
+  bits.forEach((bit, index) => { if (bit) bytes[index >> 3] |= 1 << (index & 7); });
+  return zlibWrap(bytes, adler32(input));
+};
 import { LIMITS, crc32 } from "./file-safety-inspector.mjs";
 
-export const FIXTURE_GENERATOR_VERSION = "file-safety-fixtures-v1";
+export const FIXTURE_GENERATOR_VERSION = "file-safety-fixtures-v2";
 export const BENIGN_TEXT = "APR 15.9% NOT guaranteed 1397";
 
 // fault 주입마다 기대하는 종료 형태. terminated 는 비정상 종료(코드 0 아님 또는 신호),
@@ -167,7 +184,7 @@ export const buildPng = ({ width, height, ihdrOverride = null, corruptCrc = fals
 };
 
 // JPEG: 구조만 유효한 baseline 헤더 (SOI, APP0, DQT, SOF0, DHT, SOS, 엔트로피 데이터, EOI)
-export const buildJpeg = ({ width, height, omitSof = false, omitEoi = false, trailing = null, sofMarker = 0xc0 }) => {
+export const buildJpeg = ({ width, height, omitSof = false, omitEoi = false, trailing = null, sofMarker = 0xc0, extraSegments = [] }) => {
   const seg = (marker, payload) => {
     const len = Buffer.alloc(2);
     len.writeUInt16BE(payload.length + 2);
@@ -181,12 +198,64 @@ export const buildJpeg = ({ width, height, omitSof = false, omitEoi = false, tra
   const dht = seg(0xc4, Buffer.concat([Buffer.from([0x00]), Buffer.from([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), Buffer.from([0x00])]));
   const sos = seg(0xda, Buffer.from([1, 1, 0x00, 0, 63, 0]));
   const entropy = Buffer.alloc(64, 0x55);
-  const parts = [Buffer.from([0xff, 0xd8]), app0, dqt];
+  const parts = [Buffer.from([0xff, 0xd8]), app0, ...extraSegments, dqt];
   if (!omitSof) parts.push(sof);
   parts.push(dht, sos, entropy);
   if (!omitEoi) parts.push(Buffer.from([0xff, 0xd9]));
   if (trailing) parts.push(trailing);
   return Buffer.concat(parts);
+};
+
+// Samsung 확장 정보(SEFT) 꼬리. blocks 는 [type, 이름, 자료] 목록이다.
+// 블록마다 (0, type, 이름 길이, 이름, 자료), 디렉터리는 "SEFH"·판·항목 수·항목(0, type,
+// 디렉터리 시작에서 거꾸로 센 거리, 블록 크기), 끝은 디렉터리 길이(LE)와 "SEFT" 다.
+export const samsungTrailer = (blocks, { gap = 0 } = {}) => {
+  const encoded = blocks.map(([type, name, data]) => {
+    const head = Buffer.alloc(8);
+    head.writeUInt16LE(0, 0); head.writeUInt16LE(type, 2); head.writeUInt32LE(Buffer.byteLength(name, "latin1"), 4);
+    return { type, bytes: Buffer.concat([head, latin1(name), Buffer.isBuffer(data) ? data : latin1(data)]) };
+  });
+  // gap 은 첫 블록 뒤에 끼우는 설명되지 않는 바이트다(거부 Fixture 용).
+  const body = Buffer.concat(encoded.flatMap((block, index) => (index === 0 && gap ? [block.bytes, Buffer.alloc(gap, 0x41)] : [block.bytes])));
+  const dir = Buffer.alloc(12 + 12 * encoded.length);
+  dir.write("SEFH", 0, "latin1"); dir.writeUInt32LE(106, 4); dir.writeUInt32LE(encoded.length, 8);
+  let offset = 0;
+  encoded.forEach((block, index) => {
+    const at = 12 + 12 * index;
+    dir.writeUInt16LE(0, at); dir.writeUInt16LE(block.type, at + 2);
+    dir.writeUInt32LE(body.length - offset, at + 4); dir.writeUInt32LE(block.bytes.length, at + 8);
+    offset += block.bytes.length + (index === 0 ? gap : 0);
+  });
+  const tail = Buffer.alloc(8);
+  tail.writeUInt32LE(dir.length, 0); tail.write("SEFT", 4, "latin1");
+  return Buffer.concat([body, dir, tail]);
+};
+
+// HDR gain map 처럼 보조 그림을 붙인 Multi-Picture Format(MPF) JPEG.
+// 첫 그림의 APP2 "MPF\0" 가 두 그림의 크기와 위치를 적는다. 위치는 MP Endian 필드 기준이다.
+// shift 는 적힌 위치를 일부러 어긋나게 할 바이트 수다(거부 Fixture 용).
+export const mpfJpeg = ({ width, height, secondary, shift = 0, filler = null }) => {
+  const payload = (primarySize, secondaryOffset) => {
+    const b = Buffer.alloc(4 + 50 + 32);
+    b.write("MPF\0", 0, "latin1");
+    const t = 4; // TIFF header 시작 = MP Endian 필드
+    b.write("II*\0", t, "latin1"); b.writeUInt32LE(8, t + 4);
+    b.writeUInt16LE(3, t + 8);
+    const entry = (i, tag, type, count, value) => { const at = t + 10 + i * 12; b.writeUInt16LE(tag, at); b.writeUInt16LE(type, at + 2); b.writeUInt32LE(count, at + 4); b.writeUInt32LE(value, at + 8); };
+    entry(0, 0xb000, 7, 4, 0); b.write("0100", t + 10 + 8, "latin1");
+    entry(1, 0xb001, 4, 1, 2);
+    entry(2, 0xb002, 7, 32, 50);
+    b.writeUInt32LE(0, t + 46); // 다음 IFD 없음
+    b.writeUInt32LE(0x030000, t + 50); b.writeUInt32LE(primarySize, t + 54); b.writeUInt32LE(0, t + 58);
+    b.writeUInt32LE(0x000000, t + 66); b.writeUInt32LE(secondary.length, t + 70); b.writeUInt32LE(secondaryOffset, t + 74);
+    return b;
+  };
+  const app2 = (data) => { const len = Buffer.alloc(2); len.writeUInt16BE(data.length + 2); return Buffer.concat([Buffer.from([0xff, 0xe2]), len, data]); };
+  const draft = buildJpeg({ width, height, extraSegments: [app2(payload(0, 0))] });
+  // APP2 는 SOI(2)·APP0(18) 뒤에 있다. MP Endian 필드는 marker(2)·길이(2)·"MPF\0"(4) 다음이다.
+  const base = 2 + 18 + 4 + 4;
+  const primary = buildJpeg({ width, height, extraSegments: [app2(payload(draft.length, draft.length - base + shift))] });
+  return Buffer.concat([primary, ...(filler ? [filler] : []), secondary]);
 };
 
 // 최소 ZIP: local header + central directory + EOCD
@@ -261,6 +330,21 @@ export const buildFixtures = () => {
   list.push(fixture("benign-png-3000x3000", "benign", buildPng({ width: 3000, height: 3000 }), { declaredMime: "image/png" }));
   list.push(fixture("benign-jpeg-640x480", "benign", buildJpeg({ width: 640, height: 480 }), { declaredMime: "image/jpeg" }));
   list.push(fixture("benign-jpeg-progressive-1920x1080", "benign", buildJpeg({ width: 1920, height: 1080, sofMarker: 0xc2 }), { declaredMime: "image/jpeg", filename: "benign-jpeg-progressive-1920x1080.jpeg" }));
+  // 휴대폰 사진 끝의 제조사 구조. Samsung 확장 정보(SEFT)와 HDR gain map 보조 그림(MPF).
+  const phoneTrailer = samsungTrailer([[0x0a01, "Image_UTC_Data", "1757570000000"], [0x0aa1, "MCC_Data", "450"]]);
+  const gainMap = buildJpeg({ width: 160, height: 120 });
+  list.push(fixture("benign-jpeg-samsung-trailer", "benign", buildJpeg({ width: 640, height: 480, trailing: phoneTrailer }), { declaredMime: "image/jpeg" }));
+  list.push(fixture("benign-jpeg-mpf-gain-map", "benign", mpfJpeg({ width: 640, height: 480, secondary: gainMap }), { declaredMime: "image/jpeg" }));
+  list.push(fixture("benign-jpeg-mpf-and-samsung-trailer", "benign", Buffer.concat([mpfJpeg({ width: 640, height: 480, secondary: gainMap }), phoneTrailer]), { declaredMime: "image/jpeg" }));
+  list.push(fixture("benign-png-samsung-trailer", "benign", buildPng({ width: 100, height: 100, trailing: samsungTrailer([[0x0a01, "Image_UTC_Data", "1757570000000"]]) }), { declaredMime: "image/png" }));
+  {
+    // 그림 화소·그림 전용 부호의 바이트가 우연히 /JS·/AA·/EF 처럼 보여도 문법상 값이 없으면 통과한다.
+    const n = nextObjectNumber(1);
+    const pixels = Buffer.concat([Buffer.alloc(64, 0x10), latin1("/JS \x00/AA]/EF)/JS\x01"), Buffer.alloc(64, 0x10)]);
+    const flateImage = streamObject("/Type /XObject /Subtype /Image /Width 8 /Height 8 /ColorSpace /DeviceGray /BitsPerComponent 8", storedZlib(pixels), { filter: "/FlateDecode" });
+    const dctImage = streamObject("/Type /XObject /Subtype /Image /Width 8 /Height 8 /ColorSpace /DeviceGray /BitsPerComponent 8", Buffer.concat([Buffer.from([0xff, 0xd8, 0xff]), latin1("/JS (x) /AA << >> /EF 3 0 R"), Buffer.from([0xff, 0xd9])]), { filter: "/DCTDecode" });
+    list.push(fixture("benign-pdf-image-bytes-like-tokens", "benign", simplePdf({ extraObjects: [flateImage, dctImage], pageExtra: ` /Resources << /Font << /F1 3 0 R >> /XObject << /Im1 ${n} 0 R /Im2 ${n + 1} 0 R >> >>` })));
+  }
 
   // ---------- encrypted ----------
   for (const variant of ["rc4", "aes", "pubsec"]) {
@@ -329,6 +413,19 @@ export const buildFixtures = () => {
     list.push(fixture("active-javascript-nested-flate", "active", simplePdf({ extraObjects: [streamObject("", nested, { filter: "[/FlateDecode /FlateDecode]" })] })));
   }
   list.push(fixture("active-openaction-mixed-actions", "active", simplePdf({ catalogExtra: " /OpenAction << /S /GoTo /D [4 0 R /Fit] /Next << /S /Launch /F (calc.exe) >> >>" })));
+  // 두 글자 key 는 값과 함께 볼 때도 주석·간접 참조로 빠져나가지 못한다.
+  list.push(fixture("active-js-key-after-comment", "active", simplePdf({ catalogExtra: " /Foo << /JS %note\n(app.alert\\(3\\)) >>" })));
+  {
+    const n = nextObjectNumber(1);
+    list.push(fixture("active-additional-action-indirect", "active", simplePdf({ pageExtra: ` /AA ${n} 0 R`, extraObjects: ["<< /O << /S /GoTo /D [4 0 R /Fit] >> >>"] })));
+  }
+  {
+    // 이름 escape 로 길이가 바뀐 뒤에 오는 객체 stream. 원시 바이트에 드러나지 않는 리터럴 부호로 압축한다.
+    const n = nextObjectNumber(1);
+    const headerText = `${n + 1} 0 `;
+    const objStm = streamObject(`/Type /ObjStm /N 1 /First ${headerText.length} /Na#6De (#41#42#43#44)`, literalZlib(latin1(`${headerText}${jsAction}`)), { filter: "/FlateDecode" });
+    list.push(fixture("active-object-stream-after-name-escapes", "active", simplePdf({ extraObjects: [objStm] })));
+  }
 
   // ---------- embedded files ----------
   {
@@ -345,6 +442,8 @@ export const buildFixtures = () => {
   }
   list.push(fixture("embedded-filespec-only", "embedded", simplePdf({ extraObjects: ["<< /Type /Filespec /F (c.bin) /EF << /F 3 0 R >> >>"] })));
   list.push(fixture("embedded-raw-executable-stream", "embedded", simplePdf({ extraObjects: [streamObject("", peBytes())] })));
+  list.push(fixture("embedded-ef-indirect", "embedded", simplePdf({ extraObjects: ["<< /Type /Filespec /F (d.bin) /EF 3 0 R >>"] })));
+  list.push(fixture("embedded-samsung-trailer-executable", "embedded", buildJpeg({ width: 8, height: 8, trailing: samsungTrailer([[0x0a30, "MotionPhoto_Data", peBytes()]]) }), { declaredMime: "image/jpeg" }));
 
   // ---------- polyglot / type confusion ----------
   list.push(fixture("polyglot-pdf-zip-appended", "polyglot", Buffer.concat([benignPdf, buildZip()])));
@@ -373,6 +472,17 @@ export const buildFixtures = () => {
   list.push(fixture("png-trailing-data", "polyglot", buildPng({ width: 10, height: 10, trailing: Buffer.alloc(100, 0x00) }), { declaredMime: "image/png" }));
   list.push(fixture("jpeg-trailing-data", "polyglot", buildJpeg({ width: 8, height: 8, trailing: Buffer.alloc(100, 0x00) }), { declaredMime: "image/jpeg" }));
   list.push(fixture("ole-document-declared-pdf", "polyglot", Buffer.concat([Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]), Buffer.alloc(504)])));
+  // 휴대폰 사진 구조를 흉내 낸 꼬리. 구조가 어긋나거나 설명되지 않는 바이트가 남으면 거부한다.
+  {
+    const fakeTail = Buffer.concat([latin1("junk-before-directory"), Buffer.from([20, 0, 0, 0]), latin1("SEFT")]);
+    const gainMap = buildJpeg({ width: 160, height: 120 });
+    list.push(fixture("polyglot-jpeg-fake-samsung-trailer", "polyglot", buildJpeg({ width: 8, height: 8, trailing: fakeTail }), { declaredMime: "image/jpeg" }));
+    list.push(fixture("polyglot-jpeg-samsung-trailer-gap", "polyglot", buildJpeg({ width: 8, height: 8, trailing: samsungTrailer([[0x0a01, "Image_UTC_Data", "1757570000000"], [0x0aa1, "MCC_Data", "450"]], { gap: 16 }) }), { declaredMime: "image/jpeg" }));
+    list.push(fixture("polyglot-jpeg-samsung-trailer-html", "polyglot", buildJpeg({ width: 8, height: 8, trailing: samsungTrailer([[0x0a01, "Image_UTC_Data", "<html><script>alert(1)</script></html>"]]) }), { declaredMime: "image/jpeg" }));
+    list.push(fixture("polyglot-png-samsung-trailer-zip", "polyglot", buildPng({ width: 10, height: 10, trailing: samsungTrailer([[0x0a30, "MotionPhoto_Data", buildZip()]]) }), { declaredMime: "image/png" }));
+    list.push(fixture("polyglot-jpeg-mpf-offset-mismatch", "polyglot", mpfJpeg({ width: 64, height: 64, secondary: gainMap, shift: 10, filler: Buffer.alloc(10, 0x41) }), { declaredMime: "image/jpeg" }));
+    list.push(fixture("polyglot-jpeg-mpf-then-junk", "polyglot", Buffer.concat([mpfJpeg({ width: 64, height: 64, secondary: gainMap }), Buffer.alloc(50, 0x41)]), { declaredMime: "image/jpeg" }));
+  }
 
   // ---------- bomb / resource limits ----------
   list.push(fixture("bomb-pdf-11pages", "bomb", simplePdf({ pages: LIMITS.MAX_PAGES + 1 })));
