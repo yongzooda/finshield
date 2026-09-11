@@ -182,4 +182,4 @@ export const CORPUS_SIZE = 388;
  * DB도 필요 없는 코드 대 코드 대조라 CI에서 늘 돈다. 실제로 이 값이 117에 남아
  * 세트가 132가 된 뒤에도 화면이 117을 말하고 있었다 (2026.08.31).
  */
-export const PII_TEST_SET_SIZE = 132;
+export const PII_TEST_SET_SIZE = 136;

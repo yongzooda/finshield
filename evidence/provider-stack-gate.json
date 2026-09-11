@@ -3,25 +3,6 @@
   "gate": "implementation",
   "requirements_blob_sha": "27ce706010344fbcedebe3abd707febff0f1dc26",
   "entries": {
-    "B-CONSENT-01": {
-      "code_under_test_sha": "7ac52bd5f223919efe1df69e8cadc00c950e9e92",
-      "workflow_head_sha": "7ac52bd5f223919efe1df69e8cadc00c950e9e92",
-      "run_id": 34499542659,
-      "run_attempt": 1,
-      "workflow_id": 351524788,
-      "workflow_path": ".github/workflows/consent-evidence.yml",
-      "workflow_blob_sha": "d8f92e1e244949415a602d5da41c51bc48e078ef",
-      "harness_blob_sha": "e861f36dfd2c3fa679bed04f59fe93731b9b0fc1",
-      "scope_sha256": "7076aa355f5302808c2dbb92cdea7e92669661f3656468f5b06887e96d777527",
-      "job_name": "consent-evidence / B-CONSENT-01",
-      "artifact_id": 10161271358,
-      "artifact_name": "provider-evidence-B-CONSENT-01-7ac52bd5f223919efe1df69e8cadc00c950e9e92",
-      "artifact_digest": "sha256:a68cd8fd9596a4fe820ad6a0969bac80ce60f090cda57e489718bad807b6e266",
-      "result_path": "evidence/results/B-CONSENT-01/34499542659.json",
-      "result_sha256": "635af1d5e938d5db1870625950a19906d207761b6891dcf84694cd35b4d1bb35",
-      "adoption_pr_number": 313,
-      "adopted_at": "2026-09-10T21:09:51Z"
-    },
     "B-DELETE-01": {
       "code_under_test_sha": "7ac52bd5f223919efe1df69e8cadc00c950e9e92",
       "workflow_head_sha": "7ac52bd5f223919efe1df69e8cadc00c950e9e92",
