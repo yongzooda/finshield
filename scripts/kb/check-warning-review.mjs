@@ -46,11 +46,36 @@ export const assessWarningReview = ({ review, html, now }) => {
   return { ok: problems.length === 0, problems, observedHash, reviewDueAt: review.reviewDueAt };
 };
 
+// 공식 수집 harness(source-snapshot-spike.mjs)와 같은 표준 요청 헤더다. 브라우저 위장이 아니다.
+const REQUEST_HEADERS = {
+  "Accept": "text/html,application/xhtml+xml",
+  "Accept-Language": "ko-KR,ko;q=0.9",
+  "User-Agent": "FinShield-SourceSnapshot/1 (+https://github.com/yongzooda/finshield)",
+};
+
+/** 해외 실행 환경에서 진흥원 서버 연결이 가끔 끊긴다. 연결 오류만 두 번 더 시도한다. */
+export const fetchNotice = async ({ fetchImpl = fetch, sleep = (ms) => new Promise((done) => setTimeout(done, ms)) } = {}) => {
+  let lastError;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const response = await fetchImpl(NOTICE_URL, {
+        headers: REQUEST_HEADERS, redirect: "error", cache: "no-store", signal: AbortSignal.timeout(20_000),
+      });
+      if (!response.ok) throw Object.assign(new Error(`공지 응답 ${response.status}`), { final: true });
+      return Buffer.from(await response.arrayBuffer()).toString("utf8");
+    } catch (error) {
+      if (error?.final) throw error;
+      lastError = error;
+      if (attempt < 3) await sleep(attempt * 3000);
+    }
+  }
+  const cause = lastError?.cause?.code ?? lastError?.cause?.name ?? lastError?.name ?? "unknown";
+  throw new Error(`공지를 받지 못했다(${cause})`);
+};
+
 const main = async () => {
   const review = readReviewConstants(readFileSync(resolve(ROOT, "src/lib/finshield/tools/warning-review.ts"), "utf8"));
-  const response = await fetch(NOTICE_URL, { redirect: "error", cache: "no-store", signal: AbortSignal.timeout(15_000) });
-  if (!response.ok) throw new Error(`공지 응답 ${response.status}`);
-  const html = Buffer.from(await response.arrayBuffer()).toString("utf8");
+  const html = await fetchNotice();
   const result = assessWarningReview({ review, html, now: Date.now() });
   console.log(`예방 공지 본문 Hash ${result.observedHash?.slice(0, 12) ?? "없음"} · 검토 기한 ${result.reviewDueAt}`);
   if (!result.ok) {
