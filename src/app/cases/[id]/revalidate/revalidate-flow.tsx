@@ -265,6 +265,8 @@ export function RevalidateFlow({ caseId, requestedJob = null }: { caseId: string
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href={`/cases/${caseId}`} className="fs-btn fs-btn--primary">기록에서 새 판 보기</Link>
               <Link href={`/cases/${caseId}/passport`} className="fs-btn fs-btn--quiet">검증 근거 기록</Link>
+              {/* 지난 비교를 본 뒤에도 다시 확인할 수 있어야 한다. 서버는 끝난 작업 뒤 새 작업을 받는다. */}
+              <button type="button" onClick={() => void start()} className="fs-btn fs-btn--quiet">지금 다시 확인</button>
             </div>
           </FsCard>
         </>
