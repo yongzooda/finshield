@@ -24,7 +24,8 @@ import {
 
 type Detail = {
   case: { id: string; scenario: string; lifecycle: string; title_masked: string; created_at: string;
-    journey_stage: string; enrollment_confirmed_at: string | null; aftercare_status: string };
+    journey_stage: string; enrollment_confirmed_at: string | null; aftercare_status: string;
+    latest_successful_run_id: string | null };
   claims: { id: string; claim_type: string }[];
   runs: { id: string; run_no: number; status: string; overall_result: string | null;
     coverage_satisfied: boolean | null; partial_reason_codes: string[] | null; finished_at: string | null }[];
@@ -47,6 +48,25 @@ type Detail = {
   checklists: { id: string; precase_assessment_id: string; action_code: string; status: string;
     required_material_codes: string[] | null }[];
 };
+
+/**
+ * 결과를 보여 줄 실행을 고른다.
+ *
+ * 가장 최근 실행과 가장 최근 확정 결과는 다를 수 있다. 재검증이 실패·중단되면 새 실행은
+ * 결과 없이 끝나고 이전 Passport 는 그대로 보관된다. 결과·근거·버튼은 확정 결과를 따르고
+ * 가장 최근 실행의 상태는 따로 알린다.
+ */
+export function pickResultRun<R extends { id: string }>(detail: {
+  case: { latest_successful_run_id: string | null };
+  runs: R[];
+  passports: { verification_run_id: string }[];
+}) {
+  const newest = detail.runs[0];
+  const latest = detail.runs.find((run) => run.id === detail.case.latest_successful_run_id)
+    ?? detail.runs.find((run) => detail.passports.some((row) => row.verification_run_id === run.id))
+    ?? newest;
+  return { newest, latest, newestPending: Boolean(newest && latest && newest.id !== latest.id) };
+}
 
 export function CaseDetail({ caseId }: { caseId: string }) {
   const [token, setToken, ready] = useFsToken();
@@ -83,7 +103,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
     return <FsCard className="mt-8"><p className="fs-body">{notice ?? "불러오는 중입니다."}</p></FsCard>;
   }
 
-  const latest = detail.runs[0];
+  const { newest, latest, newestPending } = pickResultRun(detail);
   const finals = detail.final_claims.filter((row) => row.verification_run_id === latest?.id);
   const axes = detail.axes.filter((row) => row.verification_run_id === latest?.id);
   const passport = detail.passports.find((row) => row.verification_run_id === latest?.id);
@@ -122,6 +142,16 @@ export function CaseDetail({ caseId }: { caseId: string }) {
       ) : null}
 
       <OfficialActions guide={passport?.guide} title="지금 하실 일" />
+      {newestPending ? (
+        <FsCard>
+          <FsChip tone="caution">{["QUEUED", "RUNNING"].includes(newest.status) ? "다시 확인하는 중" : "마지막 다시 확인 미완료"}</FsChip>
+          <p className="fs-body mt-2">
+            {["QUEUED", "RUNNING"].includes(newest.status)
+              ? "새로 확인하는 중입니다. 끝나면 새 결과로 바뀝니다. 아래는 이전에 확정된 결과입니다."
+              : "마지막 다시 확인을 끝내지 못했습니다. 아래는 이전에 확정된 결과이며 그대로 보관됩니다."}
+          </p>
+        </FsCard>
+      ) : null}
       {latest ? <ReviewNotice status={latest.status} reasons={partialReasons} /> : null}
       {latest ? (
         <FsCard>
