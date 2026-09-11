@@ -11,6 +11,6 @@ begin
  select jsonb_agg(jsonb_build_array(d.tool_code,m.purpose_code,d.timeout_ms,d.max_batch_size,d.retry_limit) order by d.tool_code,m.purpose_code) into b from private.execution_manifest_tools m join private.tool_definitions d on d.id=m.tool_definition_id where m.execution_manifest_id=new_id;
  if a is distinct from b then raise exception '허용 도구 또는 한도 변경';end if;
  if (select count(*) from private.agent_tool_allowlists l join private.agent_definitions d on d.id=l.agent_definition_id where d.version='p0-v8')<>(select count(*) from private.agent_tool_allowlists l join private.agent_definitions d on d.id=l.agent_definition_id where d.version='p0-v7') then raise exception '도구 허용 목록 누락';end if;
- raise notice '49_nested_statute_content: Agent·Tool 버전과 기존 범위 보존 통과';
+ raise notice '49_nested_statute_content: Agent·Tool 버전과 기존 범위 보존 통과했습니다';
 end $$;
 rollback;

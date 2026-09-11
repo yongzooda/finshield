@@ -16,6 +16,6 @@ begin
   and (a.evidence_policy_version<>b.evidence_policy_version or a.result_matrix_version<>b.result_matrix_version or a.kb_release_id<>b.kb_release_id or a.model_bundle<>b.model_bundle)) then raise exception '판정 정책 또는 근거 범위 변경'; end if;
  if (select count(*) from private.agent_tool_allowlists l join private.agent_definitions a on a.id=l.agent_definition_id where a.version='p0-v11')
   <> (select count(*) from private.agent_tool_allowlists l join private.agent_definitions a on a.id=l.agent_definition_id where a.version='p0-v10') then raise exception 'Agent 도구 허용 목록 누락'; end if;
- raise notice '52_aftercare_comparison_scope: 새 버전·일곱 Agent·허용 도구·과거 정책 보존 통과';
+ raise notice '52_aftercare_comparison_scope: 새 버전·일곱 Agent·허용 도구·과거 정책 보존 통과했습니다';
 end $$;
 rollback;

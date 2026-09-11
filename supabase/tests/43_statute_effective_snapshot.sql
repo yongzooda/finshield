@@ -26,6 +26,6 @@ begin
  if (select count(distinct source_fingerprint) from kb.source_snapshots where id in(old_id,current_id))<>1 then
   raise exception '같은 원문을 독립 출처로 중복 계산';
  end if;
- raise notice '43_statute_effective_snapshot: 시행 전후 조회·과거 불변성·원문 지문 보존 통과';
+ raise notice '43_statute_effective_snapshot: 시행 전후 조회·과거 불변성·원문 지문 보존 통과했습니다';
 end $$;
 rollback;

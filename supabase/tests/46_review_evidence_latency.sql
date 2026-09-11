@@ -13,6 +13,6 @@ begin
   and (a.evidence_policy_version<>b.evidence_policy_version or a.result_matrix_version<>b.result_matrix_version or a.kb_release_id<>b.kb_release_id or a.model_bundle<>b.model_bundle)) then raise exception '기존 정책 또는 예산 변경'; end if;
  if (select count(*) from private.agent_tool_allowlists l join private.agent_definitions a on a.id=l.agent_definition_id where a.version='p0-v5')<>20 then raise exception '도구 허용 목록 누락'; end if;
  if (select count(*) from private.agent_tool_allowlists l join private.agent_definitions a on a.id=l.agent_definition_id where a.version='p0-v4')<>20 then raise exception '과거 허용 목록 변경'; end if;
- raise notice '46_review_evidence_latency: 새 정의와 기존 정책 보존 통과';
+ raise notice '46_review_evidence_latency: 새 정의와 기존 정책 보존 통과했습니다';
 end $$;
 rollback;
