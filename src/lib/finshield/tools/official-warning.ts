@@ -3,6 +3,7 @@ import {createHash} from 'node:crypto';
 import {filterToolText} from '@/lib/tools/filter';
 import type {ToolCallContext,ToolOutcome} from './runtime';
 import { WARNING_REVIEW, reviewedWarningIsUsable } from './warning-review';
+import { warningSectionBounds } from './warning-section.mjs';
 
 const URL='https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020';
 const hash=(text:string)=>createHash('sha256').update(text).digest('hex');
@@ -10,11 +11,7 @@ const plain=(text:string)=>text.replace(/<!--[\s\S]*?-->/g,' ').replace(/<[^>]*>
 
 /** EV-009: 선택한 진흥원 안내 문서의 날짜·본문 위치를 보존한다. */
 export function extractWarningSection(html:string){
- const headerStart=html.indexOf('<div class="board-detail-header">');
- const start=html.indexOf('<div class="board-detail-con ',headerStart);
- const end=html.indexOf('<div class="board-detail-footer">',start);
- if(headerStart<0||start<0||end<0)throw new Error('OFFICIAL_WARNING_STRUCTURE_CHANGED');
- const header=html.slice(headerStart,start);const original=html.slice(start,end);
+ const {header,original}=warningSectionBounds(html);
  const title=plain(header.match(/<p class="tit">([\s\S]*?)<\/p>/)?.[1]??'');
  const publishedAt=header.replace(/<!--[\s\S]*?-->/g,'').match(/\d{4}-\d{2}-\d{2}/)?.[0];
  const paragraphs=[...original.matchAll(/<p(?:\s[^>]*)?>([\s\S]*?)<\/p>/g)].map(m=>plain(m[1]));

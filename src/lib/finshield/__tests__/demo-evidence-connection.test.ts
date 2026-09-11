@@ -61,6 +61,34 @@ describe("공개 Demo의 승인 출처 경계", () => {
     expect(result.observations).toMatchObject({ official_product_page: "ENDED" });
   });
 
+  // 진흥원 예방 공지의 합성 본문. 검토한 본문과 Hash 가 달라 비교 근거가 되지 않는다.
+  const noticePage = `<div class="board-detail-header"><p class="tit">합성 예방 공지</p><li>2021-05-27</li></div>`
+    + `<div class="board-detail-con contents"><p>서민금융진흥원은 문자메시지나 전화 광고 합성 문구</p>`
+    + `<p>정상적인 금융기관 합성 문구</p><p>출처가 불분명한 앱 합성 문구</p></div><div class="board-detail-footer">목록</div>`;
+  const guideSql = () => Object.assign(vi.fn((parts: TemplateStringsArray) => {
+    const query = parts.join("?");
+    if (query.includes("select embedding_model")) return cancellable([{ embedding_model: null, embedding_dimension: null, embedding_model_version: null, documents: 1 }]);
+    if (query.includes("with scoped as")) return cancellable([]);
+    throw new Error(`예상하지 않은 SQL: ${query}`);
+  }), { unsafe: (value: string) => value });
+
+  it("예방 안내 조회에 회원 실행과 같은 진흥원 공지를 함께 읽는다", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(noticePage)));
+    const result = await TOOL_IMPLS.search_consumer_warning({ query: "정부지원 대출 문자 사칭" }, demoCtx(guideSql()));
+    const notice = result.items.find((item) => item.officialId === "kinfa:notice:24020");
+    // 검토한 본문과 다르면 비교 근거가 아니라 참고 자료로만 온다.
+    expect(notice).toMatchObject({ isCitable: false, directness: "CONTEXT_ONLY", referenceOnly: true });
+    expect(notice?.locator).toMatchObject({ permitted_use: "PUBLIC_GUIDANCE_COMPARISON", current_transaction_proof: false });
+    expect(result.observations).toMatchObject({ kind: "APPROVED_DEMO_GUIDE_SEARCH", official_warning: "UNREVIEWED" });
+  });
+
+  it("예방 공지를 읽지 못하면 승인 Snapshot 결과만 돌려주고 그 사실을 남긴다", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("network"); }));
+    const result = await TOOL_IMPLS.search_consumer_warning({ query: "정부지원 대출 문자 사칭" }, demoCtx(guideSql()));
+    expect(result.items).toEqual([]);
+    expect(result.observations).toMatchObject({ official_warning: "UNAVAILABLE", current_transaction_proof: false });
+  });
+
   it("햇살론15 가 아닌 상품 조회는 공식 페이지를 부르지 않는다", async () => {
     const fetch = vi.fn(async () => new Response(kinfaPage("")));
     vi.stubGlobal("fetch", fetch);

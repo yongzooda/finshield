@@ -72,3 +72,25 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.FINSHIELD_DATABASE_URL }}
         run: node trusted/scripts/kb/refresh-demo-seed-sources.mjs --result evidence-output/result.json
+
+  # 고위험 행동 경고가 쓰는 진흥원 예방 공지(24020)의 본문과 검토 기한을 본다.
+  # 기한 72시간 전이나 본문이 바뀌면 실패해 다시 검토할 시간을 둔다. 비밀을 쓰지 않는다.
+  warning-review:
+    name: warning-review
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+
+      - name: Set up Node 24
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+
+      - name: 검토한 예방 공지 점검
+        run: node scripts/kb/check-warning-review.mjs

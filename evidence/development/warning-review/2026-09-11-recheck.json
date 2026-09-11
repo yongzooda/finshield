@@ -1,0 +1,27 @@
+{
+  "schema_version": "warning-review-recheck-v1",
+  "official_id": "kinfa:notice:24020",
+  "url": "https://www.kinfa.or.kr/notificationPromotion/noticeDetail.do?seq=24020",
+  "purpose": "검토 기한(2026-09-15T11:31:40Z) 만료 전 재검토. 같은 본문이면 검토 기한을 새로 둔다.",
+  "section_rule": "src/lib/finshield/tools/warning-section.mjs 의 board-detail-con 구간, official-warning.ts 와 같은 경계",
+  "checks": [
+    {
+      "fetched_at": "2026-09-11T03:28:22.901Z",
+      "http_status": 200,
+      "title": "서민금융 사칭 및 불법사금융 피해를 입지 않도록 조심하세요",
+      "published_at": "2021-05-27",
+      "section_sha256": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+      "same_as_reviewed": true,
+      "selected_paragraph_markers": ["문자메시지나 전화", "정상적인 금융기관", "신용도에 관계없이", "출처가 불분명한 앱"]
+    },
+    {
+      "fetched_at": "2026-09-11T03:32:05.485Z",
+      "http_status": 200,
+      "section_sha256": "d584f37fa160619ab0f3c97b81ddafcd26d3a82df9a5fc5f2047d684fe0645e9",
+      "same_as_reviewed": true
+    }
+  ],
+  "previous_review": { "reviewed_at": "2026-09-08T11:31:40.000Z", "review_due_at": "2026-09-15T11:31:40.000Z" },
+  "renewed_review": { "reviewed_at": "2026-09-11T03:28:22.000Z", "review_due_at": "2026-10-11T03:28:22.000Z" },
+  "limits": "본문 원문은 저장하지 않는다. 일반 예방 지침이며 현재 거래의 사기·위법 증명이 아니다."
+}
