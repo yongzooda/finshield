@@ -26,7 +26,7 @@ export async function POST(request:Request) {
   const sql=fsql(); const {case_id:caseId,input_id:inputId,ocr_consent:ocrConsent}=body.data;
   try {
     const result=await processFileInput({sql,ownerId,caseId,inputId,ocrConsent,extractClaims:createClaimExtractor(),
-      signal:AbortSignal.any([request.signal,AbortSignal.timeout(50000)])});
+      signal:AbortSignal.any([request.signal,AbortSignal.timeout(80000)])});
     return jsonNoStore(result,200);
   }catch(error){
     if(error instanceof FileInputAccessError)return jsonNoStore({error:"처리 가능한 본인 파일을 찾을 수 없습니다."},404);
