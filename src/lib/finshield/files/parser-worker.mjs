@@ -37,8 +37,9 @@ async function main() {
       if(text.length>12000) {save({ok:false,code:'TEXT_LIMIT'});return;}
       pages.push({page_no:pageNo,text,words});page.cleanup();
     }
-    const needsOcr=pages.some(page=>page.text.length<10 || /\uFFFD/.test(page.text));
-    save({ok:true,mime:'application/pdf',parser_version:pdfjs.version,pages,needs_ocr:needsOcr});
+    // 쪽마다 글자 층을 읽을 수 있는지 남긴다. 일부 쪽만 비었으면 나머지는 OCR 없이 쓸 수 있다.
+    const unreadable=pages.filter(page=>page.text.length<10 || /\uFFFD/.test(page.text)).map(page=>page.page_no);
+    save({ok:true,mime:'application/pdf',parser_version:pdfjs.version,pages,needs_ocr:unreadable.length>0,unreadable_pages:unreadable});
   } finally {await task.destroy();}
 }
 main().catch(()=>{save({ok:false,code:'PARSER_FAILED'});process.exitCode=1;});

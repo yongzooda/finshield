@@ -16,7 +16,7 @@ import { sessionFetch } from "../session-client";
  */
 
 import { useEffect, useRef, useState } from "react";
-import { FileIntake, type OcrReviewField } from "./file-intake";
+import { FileIntake, unreadPagesNotice, type OcrReviewField } from "./file-intake";
 import { OcrReviewText } from "./ocr-review-text";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -326,7 +326,7 @@ export function VerifyFlow() {
             setClaims(result.claims);submittedOnce.current=false;setPicked(new Set(result.claims.filter(c=>c.materiality==="MATERIAL"&&!c.requires_review).map(c=>c.claim_id)));
             setOcrReviewed(new Set());
             setCaseId(result.case_id);setInputId(result.input_id);masked.current=result.masked_text;
-            setFilePages(result.masked_pages);setNotice(null);setStep("claims");
+            setFilePages(result.masked_pages);setNotice(unreadPagesNotice(result.unread_pages));setStep("claims");
           }}/>
         </FsCard>
       ) : null}

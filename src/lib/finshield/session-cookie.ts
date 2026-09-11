@@ -12,6 +12,15 @@ export function tokenSession(token: string | null): { id: string; owner: string;
   } catch { return null; }
 }
 
+/**
+ * 새 탭은 Access Token 없이 세션 식별자만 보낸다. 이 값은 Cookie 이름을 고르는 데만 쓰고,
+ * 이어받을 수 있는지는 그 세션의 HttpOnly Refresh Cookie와 발급처 회전이 정한다.
+ */
+export function sessionHint(request: Request): string | null {
+  const value = request.headers.get("x-finshield-session")?.trim() ?? "";
+  return UUID.test(value) && !/^0{8}-0{4}-0{4}-0{4}-0{12}$/.test(value) ? value.toLowerCase() : null;
+}
+
 export function sameSessionOrigin(request: Request): boolean {
   const url = new URL(request.url);
   return request.headers.get("origin") === `${url.protocol}//${request.headers.get("host") ?? url.host}`;

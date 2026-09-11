@@ -1,11 +1,16 @@
 "use client";
 
 const KEY = "finshield_token";
+// 새 탭이 같은 세션을 이어받도록 세션 식별자만 브라우저 전체 저장소에 둔다. Token은 두지 않는다.
+const HINT = "finshield_session_hint";
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const listeners = new Set<() => void>();
 let cached: string | null = null;
 let filled = false;
 let generation = 0;
 let refreshing: Promise<string> | null = null;
+let restoring: Promise<void> | null = null;
+let restoreState: "unknown" | "pending" | "settled" = "unknown";
 let timer: ReturnType<typeof setInterval> | undefined;
 let channel: BroadcastChannel | undefined;
 let suspended = false;
@@ -32,10 +37,29 @@ export function readSessionToken(): string | null {
   return cached;
 }
 
+function notify() {
+  for (const listener of [...listeners]) listener();
+}
+
 function publish(value: string | null) {
   cached = value; filled = true;
   try { if (value) sessionStorage.setItem(KEY, value); else sessionStorage.removeItem(KEY); } catch { /* 이 탭의 메모리로 계속한다. */ }
-  for (const listener of [...listeners]) listener();
+  notify();
+}
+
+function readHint(): string | null {
+  try {
+    const value = localStorage.getItem(HINT);
+    return value && UUID.test(value) ? value : null;
+  } catch { return null; }
+}
+
+/** 지울 때는 그 세션의 표시일 때만 지운다. 다른 탭이 새로 로그인한 표시는 남긴다. */
+function writeHint(value: string | null, session?: string): void {
+  try {
+    if (value) localStorage.setItem(HINT, value);
+    else if (!session || localStorage.getItem(HINT) === session) localStorage.removeItem(HINT);
+  } catch { /* 새 탭에서 다시 로그인해야 할 뿐이다. */ }
 }
 
 /** 로그인·만료·로그아웃에만 사용한다. 늦게 도착한 이전 갱신 응답을 무효화한다. */
@@ -43,7 +67,51 @@ export function writeSessionToken(value: string | null): void {
   const previous = claims(readSessionToken());
   generation++; suspended = false; refreshing = null;
   publish(value);
-  if (!value && previous) channel?.postMessage({ kind: "SIGNED_OUT", session: previous.session_id });
+  const next = claims(value);
+  if (next && UUID.test(next.session_id)) writeHint(next.session_id);
+  if (!value && previous) {
+    writeHint(null, previous.session_id);
+    channel?.postMessage({ kind: "SIGNED_OUT", session: previous.session_id });
+  }
+}
+
+/**
+ * 이 탭에 Token이 없고 이어받을 세션 표시가 있으면 확인이 끝날 때까지 false다.
+ * 그동안 화면은 로그인 카드를 먼저 보이지 않는다.
+ */
+export function sessionSettled(): boolean {
+  if (readSessionToken() || restoreState === "settled") return true;
+  return restoreState === "unknown" ? readHint() === null : false;
+}
+
+/**
+ * 새 탭: 세션 식별자로 그 세션의 HttpOnly Refresh Cookie 갱신을 요청해 Access를 받는다.
+ * 같은 세션의 다른 탭 갱신과 같은 잠금을 쓰므로 회전된 Cookie를 순서대로 사용한다.
+ */
+function restore(initial: boolean): void {
+  if (restoring || readSessionToken()) return;
+  const hint = readHint();
+  if (!hint) {
+    if (restoreState !== "settled") { restoreState = "settled"; notify(); }
+    return;
+  }
+  const epoch = generation;
+  // 확인하는 동안 보호 화면이 비어 있으므로 기다리는 시간을 짧게 둔다.
+  if (initial) restoreState = "pending";
+  const task = exclusive(hint, async () => {
+    if (generation !== epoch || readSessionToken()) return;
+    const response = await fetch("/api/finshield/session", { method: "PATCH", credentials: "same-origin",
+      headers: { "X-FinShield-Session": hint }, signal: AbortSignal.timeout(8_000), cache: "no-store", redirect: "error" });
+    const body = await response.json().catch(() => null);
+    if (generation !== epoch || readSessionToken()) return;
+    const next = claims(body?.access_token);
+    if (response.ok && next?.session_id === hint) { suspended = false; publish(body.access_token); }
+    else if (response.status === 401) writeHint(null, hint);
+  }).catch(() => { /* 연결 실패는 로그인 화면으로 두고 다음 확인 때 다시 시도한다. */ }).finally(() => {
+    if (restoring === task) restoring = null;
+    if (restoreState !== "settled") { restoreState = "settled"; notify(); }
+  });
+  restoring = task;
 }
 
 export class SessionUnavailable extends Error {
@@ -130,9 +198,11 @@ export async function closeSession(token: string): Promise<Response> {
 }
 
 function maintain() {
-  if (suspended || document.visibilityState === "hidden") return;
+  if (document.visibilityState === "hidden") return;
   const token = readSessionToken();
-  if (token) void freshSessionToken(token).catch(() => { /* 실패한 갱신은 사용자 요청 때 다시 확인한다. */ });
+  // 다른 탭에서 로그인했다면 이 탭도 그 세션을 이어받는다. 첫 확인이 끝난 뒤에만 시도한다.
+  if (!token) { if (restoreState === "settled") restore(false); return; }
+  if (!suspended) void freshSessionToken(token).catch(() => { /* 실패한 갱신은 사용자 요청 때 다시 확인한다. */ });
 }
 
 export function subscribeSession(listener: () => void): () => void {
@@ -142,12 +212,13 @@ export function subscribeSession(listener: () => void): () => void {
       channel = new BroadcastChannel("finshield-session-status");
       channel.onmessage = event => {
         if (event.data?.kind === "SIGNED_OUT" && event.data.session === claims(readSessionToken())?.session_id) {
-          generation++; suspended = false; refreshing = null; publish(null);
+          generation++; suspended = false; refreshing = null; publish(null); writeHint(null, event.data.session);
         }
       };
     }
     timer = setInterval(maintain, 30_000);
     document.addEventListener("visibilitychange", maintain);
+    restore(true);
     queueMicrotask(maintain);
   }
   return () => {

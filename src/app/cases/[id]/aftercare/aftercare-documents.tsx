@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { FileIntake, type OcrReviewField } from "../../../verify/file-intake";
+import { FileIntake, unreadPagesNotice, type OcrReviewField } from "../../../verify/file-intake";
 import { sessionFetch, sessionIdentity, readSessionToken } from "../../../session-client";
 import type { PriorClaim } from "@/lib/finshield/contract-comparison";
 
@@ -98,7 +98,7 @@ export function AftercareDocuments({token,caseId,basePassport,prior,onUse,onBusy
         {!confirmed?<button type="button" className="fs-btn fs-btn--quiet" disabled={busy} onClick={()=>void discard()}>이 문서 중단하고 지우기</button>:null}
       </div>
     </div>:null}
-    {!document||confirmed?<FileIntake token={token} caseId={caseId} onBusyChange={onBusyChange} onPrepared={()=>{void load().catch(()=>setMessage("추출한 문구를 다시 읽지 못했습니다. 화면을 다시 열어 주세요."));}}/>:null}
+    {!document||confirmed?<FileIntake token={token} caseId={caseId} onBusyChange={onBusyChange} onPrepared={result=>{setMessage(unreadPagesNotice(result.unread_pages)??"");void load().catch(()=>setMessage("추출한 문구를 다시 읽지 못했습니다. 화면을 다시 열어 주세요."));}}/>:null}
     {message?<p role="status" className="fs-body mt-3">{message}</p>:null}
   </section>;
 }

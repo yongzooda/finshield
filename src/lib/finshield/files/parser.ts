@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { Sandbox } from "@vercel/sandbox";
 import { z } from "zod";
+import { rejectionCode } from "./file-messages";
 
 const word=z.object({
   text:z.string(),bbox:z.array(z.number().finite()).length(4),
@@ -10,7 +11,8 @@ const word=z.object({
 });
 export const pageSchema=z.object({page_no:z.number().int().min(1).max(10),text:z.string().max(12000),words:z.array(word).max(15000)});
 const resultSchema=z.object({ok:z.literal(true),mime:z.enum(["application/pdf","image/png","image/jpeg"]),
-  pages:z.array(pageSchema).min(1).max(10),needs_ocr:z.boolean(),parser_version:z.string().optional()});
+  pages:z.array(pageSchema).min(1).max(10),needs_ocr:z.boolean(),parser_version:z.string().optional(),
+  unreadable_pages:z.array(z.number().int().min(1).max(10)).max(10).optional()});
 export type ParsedPage=z.infer<typeof pageSchema>;
 
 export async function parseIsolatedFile(bytes:Buffer,mime:string,filename:string, signal?:AbortSignal) {
@@ -30,8 +32,10 @@ export async function parseIsolatedFile(bytes:Buffer,mime:string,filename:string
     await sandbox.runCommand({cmd:"node",args:["--max-old-space-size=256","parser-worker.mjs"],signal});
     const output=await sandbox.readFileToBuffer({path:"/vercel/sandbox/result.json"});
     if(!output || output.byteLength>4*1024*1024)throw new Error("FILE_PARSE_FAILED");
-    const parsed=resultSchema.safeParse(JSON.parse(output.toString("utf8")));
-    if(!parsed.success)throw new Error("FILE_REJECTED");
+    const raw=JSON.parse(output.toString("utf8"));
+    const parsed=resultSchema.safeParse(raw);
+    // 거부 사유 묶음만 오류 코드로 옮긴다. 사유 세부값은 화면·로그에 싣지 않는다.
+    if(!parsed.success)throw new Error(rejectionCode(raw));
     return parsed.data;
   } finally {await sandbox.stop();}
 }

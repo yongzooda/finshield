@@ -47,6 +47,23 @@ it("응답 유실 때 Cookie를 보존하고 다음 명시 요청으로 회전�
  fetchMock.mockRejectedValueOnce(new Error("private-fixture"));expect((await PATCH(req())).status).toBe(503);
  fetchMock.mockResolvedValueOnce(pair());expect((await PATCH(req())).status).toBe(200);expect(fetchMock).toHaveBeenCalledTimes(2);
 });
+const restoreReq=(hint:string|null,origin="https://app.example.invalid")=>new Request("https://app.example.invalid/api/finshield/session",{method:"PATCH",
+ headers:{Cookie:cookie,Origin:origin,...(hint?{"X-FinShield-Session":hint}:{})}});
+it("새 탭은 Access 없이 세션 표시와 그 세션의 Cookie로만 이어받는다",async()=>{
+ fetchMock.mockResolvedValue(pair());const r=await PATCH(restoreReq(id));expect(r.status).toBe(200);
+ expect((await r.json()).access_token).toBe(jwt());expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({refresh_token:"private-fixture"});
+ expect(r.headers.get("set-cookie")).toContain(`__Host-finshield-refresh-${id}=rotated-private-fixture`);
+});
+it.each([null,other,"not-a-session","00000000-0000-0000-0000-000000000000"])("표시가 없거나 Cookie와 다른 세션이면 외부 전송 전에 거부한다 %#",async hint=>{
+ expect((await PATCH(restoreReq(hint))).status).toBe(401);expect(fetchMock).not.toHaveBeenCalled();
+});
+it("이어받기에서 발급처가 다른 세션을 돌려주면 Cookie를 바꾸지 않는다",async()=>{
+ fetchMock.mockResolvedValue(pair(jwt(other)));const r=await PATCH(restoreReq(id));
+ expect(r.status).toBe(503);expect(r.headers.get("set-cookie")).toBeNull();
+});
+it("이어받기도 교차 Origin 요청은 거부한다",async()=>{
+ expect((await PATCH(restoreReq(id,"https://foreign.example.invalid"))).status).toBe(403);expect(fetchMock).not.toHaveBeenCalled();
+});
 it("로그아웃이 확인되면 해당 세션의 Refresh Cookie도 폐기한다",async()=>{
  fetchMock.mockResolvedValue(new Response(null,{status:204}));const r=await DELETE(req("DELETE"));expect(r.status).toBe(200);expect(r.headers.get("set-cookie")).toContain("Max-Age=0");
 });
