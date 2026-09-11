@@ -7,6 +7,14 @@ export type OcrReviewField={field_kind:"URL"|"INSTITUTION"|"PRODUCT"|"NUMBER"|"N
 export type FileClaim={claim_id:string;claim_ref:string;claim_type:string;statement_masked:string;materiality:string;expected_revision_no:number;source_page_no:number;requires_review?:boolean;review_fields?:OcrReviewField[]};
 export type PreparedFile={input_purpose?:string;case_id:string;input_id:string;claims:FileClaim[];masked_text:string;masked_pages:{page_no:number;text:string;low_confidence_count?:number;low_confidence_fields?:OcrReviewField[]}[];unread_pages?:number[]};
 
+/** 브라우저가 읽은 이미지 가로·세로. 읽지 못하면 null 이고 서버 검사에 맡긴다. */
+const imageSize=(file:File)=>new Promise<{width:number;height:number}|null>(resolve=>{
+  const url=URL.createObjectURL(file); const image=new Image();
+  image.onload=()=>{resolve({width:image.naturalWidth,height:image.naturalHeight});URL.revokeObjectURL(url);};
+  image.onerror=()=>{resolve(null);URL.revokeObjectURL(url);};
+  image.src=url;
+});
+
 /** OCR 없이 글자 층만 읽은 PDF의 빠진 쪽을 알린다. 빠진 쪽이 없으면 null. */
 export const unreadPagesNotice=(pages?:number[])=>pages?.length
   ?`${pages.join("·")}쪽은 글자 층이 없어 읽지 않았습니다. 그 쪽 내용도 확인하려면 OCR에 동의하고 다시 올리거나 해당 부분을 텍스트로 붙여 넣어 주세요.`:null;
@@ -31,6 +39,9 @@ export function FileIntake({token,caseId,onPrepared,onBusyChange}:{token:string;
     if(!["application/pdf","image/png","image/jpeg"].includes(file.type)||file.size<1||file.size>10485760){setMessage("PDF·PNG·JPG 파일을 10 MiB 이내로 올려 주세요.");return;}
     // 이미지는 글자 층이 없어 언제나 OCR이 필요하다. 동의 없이 올리면 업로드만 하고 실패하므로 먼저 알린다.
     if(file.type!=="application/pdf"&&!consent){setMessage("사진·캡처 이미지는 글자 인식(OCR) 동의가 있어야 읽을 수 있습니다. 아래 동의 항목을 선택하거나 내용을 텍스트로 붙여 넣어 주세요.");return;}
+    // 문서 인식(CLOVA OCR)은 긴 변이 8,000픽셀 미만인 이미지만 받는다. 긴 스크롤 캡처는 올리기 전에 알린다.
+    if(file.type!=="application/pdf"){const size=await imageSize(file);
+      if(size&&Math.max(size.width,size.height)>=8000){setMessage(`이 이미지는 ${size.width}×${size.height}픽셀입니다. 긴 화면 캡처는 가로·세로 모두 8,000픽셀보다 작아야 글자를 읽을 수 있으니 두세 장으로 나눠 캡처해 올려 주세요.`);return;}}
     setBusy(true);onBusyChange(true);setMessage("업로드를 준비하고 있습니다.");
     const abort=new AbortController();controller.current=abort;
     try{
@@ -57,7 +68,7 @@ export function FileIntake({token,caseId,onPrepared,onBusyChange}:{token:string;
   };
   return <section className="mt-7 border-t border-[var(--fs-line)] pt-5" aria-label="문서로 입력">
     <h3 className="fs-h2">캡처 이미지 또는 PDF</h3>
-    <p className="fs-meta mt-2">PDF·PNG·JPG, 최대 10 MiB·10쪽. 원본은 항목 확인이나 중단 시 삭제를 시작하며 최대 24시간 임시 처리합니다.</p>
+    <p className="fs-meta mt-2">PDF·PNG·JPG, 최대 10 MiB·10쪽. 이미지는 긴 변 8,000픽셀 미만이어야 합니다. 원본은 항목 확인이나 중단 시 삭제를 시작하며 최대 24시간 임시 처리합니다.</p>
     <p className="fs-meta mt-2">분쟁 준비에 필요한 원본은 본인 기기에 따로 보관해 주세요. 서버에는 원본을 보관하지 않습니다.</p>
     <label className="mt-4 block fs-body" htmlFor="proposal-file">{caseId?"계약 문서 선택":"권유 문서 선택"}</label>
     <input id="proposal-file" type="file" accept="application/pdf,image/png,image/jpeg" disabled={busy} className="fs-field mt-2"

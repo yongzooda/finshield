@@ -12,7 +12,8 @@ const word=z.object({
 export const pageSchema=z.object({page_no:z.number().int().min(1).max(10),text:z.string().max(12000),words:z.array(word).max(15000)});
 const resultSchema=z.object({ok:z.literal(true),mime:z.enum(["application/pdf","image/png","image/jpeg"]),
   pages:z.array(pageSchema).min(1).max(10),needs_ocr:z.boolean(),parser_version:z.string().optional(),
-  unreadable_pages:z.array(z.number().int().min(1).max(10)).max(10).optional()});
+  unreadable_pages:z.array(z.number().int().min(1).max(10)).max(10).optional(),
+  image:z.object({width:z.number().int().min(1),height:z.number().int().min(1)}).optional()});
 export type ParsedPage=z.infer<typeof pageSchema>;
 
 export async function parseIsolatedFile(bytes:Buffer,mime:string,filename:string, signal?:AbortSignal) {

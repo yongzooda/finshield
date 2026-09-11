@@ -78,3 +78,12 @@ it("동의한 경우에는 빈 쪽이 있으면 문서 전체를 OCR로 읽는�
   expect(state.queries.filter(name => name === "register_ocr_artifact")).toHaveLength(2);
   vi.unstubAllEnvs();
 });
+
+it("긴 변이 8,000px 이상인 이미지는 OCR 로 보내기 전에 막는다", async () => {
+  vi.stubEnv("CLOVA_OCR_SECRET", "fixture"); vi.stubEnv("CLOVA_OCR_INVOKE_URL", "https://example.invalid");
+  state.parsed = { ok: true, mime: "image/png", needs_ocr: true, pages: [page(1, "")], image: { width: 1080, height: 9000 } };
+  await expect(run(true)).rejects.toThrow("OCR_IMAGE_TOO_LONG");
+  expect(state.ocr).not.toHaveBeenCalled();
+  expect(state.queries).not.toContain("acquire_provider_slot");
+  vi.unstubAllEnvs();
+});

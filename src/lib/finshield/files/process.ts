@@ -21,6 +21,8 @@ export class FileInputConflictError extends Error {
 }
 
 type Sql = ReturnType<typeof postgres>;
+/** CLOVA OCR General API 호출 한도: 긴 변 8,000px 미만(2026-04-23 한국 리전 기준). */
+export const OCR_MAX_LONG_SIDE = 8000;
 const hash = (text:string) => createHash("sha256").update(text).digest("hex");
 
 /** 마스킹한 페이지의 구절을 실제 위치로 연결한다. 모델의 좌표나 페이지 번호는 받지 않는다. */
@@ -75,6 +77,8 @@ export async function processFileInput(args: {sql:Sql;ownerId:string;caseId:stri
   const usedOcr=parsed.needs_ocr&&!partialText;
   if (usedOcr) {
     if (!args.ocrConsent) throw new Error("OCR_CONSENT_REQUIRED");
+    // CLOVA OCR API 는 긴 변이 8,000px 미만인 이미지만 받는다. 보내기 전에 알린다.
+    if (parsed.image && Math.max(parsed.image.width,parsed.image.height)>=OCR_MAX_LONG_SIDE) throw new Error("OCR_IMAGE_TOO_LONG");
     if (!process.env.CLOVA_OCR_SECRET || !process.env.CLOVA_OCR_INVOKE_URL) throw new Error("OCR_UNAVAILABLE");
     const [slot]=await sql`select * from private.acquire_provider_slot('clova','ocr-general',1000)`;
     const wait=Math.max(0,Date.parse(slot.scheduled_at)-Date.now());

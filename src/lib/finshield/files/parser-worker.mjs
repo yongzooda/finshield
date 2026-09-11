@@ -12,7 +12,9 @@ async function main() {
     save({ ok:false, code:'FILE_REJECTED', reasons:inspection.reasons.map(reason=>reason.code) }); return;
   }
   if (inspection.detected_mime !== 'application/pdf') {
-    save({ ok:true, mime:inspection.detected_mime, pages:[{ page_no:1, text:'', words:[] }], needs_ocr:true }); return;
+    // OCR 한도를 전송 전에 확인하도록 헤더의 가로·세로만 넘긴다. 화소 자료는 넘기지 않는다.
+    const image={ width:inspection.metrics.image_width, height:inspection.metrics.image_height };
+    save({ ok:true, mime:inspection.detected_mime, pages:[{ page_no:1, text:'', words:[] }], needs_ocr:true, image }); return;
   }
   const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
   const task = pdfjs.getDocument({ data:new Uint8Array(bytes), isEvalSupported:false,
