@@ -140,7 +140,7 @@ export function PrivacyActions() {
       <FsCard>
         <h2 className="fs-h2">로그인 관리</h2>
         <p className="fs-body mt-2">
-          현재 탭에서 로그인 상태를 유지하고 있습니다.
+          이 브라우저에서 로그인 상태를 유지하고 있습니다. 새 탭에서도 이어지며, 로그아웃하면 열린 탭 모두에서 풀립니다.
         </p>
         {sessionNotice ? <p role="status" className="fs-body mt-2">{sessionNotice}</p> : null}
         <button type="button" disabled={signingOut || busy || Boolean(reauthCase)} onClick={() => void signOut()} className="fs-btn fs-btn--quiet mt-4">

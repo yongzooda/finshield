@@ -5,7 +5,11 @@ import { uploadFile } from "./upload-file";
 
 export type OcrReviewField={field_kind:"URL"|"INSTITUTION"|"PRODUCT"|"NUMBER"|"NEGATION"|"TEXT";confidence_milli:number;bbox:[number,number,number,number];start:number;end:number};
 export type FileClaim={claim_id:string;claim_ref:string;claim_type:string;statement_masked:string;materiality:string;expected_revision_no:number;source_page_no:number;requires_review?:boolean;review_fields?:OcrReviewField[]};
-export type PreparedFile={input_purpose?:string;case_id:string;input_id:string;claims:FileClaim[];masked_text:string;masked_pages:{page_no:number;text:string;low_confidence_count?:number;low_confidence_fields?:OcrReviewField[]}[]};
+export type PreparedFile={input_purpose?:string;case_id:string;input_id:string;claims:FileClaim[];masked_text:string;masked_pages:{page_no:number;text:string;low_confidence_count?:number;low_confidence_fields?:OcrReviewField[]}[];unread_pages?:number[]};
+
+/** OCR 없이 글자 층만 읽은 PDF의 빠진 쪽을 알린다. 빠진 쪽이 없으면 null. */
+export const unreadPagesNotice=(pages?:number[])=>pages?.length
+  ?`${pages.join("·")}쪽은 글자 층이 없어 읽지 않았습니다. 그 쪽 내용도 확인하려면 OCR에 동의하고 다시 올리거나 해당 부분을 텍스트로 붙여 넣어 주세요.`:null;
 
 export function FileIntake({token,caseId,onPrepared,onBusyChange}:{token:string;caseId?:string;onPrepared:(value:PreparedFile)=>void;onBusyChange:(busy:boolean)=>void}) {
   const [file,setFile]=useState<File|null>(null), [consent,setConsent]=useState(false);
@@ -25,6 +29,8 @@ export function FileIntake({token,caseId,onPrepared,onBusyChange}:{token:string;
   const submit=async()=>{
     if(!file)return;
     if(!["application/pdf","image/png","image/jpeg"].includes(file.type)||file.size<1||file.size>10485760){setMessage("PDF·PNG·JPG 파일을 10 MiB 이내로 올려 주세요.");return;}
+    // 이미지는 글자 층이 없어 언제나 OCR이 필요하다. 동의 없이 올리면 업로드만 하고 실패하므로 먼저 알린다.
+    if(file.type!=="application/pdf"&&!consent){setMessage("사진·캡처 이미지는 글자 인식(OCR) 동의가 있어야 읽을 수 있습니다. 아래 동의 항목을 선택하거나 내용을 텍스트로 붙여 넣어 주세요.");return;}
     setBusy(true);onBusyChange(true);setMessage("업로드를 준비하고 있습니다.");
     const abort=new AbortController();controller.current=abort;
     try{

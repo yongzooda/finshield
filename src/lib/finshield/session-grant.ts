@@ -4,7 +4,7 @@ import { jsonNoStore, readJson, str } from "@/lib/ops/http";
 import { bearerToken } from "./auth";
 import { fsql } from "./db";
 import { finshieldEnv } from "./env";
-import { readRefreshCookie, sameSessionOrigin, setRefreshCookie, tokenSession } from "./session-cookie";
+import { readRefreshCookie, sameSessionOrigin, sessionHint, setRefreshCookie, tokenSession } from "./session-cookie";
 
 const signupKey = (request: Request, secret: string): string => {
   const forwarded = request.headers.get("x-forwarded-for");
@@ -17,7 +17,12 @@ export const SIGNUP_LIMITS = Object.freeze({ perAddressPerHour: 20, allPerDay: 3
 /** AUTH-002·SEC-AUTH-005: refresh는 HttpOnly Cookie에서만 읽고 발급처가 회전한다. */
 export async function sessionGrant(request: Request, kind: "login" | "signup" | "refresh"): Promise<Response> {
   if (!sameSessionOrigin(request)) return jsonNoStore({ code: "ORIGIN_REJECTED", error: "이 화면에서 다시 요청해 주세요" }, 403);
-  const previous = kind === "refresh" ? tokenSession(bearerToken(request)) : null;
+  // 같은 브라우저의 새 탭은 Access 없이 세션 식별자만 보내 그 세션을 이어받는다.
+  const bearer = kind === "refresh" ? bearerToken(request) : null;
+  const restoring = kind === "refresh" && !bearer;
+  const hinted = restoring ? sessionHint(request) : null;
+  const previous = kind !== "refresh" ? null
+    : restoring ? (hinted ? { id: hinted, owner: null, expires: 0 } : null) : tokenSession(bearer);
   let payload: Record<string, string>;
   if (kind === "refresh") {
     const refresh = previous && readRefreshCookie(request, previous.id);
@@ -94,7 +99,8 @@ export async function sessionGrant(request: Request, kind: "login" | "signup" | 
     }
     const session = tokenSession(typeof body?.access_token === "string" ? body.access_token : null);
     if (!session || typeof session.owner !== "string" || !Number.isFinite(session.expires)
-      || typeof body?.refresh_token !== "string" || (previous && (previous.id !== session.id || previous.owner !== session.owner))) throw new Error();
+      || typeof body?.refresh_token !== "string"
+      || (previous && (previous.id !== session.id || (previous.owner !== null && previous.owner !== session.owner)))) throw new Error();
     // Provider가 반환한 Access Token만 앱 응답에 싣는다. Refresh는 JSON/HTML에 포함하지 않는다.
     return setRefreshCookie(jsonNoStore({ access_token: body.access_token, expires_at: session.expires,
       ...(kind === "signup" ? { needs_confirmation: false } : {}) }), request, session.id, body.refresh_token);

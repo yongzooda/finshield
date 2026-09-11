@@ -5,6 +5,7 @@
  *
  * Access Token은 탭 저장소, Refresh Token은 세션별 HttpOnly Cookie에 둔다.
  * 갱신은 서버를 거치고 보호 요청을 보내기 전에 만료 여유를 확인한다.
+ * 같은 브라우저의 새 탭은 세션 식별자 표시로 그 Cookie 갱신을 요청해 로그인을 이어받는다.
  *
  * 이 값으로 남의 자료에 닿을 수는 없다. 소유권은 데이터베이스 정책이 정한다.
  *
@@ -17,11 +18,12 @@ import { useCallback, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { FsIcon } from "./fs-icon";
 import { FsCard } from "./fs-shell";
-import { readSessionToken, subscribeSession, writeSessionToken } from "./session-client";
+import { readSessionToken, sessionSettled, subscribeSession, writeSessionToken } from "./session-client";
 
 export function useFsToken(): [string | null, (value: string | null) => void, boolean] {
   const token = useSyncExternalStore(subscribeSession, readSessionToken, () => null);
-  const ready = useSyncExternalStore(subscribeSession, () => true, () => false);
+  // 새 탭이 로그인을 이어받는 동안에는 준비되지 않은 것으로 보고 로그인 카드를 먼저 띄우지 않는다.
+  const ready = useSyncExternalStore(subscribeSession, sessionSettled, () => false);
   const update = useCallback((value: string | null) => { writeSessionToken(value); }, []);
   return [token, update, ready];
 }

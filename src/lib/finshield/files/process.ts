@@ -66,7 +66,14 @@ export async function processFileInput(args: {sql:Sql;ownerId:string;caseId:stri
     throw error;
   });
   let pages=parsed.pages;
-  if (parsed.needs_ocr) {
+  // 글자 층이 있는 PDF 쪽은 외부 전송 없이 읽는다. 빈 쪽 하나 때문에 문서 전체를 OCR 동의로
+  // 막지 않고, 동의가 없으면 읽지 못한 쪽을 알린다. 이미지와 전부 스캔인 PDF는 동의가 필요하다.
+  const unreadable=parsed.mime==="application/pdf"?(parsed.unreadable_pages??pages.map(page=>page.page_no)):pages.map(page=>page.page_no);
+  const partialText=parsed.needs_ocr&&!args.ocrConsent&&unreadable.length<pages.length;
+  const unreadPages=partialText?unreadable:[];
+  if (partialText) pages=pages.map(page=>unreadable.includes(page.page_no)&&/\uFFFD/.test(page.text)?{...page,text:"",words:[]}:page);
+  const usedOcr=parsed.needs_ocr&&!partialText;
+  if (usedOcr) {
     if (!args.ocrConsent) throw new Error("OCR_CONSENT_REQUIRED");
     if (!process.env.CLOVA_OCR_SECRET || !process.env.CLOVA_OCR_INVOKE_URL) throw new Error("OCR_UNAVAILABLE");
     const [slot]=await sql`select * from private.acquire_provider_slot('clova','ocr-general',1000)`;
@@ -81,7 +88,7 @@ export async function processFileInput(args: {sql:Sql;ownerId:string;caseId:stri
   const pageIds=await sql.begin(async tx=>{
     await tx`select private.register_input_pages(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid,${pages.length},'SUCCEEDED','v1')`;
     const ids=await tx`select * from private.input_page_ids(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid)`;
-    if(parsed.needs_ocr) for(const page of ids) {
+    if(usedOcr) for(const page of ids) {
       const [artifact]=await tx`select private.register_ocr_artifact(${ownerId}::uuid,${caseId}::uuid,${inputId}::uuid,${page.id}::uuid,'NAVER_CLOVA_OCR',null,3600) as id`;
       ocrArtifactIds.push(artifact.id);
     }
@@ -137,5 +144,5 @@ export async function processFileInput(args: {sql:Sql;ownerId:string;caseId:stri
     }
     return results;
   });
-  return {case_id:caseId,input_id:inputId,input_purpose:file.input_purpose??"PROPOSAL",claims,masked_pages:maskedPages,masked_text:maskedText};
+  return {case_id:caseId,input_id:inputId,input_purpose:file.input_purpose??"PROPOSAL",claims,masked_pages:maskedPages,masked_text:maskedText,unread_pages:unreadPages};
 }
