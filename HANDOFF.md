@@ -1,3 +1,11 @@
+## 2026-09-11 휴대폰 사진 거부와 PDF 오탐 수정
+
+- 파일 검사기가 그림 끝(EOI·IEND) 뒤의 바이트를 모두 거부해 Samsung 카메라 사진(SEFT 꼬리), HDR 사진(MPF gain map), Samsung PNG 캡처가 "안전하게 읽을 수 없는 파일"로 막혔다. 두 구조가 정확히 맞을 때만 받아들이고, 어긋나거나 설명되지 않는 바이트는 그대로 거부한다. 기준은 [파일 안전 검사 운영 절차](docs/ops/file-safety-spike.md)를 따른다.
+- PDF 의 `/JS`·`/AA`·`/EF` 는 압축 바이트·그림 화소에서도 우연히 나와 몇 MB PDF 를 몇 퍼센트 확률로 거부했다. 문법상 값이 이어질 때만 센다.
+- 이름 `#xx` escape 뒤에 오는 stream 위치를 잘못 계산해, 원시 바이트에 드러나지 않게 압축한 객체 stream 속 JavaScript 를 놓칠 수 있던 경로도 막았다.
+- Fixture 119건(위험 93건, v2)이 기대대로 판정된다. 새 정상 사진 5건은 수정 전 검사기에서 거부됐고, 새 위험 입력 1건은 수정 전 검사기가 통과시켰다.
+- 이 파일들은 B-FILE-SAFETY scope 라 채택 항목을 `evidence/development/runtime/pre-phone-trailer-file-safety-entry.json` 에 보존하고 `NOT-EVALUATED` 로 되돌렸다. 병합 뒤 main 에서 B-CONSENT-01 과 함께 다시 재 한 Adoption PR 로 올린다. 재채택 전까지 부분 PASS 는 11/20 이다.
+
 ## 2026-09-11 심사 체험의 회원 흐름·파일 입력 막힘 수정
 
 - 텍스트 접수 10초 제한, 가입 주소별 시간당 3건, 재시도의 낡은 판번호, 검증 전 기록의 가입 후 점검 막힘을 고쳤다(PR #332). 파일 처리 시한은 75초, route 중단 신호는 80초다.

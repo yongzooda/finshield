@@ -1,0 +1,26 @@
+{
+  "schema_version": "retired-adopted-entry-v1",
+  "reason": "휴대폰 사진 끝 구조(Samsung SEFT·MPF)와 PDF 두 글자 key 오탐 수정으로 B-FILE-SAFETY scope(file-safety-inspector.mjs·file-safety-fixtures.mjs 등)가 바뀌어 재측정 전까지 재사용하지 않는다",
+  "retired_on": "2026-09-11",
+  "entries": {
+    "B-FILE-SAFETY": {
+      "code_under_test_sha": "7ac52bd5f223919efe1df69e8cadc00c950e9e92",
+      "workflow_head_sha": "7ac52bd5f223919efe1df69e8cadc00c950e9e92",
+      "run_id": 34499515046,
+      "run_attempt": 1,
+      "workflow_id": 351458287,
+      "workflow_path": ".github/workflows/file-safety-evidence.yml",
+      "workflow_blob_sha": "93e19d90423984d1fcdf2830034a50873613b080",
+      "harness_blob_sha": "0aaa683b4b8cf798c684f1c88c06e115bd389e1e",
+      "scope_sha256": "8b017b9106abe82e05e216b4e9a7aa8a9971f73cf7557300f2ce1d9b2d2db2ef",
+      "job_name": "file-safety-evidence / B-FILE-SAFETY",
+      "artifact_id": 10161269064,
+      "artifact_name": "provider-evidence-B-FILE-SAFETY-7ac52bd5f223919efe1df69e8cadc00c950e9e92",
+      "artifact_digest": "sha256:061b33af5b0385a9c2ca09123b60a3c87a712c3ef09f243d8de3aafa9eb9a94f",
+      "result_path": "evidence/results/B-FILE-SAFETY/34499515046.json",
+      "result_sha256": "1d3f76bd303e159838f174e1d954890f6ff8f6b16a991a4a028af1867f5d68c2",
+      "adoption_pr_number": 313,
+      "adopted_at": "2026-09-10T21:09:51Z"
+    }
+  }
+}

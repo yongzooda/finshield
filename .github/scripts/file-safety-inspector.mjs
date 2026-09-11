@@ -64,8 +64,16 @@ const DANGEROUS_EXTENSIONS = new Set([
   "img", "lnk", "hta", "app", "dmg", "pkg", "deb", "rpm", "apk", "chm", "reg", "inf", "cpl", "docm", "xlsm", "pptm",
 ]);
 const DELIM = "(?=[\\s/\\[\\]<>(){}%]|$)";
-const ACTIVE_TOKEN = new RegExp(`/(JavaScript|JS|Launch|SubmitForm|ImportData|RichMedia|XFA|AA|GoToR|GoToE|Movie|Sound|Rendition)${DELIM}`, "g");
-const EMBEDDED_TOKEN = new RegExp(`/(EmbeddedFile|EmbeddedFiles|FileAttachment|EF)${DELIM}`, "g");
+// 두 글자 key(/JS·/AA·/EF)는 압축 바이트·그림 화소 같은 임의 바이트에서도 우연히 나온다.
+// 실제 PDF 에서 이 key 가 뜻을 가지려면 값이 이어져야 하므로 값의 시작까지 함께 본다.
+// /JS 는 문자열·hex 문자열·간접 참조, /AA·/EF 는 사전·간접 참조만 값이 될 수 있다.
+// key 와 값 사이의 공백·주석은 Parser 처럼 건너뛴다.
+const GAP = "(?:\\s|%[^\\r\\n]*(?:\\r\\n|\\r|\\n))*";
+const REF = "\\d+\\s+\\d+\\s+R";
+const ACTIVE_TOKEN = new RegExp(`/(JavaScript|Launch|SubmitForm|ImportData|RichMedia|XFA|GoToR|GoToE|Movie|Sound|Rendition)${DELIM}|/(JS)(?=${GAP}(?:\\(|<|${REF}))|/(AA)(?=${GAP}(?:<<|${REF}))`, "g");
+const EMBEDDED_TOKEN = new RegExp(`/(EmbeddedFile|EmbeddedFiles|FileAttachment)${DELIM}|/(EF)(?=${GAP}(?:<<|${REF}))`, "g");
+// 그림 전용 부호. 이 stream 은 어떤 Parser 도 PDF 문법으로 읽지 않으므로 원시 바이트를 훑지 않는다.
+const IMAGE_ONLY_FILTERS = new Set(["DCTDecode", "DCT", "JPXDecode", "CCITTFaxDecode", "CCF", "JBIG2Decode"]);
 const ENCRYPT_TOKEN = new RegExp(`/Encrypt${DELIM}`);
 const MAX_SCAN_TEXT = 8 * 1024 * 1024; // 정규식 탐색 상한 (해제 데이터는 앞부분만 훑는다; 합계 상한은 별도)
 
@@ -180,38 +188,42 @@ const analyzePdf = (bytes, reasons, metrics) => {
     const at = offset < bytes.length ? text.slice(offset, offset + 40).replace(/^\s+/, "") : "";
     if (!/^xref/.test(at) && !/^\d+\s+\d+\s+obj\b/.test(at)) reasons.push({ code: "malformed-xref", detail: "startxref-target" });
   }
-  const normalized = decodeNameEscapes(text);
-  const objectCount = (normalized.match(/(?:^|[^0-9])\d+\s+\d+\s+obj\b/g) ?? []).length;
+  const objectCount = (text.match(/(?:^|[^0-9])\d+\s+\d+\s+obj\b/g) ?? []).length;
   metrics.object_count = objectCount;
   if (objectCount > LIMITS.MAX_OBJECTS) reasons.push({ code: "object-limit" });
 
-  // stream 구간을 먼저 찾는다. 사전 텍스트는 직전 obj 부터 stream 키워드까지다.
+  // stream 구간을 원시 바이트 위치로 찾는다. 이름의 #xx 풀기는 길이를 바꾸므로 위치 계산 뒤에만 쓴다.
+  // 사전 텍스트는 직전 obj 부터 stream 키워드까지다.
   const regions = [];
   const streams = [];
   const streamPattern = /stream\r?\n/g;
   let m;
-  while ((m = streamPattern.exec(normalized)) !== null) {
-    if (m.index >= 3 && normalized.slice(m.index - 3, m.index) === "end") continue;
+  while ((m = streamPattern.exec(text)) !== null) {
+    if (m.index >= 3 && text.slice(m.index - 3, m.index) === "end") continue;
     const dataStart = m.index + m[0].length;
-    const end = normalized.indexOf("endstream", dataStart);
+    const end = text.indexOf("endstream", dataStart);
     if (end < 0) { reasons.push({ code: "malformed", detail: "unterminated-stream" }); break; }
-    const objPos = normalized.lastIndexOf(" obj", m.index);
-    const dictText = normalized.slice(objPos < 0 ? 0 : objPos, m.index);
+    const objPos = text.lastIndexOf(" obj", m.index);
+    const dictText = decodeNameEscapes(text.slice(objPos < 0 ? 0 : objPos, m.index));
     regions.push([dataStart, end]);
     streams.push({ dataStart, dataEnd: end, dictText });
     streamPattern.lastIndex = end + 9;
   }
   metrics.stream_count = streams.length;
-  metrics.nesting_depth = scanNesting(normalized, regions);
+  metrics.nesting_depth = scanNesting(text, regions);
   if (metrics.nesting_depth > LIMITS.MAX_NESTING) reasons.push({ code: "nesting-limit" });
 
-  const scanTexts = [normalized.slice(0, MAX_SCAN_TEXT)];
+  // 풀어서 따로 훑는 stream 과 그림 전용 stream 의 원시 바이트는 첫 탐색 본문에서 공백으로 지운다.
+  // 압축된 바이트는 어떤 Parser 도 PDF 문법으로 읽지 않는다. 풀지 못한 stream 은 그대로 훑는다.
+  const blanked = [];
+  const scanTexts = [];
   let decodedTotal = 0;
   let maxRatio = 0;
   let totalPixels = 0;
   for (const stream of streams) {
     const filterMatch = /\/Filter\s*(\/[A-Za-z0-9]+|\[[^\]]*\])/.exec(stream.dictText);
     const filters = filterMatch ? [...filterMatch[1].matchAll(/\/([A-Za-z0-9]+)/g)].map((f) => f[1]) : [];
+    if (filters.length > 0 && IMAGE_ONLY_FILTERS.has(filters[0])) blanked.push([stream.dataStart, stream.dataEnd]);
     if (/\/Subtype\s*\/Image\b/.test(stream.dictText)) {
       const width = Number((/\/Width\s+(\d+)/.exec(stream.dictText) ?? [])[1] ?? 0);
       const height = Number((/\/Height\s+(\d+)/.exec(stream.dictText) ?? [])[1] ?? 0);
@@ -223,6 +235,7 @@ const analyzePdf = (bytes, reasons, metrics) => {
     let data = bytes.subarray(stream.dataStart, stream.dataEnd);
     if (data.length >= 2 && data[data.length - 1] === 0x0a) data = data.subarray(0, data[data.length - 2] === 0x0d ? data.length - 2 : data.length - 1);
     const encodedLength = data.length;
+    let inflated = 0;
     for (const filter of filters) {
       if (filter !== "FlateDecode" && filter !== "Fl") break;
       try {
@@ -237,18 +250,30 @@ const analyzePdf = (bytes, reasons, metrics) => {
         data = null;
         break;
       }
+      inflated += 1;
       decodedTotal += data.length;
       if (decodedTotal > LIMITS.MAX_DECODED_BYTES) { reasons.push({ code: "decompression-bomb", detail: "decoded-total" }); data = null; break; }
     }
-    if (data && filters.length > 0 && data.length !== encodedLength) {
-      maxRatio = Math.max(maxRatio, data.length / Math.max(1, encodedLength));
+    if (data && inflated > 0) {
+      if (data.length !== encodedLength) maxRatio = Math.max(maxRatio, data.length / Math.max(1, encodedLength));
       if (data.length >= 2 && (data.toString("latin1", 0, 2) === "MZ" || data.toString("latin1", 0, 4) === "\x7fELF")) reasons.push({ code: "executable-payload" });
       scanTexts.push(decodeNameEscapes(data.toString("latin1", 0, Math.min(data.length, MAX_SCAN_TEXT))));
+      if (!IMAGE_ONLY_FILTERS.has(filters[0])) blanked.push([stream.dataStart, stream.dataEnd]);
     } else if (data && filters.length === 0 && data.length >= 4 && (data.toString("latin1", 0, 2) === "MZ" || data.toString("latin1", 0, 4) === "\x7fELF")) {
       reasons.push({ code: "executable-payload" });
     }
     if (decodedTotal > LIMITS.MAX_DECODED_BYTES) break;
   }
+  // 첫 탐색 본문: stream 밖의 문법과 풀지 못한 stream 원문. 위치를 지키려고 길이는 그대로 둔다.
+  let cursor = 0;
+  const pieces = [];
+  for (const [start, end] of blanked) {
+    if (start < cursor) continue;
+    pieces.push(text.slice(cursor, start), " ".repeat(end - start));
+    cursor = end;
+  }
+  pieces.push(text.slice(cursor));
+  scanTexts.unshift(decodeNameEscapes(pieces.join("").slice(0, MAX_SCAN_TEXT)));
   metrics.decoded_bytes = Math.min(decodedTotal, LIMITS.MAX_DECODED_BYTES + 1);
   metrics.max_stream_ratio = Number(maxRatio.toFixed(1));
   metrics.total_image_pixels = totalPixels;
@@ -259,8 +284,8 @@ const analyzePdf = (bytes, reasons, metrics) => {
   const embeddedHits = new Set();
   for (const scan of scanTexts) {
     if (ENCRYPT_TOKEN.test(scan)) reasons.push({ code: "encrypted" });
-    for (const hit of scan.matchAll(ACTIVE_TOKEN)) activeHits.add(hit[1]);
-    for (const hit of scan.matchAll(EMBEDDED_TOKEN)) embeddedHits.add(hit[1]);
+    for (const hit of scan.matchAll(ACTIVE_TOKEN)) activeHits.add(hit[1] ?? hit[2] ?? hit[3]);
+    for (const hit of scan.matchAll(EMBEDDED_TOKEN)) embeddedHits.add(hit[1] ?? hit[2]);
     const openPattern = new RegExp(`/OpenAction${DELIM}`, "g");
     for (const hit of scan.matchAll(openPattern)) {
       if (!openActionAllowed(scan, hit.index + "/OpenAction".length)) reasons.push({ code: "open-action" });
@@ -317,33 +342,149 @@ const analyzePng = (bytes, reasons, metrics) => {
   if (!sawIhdr || !ended) { reasons.push({ code: "malformed-png", detail: ended ? "ihdr-missing" : "iend-missing" }); return; }
   if (idatBytes === 0) reasons.push({ code: "malformed-png", detail: "idat-missing" });
   metrics.trailing_bytes = bytes.length - pos;
-  if (bytes.length > pos) reasons.push({ code: "trailing-data", detail: "after-iend" });
+  if (bytes.length > pos && !acceptTrailer(bytes, pos, pos, reasons, metrics)) reasons.push({ code: "trailing-data", detail: "after-iend" });
 };
 
-const analyzeJpeg = (bytes, reasons, metrics) => {
+// ---------- 휴대폰 사진 끝의 제조사 정보 ----------
+// 휴대폰 카메라는 그림 끝(EOI·IEND) 뒤에 정해진 구조를 붙인다. 구조가 정확히 맞을 때만 받아들이고
+// 조금이라도 어긋나거나 설명하지 못하는 바이트가 남으면 지금처럼 trailing-data 로 거부한다.
+//   - Samsung 확장 정보(SEFT): 파일 마지막 8바이트가 SEFH 디렉터리 길이(LE)와 "SEFT" 다.
+//     디렉터리의 항목마다 (0·type, 디렉터리 시작에서 거꾸로 센 거리, 블록 크기)가 있고,
+//     블록은 항목과 같은 머리 4바이트·이름 길이·이름·자료로 이뤄진다(ExifTool Samsung.pm 과 같은 해석).
+//   - Multi-Picture Format(MPF, CIPA DC-007): 첫 그림의 APP2 "MPF\0" 가 보조 그림(HDR gain map 등)의
+//     크기와 위치를 적는다. 보조 그림은 첫 그림 바로 뒤에 빈틈 없이 이어진 온전한 JPEG 여야 한다.
+const MAX_SEFT_ENTRIES = 64;
+const TRAILER_MARKUP = /<(?:script|html|!doctype|iframe|body|\?php)/i;
+
+const parseSamsungTrailer = (bytes, from) => {
+  const end = bytes.length;
+  if (end - from < 20 || bytes.toString("latin1", end - 4, end) !== "SEFT") return null;
+  const dirLength = bytes.readUInt32LE(end - 8);
+  const dirPos = end - 8 - dirLength;
+  if (dirLength < 24 || dirPos < from || bytes.toString("latin1", dirPos, dirPos + 4) !== "SEFH") return null;
+  const count = bytes.readUInt32LE(dirPos + 8);
+  if (count < 1 || count > MAX_SEFT_ENTRIES || 12 + 12 * count > dirLength) return null;
+  const blocks = [];
+  for (let i = 0; i < count; i += 1) {
+    const entry = dirPos + 12 + 12 * i;
+    const distance = bytes.readUInt32LE(entry + 4);
+    const size = bytes.readUInt32LE(entry + 8);
+    if (bytes.readUInt16LE(entry) !== 0 || distance > dirPos - from || size < 8 || size > distance) return null;
+    const start = dirPos - distance;
+    if (!bytes.subarray(start, start + 4).equals(bytes.subarray(entry, entry + 4))) return null;
+    const nameLength = bytes.readUInt32LE(start + 4);
+    if (nameLength < 1 || nameLength > 128 || 8 + nameLength > size) return null;
+    if (!/^[A-Za-z0-9_.-]+$/.test(bytes.toString("latin1", start + 8, start + 8 + nameLength))) return null;
+    blocks.push({ start, end: start + size, data: start + 8 + nameLength });
+  }
+  blocks.sort((a, b) => a.start - b.start);
+  // 블록은 겹치지 않고 빈틈 없이 이어져 SEFH 바로 앞에서 끝나야 한다.
+  for (let i = 1; i < blocks.length; i += 1) if (blocks[i].start !== blocks[i - 1].end) return null;
+  if (blocks[blocks.length - 1].end !== dirPos) return null;
+  return { start: blocks[0].start, blocks };
+};
+
+const readMpfEntries = (bytes, mpf) => {
+  const view = bytes.subarray(mpf.base, mpf.end);
+  if (view.length < 8) return null;
+  const order = view.toString("latin1", 0, 2);
+  const le = order === "II";
+  if (!le && order !== "MM") return null;
+  const u16 = (at) => (le ? view.readUInt16LE(at) : view.readUInt16BE(at));
+  const u32 = (at) => (le ? view.readUInt32LE(at) : view.readUInt32BE(at));
+  if (u16(2) !== 0x2a) return null;
+  const ifd = u32(4);
+  if (ifd + 2 > view.length) return null;
+  const count = u16(ifd);
+  if (count > 64 || ifd + 2 + count * 12 > view.length) return null;
+  let images = null;
+  let entryAt = null;
+  let entryBytes = 0;
+  for (let i = 0; i < count; i += 1) {
+    const at = ifd + 2 + i * 12;
+    const tag = u16(at);
+    const type = u16(at + 2);
+    const n = u32(at + 4);
+    if (tag === 0xb001 && type === 4 && n === 1) images = u32(at + 8);
+    if (tag === 0xb002 && type === 7) { entryBytes = n; entryAt = n <= 4 ? at + 8 : u32(at + 8); }
+  }
+  if (!images || images < 2 || images > 16 || entryAt === null || entryBytes !== images * 16 || entryAt + entryBytes > view.length) return null;
+  return Array.from({ length: images }, (_, i) => ({ size: u32(entryAt + i * 16 + 4), offset: u32(entryAt + i * 16 + 8) }));
+};
+
+// from 부터 파일 끝까지를 받아들일 수 있는 구조로 모두 설명하면 true. 설명에 쓴 보조 그림의
+// 화소 한도 위반은 reasons 에 남긴다.
+const acceptTrailer = (bytes, from, primaryEnd, reasons, metrics, mpf = null) => {
+  let cursor = from;
+  const kinds = [];
+  if (mpf) {
+    const entries = readMpfEntries(bytes, mpf);
+    if (entries) {
+      const secondary = entries.slice(1).map((e) => ({ start: mpf.base + e.offset, size: e.size })).sort((a, b) => a.start - b.start);
+      let next = cursor;
+      const limitReasons = [];
+      const covered = secondary.every((image) => {
+        if (image.start !== next || image.size < 4 || image.start + image.size > bytes.length) return false;
+        const sub = bytes.subarray(image.start, image.start + image.size);
+        const subReasons = [];
+        const walked = walkJpeg(sub, subReasons, metrics, false);
+        if (!walked || walked.end !== sub.length || subReasons.some((r) => r.code !== "pixel-limit")) return false;
+        limitReasons.push(...subReasons);
+        next = image.start + image.size;
+        return true;
+      });
+      if (covered) { cursor = next; kinds.push("mpf"); reasons.push(...limitReasons); }
+    }
+  }
+  if (cursor < bytes.length) {
+    const samsung = parseSamsungTrailer(bytes, cursor);
+    if (!samsung || samsung.start !== cursor) return false;
+    for (const block of samsung.blocks) {
+      if (bytes.toString("latin1", block.data, block.data + 2) === "MZ" || bytes.toString("latin1", block.data, block.data + 4) === "\x7fELF") {
+        reasons.push({ code: "executable-payload", detail: "trailer" });
+      }
+    }
+    kinds.push("samsung");
+  }
+  // 받아들인 구조 안에도 웹 문서 조각이 있으면 polyglot 으로 거부한다.
+  if (TRAILER_MARKUP.test(bytes.toString("latin1", primaryEnd))) reasons.push({ code: "polyglot-html", detail: "trailer" });
+  metrics.trailer_kinds = kinds;
+  return true;
+};
+
+// JPEG 한 장의 marker 를 따라가 EOI 다음 위치와 APP2 MPF 위치를 돌려준다. 구조가 깨지면 null.
+// primary 가 아니면(보조 그림) 가로·세로 계측값을 덮지 않고 화소 한도만 확인한다.
+const walkJpeg = (bytes, reasons, metrics, primary) => {
   let pos = 2;
   let sawSof = false;
   let sawEoi = false;
+  let mpf = null;
+  if (!primary && !(bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff)) {
+    reasons.push({ code: "malformed-jpeg", detail: "soi-missing" });
+    return null;
+  }
   while (pos < bytes.length) {
-    if (bytes[pos] !== 0xff) { reasons.push({ code: "malformed-jpeg", detail: "marker-expected" }); return; }
+    if (bytes[pos] !== 0xff) { reasons.push({ code: "malformed-jpeg", detail: "marker-expected" }); return null; }
     while (pos < bytes.length && bytes[pos] === 0xff) pos += 1; // fill bytes
-    if (pos >= bytes.length) { reasons.push({ code: "malformed-jpeg", detail: "truncated" }); return; }
+    if (pos >= bytes.length) { reasons.push({ code: "malformed-jpeg", detail: "truncated" }); return null; }
     const marker = bytes[pos];
     pos += 1;
     if (marker === 0xd9) { sawEoi = true; break; }
     if (marker === 0xd8 || marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) continue;
-    if (pos + 2 > bytes.length) { reasons.push({ code: "malformed-jpeg", detail: "truncated" }); return; }
+    if (pos + 2 > bytes.length) { reasons.push({ code: "malformed-jpeg", detail: "truncated" }); return null; }
     const length = bytes.readUInt16BE(pos);
-    if (length < 2 || pos + length > bytes.length) { reasons.push({ code: "malformed-jpeg", detail: "segment-length" }); return; }
+    if (length < 2 || pos + length > bytes.length) { reasons.push({ code: "malformed-jpeg", detail: "segment-length" }); return null; }
+    if (marker === 0xe2 && primary && mpf === null && length >= 10 && bytes.toString("latin1", pos + 2, pos + 6) === "MPF\0") {
+      mpf = { base: pos + 6, end: pos + length };
+    }
     const isSof = marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc;
     if (isSof) {
-      if (length < 8) { reasons.push({ code: "malformed-jpeg", detail: "sof-length" }); return; }
+      if (length < 8) { reasons.push({ code: "malformed-jpeg", detail: "sof-length" }); return null; }
       const height = bytes.readUInt16BE(pos + 3);
       const width = bytes.readUInt16BE(pos + 5);
-      metrics.image_width = width;
-      metrics.image_height = height;
-      if (width === 0 || height === 0) { reasons.push({ code: "malformed-jpeg", detail: "dimensions" }); return; }
-      metrics.max_image_pixels = width * height;
+      if (primary) { metrics.image_width = width; metrics.image_height = height; }
+      if (width === 0 || height === 0) { reasons.push({ code: "malformed-jpeg", detail: "dimensions" }); return null; }
+      metrics.max_image_pixels = Math.max(primary ? 0 : metrics.max_image_pixels ?? 0, width * height);
       if (width * height > LIMITS.MAX_IMAGE_PIXELS) reasons.push({ code: "pixel-limit", detail: `${width}x${height}` });
       sawSof = true;
     }
@@ -357,9 +498,17 @@ const analyzeJpeg = (bytes, reasons, metrics) => {
     }
   }
   if (!sawSof) reasons.push({ code: "malformed-jpeg", detail: "sof-missing" });
-  if (!sawEoi) { reasons.push({ code: "malformed-jpeg", detail: "eoi-missing" }); return; }
-  metrics.trailing_bytes = bytes.length - pos;
-  if (bytes.length > pos) reasons.push({ code: "trailing-data", detail: "after-eoi" });
+  if (!sawEoi) { reasons.push({ code: "malformed-jpeg", detail: "eoi-missing" }); return null; }
+  return { end: pos, mpf };
+};
+
+const analyzeJpeg = (bytes, reasons, metrics) => {
+  const walked = walkJpeg(bytes, reasons, metrics, true);
+  if (!walked) return;
+  metrics.trailing_bytes = bytes.length - walked.end;
+  if (bytes.length > walked.end && !acceptTrailer(bytes, walked.end, walked.end, reasons, metrics, walked.mpf)) {
+    reasons.push({ code: "trailing-data", detail: "after-eoi" });
+  }
 };
 
 const checkFilename = (filename, detectedType, reasons) => {
