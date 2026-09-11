@@ -25,7 +25,7 @@ import { claimViewOf, FsCard, FsChip } from "../fs-shell";
 import { AxisLimitations, ClaimBadges, ClaimReviewDetails, ResultScopeNote, ReviewNotice } from "../result-explanation";
 import { FsLoginCard, useFsToken } from "../fs-session";
 import {
-  AGENT_LABEL, AXIS_LABEL, axisResultOf, DIRECTNESS_LABEL, FRESHNESS_LABEL, nextAction,
+  AGENT_LABEL, AXIS_LABEL, axisResultOf, DIRECTNESS_LABEL, FRESHNESS_LABEL, nextAction, RELATION_LABEL,
 } from "../fs-labels";
 import { resolveInitialRunRecovery } from "./run-recovery";
 
@@ -41,7 +41,7 @@ type Evidence = {
   directness: string; reference_only: boolean; excerpt: string;
 };
 type ClaimResult = {
-  claim_ref: string; state: string; evidence_refs: string[];
+  claim_ref: string; state: string; evidence_refs: string[]; relations?: Record<string, string>;
   withheld_reason: string | null; rationale_masked: string;
   /** 독립 재확인과 반대 근거 찾기의 결과. 확정을 낮춘 이유가 여기 남는다. */
   cove_status?: string; red_team_status?: string; reason_code?: string;
@@ -229,11 +229,12 @@ export function VerifyFlow() {
               ? { ...a, status: event.status, findings: event.findings, toolCalls: event.toolCalls } : a));
           } else if (event.type === "done") {
             // 독립 검증까지 반영한 최종 상태를 쓴다. 저장된 값과 화면이 같아야 한다.
-            const finals = (event.final_claims ?? []) as (Omit<ClaimResult, "evidence_refs" | "withheld_reason" | "rationale_masked"> & { summary_masked: string })[];
+            const finals = (event.final_claims ?? []) as (Omit<ClaimResult, "evidence_refs" | "withheld_reason" | "rationale_masked"> & { summary_masked: string; evidence_refs?: string[] })[];
             const merged = finals.map((settled) => {
               const base = (event.claim_results as ClaimResult[]).find(entry => entry.claim_ref === settled.claim_ref);
-              return { evidence_refs: base?.evidence_refs ?? [], withheld_reason: base?.withheld_reason ?? null,
-                ...settled, rationale_masked: settled.summary_masked };
+              // 근거 목록도 저장하는 최종 항목의 것을 쓴다. 이전 서버 응답에만 판단 인용으로 되돌아간다.
+              return { withheld_reason: base?.withheld_reason ?? null,
+                ...settled, evidence_refs: settled.evidence_refs ?? base?.evidence_refs ?? [], rationale_masked: settled.summary_masked };
             });
             setAxes(event.axes ?? []);
             setOfficialChannels(event.guide?.channels ?? []);
@@ -516,6 +517,11 @@ export function VerifyFlow() {
                               <li key={item.ref} className="rounded-[10px] bg-[var(--fs-canvas)] px-4 py-3">
                                 <div className="flex flex-wrap items-center gap-2">
                                   <FsChip tone="neutral">{item.ref}</FsChip>
+                                  {result.relations?.[item.ref] ? (
+                                    <FsChip tone={result.relations[item.ref] === "CONTRADICT" ? "contra" : "neutral"}>
+                                      {RELATION_LABEL[result.relations[item.ref]] ?? result.relations[item.ref]}
+                                    </FsChip>
+                                  ) : null}
                                   <FsChip tone={item.grade === "A" ? "verified" : "neutral"}>권위 {item.grade}</FsChip>
                                   <FsChip tone={item.freshness === "FRESH" ? "verified" : "caution"}>
                                     {FRESHNESS_LABEL[item.freshness] ?? item.freshness}

@@ -16,6 +16,7 @@ import { loadInitialVerificationPreparation, loadRunInput, maskSelection, prepar
 import { loadManifest } from "@/lib/finshield/registry";
 import { runVerification, type RunProgress } from "@/lib/finshield/orchestrator";
 import { buildFinalClaims, finalizeRun } from "@/lib/finshield/finalize";
+import { finalEvidenceRefs } from "@/lib/finshield/final-evidence";
 import { createAgentModel, createJudgeModel } from "@/lib/finshield/agents/model-adapter";
 import { createHash, randomUUID } from "node:crypto";
 import { dispatchNotifications } from "@/lib/finshield/revalidate";
@@ -125,6 +126,8 @@ export async function POST(request: Request): Promise<Response> {
           state: entry.status, reason_code: entry.reason_code,
           cove_status: entry.cove_status, red_team_status: entry.red_team_status,
           summary_masked: entry.decision_summary_masked,
+          // 저장하는 최종 항목과 같은 근거 목록. 직후 화면과 저장된 기록이 같아야 한다.
+          ...finalEvidenceRefs(entry.evidences, result.evidenceIds),
         })),
         run_id: runId,
         // RES-008: 온전히 끝나지 않았으면 결과 맨 위에 알린다.
