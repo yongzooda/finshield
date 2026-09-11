@@ -230,6 +230,25 @@
       "result_sha256": "5ec83468078b94550a18092ffaee56f07501e3be1c334b5649a76a2f1b76b929",
       "adoption_pr_number": 313,
       "adopted_at": "2026-09-10T21:09:51Z"
+    },
+    "B-SUPABASE-01": {
+      "code_under_test_sha": "e5d05cae3fa3e1f91b671561f0174c1e48d85b5e",
+      "workflow_head_sha": "e5d05cae3fa3e1f91b671561f0174c1e48d85b5e",
+      "run_id": 34559818408,
+      "run_attempt": 1,
+      "workflow_id": 350923567,
+      "workflow_path": ".github/workflows/supabase-evidence.yml",
+      "workflow_blob_sha": "7a4e3bebe8fcacaf4e25d2d2de45c066ff6a7e9f",
+      "harness_blob_sha": "20528f917d47ba0fedb68deccd61234de098561e",
+      "scope_sha256": "c841cb1b770427adc73aa0975d86148cddb45a366faf7c6a5553f11650dd8576",
+      "job_name": "supabase-evidence / B-SUPABASE-01",
+      "artifact_id": 10183919799,
+      "artifact_name": "provider-evidence-B-SUPABASE-01-e5d05cae3fa3e1f91b671561f0174c1e48d85b5e",
+      "artifact_digest": "sha256:4280fc3a1daf218ae76e2779db102f4a92ecfd251b3454236f39c2b35670b2c9",
+      "result_path": "evidence/results/B-SUPABASE-01/34559818408.json",
+      "result_sha256": "09fb23e15ab6ec321d086b8a52be60c3321f38b9ef534a2326b9534e4643ff08",
+      "adoption_pr_number": 324,
+      "adopted_at": "2026-09-11T03:50:23Z"
     }
   }
 }

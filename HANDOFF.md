@@ -1,3 +1,9 @@
+## 2026-09-11 Supabase 증거 채택
+
+- SQL 계약 시험 14파일의 완료 표시 문구를 수집기 기준에 맞춘 뒤(PR #323) main `e5d05cae` 에서 B-SUPABASE-01 을 다시 쟀다. run `34559818408` 이 통과해 PR #324 에서 채택한다. 현재 부분 PASS 는 13/20 이다.
+- Migration 68개·SQL 시험 54파일의 단언 516개가 통과했고 운영 DB 와 schema digest 6/6 이 같다. RLS 83/83, anon 잔존 0건, 교차 Owner 거부 247건, 예상 밖 허용 0건이다.
+- Retrieval 의 `B-SUPABASE-01` 선행 조건이 채워졌다. 측정 범위는 `evidence/adoption/2026-09-11-supabase-markers.md` 를 따른다. Implementation `NO-GO`, Release `NOT-EVALUATED` 를 유지한다.
+
 ## 2026-09-11 심사 체험 공백 정리
 
 - 공개 Demo 결과가 회원 결과와 같은 최종화 규칙·종합 결과 Matrix·행동 안내를 쓴다(PR #314). 운영에서 실제 실행해 `지금 하실 일`·`서민금융콜센터 1397`·`중대한 위험 신호`·세 축이 나오는 것을 확인했다.
