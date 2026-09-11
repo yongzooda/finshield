@@ -33,14 +33,16 @@ const { contract, fsc, kinfa, official_pages: pages, registry } = result.observa
 // 채택된 결과는 산식 v6(PR #116, run 33981161310)이다. v2~v5 결과는 채택되지 않았으므로 받지 않는다.
 if (!/^source-snapshot-two-api-cross-check-v6$/.test(contract.formula_version)) throw new Error(`지원하지 않는 산식 버전 ${contract.formula_version}`);
 
-const LICENSE_CODE = "DATA_GO_KR_NO_RESTRICTION";
+// 공공데이터포털 API 레코드의 이용허락 표시다. 진흥원 누리집 페이지에는 공개된
+// 이용허락 표시가 없어 이 값을 붙이지 않고 비워 둔다. 모르는 라이선스를 채우지 않는다.
+const DATA_GO_KR_LICENSE = "DATA_GO_KR_NO_RESTRICTION";
 const FRESH_HOURS = 24; // ADR 8.5 갱신 후보 6~24시간의 상한. 실제 TTL 은 재실행 결과로 정한다.
 const lit = (value) => (value === null || value === undefined ? "null" : `'${String(value).replace(/'/g, "''")}'`);
 
 // 하나의 Snapshot 을 멱등 적재하는 statement. 같은 identity 가 있으면 새 행을 만들지 않고
 // Fetch Event 만 UNCHANGED 로 남긴다.
 const snapshotStatement = ({ sourceType, authority, title, canonicalUrl, officialId, sourceVersion, publishedAt, retrievedAt,
-  contentHash, fingerprint, licenseUrl, isComplete, isCitable, adapter, requestKey }) => `
+  contentHash, fingerprint, licenseCode, licenseUrl, isComplete, isCitable, adapter, requestKey }) => `
 with existing as (
   select id from kb.source_snapshots
    where source_type = ${lit(sourceType)} and official_id is not distinct from ${lit(officialId)}
@@ -53,7 +55,7 @@ with existing as (
   select ${lit(sourceType)}, 'A', ${lit(authority)}, ${lit(title)}, ${lit(canonicalUrl)}, ${lit(officialId)}, ${lit(publishedAt)}::timestamptz,
          ${lit(retrievedAt)}::timestamptz, ${lit(sourceVersion)}, ${lit(contentHash)}, ${lit(fingerprint)}, 'FRESH',
          ${lit(retrievedAt)}::timestamptz + interval '${FRESH_HOURS} hours',
-         ${lit(LICENSE_CODE)}, ${lit(licenseUrl)}, ${isComplete}, ${isCitable}
+         ${lit(licenseCode)}, ${lit(licenseUrl)}, ${isComplete}, ${isCitable}
    where not exists (select 1 from existing)
   returning id
 )
@@ -76,7 +78,8 @@ for (const s of currentSnapshots) {
     title: `${rec[fsc.product_name_field]} (${rec.prdCtg ?? "서민금융"}, 기준 ${rec[fsc.bas_ym_field] ?? "미상"})`,
     canonicalUrl: s.official_url, officialId: s.official_id, sourceVersion: rec[fsc.bas_ym_field] ?? null,
     publishedAt: rec[fsc.bas_ym_field] ? `${String(rec[fsc.bas_ym_field]).slice(0, 4)}-${String(rec[fsc.bas_ym_field]).slice(4, 6)}-01` : null,
-    retrievedAt: s.fetched_at, contentHash: s.sha256, fingerprint: s.source_fingerprint, licenseUrl: registry.portal_pages.fsc,
+    retrievedAt: s.fetched_at, contentHash: s.sha256, fingerprint: s.source_fingerprint,
+    licenseCode: DATA_GO_KR_LICENSE, licenseUrl: registry.portal_pages.fsc,
     isComplete: true, isCitable: true, adapter: "data_go_kr_fsc_small_loan", requestKey: `${s.official_id}:${s.fetched_at}`,
   }));
 }
@@ -88,7 +91,7 @@ for (const s of kinfa.snapshots) {
     sourceType: "INSTITUTION", authority: s.authority,
     title: `${rec.insttNm} 햇살론15 취급기관`, canonicalUrl: s.official_url, officialId: s.official_id, sourceVersion: null,
     publishedAt: null, retrievedAt: s.fetched_at, contentHash: s.sha256, fingerprint: s.source_fingerprint,
-    licenseUrl: registry.portal_pages.kinfa, isComplete: true, isCitable: true,
+    licenseCode: DATA_GO_KR_LICENSE, licenseUrl: registry.portal_pages.kinfa, isComplete: true, isCitable: true,
     adapter: "data_go_kr_kinfa_handling_agency", requestKey: `${s.official_id}:${s.fetched_at}`,
   }));
 }
@@ -109,7 +112,7 @@ for (const page of pages) {
   statements.push(snapshotStatement({
     sourceType: "GUIDE", authority: "서민금융진흥원", title: spec.title, canonicalUrl: page.url, officialId,
     sourceVersion: fetchedAt.slice(0, 10), publishedAt: null, retrievedAt: fetchedAt, contentHash: page.content_sha256,
-    fingerprint, licenseUrl: page.url, isComplete: spec.complete, isCitable: spec.complete,
+    fingerprint, licenseCode: null, licenseUrl: null, isComplete: spec.complete, isCitable: spec.complete,
     adapter: "kinfa_official_page", requestKey: `${officialId}:${fetchedAt.slice(0, 10)}`,
   }));
 }
