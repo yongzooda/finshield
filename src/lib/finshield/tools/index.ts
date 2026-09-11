@@ -46,19 +46,31 @@ const searchProductForContext: ToolImpl = async (input, ctx) => {
   };
 };
 
+/**
+ * 공개 Demo 의 예방 안내 조회도 회원 실행과 같은 검토된 진흥원 공지를 함께 읽는다.
+ *
+ * 승인 Snapshot 인 사칭 신고센터만으로는 "진흥원은 문자로 금융상품 광고를 하지
+ * 않는다" 같은 공식 예방 지침을 인용할 수 없었다. 공지는 검토한 본문 Hash 와 검토
+ * 기한이 맞을 때만 비교 근거가 되고, 아니면 참고 자료로만 온다. 현재 거래의 사기
+ * 증명으로 쓰지 않는 제한(current_transaction_proof=false)은 그대로다.
+ */
 const searchWarningForContext: ToolImpl = async (input, ctx) => {
-  if (ctx.allowedSourceSnapshotIds?.length) {
-    const stored = await searchPublicKnowledge(input, ctx, ["GUIDE", "ALERT"]);
-    return {
-      ...stored,
-      observations: {
-        ...stored.observations,
-        kind: "APPROVED_DEMO_GUIDE_SEARCH",
-        current_transaction_proof: false,
-      },
-    };
-  }
-  return searchOfficialWarning(input, ctx);
+  if (!ctx.allowedSourceSnapshotIds?.length) return searchOfficialWarning(input, ctx);
+  const stored = await searchPublicKnowledge(input, ctx, ["GUIDE", "ALERT"]);
+  const live = await searchOfficialWarning(input, ctx).catch(() => null);
+  return {
+    ...stored,
+    items: [...stored.items, ...(live?.items ?? [])],
+    candidateCount: stored.candidateCount + (live?.items.length ?? 0),
+    observations: {
+      ...stored.observations,
+      kind: "APPROVED_DEMO_GUIDE_SEARCH",
+      current_transaction_proof: false,
+      official_warning: !live ? "UNAVAILABLE"
+        : live.items.length === 0 ? String(live.reasonCode ?? "NO_MATCH")
+          : live.observations?.reviewed === true ? "REVIEWED" : "UNREVIEWED",
+    },
+  };
 };
 
 export const TOOL_IMPLS: Record<string, ToolImpl> = {
