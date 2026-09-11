@@ -100,6 +100,21 @@ export function FsLoginCard({ onToken, title = "로그인" }: {
           </button>
         </div>
       </form>
+      {/* 시험 서비스는 메일을 보내지 않는다. 가입도 확인 메일 없이 바로 만든다.
+          보낼 수 없는 재설정 메일 버튼을 두는 대신 실제로 할 수 있는 일을 적는다. */}
+      {mode === "login" ? (
+        <details className="fs-details">
+          <summary>비밀번호를 잊으셨나요?</summary>
+          <p className="fs-body mt-2">
+            공모전 시험 서비스라 비밀번호 재설정 메일을 보내지 않습니다. 가입할 때도 확인 메일을 보내지 않으니
+            새 이메일 주소로 다시 가입해 이용해 주세요. 이전 계정의 검증 기록은 그 계정으로 로그인해야 보거나 지울 수 있습니다.
+          </p>
+          <button type="button" disabled={busy} className="fs-btn fs-btn--quiet mt-3"
+            onClick={() => { setMode("signup"); setNotice(null); }}>
+            새 계정 만들기
+          </button>
+        </details>
+      ) : null}
       <div className="fs-details"><Link href="/live-demo" className="fs-text-link">먼저 로그인 없이 체험하기 <FsIcon name="arrow" /></Link></div>
     </FsCard>
   );
