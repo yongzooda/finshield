@@ -18,7 +18,7 @@ import { LIFECYCLE_LABEL, SCENARIO_LABEL } from "../fs-labels";
 
 type CaseRow = {
   id: string; scenario: string; lifecycle: string;
-  title_masked: string; created_at: string;
+  title_masked: string; created_at: string; latest_passport_id?: string | null;
 };
 
 export function CaseList({ intent = "history" }: { intent?: "history" | "aftercare" }) {
@@ -84,9 +84,15 @@ export function CaseList({ intent = "history" }: { intent?: "history" | "afterca
       <ul className="space-y-4">
         {rows.map((row) => {
           const state = LIFECYCLE_LABEL[row.lifecycle] ?? { label: row.lifecycle, tone: "neutral" as const };
+          // 가입 후 점검은 확정된 검증 결과와 비교한다. 결과가 없는 기록은 점검 화면에서 막히므로
+          // 기록 화면으로 보내고 그 사실을 먼저 알린다.
+          const verified = Boolean(row.latest_passport_id);
           return (
             <li key={row.id} className="border-t border-[var(--fs-line)] pt-4 first:border-0 first:pt-0">
-              <Link href={intent === "aftercare" ? `/cases/${row.id}/journey` : `/cases/${row.id}`}
+              {intent === "aftercare" && !verified ? (
+                <p className="fs-meta mb-1">검증을 마치지 않은 기록입니다. 검증을 끝낸 뒤 가입 후 점검을 할 수 있습니다.</p>
+              ) : null}
+              <Link href={intent === "aftercare" && verified ? `/cases/${row.id}/journey` : `/cases/${row.id}`}
                 className="-mx-3 flex flex-wrap items-baseline justify-between gap-3 rounded-[10px] px-3 py-2 no-underline hover:bg-[var(--fs-canvas)]">
                 <span>
                   <span className="block font-bold">{row.title_masked}</span>

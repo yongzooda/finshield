@@ -53,6 +53,8 @@ export type IntakeStage =
   | "INPUT_CREATED" | "VALIDATED" | "EXTRACTED" | "MASKED" | "CLAIMS_EXTRACTED";
 export type StageReporter = (stage: IntakeStage, detail?: Record<string, unknown>) => void;
 
+export const INTAKE_TIMEOUT_MS = 45_000;
+
 export const startIntake = async (args: {
   sql: Sql;
   ownerId: string;
@@ -63,7 +65,9 @@ export const startIntake = async (args: {
   signal?: AbortSignal;
 }): Promise<IntakeAccepted | IntakeBlocked> => {
   const { sql, ownerId } = args;
-  const signal = AbortSignal.any([AbortSignal.timeout(10000), ...(args.signal ? [args.signal] : [])]);
+  // 항목 추출 모델 호출이 4개 항목에 7.5~9.2초 걸렸다. 10초로 묶으면 긴 권유문이 매번
+  // 시간 초과로 접수되지 않았다 (2026-09-11 점검). 파일 경로(35초)처럼 여유를 둔다.
+  const signal = AbortSignal.any([AbortSignal.timeout(INTAKE_TIMEOUT_MS), ...(args.signal ? [args.signal] : [])]);
   signal.throwIfAborted();
   const report: StageReporter = args.onStage ?? (() => undefined);
   const raw = args.rawText.trim();

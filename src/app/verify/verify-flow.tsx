@@ -77,11 +77,19 @@ export function VerifyFlow() {
   const [fileBusy, setFileBusy] = useState(false);
   const intakeAbort = useRef<AbortController | null>(null);
   const verifyAbort = useRef<AbortController | null>(null);
+  const submittedOnce = useRef(false);
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
   useEffect(() => () => {
     intakeAbort.current?.abort();
     verifyAbort.current?.abort();
   }, []);
+  // 확인 중에 화면을 떠나면 요청이 끊겨 서버가 실행을 중단한다. 떠나기 전에 한 번 묻는다.
+  useEffect(() => {
+    if (step !== "running") return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [step]);
   const [notice, setNotice] = useState<string | null>(null);
   const [text, setText] = useState("");
   const [filePages,setFilePages] = useState<{page_no:number;text:string;low_confidence_count?:number;low_confidence_fields?:OcrReviewField[]}[]>([]);
@@ -130,7 +138,7 @@ export function VerifyFlow() {
           } else if (event.type === "blocked") {
             setNotice(event.ask); setStep("input");
           } else if (event.type === "done") {
-            setClaims(event.claims);
+            setClaims(event.claims); submittedOnce.current = false;
             setPicked(new Set(event.claims
               .filter((c: Claim) => c.materiality === "MATERIAL").map((c: Claim) => c.claim_id)));
             setCaseId(event.case_id as string);
@@ -179,6 +187,11 @@ export function VerifyFlow() {
     verifyAbort.current = controller;
     let streamedRunId = activeRunId;
     let receivedTerminal = false;
+    // 서버는 확정할 때마다 항목 판번호를 올린다. 앞선 시도가 확정까지 갔다면 처음 받은
+    // 판번호는 이미 낡아 재시도가 「다른 화면에서 수정됨」으로 거부된다. 같은 화면의
+    // 재시도에서는 판번호를 다시 보내지 않는다.
+    const retry = submittedOnce.current;
+    submittedOnce.current = true;
     setBusy(true); setNotice(null); setAgents([]); setStep("running");
     try {
       const response = await sessionFetch("/api/finshield/verify", token, {
@@ -186,8 +199,9 @@ export function VerifyFlow() {
         body: JSON.stringify({
           case_id: caseId,
           ...(activeRunId ? { replace_run_id: activeRunId } : {}),
-          claims: claims.filter((claim) => picked.has(claim.claim_id)).map(claim=>({
-            ...claim,...(claim.requires_review?{ocr_reviewed:ocrReviewed.has(claim.claim_id)}:{})
+          claims: claims.filter((claim) => picked.has(claim.claim_id)).map(({ expected_revision_no, ...claim })=>({
+            ...claim, ...(retry || expected_revision_no === undefined ? {} : { expected_revision_no }),
+            ...(claim.requires_review?{ocr_reviewed:ocrReviewed.has(claim.claim_id)}:{})
           })),
         }),
       });
@@ -201,7 +215,12 @@ export function VerifyFlow() {
           if (event.type === "run_started" && event.claims) {
             streamedRunId = event.run_id as string;
             setActiveRunId(event.run_id as string);
-            setClaims(event.claims);
+            // 서버 항목에는 원본 대조 필요 표시가 없다. 지우면 실패 뒤 재시도가 대조 확인 없이
+            // 나가 거부된다. 같은 항목의 표시와 대조 필드는 화면 값을 지킨다.
+            setClaims((prev) => (event.claims as Claim[]).map((claim) => {
+              const before = prev.find((item) => item.claim_id === claim.claim_id);
+              return { ...claim, requires_review: before?.requires_review, review_fields: before?.review_fields };
+            }));
           } else if (event.type === "agent_started") {
             setAgents((prev) => prev.some((a) => a.agentCode === event.agentCode)
               ? prev : [...prev, { agentCode: event.agentCode, status: "RUNNING" }]);
@@ -304,7 +323,7 @@ export function VerifyFlow() {
             {busy ? "정리하는 중" : "다음 · 확인 항목 선택"}
           </button>
           <FileIntake token={token} onBusyChange={setFileBusy} onPrepared={result=>{
-            setClaims(result.claims);setPicked(new Set(result.claims.filter(c=>c.materiality==="MATERIAL"&&!c.requires_review).map(c=>c.claim_id)));
+            setClaims(result.claims);submittedOnce.current=false;setPicked(new Set(result.claims.filter(c=>c.materiality==="MATERIAL"&&!c.requires_review).map(c=>c.claim_id)));
             setOcrReviewed(new Set());
             setCaseId(result.case_id);setInputId(result.input_id);masked.current=result.masked_text;
             setFilePages(result.masked_pages);setNotice(null);setStep("claims");
@@ -411,7 +430,8 @@ export function VerifyFlow() {
       {step === "running" ? (
         <FsCard>
           <h2 className="fs-h2">확인하는 중</h2>
-          <p className="fs-body mt-2">공식 자료를 조회하고 판단 근거를 검토하고 있습니다.</p>
+          <p className="fs-body mt-2">공식 자료를 조회하고 판단 근거를 검토하고 있습니다. 보통 1분 안팎 걸립니다.</p>
+          <p className="fs-inline-notice mt-3">이 화면을 떠나거나 새로고침하면 확인이 중단됩니다. 끝날 때까지 이 화면에 머물러 주세요.</p>
           <ul className="fs-steps mt-5" aria-live="polite">
             {agents.map((agent) => (
               <li key={agent.agentCode} data-state={agent.status === "RUNNING" ? "running" : "done"}>

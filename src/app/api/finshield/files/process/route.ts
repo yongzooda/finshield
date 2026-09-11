@@ -7,7 +7,7 @@ import { cleanupCaseFiles } from "@/lib/finshield/files/cleanup";
 import { jsonNoStore, readJson } from "@/lib/ops/http";
 
 export const runtime="nodejs";
-export const maxDuration=60;
+export const maxDuration=90;
 const schema=z.object({case_id:z.uuid(),input_id:z.uuid(),ocr_consent:z.boolean()});
 const errors:Record<string,string>={
   OCR_CONSENT_REQUIRED:"이미지나 스캔 PDF는 별도 OCR 동의가 필요합니다. 동의하지 않으려면 내용을 텍스트로 입력해 주세요.",
@@ -26,7 +26,7 @@ export async function POST(request:Request) {
   const sql=fsql(); const {case_id:caseId,input_id:inputId,ocr_consent:ocrConsent}=body.data;
   try {
     const result=await processFileInput({sql,ownerId,caseId,inputId,ocrConsent,extractClaims:createClaimExtractor(),
-      signal:AbortSignal.any([request.signal,AbortSignal.timeout(50000)])});
+      signal:AbortSignal.any([request.signal,AbortSignal.timeout(80000)])});
     return jsonNoStore(result,200);
   }catch(error){
     if(error instanceof FileInputAccessError)return jsonNoStore({error:"처리 가능한 본인 파일을 찾을 수 없습니다."},404);
