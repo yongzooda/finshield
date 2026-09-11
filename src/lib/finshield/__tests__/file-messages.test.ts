@@ -23,3 +23,8 @@ it("사유별 문구는 무엇을 바꾸면 되는지 알리고 모르는 오류
   expect(fileErrorMessage(Object.assign(new Error("x"), { name: "TimeoutError" }))).toContain("시간");
   expect(fileErrorMessage(new Error("합성 내부 오류"))).toBe("파일 내용을 끝까지 읽지 못했습니다. 파일을 다시 올리거나 텍스트로 입력해 주세요.");
 });
+
+it("OCR 한도·실패 코드도 이용자가 할 일로 옮긴다", () => {
+  expect(fileErrorMessage(new Error("OCR_IMAGE_TOO_LONG"))).toContain("8,000픽셀");
+  expect(fileErrorMessage(new Error("OCR_REQUEST_FAILED"))).toContain("나눠");
+});
