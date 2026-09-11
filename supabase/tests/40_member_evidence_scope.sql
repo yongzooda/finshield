@@ -21,6 +21,6 @@ begin
    is distinct from (select model_bundle from private.execution_manifests where id=old_id) then
    raise exception '모델 또는 시간 예산 변경';
  end if;
- raise notice '40_member_evidence_scope: 새 구성·CoVe·과거 구성·예산 보존 통과';
+ raise notice '40_member_evidence_scope: 새 구성·CoVe·과거 구성·예산 보존 통과했습니다';
 end $$;
 rollback;

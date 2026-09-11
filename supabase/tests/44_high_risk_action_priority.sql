@@ -12,6 +12,6 @@ begin
   raise exception '행동 위험 없는 정보 부족을 위험으로 올림';end if;
  if exists(select 1 from private.policy_versions p where p.policy_type='RESULT_MATRIX' and p.version='result-matrix-v1' and p.rules ? 'high_risk_reason_codes') then
   raise exception '과거 정책 변경';end if;
- raise notice '44_high_risk_action_priority: 행동 요구 우선·정보 부족 보존·과거 정책 불변 통과';
+ raise notice '44_high_risk_action_priority: 행동 요구 우선·정보 부족 보존·과거 정책 불변 통과했습니다';
 end $$;
 rollback;
