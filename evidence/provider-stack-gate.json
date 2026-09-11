@@ -3,6 +3,25 @@
   "gate": "implementation",
   "requirements_blob_sha": "27ce706010344fbcedebe3abd707febff0f1dc26",
   "entries": {
+    "B-CONSENT-01": {
+      "code_under_test_sha": "9c702ccdf1ed67d33821534526454541de2311e0",
+      "workflow_head_sha": "9c702ccdf1ed67d33821534526454541de2311e0",
+      "run_id": 34582048537,
+      "run_attempt": 1,
+      "workflow_id": 351524788,
+      "workflow_path": ".github/workflows/consent-evidence.yml",
+      "workflow_blob_sha": "d8f92e1e244949415a602d5da41c51bc48e078ef",
+      "harness_blob_sha": "e861f36dfd2c3fa679bed04f59fe93731b9b0fc1",
+      "scope_sha256": "8d5066bdc53a3fbae004d7db627e5c45e4b9a9b1a495a24216eae0a5e3c8b2ac",
+      "job_name": "consent-evidence / B-CONSENT-01",
+      "artifact_id": 10192025705,
+      "artifact_name": "provider-evidence-B-CONSENT-01-9c702ccdf1ed67d33821534526454541de2311e0",
+      "artifact_digest": "sha256:b557c08915da1926a107018b62a727bb6a796c8be105af3ecd2fe4835ab0b316",
+      "result_path": "evidence/results/B-CONSENT-01/34582048537.json",
+      "result_sha256": "e91a0e6705a323abd16ac9b4a4b2e6044dd94120a01ce4f4f68da5ea7ea2b831",
+      "adoption_pr_number": 336,
+      "adopted_at": "2026-09-11T09:04:10Z"
+    },
     "B-DELETE-01": {
       "code_under_test_sha": "7ac52bd5f223919efe1df69e8cadc00c950e9e92",
       "workflow_head_sha": "7ac52bd5f223919efe1df69e8cadc00c950e9e92",
@@ -21,6 +40,25 @@
       "result_sha256": "cce423ea1875388131dac7ce3c91cae5205789626544229ac173c144d0ed62ea",
       "adoption_pr_number": 313,
       "adopted_at": "2026-09-10T21:09:51Z"
+    },
+    "B-FILE-SAFETY": {
+      "code_under_test_sha": "9c702ccdf1ed67d33821534526454541de2311e0",
+      "workflow_head_sha": "9c702ccdf1ed67d33821534526454541de2311e0",
+      "run_id": 34582050894,
+      "run_attempt": 1,
+      "workflow_id": 351458287,
+      "workflow_path": ".github/workflows/file-safety-evidence.yml",
+      "workflow_blob_sha": "93e19d90423984d1fcdf2830034a50873613b080",
+      "harness_blob_sha": "0aaa683b4b8cf798c684f1c88c06e115bd389e1e",
+      "scope_sha256": "bf96db35e124213f60ee1da6b90a98b364c9bb8b4462c97bb89814f47bef4ac0",
+      "job_name": "file-safety-evidence / B-FILE-SAFETY",
+      "artifact_id": 10192029257,
+      "artifact_name": "provider-evidence-B-FILE-SAFETY-9c702ccdf1ed67d33821534526454541de2311e0",
+      "artifact_digest": "sha256:d5e876a283fcb176e727e504504e04f4b2ea51c2ca0d2fd781b93eebad0b1f07",
+      "result_path": "evidence/results/B-FILE-SAFETY/34582050894.json",
+      "result_sha256": "5bcd014fdd9d17bb6fd8b31c344dacd4ec3579ad7e54e9dc2a382a99078cfefe",
+      "adoption_pr_number": 336,
+      "adopted_at": "2026-09-11T09:04:10Z"
     },
     "B-HEALTH-01": {
       "code_under_test_sha": "7ac52bd5f223919efe1df69e8cadc00c950e9e92",
