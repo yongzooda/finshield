@@ -90,10 +90,11 @@ describe("DR-301 신고 — DB 이전 단계", () => {
 
   it("잔존 PII가 의심되면 **저장하지 않고** 되돌린다 (F-601 · EP-3)", async () => {
     const { submitReport } = await import("../reports");
-    // 규칙으로 지우지 못한 긴 숫자열이 남는 입력이다(실측 확인). forbidden
-    // 실행기가 호출되면 테스트가 죽으므로, 통과 = DB에 닿지 않았다는 뜻이다.
+    // 규칙으로 가리지 못하는 주민번호 앞자리가 남는 입력이다. 긴 번호는 이제 가리고
+    // 보내므로(2026-09-11) 가릴 수 없는 형태로 의도를 지킨다. forbidden 실행기가
+    // 호출되면 테스트가 죽으므로, 통과 = DB에 닿지 않았다는 뜻이다.
     const r = await submitReport(
-      { content: "판단이 사실과 다릅니다. 증권번호 123456789012 확인해 주세요" },
+      { content: "판단이 사실과 다릅니다. 주민번호 앞자리 800101 확인해 주세요" },
       { maxChars: 4000, exec: forbidden },
     );
     expect(r.ok).toBe(false);
