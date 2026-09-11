@@ -24,7 +24,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     environment: provider-spike
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Checkout main
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -51,7 +51,15 @@ jobs:
           GITHUB_RUN_ID: ${{ github.run_id }}
           TRUSTED_REPOSITORY: ${{ github.workspace }}/trusted
           WORKFLOW_HEAD_SHA: ${{ github.sha }}
-        run: node trusted/.github/scripts/run-source-evidence.mjs --run
+        # 공공데이터포털 접속이 해외 실행 환경에서 가끔 시간 초과로 끊긴다. harness 는
+        # Source 증거 scope 라 고치지 않고, 실패하면 1분 뒤 두 번까지 다시 수집한다.
+        # --run 은 시작할 때 이전 결과 파일을 지우므로 다시 실행해도 섞이지 않는다.
+        run: |
+          for attempt in 1 2 3; do
+            if node trusted/.github/scripts/run-source-evidence.mjs --run; then exit 0; fi
+            if [ "$attempt" -lt 3 ]; then echo "수집 실패, 60초 뒤 다시 시도 ($attempt/3)"; sleep 60; fi
+          done
+          exit 1
 
       - name: 수집 결과 정책 검사
         env:
