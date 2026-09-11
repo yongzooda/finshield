@@ -41,3 +41,29 @@ describe("검토한 예방 공지 점검", () => {
     expect(() => readReviewConstants("export const X = 1;")).toThrow();
   });
 });
+
+describe("예방 공지 받기", () => {
+  it("연결 오류는 두 번 더 시도하고 표준 요청 헤더를 보낸다", async () => {
+    const { fetchNotice } = await import("../../../../scripts/kb/check-warning-review.mjs");
+    const seen: RequestInit[] = [];
+    let calls = 0;
+    const fetchImpl = async (_url: string, init: RequestInit) => {
+      seen.push(init); calls += 1;
+      if (calls < 3) throw Object.assign(new TypeError("fetch failed"), { cause: { code: "ECONNRESET" } });
+      return new Response(html);
+    };
+    await expect(fetchNotice({ fetchImpl: fetchImpl as unknown as typeof fetch, sleep: async () => undefined })).resolves.toContain("board-detail-con");
+    expect(calls).toBe(3);
+    expect(seen[0].headers).toMatchObject({ "Accept-Language": "ko-KR,ko;q=0.9" });
+  });
+
+  it("세 번 모두 끊기면 원인 코드와 함께 실패하고, 오류 응답은 다시 시도하지 않는다", async () => {
+    const { fetchNotice } = await import("../../../../scripts/kb/check-warning-review.mjs");
+    const down = async () => { throw Object.assign(new TypeError("fetch failed"), { cause: { code: "ECONNRESET" } }); };
+    await expect(fetchNotice({ fetchImpl: down as unknown as typeof fetch, sleep: async () => undefined })).rejects.toThrow("ECONNRESET");
+    let calls = 0;
+    const missing = async () => { calls += 1; return new Response("없음", { status: 404 }); };
+    await expect(fetchNotice({ fetchImpl: missing as unknown as typeof fetch, sleep: async () => undefined })).rejects.toThrow("404");
+    expect(calls).toBe(1);
+  });
+});
