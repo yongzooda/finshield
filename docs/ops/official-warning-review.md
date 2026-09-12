@@ -27,7 +27,7 @@
 4. `evidence/development/warning-review/` 에 확인 시각·HTTP 상태·Hash 를 남긴다. 본문 원문은 저장하지 않는다.
 5. Hash 가 다르면 기한을 늘리지 않는다. 바뀐 본문을 새로 검토하고 문단 선택 규칙과 Hash 를 함께 바꾼다.
 
-`source-refresh.yml` 의 `warning-review` job 이 6시간마다 본문 Hash 와 기한을 본다.
+`source-refresh.yml` 의 `warning-review` job 이 본문 Hash 와 기한을 본다. 2026-09-12 에 예약 실행을 끈 뒤로는 그 Workflow 를 손으로 실행할 때 함께 돈다.
 기한 72시간 전부터, 또는 본문이 바뀌면 실패해 관리자에게 알린다.
 
 ## 기한을 30일로 둔 까닭
